@@ -190,3 +190,502 @@ body {
   font-style: italic;
   color: var(--foreground-muted);
 }
+
+/* ==========================================
+   🎨 Claymorphism Design System
+   ==========================================
+   Soft, puffy, 3D-like design with inner shadows
+*/
+
+/* Clay Card Variants */
+.clay-card {
+  background: var(--surface);
+  box-shadow:
+    8px 8px 16px rgba(0, 0, 0, 0.08),
+    -8px -8px 16px rgba(255, 255, 255, 0.8),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.clay-card-elevated {
+  background: var(--surface);
+  box-shadow:
+    12px 12px 24px rgba(0, 0, 0, 0.1),
+    -12px -12px 24px rgba(255, 255, 255, 0.9),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.95),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.clay-card-pressed {
+  background: var(--background-muted);
+  box-shadow:
+    inset 4px 4px 8px rgba(0, 0, 0, 0.08),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+/* Clay Button Variants */
+.clay-button-primary {
+  background: var(--accent);
+  color: white;
+  box-shadow:
+    6px 6px 12px rgba(0, 0, 0, 0.15),
+    -3px -3px 8px rgba(255, 255, 255, 0.5),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.clay-button-primary:hover {
+  box-shadow:
+    4px 4px 8px rgba(0, 0, 0, 0.2),
+    -2px -2px 6px rgba(255, 255, 255, 0.4),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.35),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.clay-button-secondary {
+  background: var(--surface);
+  color: var(--foreground);
+  box-shadow:
+    6px 6px 12px rgba(0, 0, 0, 0.08),
+    -6px -6px 12px rgba(255, 255, 255, 0.8),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.clay-button-secondary:hover {
+  box-shadow:
+    4px 4px 8px rgba(0, 0, 0, 0.1),
+    -4px -4px 8px rgba(255, 255, 255, 0.7),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.95),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.clay-button-ghost {
+  background: transparent;
+  color: var(--foreground);
+  box-shadow: none;
+}
+
+.clay-button-ghost:hover {
+  background: var(--background-muted);
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.05),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
+/* Clay Badge Variants */
+.clay-badge {
+  background: var(--surface);
+  color: var(--foreground-muted);
+  box-shadow:
+    4px 4px 8px rgba(0, 0, 0, 0.06),
+    -4px -4px 8px rgba(255, 255, 255, 0.8),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.9),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.clay-badge-accent {
+  background: var(--accent-muted);
+  color: var(--accent);
+  box-shadow:
+    4px 4px 8px rgba(0, 0, 0, 0.06),
+    -4px -4px 8px rgba(255, 255, 255, 0.8),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.7),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.clay-badge-success {
+  background: #d4edda;
+  color: #155724;
+  box-shadow:
+    4px 4px 8px rgba(0, 0, 0, 0.06),
+    -4px -4px 8px rgba(255, 255, 255, 0.8),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.7),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.clay-badge-warning {
+  background: #fff3cd;
+  color: #856404;
+  box-shadow:
+    4px 4px 8px rgba(0, 0, 0, 0.06),
+    -4px -4px 8px rgba(255, 255, 255, 0.8),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.7),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.03);
+}
+
+/* Clay Icon Box */
+.clay-icon-box {
+  background: var(--surface);
+  box-shadow:
+    6px 6px 12px rgba(0, 0, 0, 0.08),
+    -6px -6px 12px rgba(255, 255, 255, 0.8),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.clay-icon-box-accent {
+  background: var(--accent-muted);
+  box-shadow:
+    6px 6px 12px rgba(0, 0, 0, 0.08),
+    -6px -6px 12px rgba(255, 255, 255, 0.8),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.7),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Clay Section */
+.clay-section-muted {
+  background: var(--background-muted);
+  box-shadow:
+    inset 0 8px 16px rgba(0, 0, 0, 0.03),
+    inset 0 -8px 16px rgba(255, 255, 255, 0.5);
+}
+
+/* Clay Input */
+.clay-input {
+  background: var(--background-muted);
+  color: var(--foreground);
+  border: none;
+  box-shadow:
+    inset 4px 4px 8px rgba(0, 0, 0, 0.06),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+.clay-input:focus {
+  box-shadow:
+    inset 4px 4px 8px rgba(0, 0, 0, 0.08),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.9),
+    0 0 0 3px var(--accent-muted);
+}
+
+/* Clay Divider */
+.clay-divider {
+  background: var(--border);
+  box-shadow:
+    inset 1px 1px 2px rgba(0, 0, 0, 0.05),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* Dark Mode Adjustments for Claymorphism */
+.dark .clay-card {
+  box-shadow:
+    8px 8px 16px rgba(0, 0, 0, 0.4),
+    -8px -8px 16px rgba(255, 255, 255, 0.03),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.05),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark .clay-card-elevated {
+  box-shadow:
+    12px 12px 24px rgba(0, 0, 0, 0.5),
+    -12px -12px 24px rgba(255, 255, 255, 0.02),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.05),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dark .clay-card-pressed {
+  box-shadow:
+    inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.02);
+}
+
+.dark .clay-button-primary {
+  box-shadow:
+    6px 6px 12px rgba(0, 0, 0, 0.4),
+    -3px -3px 8px rgba(255, 255, 255, 0.03),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.15),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.dark .clay-button-secondary {
+  box-shadow:
+    6px 6px 12px rgba(0, 0, 0, 0.4),
+    -6px -6px 12px rgba(255, 255, 255, 0.02),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.05),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark .clay-badge,
+.dark .clay-badge-accent,
+.dark .clay-badge-success,
+.dark .clay-badge-warning {
+  box-shadow:
+    4px 4px 8px rgba(0, 0, 0, 0.3),
+    -4px -4px 8px rgba(255, 255, 255, 0.02),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.05),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.dark .clay-icon-box,
+.dark .clay-icon-box-accent {
+  box-shadow:
+    6px 6px 12px rgba(0, 0, 0, 0.4),
+    -6px -6px 12px rgba(255, 255, 255, 0.02),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.05),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark .clay-section-muted {
+  box-shadow:
+    inset 0 8px 16px rgba(0, 0, 0, 0.2),
+    inset 0 -8px 16px rgba(255, 255, 255, 0.01);
+}
+
+.dark .clay-input {
+  box-shadow:
+    inset 4px 4px 8px rgba(0, 0, 0, 0.3),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.02);
+}
+
+.dark .clay-divider {
+  box-shadow:
+    inset 1px 1px 2px rgba(0, 0, 0, 0.3),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.02);
+}
+
+/* ==========================================
+   📐 Animated Academic Background
+   ==========================================
+   Subtle dashed grid lines with gentle animation
+*/
+
+.academic-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.academic-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(90deg, var(--border) 1px, transparent 1px),
+    linear-gradient(180deg, var(--border) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.3;
+  animation: grid-drift 30s linear infinite;
+  pointer-events: none;
+}
+
+.academic-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      var(--accent-muted) 20px,
+      var(--accent-muted) 21px
+    );
+  opacity: 0.15;
+  animation: diagonal-drift 40s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes grid-drift {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(60px, 60px);
+  }
+}
+
+@keyframes diagonal-drift {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(30px, 30px);
+  }
+}
+
+/* Notebook lines variant */
+.notebook-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.notebook-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 31px,
+      var(--border) 31px,
+      var(--border) 32px
+    );
+  opacity: 0.4;
+  animation: lines-scroll 20s linear infinite;
+  pointer-events: none;
+}
+
+.notebook-bg::after {
+  content: '';
+  position: absolute;
+  left: 80px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--accent) 10%,
+    var(--accent) 90%,
+    transparent 100%
+  );
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+@keyframes lines-scroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(32px);
+  }
+}
+
+/* Floating formulas background */
+.formulas-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.formulas-bg::before {
+  content: '∫ dx   Σ   √   π   ∞   Δ   ≈   ∂   θ   λ   ∫ dx   Σ   √   π   ∞   Δ   ≈   ∂   θ   λ';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  font-size: 2rem;
+  font-family: serif;
+  color: var(--accent);
+  opacity: 0.04;
+  white-space: nowrap;
+  animation: formulas-scroll 60s linear infinite;
+  pointer-events: none;
+  letter-spacing: 2rem;
+}
+
+.formulas-bg::after {
+  content: 'α   β   γ   δ   ε   ζ   η   φ   ψ   ω   α   β   γ   δ   ε   ζ   η   φ   ψ   ω';
+  position: absolute;
+  bottom: 20%;
+  left: 0;
+  right: 0;
+  font-size: 1.5rem;
+  font-family: serif;
+  color: var(--accent);
+  opacity: 0.03;
+  white-space: nowrap;
+  animation: formulas-scroll-reverse 45s linear infinite;
+  pointer-events: none;
+  letter-spacing: 1.5rem;
+}
+
+@keyframes formulas-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes formulas-scroll-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Combined academic + notebook for sections */
+.academic-section-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.academic-section-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 59px,
+      var(--border) 59px,
+      var(--border) 60px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 59px,
+      var(--border) 59px,
+      var(--border) 60px
+    );
+  opacity: 0.15;
+  animation: grid-pulse 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes grid-pulse {
+  0%, 100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Dashed border animation for sections */
+.dashed-border-animated {
+  position: relative;
+}
+
+.dashed-border-animated::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border: 2px dashed var(--accent-muted);
+  border-radius: inherit;
+  animation: dash-rotate 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes dash-rotate {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 1000;
+  }
+}
+
+/* Dark mode adjustments */
+.dark .academic-bg::before,
+.dark .notebook-bg::before,
+.dark .academic-section-bg::before {
+  opacity: 0.1;
+}
+
+.dark .academic-bg::after {
+  opacity: 0.08;
+}
+
+.dark .formulas-bg::before {
+  opacity: 0.06;
+}
+
+.dark .formulas-bg::after {
+  opacity: 0.04;
+}

@@ -3,8 +3,10 @@ import { NextRequest } from 'next/server'
 
 export const config = {  
   matcher: [
-    // Protect all routes except for public paths and static files
-    '/((?!_next/static|_next/image|favicon.ico|auth|api|public|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    // Protect dashboard routes only - landing page and auth are public
+    '/dashboard/:path*',
+    '/notes/:path*',
+    '/flashcards/:path*',
   ],
 }
 
