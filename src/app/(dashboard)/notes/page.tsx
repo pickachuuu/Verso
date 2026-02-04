@@ -1,10 +1,9 @@
 'use client';
 
 import Header from '@/component/ui/Header';
-import Card from '@/component/ui/Card';
-import Button from '@/component/ui/Button';
+import { ClayCard, ClayButton, ClayBadge } from '@/component/ui/Clay';
 import CreateNoteButton from '@/component/features/CreateNoteButton';
-import { File01Icon, Delete01Icon,GoogleGeminiIcon, BookOpen01Icon } from 'hugeicons-react';
+import { File01Icon, Delete01Icon, GoogleGeminiIcon, BookOpen01Icon, ArrowRight01Icon, Clock01Icon } from 'hugeicons-react';
 import { useEffect, useState } from 'react';
 import { useNoteActions } from '@/hook/useNoteActions';
 import { useFlashcardActions } from '@/hook/useFlashcardActions';
@@ -34,19 +33,18 @@ export default function NotesPage() {
     const checkAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        
+
         if (error) {
           console.error('Auth error:', error);
           window.location.href = '/auth';
           return;
         }
-        
+
         if (!session) {
           window.location.href = '/auth';
           return;
         }
-        
-        // If we have a session, fetch notes
+
         const data = await getUserNotes();
         setNotes(data);
         setLoading(false);
@@ -55,12 +53,11 @@ export default function NotesPage() {
         window.location.href = '/auth';
       }
     };
-    
+
     checkAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Filter out notes with empty title, empty content, and 0 tags
   const filteredNotes = notes.filter(
     (note) =>
       (note.title && note.title.trim() !== '') ||
@@ -68,18 +65,15 @@ export default function NotesPage() {
       (Array.isArray(note.tags) && note.tags.length > 0)
   );
 
-  // Fetch note if editing
   useEffect(() => {
     const fetchNote = async () => {
       if (noteId) {
-        // Fetch from Supabase
         const { data, error } = await supabase
           .from('notes')
           .select('title, content, tags')
           .eq('id', noteId)
           .single();
         if (data) {
-          // Update the note in the notes array
           const updatedNotes = notes.map((note) =>
             note.id === noteId ? { ...note, title: data.title, content: data.content, tags: data.tags } : note
           );
@@ -102,17 +96,12 @@ export default function NotesPage() {
 
   const handleConfirmDelete = async () => {
     if (!selectedNote) return;
-    
+
     try {
       await deleteNote(selectedNote.id);
-      
-      // Remove the note from the local state
       setNotes(prevNotes => prevNotes.filter(note => note.id !== selectedNote.id));
-      
-      // Show success message
       setSaveSuccess('Note deleted successfully!');
       setTimeout(() => setSaveSuccess(null), 3000);
-      
     } catch (error) {
       console.error('Error deleting note:', error);
       setSaveSuccess('Error deleting note. Please try again.');
@@ -122,14 +111,11 @@ export default function NotesPage() {
 
   const handleFlashcardsGenerated = async (geminiResponse: GeminiResponse) => {
     if (!selectedNote) return;
-    
+
     setSaving(true);
     setSaveSuccess(null);
     try {
-      // Determine difficulty from the first flashcard or default to medium
       const difficulty = geminiResponse.flashcards[0]?.difficulty || 'medium';
-
-      // Save flashcards to Supabase
       const setId = await saveGeneratedFlashcards({
         noteId: selectedNote.id,
         noteTitle: selectedNote.title,
@@ -138,10 +124,7 @@ export default function NotesPage() {
       });
 
       setSaveSuccess(`Successfully saved ${geminiResponse.flashcards.length} flashcards!`);
-      
-      // Clear success message after 3 seconds
       setTimeout(() => setSaveSuccess(null), 3000);
-      
     } catch (error) {
       console.error('Error saving flashcards:', error);
       setSaveSuccess('Error saving flashcards. Please try again.');
@@ -156,154 +139,174 @@ export default function NotesPage() {
     setSelectedNote(null);
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+    return date.toLocaleDateString();
+  };
+
   return (
     <>
-    <div className="space-y-8">
-      <Header 
-        title="Notes" 
-        description="Organize and manage your study notes"
-        children={<CreateNoteButton/>}
-      />
-      
-      {/* Success/Error Message */}
-      {saveSuccess && (
-        <div className={`p-4 rounded-md border ${
-          saveSuccess.includes('Error') 
-            ? 'bg-red-50 border-red-200 text-red-600' 
-            : 'bg-green-50 border-green-200 text-green-600'
-        }`}>
-          <p className="text-sm">{saveSuccess}</p>
-        </div>
-      )}
-      
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <Card className="h-40 flex flex-col justify-between rounded-xl border border-border bg-surface">
-                <Card.Header className="pb-2 border-b border-border rounded-t-xl">
-                  <div className="h-5 w-2/3 bg-background-muted rounded mb-2"></div>
-                </Card.Header>
-                <Card.Content className="py-3 flex-1">
-                  <div className="flex flex-wrap gap-2">
-                    <div className="h-4 w-12 bg-background-muted rounded-full"></div>
-                    <div className="h-4 w-8 bg-background-muted rounded-full"></div>
+      <div className="space-y-6">
+        <Header
+          title="Notes"
+          description="Organize and manage your study notes"
+          icon={<File01Icon className="w-6 h-6 text-accent" />}
+        >
+          <CreateNoteButton />
+        </Header>
+
+        {/* Success/Error Message */}
+        {saveSuccess && (
+          <ClayCard
+            variant="default"
+            padding="sm"
+            className={`rounded-xl ${
+              saveSuccess.includes('Error')
+                ? 'border-2 border-red-200 bg-red-50 dark:bg-red-950/20'
+                : 'border-2 border-green-200 bg-green-50 dark:bg-green-950/20'
+            }`}
+          >
+            <p className={`text-sm font-medium ${
+              saveSuccess.includes('Error') ? 'text-red-600' : 'text-green-600'
+            }`}>
+              {saveSuccess}
+            </p>
+          </ClayCard>
+        )}
+
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ClayCard key={i} variant="default" padding="none" className="rounded-2xl animate-pulse overflow-hidden">
+                <div className="p-5 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div className="h-6 w-2/3 bg-background-muted rounded-lg" />
+                    <div className="h-8 w-8 bg-background-muted rounded-lg" />
                   </div>
-                </Card.Content>
-                <Card.Footer className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-border rounded-b-xl pt-2">
-                  <div className="h-4 w-24 bg-background-muted rounded mb-2"></div>
-                  <div className="h-8 w-32 bg-background-muted rounded"></div>
-                </Card.Footer>
-              </Card>
-            </div>
-          ))}
-        </div>
-      ) : filteredNotes.length === 0 ? (
-        <Card>
-          <Card.Header>
-            <div className="text-center py-8">
-              <BookOpen01Icon className="w-12 h-12 text-foreground-muted mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No notes yet</h3>
-              <p className="text-foreground-muted mb-4">
-                Create your first note
+                  <div className="flex gap-2">
+                    <div className="h-6 w-16 bg-background-muted rounded-full" />
+                    <div className="h-6 w-12 bg-background-muted rounded-full" />
+                  </div>
+                </div>
+                <div className="px-5 py-4 bg-background-muted/30 flex justify-between">
+                  <div className="h-4 w-24 bg-background-muted rounded" />
+                  <div className="h-8 w-20 bg-background-muted rounded-lg" />
+                </div>
+              </ClayCard>
+            ))}
+          </div>
+        ) : filteredNotes.length === 0 ? (
+          <ClayCard variant="elevated" padding="lg" className="rounded-2xl">
+            <div className="text-center py-12">
+              <div className="w-20 h-20 rounded-2xl bg-accent-muted flex items-center justify-center mx-auto mb-6">
+                <BookOpen01Icon className="w-10 h-10 text-accent" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">No notes yet</h3>
+              <p className="text-foreground-muted mb-6 max-w-sm mx-auto">
+                Create your first note to start organizing your study materials
               </p>
-              <CreateNoteButton/>
-              {/* <Button onClick={handleCreate}>
-                <BookOpen01Icon className="w-4 h-4 mr-2" />
-                Create Your First Note
-              </Button> */}
+              <CreateNoteButton />
             </div>
-          </Card.Header>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredNotes.map((note) => (
-            <Link href={`/notes/${note.id}`} key={note.id} className="block h-full">
-              <Card
-                variant="elevated"
-                size="md"
-                className="flex flex-col justify-between h-full rounded-xl border border-border bg-surface shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer group"
-              >
-                <Card.Header className="pb-2 border-b border-border rounded-t-xl">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <Card.Title className="truncate text-lg font-semibold group-hover:text-accent transition-colors">{note.title}</Card.Title>
+          </ClayCard>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredNotes.map((note) => (
+              <Link href={`/notes/${note.slug || note.id}`} key={note.id} className="block group">
+                <ClayCard
+                  variant="default"
+                  padding="none"
+                  className="rounded-2xl overflow-hidden h-full flex flex-col hover:scale-[1.02] transition-all duration-300"
+                >
+                  {/* Card Header */}
+                  <div className="p-5 flex-1">
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <h3 className="font-semibold text-lg text-foreground group-hover:text-accent transition-colors line-clamp-2">
+                        {note.title || 'Untitled Note'}
+                      </h3>
+                      <div className="p-2 rounded-xl bg-accent-muted shrink-0">
+                        <File01Icon className="w-5 h-5 text-accent" />
+                      </div>
                     </div>
-                    <File01Icon className="w-6 h-6 text-accent shrink-0 ml-2" />
+
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-2">
+                      {(note.tags || []).slice(0, 3).map((tag: string) => (
+                        <ClayBadge key={tag} variant="accent" className="text-xs px-2 py-1">
+                          {tag}
+                        </ClayBadge>
+                      ))}
+                      {(note.tags || []).length > 3 && (
+                        <span className="text-xs text-foreground-muted px-2 py-1">
+                          +{note.tags.length - 3} more
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </Card.Header>
-                <Card.Content className="py-3 flex-1">
-                  <div className="flex flex-wrap gap-2">
-                    {(note.tags || []).map((tag: string) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-1 text-xs bg-accent-muted text-accent rounded-full font-medium"
+
+                  {/* Card Footer */}
+                  <div className="px-5 py-4 bg-background-muted/30 flex items-center justify-between gap-3 border-t border-border/50">
+                    <div className="flex items-center gap-1.5 text-xs text-foreground-muted">
+                      <Clock01Icon className="w-3.5 h-3.5" />
+                      <span>{note.updated_at ? formatDate(note.updated_at) : 'Never'}</span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        className="p-2 rounded-lg bg-accent-muted hover:bg-accent text-accent hover:text-white transition-all duration-200"
+                        title="Generate flashcards"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          handleGenerateFlashcards(note);
+                        }}
                       >
-                        {tag}
-                      </span>
-                    ))}
+                        <GoogleGeminiIcon className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        className="p-2 rounded-lg bg-red-50 dark:bg-red-950/30 hover:bg-red-500 text-red-500 hover:text-white transition-all duration-200"
+                        title="Delete note"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          handleDeleteNote(note);
+                        }}
+                      >
+                        <Delete01Icon className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                </Card.Content>
-                <Card.Footer className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-border rounded-b-xl pt-2">
-                  <p className="text-xs text-foreground-muted">
-                    Modified {note.updated_at ? new Date(note.updated_at).toLocaleString() : ''}
-                  </p>
+                </ClayCard>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
 
-                  {/* Action buttons */}
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      className="flex items-center gap-2 text-xs"
-                      title="Generate flashcards from this note"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        handleGenerateFlashcards(note);
-                      }}
-                    >
-                      <GoogleGeminiIcon className="w-6 h-6" />
-                      Forge
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      className="flex items-center gap-2 text-xs"
-                      title="Delete this note"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        handleDeleteNote(note);
-                      }}
-                    >
-                      <Delete01Icon className="w-6 h-6" />
-                      Delete  
-                    </Button>
-                  </div>
-                </Card.Footer>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
-
-    <GenerateFlashCardModal
+      <GenerateFlashCardModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        noteContent={selectedNote?.content || ''}  
+        noteContent={selectedNote?.content || ''}
         onFlashcardsGenerated={handleFlashcardsGenerated}
         saving={saving}
       />
 
-    <ConfirmDeleteModal
-      isOpen={isDeleteModalOpen}
-      onClose={() => setIsDeleteModalOpen(false)}
-      onConfirm={handleConfirmDelete}
-      title="Delete Note"
-      description="Are you sure you want to delete this note? This action cannot be undone."
-      itemName={selectedNote?.title || 'Untitled Note'}
-      itemType="note"
-    />
-  </>
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Note"
+        description="Are you sure you want to delete this note? This action cannot be undone."
+        itemName={selectedNote?.title || 'Untitled Note'}
+        itemType="note"
+      />
+    </>
   );
 }

@@ -1,28 +1,45 @@
-import Card from '@/component/ui/Card';
-import { BookOpen01Icon, File01Icon, Target01Icon } from 'hugeicons-react';
+'use client';
+
+import { ClayCard, ClayButton } from '@/component/ui/Clay';
+import { BookOpen01Icon, File01Icon, Target01Icon, Add01Icon, ArrowRight01Icon } from 'hugeicons-react';
 import Link from 'next/link';
 
-interface ActionButtonProps {
+interface ActionItemProps {
   title: string;
   description: string;
   icon: React.ReactNode;
   href: string;
-  color: string;
+  variant?: 'primary' | 'secondary';
 }
 
-function ActionButton({ title, description, icon, href, color }: ActionButtonProps) {
+function ActionItem({ title, description, icon, href, variant = 'secondary' }: ActionItemProps) {
   return (
-    <Link href={href}>
-      <div className={`p-4 rounded-lg border border-border hover:shadow-md transition-all duration-200 hover:scale-105 cursor-pointer group ${color}`}>
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent-muted group-hover:bg-accent-light transition-colors">
+    <Link href={href} className="block">
+      <div className={`
+        p-4 rounded-2xl transition-all duration-300 group cursor-pointer
+        ${variant === 'primary'
+          ? 'bg-gradient-to-br from-accent to-accent/80 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]'
+          : 'bg-background-muted/50 hover:bg-background-muted hover:scale-[1.02]'
+        }
+      `}>
+        <div className="flex items-start gap-4">
+          <div className={`
+            p-3 rounded-xl transition-transform duration-300 group-hover:scale-110
+            ${variant === 'primary' ? 'bg-white/20' : 'bg-surface shadow-sm'}
+          `}>
             {icon}
           </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-foreground group-hover:text-accent transition-colors">
-              {title}
-            </h3>
-            <p className="text-sm text-foreground-muted mt-1">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <h3 className={`font-semibold ${variant === 'primary' ? 'text-white' : 'text-foreground'}`}>
+                {title}
+              </h3>
+              <ArrowRight01Icon className={`
+                w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all
+                ${variant === 'primary' ? 'text-white/80' : 'text-foreground-muted'}
+              `} />
+            </div>
+            <p className={`text-sm mt-1 ${variant === 'primary' ? 'text-white/80' : 'text-foreground-muted'}`}>
               {description}
             </p>
           </div>
@@ -33,48 +50,70 @@ function ActionButton({ title, description, icon, href, color }: ActionButtonPro
 }
 
 export default function QuickActions() {
-  const actions = [
+  const actions: ActionItemProps[] = [
     {
-      title: 'New Note',
-      description: 'Create a new study note',
-      icon: <File01Icon className="w-5 h-5 text-accent" />,
+      title: 'Create Note',
+      description: 'Start a new study note',
+      icon: <Add01Icon className="w-5 h-5 text-white" />,
       href: '/notes',
-      color: 'hover:bg-blue-50 dark:hover:bg-blue-950/20',
+      variant: 'primary',
     },
     {
       title: 'Study Session',
-      description: 'Start a focused study session',
+      description: 'Review your flashcards',
       icon: <Target01Icon className="w-5 h-5 text-accent" />,
       href: '/flashcards',
-      color: 'hover:bg-green-50 dark:hover:bg-green-950/20',
-    },
-    {
-      title: 'Review Cards',
-      description: 'Review your flashcards',
-      icon: <BookOpen01Icon className="w-5 h-5 text-accent" />,
-      href: '/flashcards',
-      color: 'hover:bg-purple-50 dark:hover:bg-purple-950/20',
+      variant: 'secondary',
     },
     {
       title: 'Browse Notes',
       description: 'View all your notes',
       icon: <File01Icon className="w-5 h-5 text-accent" />,
       href: '/notes',
-      color: 'hover:bg-orange-50 dark:hover:bg-orange-950/20',
+      variant: 'secondary',
+    },
+    {
+      title: 'Flashcard Sets',
+      description: 'Manage your flashcards',
+      icon: <BookOpen01Icon className="w-5 h-5 text-accent" />,
+      href: '/flashcards',
+      variant: 'secondary',
     },
   ];
 
   return (
-    <Card variant="default" size="md" className="bg-surface">
-      <Card.Header className='mb-3'>
-        <Card.Title>Quick Actions</Card.Title>
-        <Card.Description>Quick access to common tasks</Card.Description>
-      </Card.Header>
-      <Card.Content className="space-y-3">
+    <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold text-foreground">Quick Actions</h3>
+        <p className="text-sm text-foreground-muted">Jump into your learning</p>
+      </div>
+
+      <div className="space-y-3">
         {actions.map((action, index) => (
-          <ActionButton key={index} {...action} />
+          <ActionItem key={index} {...action} />
         ))}
-      </Card.Content>
-    </Card>
+      </div>
+
+      {/* Motivational Footer */}
+      <div className="mt-6 pt-5 border-t border-border">
+        <div className="flex items-center gap-3 text-sm">
+          <div className="flex -space-x-2">
+            <div className="w-8 h-8 rounded-full bg-accent-muted flex items-center justify-center border-2 border-surface">
+              <span className="text-xs">📚</span>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-accent-muted flex items-center justify-center border-2 border-surface">
+              <span className="text-xs">✨</span>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-accent-muted flex items-center justify-center border-2 border-surface">
+              <span className="text-xs">🎯</span>
+            </div>
+          </div>
+          <p className="text-foreground-muted">
+            <span className="font-medium text-foreground">Keep learning!</span>
+            {' '}Consistency is key.
+          </p>
+        </div>
+      </div>
+    </ClayCard>
   );
-} 
+}

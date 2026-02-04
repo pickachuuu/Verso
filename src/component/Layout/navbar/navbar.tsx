@@ -3,15 +3,16 @@
 import { navItems } from "./navConfig";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Button from "@/component/ui/Button";
-import { Logout01Icon, Sun01Icon, Moon01Icon } from "hugeicons-react";
+import { ClayButton } from "@/component/ui/Clay";
+import { Logout01Icon, Sun01Icon, Moon01Icon, Menu01Icon, Cancel01Icon } from "hugeicons-react";
 import { useEffect, useState } from "react";
 import { signOut } from '@/hook/useAuthActions';
 
 export default function Navbar() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light"); // Default doesn't matter, will be set in useEffect
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   // Once mounted on client, get the theme
   useEffect(() => {
@@ -36,7 +37,7 @@ export default function Navbar() {
   useEffect(() => {
     if (!mounted) return;
     const stored = localStorage.getItem("theme");
-    if (stored === "light" || stored === "dark") return; // user has set preference
+    if (stored === "light" || stored === "dark") return;
 
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = () => setTheme(media.matches ? "dark" : "light");
@@ -45,73 +46,121 @@ export default function Navbar() {
   }, [mounted]);
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-surface/80 backdrop-blur-md border-b border-border shadow-sm">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/dashboard" className="text-2xl font-bold text-foreground hover:text-accent transition-colors">
-              MemoForge
-            </Link>
-          </div>
-          
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item, index) => (
-              <div className="relative" key={index}>
-                <Link 
-                  href={item.href} 
-                  className={`text-sm font-medium transition-colors hover:text-accent ${
-                    pathname === item.href 
-                      ? 'text-accent' 
-                      : 'text-foreground-muted'
-                  }`}
-                >
-                  {item.name}
-                </Link>
-                <span
-                  className={`absolute left-0 bottom-0 h-0.5 bg-accent transition-all duration-300 ${
-                    pathname === item.href ? "w-full" : "w-0"
-                  }`}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Theme Toggle */}
-            {mounted && (
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Toggle theme"
-                onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+    <>
+      <nav className="sticky top-0 z-50 w-full">
+        {/* Clay navbar container */}
+        <div className="mx-4 mt-4">
+          <div className="clay-card rounded-2xl px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              {/* Logo */}
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 group"
               >
-                {theme === "light" ? (
-                  <Sun01Icon className="w-5 h-5" />
-                ) : (
-                  <Moon01Icon className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                  <span className="text-white font-bold text-lg">M</span>
+                </div>
+                <span className="text-xl font-bold text-foreground group-hover:text-accent transition-colors hidden sm:block">
+                  MemoForge
+                </span>
+              </Link>
+
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex items-center">
+                <div className="flex items-center bg-background-muted/50 rounded-xl p-1">
+                  {navItems.map((item, index) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link
+                        key={index}
+                        href={item.href}
+                        className={`
+                          relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                          ${isActive
+                            ? 'bg-surface text-accent shadow-sm'
+                            : 'text-foreground-muted hover:text-foreground hover:bg-surface/50'
+                          }
+                        `}
+                      >
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                {/* Theme Toggle */}
+                {mounted && (
+                  <button
+                    onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+                    className="p-2.5 rounded-xl bg-background-muted/50 hover:bg-background-muted text-foreground-muted hover:text-foreground transition-all duration-200"
+                    aria-label="Toggle theme"
+                  >
+                    {theme === "light" ? (
+                      <Sun01Icon className="w-5 h-5" />
+                    ) : (
+                      <Moon01Icon className="w-5 h-5" />
+                    )}
+                  </button>
                 )}
-              </Button>
-            )}
-            {/* Sign Out */}
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Sign out"
-              onClick={signOut}
-            >
-              <Logout01Icon className="w-5 h-5" />
-            </Button>
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <button className="p-2 rounded-md text-foreground-muted hover:text-foreground hover:bg-background-muted transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
+
+                {/* Sign Out */}
+                <button
+                  onClick={signOut}
+                  className="p-2.5 rounded-xl bg-background-muted/50 hover:bg-red-50 dark:hover:bg-red-950/30 text-foreground-muted hover:text-red-500 transition-all duration-200"
+                  aria-label="Sign out"
+                >
+                  <Logout01Icon className="w-5 h-5" />
+                </button>
+
+                {/* Mobile menu button */}
+                <button
+                  className="md:hidden p-2.5 rounded-xl bg-background-muted/50 hover:bg-background-muted text-foreground-muted hover:text-foreground transition-all duration-200"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                  {mobileMenuOpen ? (
+                    <Cancel01Icon className="w-5 h-5" />
+                  ) : (
+                    <Menu01Icon className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </nav>
+
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden mx-4 mt-2">
+            <div className="clay-card rounded-2xl p-4 space-y-2">
+              {navItems.map((item, index) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={index}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`
+                      block px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
+                      ${isActive
+                        ? 'bg-accent text-white'
+                        : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
+                      }
+                    `}
+                  >
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Spacer to prevent content from going under navbar */}
+      <div className="h-4" />
+    </>
   );
 }

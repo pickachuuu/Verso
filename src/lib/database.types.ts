@@ -41,6 +41,7 @@ export type Database = {
           user_id: string
           title: string
           content: string
+          slug: string | null
           status: 'draft' | 'published' | 'archived'
           tags: string[] | null
           is_public: boolean
@@ -52,6 +53,7 @@ export type Database = {
           user_id: string
           title: string
           content: string
+          slug?: string | null
           status?: 'draft' | 'published' | 'archived'
           tags?: string[] | null
           is_public?: boolean
@@ -63,6 +65,7 @@ export type Database = {
           user_id?: string
           title?: string
           content?: string
+          slug?: string | null
           status?: 'draft' | 'published' | 'archived'
           tags?: string[] | null
           is_public?: boolean
@@ -335,4 +338,4 @@ export type FlashcardUpdate = Database['public']['Tables']['flashcards']['Update
 export type StudySessionUpdate = Database['public']['Tables']['study_sessions']['Update']
 export type SessionResultUpdate = Database['public']['Tables']['session_results']['Update']
 export type GeminiRequestUpdate = Database['public']['Tables']['gemini_requests']['Update']
-export type UserPreferencesUpdate = Database['public']['Tables']['user_preferences']['Update'] 
+export type UserPreferencesUpdate = Database['public']['Tables']['user_preferences']['Update']

@@ -1,4 +1,6 @@
-import Card from '@/component/ui/Card';
+'use client';
+
+import { ClayCard, ClayIconBox } from '@/component/ui/Clay';
 import { File01Icon, BookOpen01Icon, Target01Icon, TickDouble01Icon } from 'hugeicons-react';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
@@ -9,8 +11,8 @@ interface StatCardProps {
   title: string;
   value: string | number;
   icon: React.ReactNode;
-  trend?: string;
-  trendDirection?: 'up' | 'down';
+  description?: string;
+  accentColor?: string;
 }
 
 interface FlashcardSet {
@@ -25,50 +27,45 @@ interface FlashcardSet {
 
 function StatCardSkeleton() {
   return (
-    <Card variant="default" size="sm" className="bg-surface animate-pulse">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <div className="h-4 w-20 bg-background-muted rounded mb-2"></div>
-          <div className="h-8 w-16 bg-background-muted rounded"></div>
+    <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse">
+      <div className="flex items-start justify-between">
+        <div className="space-y-3 flex-1">
+          <div className="h-4 w-24 bg-background-muted rounded-lg" />
+          <div className="h-9 w-16 bg-background-muted rounded-lg" />
+          <div className="h-3 w-32 bg-background-muted rounded-lg" />
         </div>
-        <div className="p-2 rounded-lg bg-background-muted w-10 h-10" />
+        <div className="w-14 h-14 bg-background-muted rounded-2xl" />
       </div>
-    </Card>
+    </ClayCard>
   );
 }
 
-function StatCard({ title, value, icon, trend, trendDirection }: StatCardProps) {
+function StatCard({ title, value, icon, description }: StatCardProps) {
   return (
-    <Card variant="default" size="sm" className="bg-surface">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-foreground-muted">{title}</p>
-          <p className="text-2xl font-bold text-foreground">{value}</p>
-          {trend && (
-            <div className="flex items-center gap-1">
-              <span className={`text-sm ${
-                trendDirection === 'up' ? 'text-green-500' : 'text-red-500'
-              }`}>
-                {trend}
-              </span>
-            </div>
+    <ClayCard variant="default" padding="md" className="rounded-2xl hover:scale-[1.02] transition-transform duration-300">
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-foreground-muted uppercase tracking-wide">{title}</p>
+          <p className="text-4xl font-bold text-foreground tracking-tight">{value}</p>
+          {description && (
+            <p className="text-xs text-foreground-muted">{description}</p>
           )}
         </div>
-        <div className="p-2 rounded-lg bg-accent-muted">
+        <ClayIconBox size="md" variant="accent" className="shrink-0">
           {icon}
-        </div>
+        </ClayIconBox>
       </div>
-    </Card>
+    </ClayCard>
   );
 }
 
 export default function DashboardStats() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<StatCardProps[]>([
-    { title: 'Total Notes', value: 0, icon: <File01Icon className="w-5 h-5 text-accent" />, trend: '', trendDirection: 'up' },
-    { title: 'Flashcards', value: 0, icon: <BookOpen01Icon className="w-5 h-5 text-accent" />, trend: '', trendDirection: 'up' },
-    { title: 'Flashcard Sets', value: 0, icon: <Target01Icon className="w-5 h-5 text-accent" />, trend: '', trendDirection: 'up' },
-    { title: 'Mastered Cards', value: 0, icon: <span className="w-5 h-5 text-accent text-xl">✓</span> },
+    { title: 'Notes', value: 0, icon: <File01Icon className="w-6 h-6 text-accent" />, description: 'Total study notes' },
+    { title: 'Flashcards', value: 0, icon: <BookOpen01Icon className="w-6 h-6 text-accent" />, description: 'Cards created' },
+    { title: 'Sets', value: 0, icon: <Target01Icon className="w-6 h-6 text-accent" />, description: 'Flashcard sets' },
+    { title: 'Mastered', value: 0, icon: <TickDouble01Icon className="w-6 h-6 text-accent" />, description: 'Cards completed' },
   ]);
 
   useEffect(() => {
@@ -76,7 +73,7 @@ export default function DashboardStats() {
       setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       let userId = session?.user?.id;
-      
+
       if (!userId) {
         setLoading(false);
         return;
@@ -88,7 +85,7 @@ export default function DashboardStats() {
           .from('notes')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', userId);
-        
+
         // Fetch flashcard sets and their data
         const { data: flashcardSets } = await supabase
           .from('flashcard_sets')
@@ -110,12 +107,12 @@ export default function DashboardStats() {
 
         if (flashcardSets) {
           totalFlashcardSets = flashcardSets.length;
-          
+
           // Calculate totals and check for fully mastered sets
           flashcardSets.forEach((set: FlashcardSet) => {
             totalFlashcards += set.total_cards || 0;
             totalMasteredCards += set.mastered_cards || 0;
-            
+
             // Check if all cards in this set are mastered
             if (set.flashcards && set.flashcards.length > 0) {
               const allMastered = set.flashcards.every((card) => card.status === 'mastered');
@@ -127,31 +124,29 @@ export default function DashboardStats() {
         }
 
         setStats([
-          { 
-            title: 'Total Notes', 
-            value: notesCount || 0, 
-            icon: <File01Icon className="w-5 h-5 text-accent" />, 
-            trend: '', 
-            trendDirection: 'up' as const 
+          {
+            title: 'Notes',
+            value: notesCount || 0,
+            icon: <File01Icon className="w-6 h-6 text-accent" />,
+            description: 'Total study notes'
           },
-          { 
-            title: 'Flashcards', 
-            value: totalFlashcards, 
-            icon: <BookOpen01Icon className="w-5 h-5 text-accent" />, 
-            trend: '', 
-            trendDirection: 'up' as const 
+          {
+            title: 'Flashcards',
+            value: totalFlashcards,
+            icon: <BookOpen01Icon className="w-6 h-6 text-accent" />,
+            description: 'Cards created'
           },
-          { 
-            title: 'Flashcard Sets', 
-            value: totalFlashcardSets, 
-            icon: <Target01Icon className="w-5 h-5 text-accent" />, 
-            trend: fullyMasteredSets > 0 ? `${fullyMasteredSets} completed` : '', 
-            trendDirection: 'up' as const 
+          {
+            title: 'Sets',
+            value: totalFlashcardSets,
+            icon: <Target01Icon className="w-6 h-6 text-accent" />,
+            description: fullyMasteredSets > 0 ? `${fullyMasteredSets} completed` : 'Flashcard sets'
           },
-          { 
-            title: 'Mastered Cards', 
-            value: totalMasteredCards, 
-            icon: <TickDouble01Icon className="w-5 h-5 text-accent" />, 
+          {
+            title: 'Mastered',
+            value: totalMasteredCards,
+            icon: <TickDouble01Icon className="w-6 h-6 text-accent" />,
+            description: 'Cards completed'
           },
         ]);
       } catch (error) {
@@ -160,14 +155,17 @@ export default function DashboardStats() {
         setLoading(false);
       }
     }
-    
+
     fetchStats();
   }, []);
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-semibold text-foreground">Overview</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-foreground">Overview</h2>
+        <span className="text-sm text-foreground-muted">Your learning stats</span>
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
           : stats.map((stat, index) => <StatCard key={index} {...stat} />)
@@ -175,4 +173,4 @@ export default function DashboardStats() {
       </div>
     </div>
   );
-} 
+}

@@ -26,15 +26,22 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-8">
+      {/* Header Section */}
       <DashboardHeader user={user} />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <DashboardStats />
+
+      {/* Stats Section */}
+      <DashboardStats />
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Recent Activity - Takes 2 columns on larger screens */}
+        <div className="xl:col-span-2">
           <RecentActivity />
         </div>
-        <div className="space-y-6 mt-12">
+
+        {/* Quick Actions - Takes 1 column */}
+        <div>
           <QuickActions />
         </div>
       </div>
