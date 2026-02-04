@@ -124,6 +124,17 @@ CREATE TABLE IF NOT EXISTS public.user_preferences (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Note pages table (multi-page notebook support)
+CREATE TABLE IF NOT EXISTS public.note_pages (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    note_id UUID REFERENCES public.notes(id) ON DELETE CASCADE NOT NULL,
+    title TEXT DEFAULT 'Untitled Page',
+    content TEXT DEFAULT '',
+    page_order INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_notes_user_id ON public.notes(user_id);
 CREATE INDEX IF NOT EXISTS idx_notes_status ON public.notes(status);
@@ -145,6 +156,9 @@ CREATE INDEX IF NOT EXISTS idx_gemini_requests_user_id ON public.gemini_requests
 CREATE INDEX IF NOT EXISTS idx_gemini_requests_status ON public.gemini_requests(status);
 CREATE INDEX IF NOT EXISTS idx_gemini_requests_created_at ON public.gemini_requests(created_at);
 
+CREATE INDEX IF NOT EXISTS idx_note_pages_note_id ON public.note_pages(note_id);
+CREATE INDEX IF NOT EXISTS idx_note_pages_page_order ON public.note_pages(page_order);
+
 -- Trigger functions
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -160,6 +174,7 @@ CREATE TRIGGER update_notes_updated_at BEFORE UPDATE ON public.notes FOR EACH RO
 CREATE TRIGGER update_flashcard_sets_updated_at BEFORE UPDATE ON public.flashcard_sets FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_flashcards_updated_at BEFORE UPDATE ON public.flashcards FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_user_preferences_updated_at BEFORE UPDATE ON public.user_preferences FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_note_pages_updated_at BEFORE UPDATE ON public.note_pages FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- RLS
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -170,6 +185,7 @@ ALTER TABLE public.study_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.session_results ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gemini_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_preferences ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.note_pages ENABLE ROW LEVEL SECURITY;
 
 -- Functions
 CREATE OR REPLACE FUNCTION create_user_profile()
@@ -194,7 +210,7 @@ CREATE OR REPLACE FUNCTION update_flashcard_set_stats()
 RETURNS TRIGGER AS $$
 BEGIN
     UPDATE public.flashcard_sets
-    SET 
+    SET
         total_cards = (
             SELECT COUNT(*) FROM public.flashcards WHERE set_id = NEW.set_id
         ),

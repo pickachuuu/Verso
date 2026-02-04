@@ -41,8 +41,8 @@ CREATE POLICY "Users can delete own flashcard sets" ON public.flashcard_sets
 CREATE POLICY "Users can view own flashcards" ON public.flashcards
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM public.flashcard_sets 
-            WHERE id = flashcard_sets.id 
+            SELECT 1 FROM public.flashcard_sets
+            WHERE id = flashcard_sets.id
             AND user_id = auth.uid()
         )
     );
@@ -50,8 +50,8 @@ CREATE POLICY "Users can view own flashcards" ON public.flashcards
 CREATE POLICY "Users can insert own flashcards" ON public.flashcards
     FOR INSERT WITH CHECK (
         EXISTS (
-            SELECT 1 FROM public.flashcard_sets 
-            WHERE id = flashcard_sets.id 
+            SELECT 1 FROM public.flashcard_sets
+            WHERE id = flashcard_sets.id
             AND user_id = auth.uid()
         )
     );
@@ -59,8 +59,8 @@ CREATE POLICY "Users can insert own flashcards" ON public.flashcards
 CREATE POLICY "Users can update own flashcards" ON public.flashcards
     FOR UPDATE USING (
         EXISTS (
-            SELECT 1 FROM public.flashcard_sets 
-            WHERE id = flashcard_sets.id 
+            SELECT 1 FROM public.flashcard_sets
+            WHERE id = flashcard_sets.id
             AND user_id = auth.uid()
         )
     );
@@ -68,8 +68,8 @@ CREATE POLICY "Users can update own flashcards" ON public.flashcards
 CREATE POLICY "Users can delete own flashcards" ON public.flashcards
     FOR DELETE USING (
         EXISTS (
-            SELECT 1 FROM public.flashcard_sets 
-            WHERE id = flashcard_sets.id 
+            SELECT 1 FROM public.flashcard_sets
+            WHERE id = flashcard_sets.id
             AND user_id = auth.uid()
         )
     );
@@ -91,8 +91,8 @@ CREATE POLICY "Users can delete own study sessions" ON public.study_sessions
 CREATE POLICY "Users can view own session results" ON public.session_results
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM public.study_sessions 
-            WHERE id = session_results.session_id 
+            SELECT 1 FROM public.study_sessions
+            WHERE id = session_results.session_id
             AND user_id = auth.uid()
         )
     );
@@ -100,8 +100,8 @@ CREATE POLICY "Users can view own session results" ON public.session_results
 CREATE POLICY "Users can insert own session results" ON public.session_results
     FOR INSERT WITH CHECK (
         EXISTS (
-            SELECT 1 FROM public.study_sessions 
-            WHERE id = session_results.session_id 
+            SELECT 1 FROM public.study_sessions
+            WHERE id = session_results.session_id
             AND user_id = auth.uid()
         )
     );
@@ -109,8 +109,8 @@ CREATE POLICY "Users can insert own session results" ON public.session_results
 CREATE POLICY "Users can update own session results" ON public.session_results
     FOR UPDATE USING (
         EXISTS (
-            SELECT 1 FROM public.study_sessions 
-            WHERE id = session_results.session_id 
+            SELECT 1 FROM public.study_sessions
+            WHERE id = session_results.session_id
             AND user_id = auth.uid()
         )
     );
@@ -118,8 +118,8 @@ CREATE POLICY "Users can update own session results" ON public.session_results
 CREATE POLICY "Users can delete own session results" ON public.session_results
     FOR DELETE USING (
         EXISTS (
-            SELECT 1 FROM public.study_sessions 
-            WHERE id = session_results.session_id 
+            SELECT 1 FROM public.study_sessions
+            WHERE id = session_results.session_id
             AND user_id = auth.uid()
         )
     );
@@ -148,4 +148,41 @@ CREATE POLICY "Users can update own preferences" ON public.user_preferences
     FOR UPDATE USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete own preferences" ON public.user_preferences
-    FOR DELETE USING (auth.uid() = user_id); 
+    FOR DELETE USING (auth.uid() = user_id);
+
+-- Note pages policies (access via parent note ownership)
+CREATE POLICY "Users can view own note pages" ON public.note_pages
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM public.notes
+            WHERE notes.id = note_pages.note_id
+            AND notes.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Users can insert own note pages" ON public.note_pages
+    FOR INSERT WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM public.notes
+            WHERE notes.id = note_pages.note_id
+            AND notes.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Users can update own note pages" ON public.note_pages
+    FOR UPDATE USING (
+        EXISTS (
+            SELECT 1 FROM public.notes
+            WHERE notes.id = note_pages.note_id
+            AND notes.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Users can delete own note pages" ON public.note_pages
+    FOR DELETE USING (
+        EXISTS (
+            SELECT 1 FROM public.notes
+            WHERE notes.id = note_pages.note_id
+            AND notes.user_id = auth.uid()
+        )
+    );
