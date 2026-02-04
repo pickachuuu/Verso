@@ -310,19 +310,32 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
+.clay-button-secondary svg {
+  color: inherit;
+}
+
 .clay-button-secondary:hover {
   box-shadow:
     4px 4px 8px rgba(0, 0, 0, 0.08),
     -4px -4px 8px rgba(255, 255, 255, 0.8),
     inset 3px 3px 6px rgba(255, 255, 255, 1),
     inset -2px -2px 4px rgba(0, 0, 0, 0.05);
+  color: var(--foreground);
+}
+
+.clay-button-secondary:hover svg {
+  color: inherit;
 }
 
 .clay-button-ghost {
   background: transparent;
-  color: var(--foreground);
+  color: var(--foreground-muted);
   box-shadow: none;
   border: 1px solid transparent;
+}
+
+.clay-button-ghost svg {
+  color: inherit;
 }
 
 .clay-button-ghost:hover {
@@ -331,6 +344,11 @@ body {
     inset 2px 2px 4px rgba(0, 0, 0, 0.03),
     inset -2px -2px 4px rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(0, 0, 0, 0.03);
+  color: var(--foreground);
+}
+
+.clay-button-ghost:hover svg {
+  color: inherit;
 }
 
 /* Clay Badge Variants - Paper Style */
@@ -444,6 +462,27 @@ body {
     inset -1px -1px 2px rgba(255, 255, 255, 0.9);
 }
 
+/* Clay Toolbar - Paper Style */
+.clay-toolbar {
+  background: linear-gradient(145deg, #fefefe 0%, #f9f8f5 50%, #f5f4f0 100%);
+  position: relative;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 2px rgba(255, 255, 255, 1),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.clay-toolbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
 /* Dark Mode Adjustments - Parchment/Aged Paper Style */
 .dark .clay-card {
   background: linear-gradient(145deg, #2a2a3a 0%, #252535 50%, #202030 100%);
@@ -488,6 +527,7 @@ body {
 
 .dark .clay-button-secondary {
   background: linear-gradient(145deg, #2a2a3a 0%, #252535 100%);
+  color: var(--foreground);
   box-shadow:
     6px 6px 12px rgba(0, 0, 0, 0.4),
     -6px -6px 12px rgba(255, 255, 255, 0.015),
@@ -496,9 +536,34 @@ body {
   border-color: rgba(255, 255, 255, 0.05);
 }
 
+.dark .clay-button-secondary svg {
+  color: inherit;
+}
+
+.dark .clay-button-secondary:hover {
+  color: var(--foreground);
+}
+
+.dark .clay-button-secondary:hover svg {
+  color: inherit;
+}
+
+.dark .clay-button-ghost {
+  color: var(--foreground-muted);
+}
+
+.dark .clay-button-ghost svg {
+  color: inherit;
+}
+
 .dark .clay-button-ghost:hover {
   background: linear-gradient(145deg, #252535 0%, #202030 100%);
   border-color: rgba(255, 255, 255, 0.04);
+  color: var(--foreground);
+}
+
+.dark .clay-button-ghost:hover svg {
+  color: inherit;
 }
 
 .dark .clay-badge {
@@ -565,6 +630,20 @@ body {
   box-shadow:
     inset 1px 1px 2px rgba(0, 0, 0, 0.3),
     inset -1px -1px 2px rgba(255, 255, 255, 0.015);
+}
+
+.dark .clay-toolbar {
+  background: linear-gradient(145deg, #2a2a3a 0%, #252535 50%, #202030 100%);
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.04),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.dark .clay-toolbar::before {
+  opacity: 0.04;
+  mix-blend-mode: soft-light;
 }
 
 /* ==========================================
@@ -1145,4 +1224,338 @@ body {
     rgba(180, 100, 100, 0.15) 92%,
     transparent 100%
   );
+}
+
+/* ==========================================
+   📝 Tiptap Rich Text Editor Styles
+   ==========================================
+   Claymorphism-styled WYSIWYG editor
+*/
+
+/* Editor Container */
+.rich-text-editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: transparent;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+/* Editor Content Wrapper */
+.tiptap-editor-wrapper {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.tiptap-editor-wrapper .ProseMirror {
+  min-height: 400px;
+  padding: 1.5rem 2rem;
+}
+
+/* Main Editor Styles */
+.tiptap-editor {
+  min-height: 100%;
+  outline: none;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 16px;
+  line-height: 32px;
+  color: #202124;
+}
+
+.dark .tiptap-editor {
+  color: #e8eaed;
+}
+
+/* Ensure editor content inherits color */
+.tiptap-editor p,
+.tiptap-editor h1,
+.tiptap-editor h2,
+.tiptap-editor h3,
+.tiptap-editor h4,
+.tiptap-editor h5,
+.tiptap-editor h6,
+.tiptap-editor li,
+.tiptap-editor span,
+.tiptap-editor div {
+  color: inherit !important;
+}
+
+.dark .tiptap-editor p,
+.dark .tiptap-editor h1,
+.dark .tiptap-editor h2,
+.dark .tiptap-editor h3,
+.dark .tiptap-editor h4,
+.dark .tiptap-editor h5,
+.dark .tiptap-editor h6,
+.dark .tiptap-editor li,
+.dark .tiptap-editor span,
+.dark .tiptap-editor div {
+  color: inherit !important;
+}
+
+/* Placeholder Styling */
+.tiptap-editor.is-editor-empty::before {
+  content: attr(data-placeholder);
+  color: var(--foreground-muted);
+  opacity: 0.4;
+  pointer-events: none;
+  font-style: italic;
+  position: absolute;
+}
+
+.tiptap-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--foreground-muted);
+  opacity: 0.5;
+  pointer-events: none;
+  height: 0;
+  font-style: italic;
+  font-size: 16px;
+  line-height: 32px;
+}
+
+/* Heading Styles */
+.tiptap-editor h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0;
+  color: inherit;
+  line-height: 64px;
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.tiptap-editor h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0;
+  color: inherit;
+  line-height: 64px;
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.tiptap-editor h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0;
+  color: inherit;
+  line-height: 32px;
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+/* Paragraph */
+.tiptap-editor p {
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 32px;
+  color: inherit;
+}
+
+/* Lists */
+.tiptap-editor ul,
+.tiptap-editor ol {
+  padding-left: 36pt;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.tiptap-editor ul {
+  list-style-type: disc;
+}
+
+.tiptap-editor ol {
+  list-style-type: decimal;
+}
+
+.tiptap-editor li {
+  margin-bottom: 0;
+  line-height: 32px;
+}
+
+.tiptap-editor li p {
+  margin-bottom: 0;
+  line-height: 32px;
+}
+
+/* Nested lists */
+.tiptap-editor ul ul {
+  list-style-type: circle;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.tiptap-editor ul ul ul {
+  list-style-type: square;
+}
+
+/* Blockquote */
+.tiptap-editor blockquote {
+  border-left: 4px solid var(--accent);
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  color: var(--foreground-muted);
+  font-style: italic;
+  background: var(--accent-muted);
+  padding: 0 1rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  line-height: 32px;
+}
+
+.tiptap-editor blockquote p {
+  margin-bottom: 0;
+  line-height: 32px;
+}
+
+/* Code */
+.tiptap-editor code {
+  background-color: var(--background-muted);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family: var(--font-mono), monospace;
+  color: var(--accent);
+}
+
+/* Code Block */
+.tiptap-editor pre {
+  background-color: var(--background-muted);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border);
+}
+
+.tiptap-editor pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Horizontal Rule */
+.tiptap-editor hr {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+/* Text Decorations */
+.tiptap-editor strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.tiptap-editor em {
+  font-style: italic;
+}
+
+.tiptap-editor u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tiptap-editor s {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Highlight */
+.tiptap-editor mark {
+  background-color: #fef08a;
+  padding: 0.1rem 0.2rem;
+  border-radius: 0.2rem;
+}
+
+.dark .tiptap-editor mark {
+  background-color: rgba(253, 224, 71, 0.3);
+  color: var(--foreground);
+}
+
+/* Text Alignment */
+.tiptap-editor .has-text-align-left {
+  text-align: left;
+}
+
+.tiptap-editor .has-text-align-center {
+  text-align: center;
+}
+
+.tiptap-editor .has-text-align-right {
+  text-align: right;
+}
+
+/* Selection styling */
+.tiptap-editor ::selection {
+  background-color: var(--accent-muted);
+}
+
+/* Focus state for the editor */
+.tiptap-editor:focus {
+  outline: none;
+}
+
+/* Gapcursor */
+.tiptap-editor .ProseMirror-gapcursor:after {
+  border-top: 1px solid var(--foreground);
+}
+
+/* Link styles (for future) */
+.tiptap-editor a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.tiptap-editor a:hover {
+  color: var(--accent-light);
+}
+
+/* Task list styles (for future) */
+.tiptap-editor ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tiptap-editor ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.tiptap-editor ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.tiptap-editor ul[data-type="taskList"] li > div {
+  flex: 1;
+}
+
+/* Scrollbar styling for editor */
+.tiptap-editor-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tiptap-editor-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tiptap-editor-wrapper::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 4px;
+}
+
+.tiptap-editor-wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: var(--foreground-muted);
 }
