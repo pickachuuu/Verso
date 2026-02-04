@@ -1,6 +1,10 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+/**
+ * Updates the Supabase session and handles authentication redirects.
+ * Used in Next.js 16+ proxy.ts for route protection.
+ */
 export async function updateSession(
     request: NextRequest,
     supabaseUrl: string,
@@ -19,7 +23,7 @@ export async function updateSession(
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -67,7 +71,7 @@ export async function updateSession(
       return NextResponse.redirect(url);
     }
   } catch (error) {
-    console.error('Unexpected error in middleware:', error);
+    console.error('Unexpected error in proxy:', error);
     // On any unexpected error, redirect to auth
     if (request.nextUrl.pathname !== '/auth') {
       const url = request.nextUrl.clone();
@@ -75,7 +79,7 @@ export async function updateSession(
       return NextResponse.redirect(url);
     }
   }
-  
+
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:

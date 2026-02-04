@@ -192,217 +192,323 @@ body {
 }
 
 /* ==========================================
-   🎨 Claymorphism Design System
+   🎨 Claymorphism + Paper Design System
    ==========================================
-   Soft, puffy, 3D-like design with inner shadows
+   Soft, puffy, 3D-like design with paper textures
 */
 
-/* Clay Card Variants */
+/* Paper texture base - subtle noise pattern */
+.paper-texture {
+  position: relative;
+}
+
+.paper-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+/* Clay Card Variants - Paper Style */
 .clay-card {
-  background: var(--surface);
+  background: linear-gradient(145deg, #fefefe 0%, #f9f8f5 50%, #f5f4f0 100%);
+  position: relative;
   box-shadow:
-    8px 8px 16px rgba(0, 0, 0, 0.08),
-    -8px -8px 16px rgba(255, 255, 255, 0.8),
-    inset 2px 2px 4px rgba(255, 255, 255, 0.9),
-    inset -1px -1px 3px rgba(0, 0, 0, 0.05);
+    8px 8px 16px rgba(0, 0, 0, 0.06),
+    -8px -8px 16px rgba(255, 255, 255, 0.9),
+    inset 2px 2px 4px rgba(255, 255, 255, 1),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* Paper grain overlay for cards */
+.clay-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  mix-blend-mode: multiply;
 }
 
 .clay-card-elevated {
-  background: var(--surface);
+  background: linear-gradient(145deg, #ffffff 0%, #faf9f6 50%, #f6f5f1 100%);
+  position: relative;
   box-shadow:
-    12px 12px 24px rgba(0, 0, 0, 0.1),
-    -12px -12px 24px rgba(255, 255, 255, 0.9),
-    inset 3px 3px 6px rgba(255, 255, 255, 0.95),
-    inset -2px -2px 4px rgba(0, 0, 0, 0.05);
+    12px 12px 24px rgba(0, 0, 0, 0.08),
+    -12px -12px 24px rgba(255, 255, 255, 1),
+    inset 3px 3px 6px rgba(255, 255, 255, 1),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.clay-card-elevated::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  mix-blend-mode: multiply;
 }
 
 .clay-card-pressed {
-  background: var(--background-muted);
+  background: linear-gradient(145deg, #f4f3ef 0%, #efeee9 50%, #eae9e4 100%);
+  position: relative;
   box-shadow:
-    inset 4px 4px 8px rgba(0, 0, 0, 0.08),
-    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+    inset 4px 4px 8px rgba(0, 0, 0, 0.06),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* Clay Button Variants */
+.clay-card-pressed::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+/* Clay Button Variants - Paper Style */
 .clay-button-primary {
-  background: var(--accent);
+  background: linear-gradient(145deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 90%, black) 100%);
   color: white;
   box-shadow:
-    6px 6px 12px rgba(0, 0, 0, 0.15),
-    -3px -3px 8px rgba(255, 255, 255, 0.5),
-    inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+    6px 6px 12px rgba(0, 0, 0, 0.12),
+    -3px -3px 8px rgba(255, 255, 255, 0.6),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.25),
     inset -1px -1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .clay-button-primary:hover {
   box-shadow:
-    4px 4px 8px rgba(0, 0, 0, 0.2),
-    -2px -2px 6px rgba(255, 255, 255, 0.4),
-    inset 3px 3px 6px rgba(255, 255, 255, 0.35),
-    inset -2px -2px 4px rgba(0, 0, 0, 0.15);
+    4px 4px 8px rgba(0, 0, 0, 0.15),
+    -2px -2px 6px rgba(255, 255, 255, 0.5),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.3),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.12);
 }
 
 .clay-button-secondary {
-  background: var(--surface);
+  background: linear-gradient(145deg, #fefefe 0%, #f8f7f3 100%);
   color: var(--foreground);
   box-shadow:
-    6px 6px 12px rgba(0, 0, 0, 0.08),
-    -6px -6px 12px rgba(255, 255, 255, 0.8),
-    inset 2px 2px 4px rgba(255, 255, 255, 0.9),
-    inset -1px -1px 3px rgba(0, 0, 0, 0.05);
+    6px 6px 12px rgba(0, 0, 0, 0.06),
+    -6px -6px 12px rgba(255, 255, 255, 0.9),
+    inset 2px 2px 4px rgba(255, 255, 255, 1),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .clay-button-secondary:hover {
   box-shadow:
-    4px 4px 8px rgba(0, 0, 0, 0.1),
-    -4px -4px 8px rgba(255, 255, 255, 0.7),
-    inset 3px 3px 6px rgba(255, 255, 255, 0.95),
-    inset -2px -2px 4px rgba(0, 0, 0, 0.08);
+    4px 4px 8px rgba(0, 0, 0, 0.08),
+    -4px -4px 8px rgba(255, 255, 255, 0.8),
+    inset 3px 3px 6px rgba(255, 255, 255, 1),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .clay-button-ghost {
   background: transparent;
   color: var(--foreground);
   box-shadow: none;
+  border: 1px solid transparent;
 }
 
 .clay-button-ghost:hover {
-  background: var(--background-muted);
+  background: linear-gradient(145deg, #f8f7f3 0%, #f3f2ed 100%);
   box-shadow:
-    inset 2px 2px 4px rgba(0, 0, 0, 0.05),
-    inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+    inset 2px 2px 4px rgba(0, 0, 0, 0.03),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
-/* Clay Badge Variants */
+/* Clay Badge Variants - Paper Style */
 .clay-badge {
-  background: var(--surface);
+  background: linear-gradient(145deg, #fefefe 0%, #f8f7f3 100%);
   color: var(--foreground-muted);
   box-shadow:
-    4px 4px 8px rgba(0, 0, 0, 0.06),
-    -4px -4px 8px rgba(255, 255, 255, 0.8),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.9),
-    inset -1px -1px 2px rgba(0, 0, 0, 0.03);
+    4px 4px 8px rgba(0, 0, 0, 0.05),
+    -4px -4px 8px rgba(255, 255, 255, 0.9),
+    inset 1px 1px 2px rgba(255, 255, 255, 1),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .clay-badge-accent {
-  background: var(--accent-muted);
+  background: linear-gradient(145deg, var(--accent-muted) 0%, color-mix(in srgb, var(--accent-muted) 95%, white) 100%);
   color: var(--accent);
   box-shadow:
-    4px 4px 8px rgba(0, 0, 0, 0.06),
-    -4px -4px 8px rgba(255, 255, 255, 0.8),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.7),
-    inset -1px -1px 2px rgba(0, 0, 0, 0.03);
+    4px 4px 8px rgba(0, 0, 0, 0.05),
+    -4px -4px 8px rgba(255, 255, 255, 0.9),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.8),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .clay-badge-success {
-  background: #d4edda;
+  background: linear-gradient(145deg, #e8f5e9 0%, #d4edda 100%);
   color: #155724;
   box-shadow:
-    4px 4px 8px rgba(0, 0, 0, 0.06),
-    -4px -4px 8px rgba(255, 255, 255, 0.8),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.7),
-    inset -1px -1px 2px rgba(0, 0, 0, 0.03);
+    4px 4px 8px rgba(0, 0, 0, 0.05),
+    -4px -4px 8px rgba(255, 255, 255, 0.9),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.8),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .clay-badge-warning {
-  background: #fff3cd;
+  background: linear-gradient(145deg, #fffde7 0%, #fff3cd 100%);
   color: #856404;
   box-shadow:
-    4px 4px 8px rgba(0, 0, 0, 0.06),
-    -4px -4px 8px rgba(255, 255, 255, 0.8),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.7),
-    inset -1px -1px 2px rgba(0, 0, 0, 0.03);
+    4px 4px 8px rgba(0, 0, 0, 0.05),
+    -4px -4px 8px rgba(255, 255, 255, 0.9),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.8),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
-/* Clay Icon Box */
+/* Clay Icon Box - Paper Style */
 .clay-icon-box {
-  background: var(--surface);
+  background: linear-gradient(145deg, #fefefe 0%, #f8f7f3 100%);
   box-shadow:
-    6px 6px 12px rgba(0, 0, 0, 0.08),
-    -6px -6px 12px rgba(255, 255, 255, 0.8),
-    inset 2px 2px 4px rgba(255, 255, 255, 0.9),
-    inset -1px -1px 3px rgba(0, 0, 0, 0.05);
+    6px 6px 12px rgba(0, 0, 0, 0.06),
+    -6px -6px 12px rgba(255, 255, 255, 0.9),
+    inset 2px 2px 4px rgba(255, 255, 255, 1),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .clay-icon-box-accent {
-  background: var(--accent-muted);
+  background: linear-gradient(145deg, var(--accent-muted) 0%, color-mix(in srgb, var(--accent-muted) 95%, white) 100%);
   box-shadow:
-    6px 6px 12px rgba(0, 0, 0, 0.08),
-    -6px -6px 12px rgba(255, 255, 255, 0.8),
-    inset 2px 2px 4px rgba(255, 255, 255, 0.7),
-    inset -1px -1px 3px rgba(0, 0, 0, 0.05);
+    6px 6px 12px rgba(0, 0, 0, 0.06),
+    -6px -6px 12px rgba(255, 255, 255, 0.9),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.8),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
-/* Clay Section */
+/* Clay Section - Paper Style */
 .clay-section-muted {
-  background: var(--background-muted);
+  background: linear-gradient(180deg, #f5f4f0 0%, #f0efea 50%, #ebeae5 100%);
+  position: relative;
   box-shadow:
-    inset 0 8px 16px rgba(0, 0, 0, 0.03),
-    inset 0 -8px 16px rgba(255, 255, 255, 0.5);
+    inset 0 8px 16px rgba(0, 0, 0, 0.02),
+    inset 0 -8px 16px rgba(255, 255, 255, 0.6);
 }
 
-/* Clay Input */
+.clay-section-muted::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+/* Clay Input - Paper Style */
 .clay-input {
-  background: var(--background-muted);
+  background: linear-gradient(145deg, #f4f3ef 0%, #efeee9 100%);
   color: var(--foreground);
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow:
-    inset 4px 4px 8px rgba(0, 0, 0, 0.06),
-    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+    inset 4px 4px 8px rgba(0, 0, 0, 0.04),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.9);
 }
 
 .clay-input:focus {
   box-shadow:
-    inset 4px 4px 8px rgba(0, 0, 0, 0.08),
-    inset -4px -4px 8px rgba(255, 255, 255, 0.9),
+    inset 4px 4px 8px rgba(0, 0, 0, 0.06),
+    inset -4px -4px 8px rgba(255, 255, 255, 1),
     0 0 0 3px var(--accent-muted);
+  border-color: var(--accent-muted);
 }
 
-/* Clay Divider */
+/* Clay Divider - Paper Style */
 .clay-divider {
-  background: var(--border);
+  background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
   box-shadow:
-    inset 1px 1px 2px rgba(0, 0, 0, 0.05),
-    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+    inset 1px 1px 2px rgba(0, 0, 0, 0.03),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.9);
 }
 
-/* Dark Mode Adjustments for Claymorphism */
+/* Dark Mode Adjustments - Parchment/Aged Paper Style */
 .dark .clay-card {
+  background: linear-gradient(145deg, #2a2a3a 0%, #252535 50%, #202030 100%);
   box-shadow:
     8px 8px 16px rgba(0, 0, 0, 0.4),
-    -8px -8px 16px rgba(255, 255, 255, 0.03),
-    inset 2px 2px 4px rgba(255, 255, 255, 0.05),
+    -8px -8px 16px rgba(255, 255, 255, 0.02),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.04),
     inset -1px -1px 3px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .clay-card::before {
+  opacity: 0.04;
+  mix-blend-mode: soft-light;
 }
 
 .dark .clay-card-elevated {
+  background: linear-gradient(145deg, #2d2d3d 0%, #282838 50%, #232333 100%);
   box-shadow:
     12px 12px 24px rgba(0, 0, 0, 0.5),
-    -12px -12px 24px rgba(255, 255, 255, 0.02),
-    inset 3px 3px 6px rgba(255, 255, 255, 0.05),
+    -12px -12px 24px rgba(255, 255, 255, 0.015),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.04),
     inset -2px -2px 4px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.04);
 }
 
 .dark .clay-card-pressed {
+  background: linear-gradient(145deg, #1e1e2e 0%, #1a1a2a 50%, #161626 100%);
   box-shadow:
     inset 4px 4px 8px rgba(0, 0, 0, 0.4),
-    inset -4px -4px 8px rgba(255, 255, 255, 0.02);
+    inset -4px -4px 8px rgba(255, 255, 255, 0.015);
+  border-color: rgba(255, 255, 255, 0.03);
 }
 
 .dark .clay-button-primary {
   box-shadow:
     6px 6px 12px rgba(0, 0, 0, 0.4),
-    -3px -3px 8px rgba(255, 255, 255, 0.03),
-    inset 2px 2px 4px rgba(255, 255, 255, 0.15),
+    -3px -3px 8px rgba(255, 255, 255, 0.02),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.12),
     inset -1px -1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .dark .clay-button-secondary {
+  background: linear-gradient(145deg, #2a2a3a 0%, #252535 100%);
   box-shadow:
     6px 6px 12px rgba(0, 0, 0, 0.4),
-    -6px -6px 12px rgba(255, 255, 255, 0.02),
-    inset 2px 2px 4px rgba(255, 255, 255, 0.05),
+    -6px -6px 12px rgba(255, 255, 255, 0.015),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.04),
     inset -1px -1px 3px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .clay-button-ghost:hover {
+  background: linear-gradient(145deg, #252535 0%, #202030 100%);
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+.dark .clay-badge {
+  background: linear-gradient(145deg, #2a2a3a 0%, #252535 100%);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .clay-badge-accent {
+  background: linear-gradient(145deg, var(--accent-muted) 0%, color-mix(in srgb, var(--accent-muted) 80%, black) 100%);
+  border-color: rgba(255, 255, 255, 0.04);
 }
 
 .dark .clay-badge,
@@ -411,36 +517,54 @@ body {
 .dark .clay-badge-warning {
   box-shadow:
     4px 4px 8px rgba(0, 0, 0, 0.3),
-    -4px -4px 8px rgba(255, 255, 255, 0.02),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.05),
+    -4px -4px 8px rgba(255, 255, 255, 0.015),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.04),
     inset -1px -1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.dark .clay-icon-box {
+  background: linear-gradient(145deg, #2a2a3a 0%, #252535 100%);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .clay-icon-box-accent {
+  background: linear-gradient(145deg, var(--accent-muted) 0%, color-mix(in srgb, var(--accent-muted) 80%, black) 100%);
+  border-color: rgba(255, 255, 255, 0.04);
 }
 
 .dark .clay-icon-box,
 .dark .clay-icon-box-accent {
   box-shadow:
     6px 6px 12px rgba(0, 0, 0, 0.4),
-    -6px -6px 12px rgba(255, 255, 255, 0.02),
-    inset 2px 2px 4px rgba(255, 255, 255, 0.05),
+    -6px -6px 12px rgba(255, 255, 255, 0.015),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.04),
     inset -1px -1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .dark .clay-section-muted {
+  background: linear-gradient(180deg, #1a1a2a 0%, #161626 50%, #131323 100%);
   box-shadow:
     inset 0 8px 16px rgba(0, 0, 0, 0.2),
-    inset 0 -8px 16px rgba(255, 255, 255, 0.01);
+    inset 0 -8px 16px rgba(255, 255, 255, 0.008);
+}
+
+.dark .clay-section-muted::before {
+  opacity: 0.03;
+  mix-blend-mode: soft-light;
 }
 
 .dark .clay-input {
+  background: linear-gradient(145deg, #1e1e2e 0%, #1a1a2a 100%);
+  border-color: rgba(255, 255, 255, 0.05);
   box-shadow:
     inset 4px 4px 8px rgba(0, 0, 0, 0.3),
-    inset -4px -4px 8px rgba(255, 255, 255, 0.02);
+    inset -4px -4px 8px rgba(255, 255, 255, 0.015);
 }
 
 .dark .clay-divider {
   box-shadow:
     inset 1px 1px 2px rgba(0, 0, 0, 0.3),
-    inset -1px -1px 2px rgba(255, 255, 255, 0.02);
+    inset -1px -1px 2px rgba(255, 255, 255, 0.015);
 }
 
 /* ==========================================
@@ -543,6 +667,61 @@ body {
   pointer-events: none;
 }
 
+/* Notebook with darker/bolder lines */
+.notebook-bg-bold {
+  position: relative;
+  overflow: hidden;
+}
+
+.notebook-bg-bold::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 31px,
+      rgba(0, 0, 0, 0.12) 31px,
+      rgba(0, 0, 0, 0.12) 32px
+    );
+  animation: lines-scroll 20s linear infinite;
+  pointer-events: none;
+}
+
+.notebook-bg-bold::after {
+  content: '';
+  position: absolute;
+  left: 80px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--accent) 10%,
+    var(--accent) 90%,
+    transparent 100%
+  );
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.dark .notebook-bg-bold::before {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 31px,
+      rgba(255, 255, 255, 0.08) 31px,
+      rgba(255, 255, 255, 0.08) 32px
+    );
+}
+
+.dark .notebook-bg-bold::after {
+  opacity: 0.25;
+}
+
 @keyframes lines-scroll {
   0% {
     transform: translateY(0);
@@ -552,60 +731,189 @@ body {
   }
 }
 
-/* Floating formulas background */
+/* Notebook Paper Background */
+.notebook-paper-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Horizontal ruled lines */
+.notebook-paper-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 31px,
+      rgba(var(--accent), 0.08) 31px,
+      rgba(var(--accent), 0.08) 32px
+    );
+  background-size: 100% 32px;
+  pointer-events: none;
+  animation: ruled-lines-float 25s ease-in-out infinite;
+}
+
+/* Red margin line + hole punches */
+.notebook-paper-bg::after {
+  content: '';
+  position: absolute;
+  left: 60px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(220, 80, 80, 0.25) 5%,
+    rgba(220, 80, 80, 0.25) 95%,
+    transparent 100%
+  );
+  pointer-events: none;
+  box-shadow:
+    -40px 80px 0 8px rgba(0,0,0,0.03),
+    -40px 200px 0 8px rgba(0,0,0,0.03),
+    -40px 320px 0 8px rgba(0,0,0,0.03),
+    -40px 440px 0 8px rgba(0,0,0,0.03),
+    -40px 560px 0 8px rgba(0,0,0,0.03);
+}
+
+@keyframes ruled-lines-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+/* Dot grid background variation */
+.dot-grid-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.dot-grid-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, var(--accent) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.08;
+  pointer-events: none;
+  animation: dots-pulse 4s ease-in-out infinite;
+}
+
+@keyframes dots-pulse {
+  0%, 100% {
+    opacity: 0.08;
+  }
+  50% {
+    opacity: 0.12;
+  }
+}
+
+/* Graph paper background */
+.graph-paper-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.graph-paper-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--accent) 1px, transparent 1px),
+    linear-gradient(90deg, var(--accent) 1px, transparent 1px),
+    linear-gradient(var(--accent) 0.5px, transparent 0.5px),
+    linear-gradient(90deg, var(--accent) 0.5px, transparent 0.5px);
+  background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+/* Floating sticky notes decoration */
+.sticky-notes-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.sticky-notes-bg::before,
+.sticky-notes-bg::after {
+  content: '';
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 4px;
+  pointer-events: none;
+  transform: rotate(-3deg);
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+}
+
+.sticky-notes-bg::before {
+  top: 10%;
+  right: 5%;
+  background: linear-gradient(145deg, #fff9c4 0%, #fff59d 100%);
+  transform: rotate(5deg);
+  animation: sticky-float 6s ease-in-out infinite;
+}
+
+.sticky-notes-bg::after {
+  bottom: 15%;
+  left: 3%;
+  background: linear-gradient(145deg, #bbdefb 0%, #90caf9 100%);
+  transform: rotate(-8deg);
+  animation: sticky-float 8s ease-in-out infinite reverse;
+}
+
+@keyframes sticky-float {
+  0%, 100% {
+    transform: rotate(5deg) translateY(0);
+  }
+  50% {
+    transform: rotate(5deg) translateY(-10px);
+  }
+}
+
+/* Legacy formulas-bg - now uses notebook style */
 .formulas-bg {
   position: relative;
   overflow: hidden;
 }
 
 .formulas-bg::before {
-  content: '∫ dx   Σ   √   π   ∞   Δ   ≈   ∂   θ   λ   ∫ dx   Σ   √   π   ∞   Δ   ≈   ∂   θ   λ';
+  content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  font-size: 2rem;
-  font-family: serif;
-  color: var(--accent);
-  opacity: 0.04;
-  white-space: nowrap;
-  animation: formulas-scroll 60s linear infinite;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      rgba(95, 108, 175, 0.06) 27px,
+      rgba(95, 108, 175, 0.06) 28px
+    );
+  background-size: 100% 28px;
   pointer-events: none;
-  letter-spacing: 2rem;
 }
 
 .formulas-bg::after {
-  content: 'α   β   γ   δ   ε   ζ   η   φ   ψ   ω   α   β   γ   δ   ε   ζ   η   φ   ψ   ω';
+  content: '';
   position: absolute;
-  bottom: 20%;
-  left: 0;
-  right: 0;
-  font-size: 1.5rem;
-  font-family: serif;
-  color: var(--accent);
-  opacity: 0.03;
-  white-space: nowrap;
-  animation: formulas-scroll-reverse 45s linear infinite;
+  left: 48px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(220, 100, 100, 0.2) 8%,
+    rgba(220, 100, 100, 0.2) 92%,
+    transparent 100%
+  );
   pointer-events: none;
-  letter-spacing: 1.5rem;
-}
-
-@keyframes formulas-scroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes formulas-scroll-reverse {
-  0% {
-    transform: translateX(-50%);
-  }
-  100% {
-    transform: translateX(0);
-  }
 }
 
 /* Combined academic + notebook for sections */
@@ -682,10 +990,69 @@ body {
   opacity: 0.08;
 }
 
+/* Dark mode for notebook backgrounds */
+.dark .notebook-paper-bg::before {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 31px,
+      rgba(157, 123, 224, 0.1) 31px,
+      rgba(157, 123, 224, 0.1) 32px
+    );
+}
+
+.dark .notebook-paper-bg::after {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(180, 100, 100, 0.2) 5%,
+    rgba(180, 100, 100, 0.2) 95%,
+    transparent 100%
+  );
+  box-shadow:
+    -40px 80px 0 8px rgba(255,255,255,0.02),
+    -40px 200px 0 8px rgba(255,255,255,0.02),
+    -40px 320px 0 8px rgba(255,255,255,0.02),
+    -40px 440px 0 8px rgba(255,255,255,0.02),
+    -40px 560px 0 8px rgba(255,255,255,0.02);
+}
+
+.dark .dot-grid-bg::before {
+  opacity: 0.12;
+}
+
+.dark .graph-paper-bg::before {
+  opacity: 0.08;
+}
+
+.dark .sticky-notes-bg::before {
+  background: linear-gradient(145deg, #4a4a2a 0%, #3a3a20 100%);
+  box-shadow: 2px 2px 12px rgba(0,0,0,0.4);
+}
+
+.dark .sticky-notes-bg::after {
+  background: linear-gradient(145deg, #2a3a4a 0%, #203040 100%);
+  box-shadow: 2px 2px 12px rgba(0,0,0,0.4);
+}
+
 .dark .formulas-bg::before {
-  opacity: 0.06;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      rgba(157, 123, 224, 0.08) 27px,
+      rgba(157, 123, 224, 0.08) 28px
+    );
 }
 
 .dark .formulas-bg::after {
-  opacity: 0.04;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(180, 100, 100, 0.15) 8%,
+    rgba(180, 100, 100, 0.15) 92%,
+    transparent 100%
+  );
 }

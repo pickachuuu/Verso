@@ -169,7 +169,7 @@ export default function LandingPage() {
         </section>
 
         {/* Features Section - Combined and More Detailed */}
-        <ClaySection variant="muted" id="features" className="formulas-bg">
+        <ClaySection variant="muted" id="features" className="notebook-bg-bold">
           <m.div
             className="text-center mb-16 relative z-10"
             variants={fadeInUp}
