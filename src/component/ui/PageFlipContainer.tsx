@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { ReactNode, useRef, useLayoutEffect, useState, useCallback } from 'react';
 
 export type ViewType = 'cover' | 'toc' | 'page';
+export type PageFlipVariant = 'notebook' | 'exam';
 
 interface PageFlipContainerProps {
   currentView: ViewType;
@@ -14,6 +15,7 @@ interface PageFlipContainerProps {
   pageContent: ReactNode;
   previousContent?: ReactNode;
   theme?: 'light' | 'dark';
+  variant?: PageFlipVariant;
 }
 
 export default function PageFlipContainer({
@@ -25,8 +27,10 @@ export default function PageFlipContainer({
   pageContent,
   previousContent,
   theme = 'light',
+  variant = 'notebook',
 }: PageFlipContainerProps) {
   const isDark = theme === 'dark';
+  const isExam = variant === 'exam';
 
   const getPosition = (view: ViewType, pageIdx: number | null): number => {
     if (view === 'cover') return 0;
@@ -114,23 +118,31 @@ export default function PageFlipContainer({
   const lineColor = isDark ? 'rgba(157,123,224,0.1)' : 'rgba(95,108,175,0.08)';
   const marginColor = isDark ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.2)';
 
-  const leftCount = Math.min(currentPosition > 0 ? currentPosition : 0, 5);
+  // For exam mode: no left stack on first page (toc), and fewer visual stacks overall
+  const leftCount = isExam
+    ? (currentView === 'page' && currentPageIndex !== null ? Math.min(currentPageIndex + 1, 3) : 0)
+    : Math.min(currentPosition > 0 ? currentPosition : 0, 5);
   const rightCount = Math.min(Math.max(0, 2 + totalPages - currentPosition - 1), 4);
 
+  // Blank paper back - plain white for exam, lined for notebook
   const BlankPaper = () => (
     <div className="absolute inset-0 rounded-lg" style={{ background: paperBg }}>
-      <div className="absolute inset-0" style={{
-        backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 31px, ${lineColor} 31px, ${lineColor} 32px)`,
-        backgroundSize: '100% 32px',
-        backgroundPosition: '0 24px',
-      }} />
-      <div className="absolute top-0 bottom-0 w-px" style={{ left: 48, backgroundColor: marginColor }} />
-      <div className="absolute left-3 top-1/4 w-3 h-3 rounded-full"
-        style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)' }} />
-      <div className="absolute left-3 top-1/2 w-3 h-3 rounded-full -translate-y-1/2"
-        style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)' }} />
-      <div className="absolute left-3 top-3/4 w-3 h-3 rounded-full"
-        style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)' }} />
+      {!isExam && (
+        <>
+          <div className="absolute inset-0" style={{
+            backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 31px, ${lineColor} 31px, ${lineColor} 32px)`,
+            backgroundSize: '100% 32px',
+            backgroundPosition: '0 24px',
+          }} />
+          <div className="absolute top-0 bottom-0 w-px" style={{ left: 48, backgroundColor: marginColor }} />
+          <div className="absolute left-3 top-1/4 w-3 h-3 rounded-full"
+            style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)' }} />
+          <div className="absolute left-3 top-1/2 w-3 h-3 rounded-full -translate-y-1/2"
+            style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)' }} />
+          <div className="absolute left-3 top-3/4 w-3 h-3 rounded-full"
+            style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)' }} />
+        </>
+      )}
     </div>
   );
 

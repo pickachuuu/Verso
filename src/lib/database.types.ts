@@ -9,6 +9,161 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      exam_sets: {
+        Row: {
+          id: string
+          user_id: string
+          note_id: string | null
+          title: string
+          description: string | null
+          difficulty: 'easy' | 'medium' | 'hard' | 'mixed'
+          total_questions: number
+          time_limit_minutes: number | null
+          include_multiple_choice: boolean
+          include_identification: boolean
+          include_essay: boolean
+          is_public: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          note_id?: string | null
+          title: string
+          description?: string | null
+          difficulty?: 'easy' | 'medium' | 'hard' | 'mixed'
+          total_questions?: number
+          time_limit_minutes?: number | null
+          include_multiple_choice?: boolean
+          include_identification?: boolean
+          include_essay?: boolean
+          is_public?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          note_id?: string | null
+          title?: string
+          description?: string | null
+          difficulty?: 'easy' | 'medium' | 'hard' | 'mixed'
+          total_questions?: number
+          time_limit_minutes?: number | null
+          include_multiple_choice?: boolean
+          include_identification?: boolean
+          include_essay?: boolean
+          is_public?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      exam_questions: {
+        Row: {
+          id: string
+          exam_id: string
+          question_type: 'multiple_choice' | 'identification' | 'essay'
+          question: string
+          correct_answer: string
+          options: string[] | null
+          points: number
+          position: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          exam_id: string
+          question_type: 'multiple_choice' | 'identification' | 'essay'
+          question: string
+          correct_answer: string
+          options?: string[] | null
+          points?: number
+          position?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          exam_id?: string
+          question_type?: 'multiple_choice' | 'identification' | 'essay'
+          question?: string
+          correct_answer?: string
+          options?: string[] | null
+          points?: number
+          position?: number
+          created_at?: string
+        }
+      }
+      exam_attempts: {
+        Row: {
+          id: string
+          user_id: string
+          exam_id: string
+          started_at: string
+          completed_at: string | null
+          time_spent_seconds: number
+          total_score: number
+          max_score: number
+          percentage: number
+          status: 'in_progress' | 'completed' | 'abandoned'
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          exam_id: string
+          started_at?: string
+          completed_at?: string | null
+          time_spent_seconds?: number
+          total_score?: number
+          max_score?: number
+          percentage?: number
+          status?: 'in_progress' | 'completed' | 'abandoned'
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          exam_id?: string
+          started_at?: string
+          completed_at?: string | null
+          time_spent_seconds?: number
+          total_score?: number
+          max_score?: number
+          percentage?: number
+          status?: 'in_progress' | 'completed' | 'abandoned'
+        }
+      }
+      exam_responses: {
+        Row: {
+          id: string
+          attempt_id: string
+          question_id: string
+          user_answer: string | null
+          is_correct: boolean | null
+          score: number
+          ai_feedback: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          attempt_id: string
+          question_id: string
+          user_answer?: string | null
+          is_correct?: boolean | null
+          score?: number
+          ai_feedback?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          attempt_id?: string
+          question_id?: string
+          user_answer?: string | null
+          is_correct?: boolean | null
+          score?: number
+          ai_feedback?: string | null
+          created_at?: string
+        }
+      }
       profiles: {
         Row: {
           id: string
@@ -309,6 +464,9 @@ export type Database = {
       note_status: 'draft' | 'published' | 'archived'
       flashcard_status: 'new' | 'learning' | 'review' | 'mastered'
       gemini_request_status: 'pending' | 'processing' | 'completed' | 'failed'
+      exam_difficulty: 'easy' | 'medium' | 'hard' | 'mixed'
+      question_type: 'multiple_choice' | 'identification' | 'essay'
+      attempt_status: 'in_progress' | 'completed' | 'abandoned'
     }
   }
 }
@@ -342,3 +500,21 @@ export type StudySessionUpdate = Database['public']['Tables']['study_sessions'][
 export type SessionResultUpdate = Database['public']['Tables']['session_results']['Update']
 export type GeminiRequestUpdate = Database['public']['Tables']['gemini_requests']['Update']
 export type UserPreferencesUpdate = Database['public']['Tables']['user_preferences']['Update']
+
+// Exam types
+export type ExamSet = Database['public']['Tables']['exam_sets']['Row']
+export type ExamQuestion = Database['public']['Tables']['exam_questions']['Row']
+export type ExamAttempt = Database['public']['Tables']['exam_attempts']['Row']
+export type ExamResponse = Database['public']['Tables']['exam_responses']['Row']
+
+// Exam insert types
+export type ExamSetInsert = Database['public']['Tables']['exam_sets']['Insert']
+export type ExamQuestionInsert = Database['public']['Tables']['exam_questions']['Insert']
+export type ExamAttemptInsert = Database['public']['Tables']['exam_attempts']['Insert']
+export type ExamResponseInsert = Database['public']['Tables']['exam_responses']['Insert']
+
+// Exam update types
+export type ExamSetUpdate = Database['public']['Tables']['exam_sets']['Update']
+export type ExamQuestionUpdate = Database['public']['Tables']['exam_questions']['Update']
+export type ExamAttemptUpdate = Database['public']['Tables']['exam_attempts']['Update']
+export type ExamResponseUpdate = Database['public']['Tables']['exam_responses']['Update']

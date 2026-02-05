@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { createGeminiService, GeminiFlashcard, GeminiResponse } from '@/lib/gemini';
 import Button from '@/component/ui/Button';
 import Card from '@/component/ui/Card';
-import { cn, formatMultipleChoiceQuestion } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 export interface ReforgeModalProps {
   isOpen: boolean;
@@ -277,13 +277,13 @@ export default function ReforgeModal({
               <textarea
                 value={settings.customPrompt}
                 onChange={(e) => handleSettingChange('customPrompt', e.target.value)}
-                placeholder="e.g., Make them multiple choice questions, focus on identification questions, create scenario-based questions, emphasize key terms and definitions..."
+                placeholder="e.g., Focus on key concepts, emphasize definitions, test practical applications, include examples..."
                 className="w-full px-3 py-2 border border-border rounded-md bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent resize-none"
                 rows={3}
                 disabled={isLoading}
               />
               <p className="text-xs text-foreground-muted">
-                Add specific instructions to customize how flashcards are generated. Examples: "Make them multiple choice", "Focus on identification questions", "Create scenario-based questions"
+                Add specific instructions to customize the focus of flashcards. Examples: "Focus on key concepts", "Emphasize definitions", "Test practical applications"
               </p>
             </div>
 
@@ -387,7 +387,7 @@ export default function ReforgeModal({
                       <div className="space-y-2">
                         <div>
                           <strong className="text-sm">Question:</strong>
-                          <p className="text-sm mt-1 whitespace-pre-line">{formatMultipleChoiceQuestion(flashcard.question)}</p>
+                          <p className="text-sm mt-1 whitespace-pre-line">{flashcard.question}</p>
                         </div>
                         <div>
                           <strong className="text-sm">Answer:</strong>

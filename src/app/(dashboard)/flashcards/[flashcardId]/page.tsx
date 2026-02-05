@@ -8,7 +8,6 @@ import Button from "@/component/ui/Button";
 import { useFlashcardActions, StudySetData } from "@/hook/useFlashcardActions";
 import { Flashcard } from "@/lib/database.types";
 import { Share01Icon, ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle01Icon, Cancel01Icon } from "hugeicons-react";
-import { formatMultipleChoiceQuestion } from "@/lib/utils";
 
 export default function FlashcardPage() {
     const params = useParams();
@@ -24,8 +23,9 @@ export default function FlashcardPage() {
     const [isSharing, setIsSharing] = useState(false);
     const [shareLinkCopied, setShareLinkCopied] = useState(false);
 
-    const {
+const {
         getStudySetData,
+        getFlashcardById,
         markFlashcardAsMastered,
         markFlashcardAsLearning,
         togglePublicStatus
@@ -61,14 +61,13 @@ export default function FlashcardPage() {
         };
     }, [studyData?.cards]);
 
-    // Load study set data once based on the flashcard ID
+// Load study set data once based on the flashcard ID
     const loadStudyData = useCallback(async () => {
         if (!flashcardId) return;
 
         setIsLoading(true);
         try {
             // First, get the flashcard to find its set_id
-            const { getFlashcardById } = useFlashcardActions();
             const flashcard = await getFlashcardById(flashcardId);
 
             if (!flashcard) {
@@ -90,7 +89,7 @@ export default function FlashcardPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [flashcardId, getStudySetData]);
+    }, [flashcardId, getFlashcardById, getStudySetData]);
 
     useEffect(() => {
         loadStudyData();
@@ -389,7 +388,7 @@ export default function FlashcardPage() {
                             </div>
                         </div>
                         <div className="text-lg text-foreground leading-relaxed whitespace-pre-line">
-                            {formatMultipleChoiceQuestion(currentCard.question)}
+                            {currentCard.question}
                         </div>
                     </Card.Header>
 

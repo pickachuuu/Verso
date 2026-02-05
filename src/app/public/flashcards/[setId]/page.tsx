@@ -8,7 +8,6 @@ import Button from '@/component/ui/Button';
 import Header from '@/component/ui/Header';
 import { ArrowLeft01Icon, Share01Icon, EyeIcon } from 'hugeicons-react';
 import Link from 'next/link';
-import { formatMultipleChoiceQuestion } from '@/lib/utils';
 
 const supabase = createClient();
 
@@ -210,7 +209,7 @@ export default function PublicFlashcardSetPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground-muted">Question</label>
                 <div className="p-4 bg-accent-muted/10 rounded-lg border border-border">
-                  <p className="text-foreground whitespace-pre-line">{formatMultipleChoiceQuestion(currentCard.question)}</p>
+                  <p className="text-foreground whitespace-pre-line">{currentCard.question}</p>
                 </div>
               </div>
 
