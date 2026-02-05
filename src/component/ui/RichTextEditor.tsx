@@ -6,8 +6,8 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
-import Image from '@tiptap/extension-image';
 import { Color } from '@tiptap/extension-color';
+import { ResizableImage } from './ResizableImage';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { useEffect, useState, useImperativeHandle, forwardRef, useRef } from 'react';
 import {
@@ -225,7 +225,7 @@ export function VerticalEditorToolbar({ editor, theme }: VerticalEditorToolbarPr
       const reader = new FileReader();
       reader.onload = (e) => {
         const base64 = e.target?.result as string;
-        editor.chain().focus().setImage({ src: base64 }).run();
+        editor.chain().focus().setResizableImage({ src: base64 }).run();
       };
       reader.readAsDataURL(file);
     }
@@ -527,7 +527,7 @@ export function VerticalEditorToolbar({ editor, theme }: VerticalEditorToolbarPr
         </VerticalToolbarButton>
         <VerticalToolbarButton
           onClick={handleImageClick}
-          isActive={editor.isActive('image')}
+          isActive={editor.isActive('resizableImage')}
           title="Insert Image"
           theme={theme}
         >
@@ -874,13 +874,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
-      Image.configure({
-        inline: false,
-        allowBase64: true,
-        HTMLAttributes: {
-          class: 'editor-image',
-        },
-      }),
+      ResizableImage,
     ],
     content,
     immediatelyRender: false,
@@ -908,9 +902,17 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
   }, [editor, onEditorReady]);
 
   // Update content when prop changes (e.g., loading a note)
+  // Use queueMicrotask to defer setContent outside of React's lifecycle
+  // This prevents the "flushSync was called from inside a lifecycle method" error
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content, { emitUpdate: false });
+      // Defer the setContent call to avoid flushSync conflicts with React
+      queueMicrotask(() => {
+        // Double-check editor still exists and content still differs
+        if (editor && !editor.isDestroyed && content !== editor.getHTML()) {
+          editor.commands.setContent(content, { emitUpdate: false });
+        }
+      });
     }
   }, [content, editor]);
 

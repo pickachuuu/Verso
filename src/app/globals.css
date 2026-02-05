@@ -3156,8 +3156,202 @@ body {
   height: 0;
 }
 
-/* Editor images */
-.notebook-editor-wrapper .ProseMirror img,
+/* ========================================
+   Resizable Image Component Styles
+   ======================================== */
+
+/* Wrapper maintains line grid alignment */
+.resizable-image-wrapper {
+  display: block;
+  width: 100%;
+  user-select: none;
+}
+
+/* Container with resize handles */
+.resizable-image-container {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  border-radius: 8px;
+  overflow: visible;
+  transition: box-shadow 0.2s ease;
+}
+
+.resizable-image-container img {
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transition: box-shadow 0.2s ease;
+}
+
+/* Selected state */
+.resizable-image-container.selected {
+  outline: 3px solid #6366f1;
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+.resizable-image-container.selected img {
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+}
+
+/* Resizing state */
+.resizable-image-container.resizing {
+  outline: 2px dashed #6366f1;
+  outline-offset: 3px;
+}
+
+/* Resize handles - hidden by default */
+.resize-handle {
+  position: absolute;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+.resizable-image-container:hover .resize-handle,
+.resizable-image-container.selected .resize-handle,
+.resizable-image-container.resizing .resize-handle {
+  opacity: 1;
+}
+
+/* Left and right handles */
+.resize-handle-left,
+.resize-handle-right {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 60px;
+  cursor: ew-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resize-handle-left {
+  left: -10px;
+}
+
+.resize-handle-right {
+  right: -10px;
+}
+
+.handle-bar {
+  width: 4px;
+  height: 40px;
+  background: #6366f1;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.resize-handle:hover .handle-bar {
+  background: #4f46e5;
+  transform: scaleY(1.1);
+}
+
+.resize-handle:active .handle-bar {
+  background: #4338ca;
+}
+
+/* Corner resize handle */
+.resize-handle-corner {
+  right: -6px;
+  bottom: -6px;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #6366f1;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.resize-handle-corner:hover {
+  background: #4f46e5;
+  transform: scale(1.1);
+}
+
+.resize-handle-corner:active {
+  background: #4338ca;
+}
+
+.corner-icon {
+  width: 10px;
+  height: 10px;
+  color: white;
+}
+
+/* Resize guide showing line count */
+.resize-guide {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #6366f1;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  z-index: 20;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.resize-guide::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #6366f1;
+}
+
+/* Dark mode adjustments */
+.dark .resizable-image-container img {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.dark .resizable-image-container.selected img {
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+}
+
+.dark .handle-bar {
+  background: #818cf8;
+  box-shadow: 0 2px 8px rgba(129, 140, 248, 0.5);
+}
+
+.dark .resize-handle:hover .handle-bar {
+  background: #a5b4fc;
+}
+
+.dark .resize-handle-corner {
+  background: #818cf8;
+  box-shadow: 0 2px 8px rgba(129, 140, 248, 0.5);
+}
+
+.dark .resize-handle-corner:hover {
+  background: #a5b4fc;
+}
+
+.dark .resize-guide {
+  background: #818cf8;
+  box-shadow: 0 2px 8px rgba(129, 140, 248, 0.4);
+}
+
+.dark .resize-guide::after {
+  border-top-color: #818cf8;
+}
+
+/* Legacy image styles (fallback) */
+.notebook-editor-wrapper .ProseMirror img:not([data-node-view-wrapper] img),
 .notebook-editor-wrapper .ProseMirror .editor-image {
   max-width: 100%;
   height: auto;
@@ -3167,13 +3361,7 @@ body {
   display: block;
 }
 
-.notebook-editor-wrapper .ProseMirror img.ProseMirror-selectednode {
-  outline: 3px solid #6366f1;
-  outline-offset: 2px;
-}
-
-/* Also add styles for the regular tiptap editor */
-.tiptap-editor img,
+.tiptap-editor img:not([data-node-view-wrapper] img),
 .tiptap-editor .editor-image {
   max-width: 100%;
   height: auto;
@@ -3181,11 +3369,6 @@ body {
   margin: 16px 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: block;
-}
-
-.tiptap-editor img.ProseMirror-selectednode {
-  outline: 3px solid #6366f1;
-  outline-offset: 2px;
 }
 
 .notebook-editor-wrapper .ProseMirror .is-editor-empty:first-child::before {
