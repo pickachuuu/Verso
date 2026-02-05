@@ -36,7 +36,7 @@ export default function FlashcardPage() {
     const sessionIdRef = useRef<string | null>(null);
     const cardsStudiedRef = useRef(0);
     const correctAnswersRef = useRef(0);
-    
+
     // Track cards reviewed in this session (so we can skip them)
     const [reviewedCardIds, setReviewedCardIds] = useState<Set<string>>(new Set());
 
@@ -86,8 +86,8 @@ export default function FlashcardPage() {
     const isCurrentCardReviewed = currentCard ? reviewedCardIds.has(currentCard.id) : false;
 
     // All cards have been reviewed in this session
-    const allCardsReviewedThisSession = studyData?.cards 
-        ? studyData.cards.length > 0 && unreviewedCards.length === 0 
+    const allCardsReviewedThisSession = studyData?.cards
+        ? studyData.cards.length > 0 && unreviewedCards.length === 0
         : false;
 
     // Find next unreviewed card index
@@ -251,7 +251,7 @@ export default function FlashcardPage() {
                     // Find next unreviewed card (need fresh lookup since state updated)
                     const newReviewedIds = new Set([...reviewedCardIds, currentCard.id]);
                     let nextIdx: number | null = null;
-                    
+
                     if (studyData?.cards) {
                         // Search forward first
                         for (let i = currentIndex + 1; i < studyData.cards.length; i++) {
@@ -270,7 +270,7 @@ export default function FlashcardPage() {
                             }
                         }
                     }
-                    
+
                     if (nextIdx !== null && studyData?.cards) {
                         setShowAnswer(false);
                         setCurrentIndex(nextIdx);
@@ -455,7 +455,7 @@ export default function FlashcardPage() {
                         </button>
                         <Header title={studyData.set.title || "Flashcards"} />
                     </div>
-                    
+
                     <Card className="text-center py-12">
                         <Card.Header>
                             <div className="text-6xl mb-4">🎉</div>
@@ -465,7 +465,7 @@ export default function FlashcardPage() {
                             <p className="text-foreground-muted mb-6">
                                 You've reviewed all {studyData.cards.length} cards in this set.
                             </p>
-                            
+
                             <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mb-8">
                                 <div className="p-4 bg-green-50 rounded-lg">
                                     <div className="text-2xl font-bold text-green-600">{masteredCount}</div>
@@ -661,11 +661,9 @@ export default function FlashcardPage() {
                                         >
                                             <SparklesIcon className="w-5 h-5 text-blue-600 mb-1" />
                                             <span className="text-sm font-medium text-blue-700">Easy</span>
-                                            {reviewPreviews && (
-                                                <span className="text-xs text-blue-500 mt-1">
-                                                    {reviewPreviews.easy}
-                                                </span>
-                                            )}
+                                            <span className="text-xs text-blue-500 mt-1">
+                                                Mastered
+                                            </span>
                                         </button>
                                     </div>
                                     <p className="text-xs text-foreground-muted text-center">
@@ -732,29 +730,35 @@ export default function FlashcardPage() {
                     </Button>
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-foreground-muted">
-                            Card {currentIndex + 1} of {studyData.cards.length}
+                            {reviewedCardIds.size}/{studyData.cards.length} reviewed
                         </span>
                         {/* Card position dots for small sets */}
                         {studyData.cards.length <= 10 && (
                             <div className="hidden sm:flex gap-1 ml-3">
-                                {studyData.cards.map((card, idx) => (
-                                    <button
-                                        key={card.id}
-                                        onClick={() => {
-                                            setCurrentIndex(idx);
-                                            setShowAnswer(false);
-                                            window.history.replaceState(null, '', `/flashcards/${card.id}`);
-                                        }}
-                                        className={`w-2 h-2 rounded-full transition-all ${
-                                            idx === currentIndex
-                                                ? 'bg-accent w-4'
-                                                : card.status === 'mastered'
-                                                    ? 'bg-green-400'
-                                                    : 'bg-gray-300 hover:bg-gray-400'
-                                        }`}
-                                        title={`Card ${idx + 1}${card.status === 'mastered' ? ' (mastered)' : ''}`}
-                                    />
-                                ))}
+                                {studyData.cards.map((card, idx) => {
+                                    const isReviewed = reviewedCardIds.has(card.id);
+                                    const isCurrent = idx === currentIndex;
+                                    return (
+                                        <button
+                                            key={card.id}
+                                            onClick={() => {
+                                                setCurrentIndex(idx);
+                                                setShowAnswer(false);
+                                                window.history.replaceState(null, '', `/flashcards/${card.id}`);
+                                            }}
+                                            className={`w-2 h-2 rounded-full transition-all ${
+                                                isCurrent
+                                                    ? 'bg-accent w-4'
+                                                    : card.status === 'mastered'
+                                                        ? 'bg-green-400'
+                                                        : isReviewed
+                                                            ? 'bg-blue-400 opacity-50'
+                                                            : 'bg-gray-300 hover:bg-gray-400'
+                                            }`}
+                                            title={`Card ${idx + 1}${card.status === 'mastered' ? ' (mastered)' : isReviewed ? ' (reviewed)' : ''}`}
+                                        />
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
