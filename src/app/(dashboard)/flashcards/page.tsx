@@ -19,6 +19,7 @@ import {
   CheckmarkCircle01Icon,
   Loading01Icon
 } from 'hugeicons-react';
+import HeroActionButton from '@/component/ui/HeroActionButton';
 import { useFlashcardActions } from '@/hook/useFlashcardActions';
 import { FlashcardSet } from '@/lib/database.types';
 import ReforgeModal from '@/component/features/modal/ReforgeModal';
@@ -292,13 +293,13 @@ export default function FlashcardDashboardPage() {
                   </div>
                 </div>
 
-                <button
+                <HeroActionButton
+                  theme="accent"
+                  icon={<SparklesIcon className="w-5 h-5" />}
                   onClick={() => setIsForgeModalOpen(true)}
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-accent to-purple-500 text-white font-semibold hover:from-accent/90 hover:to-purple-500/90 transition-all shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30 hover:-translate-y-0.5"
                 >
-                  <SparklesIcon className="w-5 h-5" />
                   Forge Flashcards
-                </button>
+                </HeroActionButton>
               </div>
             </div>
           </div>
@@ -615,13 +616,13 @@ function EmptyState({
             <p className="text-foreground-muted mb-8 max-w-md mx-auto">
               Create flashcards from your notes to begin studying with AI-generated content
             </p>
-            <button
+            <HeroActionButton
+              theme="accent"
+              icon={<SparklesIcon className="w-5 h-5" />}
               onClick={onCreateNew}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-accent to-purple-500 text-white font-semibold hover:from-accent/90 hover:to-purple-500/90 transition-all shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30"
             >
-              <SparklesIcon className="w-5 h-5" />
               Forge Flashcards
-            </button>
+            </HeroActionButton>
           </>
         ) : (
           <>

@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { File01Icon } from 'hugeicons-react';
-import Button from '../ui/Button';
+import { Add01Icon } from 'hugeicons-react';
+import HeroActionButton from '../ui/HeroActionButton';
 
 export default function CreateNoteButton() {
   const router = useRouter();
@@ -12,9 +12,12 @@ export default function CreateNoteButton() {
   };
 
   return (
-    <Button onClick={handleCreate}>
-      <File01Icon className="w-4 h-4 mr-2" />
-      New Note
-    </Button>
+    <HeroActionButton
+      theme="primary"
+      icon={<Add01Icon className="w-5 h-5" />}
+      onClick={handleCreate}
+    >
+      New Notebook
+    </HeroActionButton>
   );
 }

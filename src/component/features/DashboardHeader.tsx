@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns';
 import { ClayCard, ClayBadge } from '@/component/ui/Clay';
-import { Calendar03Icon, SparklesIcon, Rocket01Icon } from 'hugeicons-react';
+import { Calendar03Icon, SparklesIcon } from 'hugeicons-react';
 
 export default function DashboardHeader({ user }: { user?: { full_name?: string; email?: string } | null }) {
   const currentDate = new Date();
@@ -48,25 +48,17 @@ export default function DashboardHeader({ user }: { user?: { full_name?: string;
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Date card */}
-          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-sm">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary-muted to-primary-muted/60">
-              <Calendar03Icon className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-xs text-foreground-muted font-medium uppercase tracking-wide">Today</p>
-              <p className="text-sm font-bold text-foreground">
-                {format(currentDate, 'EEEE, MMM d')}
-              </p>
-            </div>
+        {/* Date card */}
+        <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-sm">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary-muted to-primary-muted/60">
+            <Calendar03Icon className="w-5 h-5 text-primary" />
           </div>
-
-          {/* Quick action button */}
-          <button className="hidden sm:flex items-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-primary to-primary-light text-white font-semibold text-sm shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all">
-            <Rocket01Icon className="w-4 h-4" />
-            Start Learning
-          </button>
+          <div>
+            <p className="text-xs text-foreground-muted font-medium uppercase tracking-wide">Today</p>
+            <p className="text-sm font-bold text-foreground">
+              {format(currentDate, 'EEEE, MMM d')}
+            </p>
+          </div>
         </div>
       </div>
     </ClayCard>
