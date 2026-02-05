@@ -4,11 +4,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/component/ui/Header';
 import { ClayCard, ClayBadge } from '@/component/ui/Clay';
-import { BookOpen01Icon, Target01Icon, RefreshIcon, File01Icon, Share01Icon, Delete01Icon, ArrowRight01Icon, Clock01Icon } from 'hugeicons-react';
+import { BookOpen01Icon, Target01Icon, RefreshIcon, File01Icon, Share01Icon, Delete01Icon, ArrowRight01Icon, Clock01Icon, SparklesIcon } from 'hugeicons-react';
 import { useFlashcardActions } from '@/hook/useFlashcardActions';
 import { FlashcardSet } from '@/lib/database.types';
 import ReforgeModal from '@/component/features/modal/ReforgeModal';
 import ConfirmDeleteModal from '@/component/features/modal/ConfirmDeleteModal';
+import ForgeFlashcardsModal from '@/component/features/modal/ForgeFlashcardsModal';
 import { GeminiResponse } from '@/lib/gemini';
 import { createClient } from '@/utils/supabase/client';
 import { redirect } from 'next/navigation';
@@ -22,12 +23,13 @@ export default function FlashcardDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isReforgeModalOpen, setIsReforgeModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isForgeModalOpen, setIsForgeModalOpen] = useState(false);
   const [selectedSet, setSelectedSet] = useState<FlashcardSet | null>(null);
-  const [existingFlashcards, setExistingFlashcards] = useState<any[]>([]);
+  const [existingFlashcards, setExistingFlashcards] = useState<{ question: string; answer: string; difficulty: 'easy' | 'medium' | 'hard' }[]>([]);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | undefined>(undefined);
   const [shareLinkCopied, setShareLinkCopied] = useState<string | null>(null);
-  const { getUserFlashcardSets, getSetProgress, getFirstCardInSet, saveGeneratedFlashcards, deleteFlashcardSet, reforgeFlashcards, togglePublicStatus } = useFlashcardActions();
+  const { getUserFlashcardSets, getSetProgress, getFirstCardInSet, saveGeneratedFlashcards, deleteFlashcardSet, reforgeFlashcards, togglePublicStatus, getFlashcardsBySet } = useFlashcardActions();
 
   const loadFlashcardSets = useCallback(async () => {
     setIsLoading(true);
@@ -60,17 +62,14 @@ export default function FlashcardDashboardPage() {
     setSelectedSet(set);
 
     try {
-      const { data: flashcards, error } = await supabase
-        .from('flashcards')
-        .select('*')
-        .eq('set_id', set.id);
-
-      if (error) {
-        console.error('Error fetching existing flashcards:', error);
-        setExistingFlashcards([]);
-      } else {
-        setExistingFlashcards(flashcards || []);
-      }
+      // Use the hook method for consistent ordering by position
+      const flashcards = await getFlashcardsBySet(set.id);
+      // Convert to GeminiFlashcard format expected by ReforgeModal
+      setExistingFlashcards(flashcards.map(f => ({
+        question: f.question,
+        answer: f.answer,
+        difficulty: (f.difficulty_level === 1 ? 'easy' : f.difficulty_level === 3 ? 'hard' : 'medium') as 'easy' | 'medium' | 'hard'
+      })));
     } catch (error) {
       console.error('Error fetching existing flashcards:', error);
       setExistingFlashcards([]);
@@ -128,6 +127,32 @@ export default function FlashcardDashboardPage() {
       console.error('Error deleting flashcard set:', error);
       setSaveSuccess('Error deleting flashcard set. Please try again.');
       setTimeout(() => setSaveSuccess(undefined), 3000);
+    }
+  };
+
+  const handleForgeFlashcards = async (
+    geminiResponse: GeminiResponse,
+    noteIds: string[],
+    setTitle: string
+  ) => {
+    setSaving(true);
+    try {
+      await saveGeneratedFlashcards({
+        noteId: noteIds.length === 1 ? noteIds[0] : undefined,
+        noteTitle: setTitle,
+        difficulty: 'medium',
+        geminiResponse,
+      });
+      setSaveSuccess(`Successfully created ${geminiResponse.flashcards.length} flashcards!`);
+      await loadFlashcardSets();
+      setTimeout(() => setSaveSuccess(undefined), 3000);
+    } catch (error) {
+      console.error('Error saving flashcards:', error);
+      setSaveSuccess('Error saving flashcards. Please try again.');
+      setTimeout(() => setSaveSuccess(undefined), 3000);
+    } finally {
+      setSaving(false);
+      setIsForgeModalOpen(false);
     }
   };
 
@@ -211,12 +236,13 @@ export default function FlashcardDashboardPage() {
           description="Study with interactive flashcards"
           icon={<BookOpen01Icon className="w-6 h-6 text-secondary" />}
         >
-          <Link href="/library">
-            <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent text-white font-medium text-sm hover:bg-accent/90 transition-colors">
-              <File01Icon className="w-4 h-4" />
-              Forge from notes
-            </button>
-          </Link>
+          <button
+            onClick={() => setIsForgeModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-accent to-purple-500 text-white font-medium text-sm hover:from-accent/90 hover:to-purple-500/90 transition-all shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30 hover:-translate-y-0.5"
+          >
+            <SparklesIcon className="w-4 h-4" />
+            Forge Flashcards
+          </button>
         </Header>
 
         {/* Success/Error Message */}
@@ -241,19 +267,20 @@ export default function FlashcardDashboardPage() {
         {flashcardSets.length === 0 ? (
           <ClayCard variant="elevated" padding="lg" className="rounded-2xl">
             <div className="text-center py-12">
-              <div className="w-20 h-20 rounded-2xl bg-secondary-muted flex items-center justify-center mx-auto mb-6">
-                <BookOpen01Icon className="w-10 h-10 text-secondary" />
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent/20 to-purple-500/20 flex items-center justify-center mx-auto mb-6">
+                <SparklesIcon className="w-10 h-10 text-accent" />
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">No flashcard sets yet</h3>
               <p className="text-foreground-muted mb-6 max-w-sm mx-auto">
                 Create flashcards from your notes to start studying
               </p>
-              <Link href="/library">
-                <button className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent text-white font-medium hover:bg-accent/90 transition-colors">
-                  <File01Icon className="w-5 h-5" />
-                  Go to Library
-                </button>
-              </Link>
+              <button
+                onClick={() => setIsForgeModalOpen(true)}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-accent to-purple-500 text-white font-medium hover:from-accent/90 hover:to-purple-500/90 transition-all shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30"
+              >
+                <SparklesIcon className="w-5 h-5" />
+                Forge Flashcards
+              </button>
             </div>
           </ClayCard>
         ) : (
@@ -388,6 +415,13 @@ export default function FlashcardDashboardPage() {
         description="Are you sure you want to delete this flashcard set? This action cannot be undone."
         itemName={selectedSet?.title || 'Untitled Set'}
         itemType="flashcard set"
+      />
+
+      <ForgeFlashcardsModal
+        isOpen={isForgeModalOpen}
+        onClose={() => setIsForgeModalOpen(false)}
+        onFlashcardsGenerated={handleForgeFlashcards}
+        saving={saving}
       />
     </>
   );

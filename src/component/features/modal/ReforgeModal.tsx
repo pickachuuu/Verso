@@ -105,22 +105,22 @@ export default function ReforgeModal({
     setSuccess(null);
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      const apiKey = process.env.NEXT_PUBLIC_PERPLEXITY_API_KEY;
       if (!apiKey) {
-        throw new Error('Gemini API key not configured. Please set NEXT_PUBLIC_GEMINI_API_KEY in your environment variables.');
+        throw new Error('Perplexity API key not configured. Please set NEXT_PUBLIC_PERPLEXITY_API_KEY in your environment variables.');
       }
 
       const geminiService = createGeminiService(apiKey);
-      
+
       const apiDifficulty = settings.difficulty === 'all' ? 'medium' : settings.difficulty;
 
       // Create context about existing flashcards to avoid duplicates
       const existingQuestions = existingFlashcards.map(fc => fc.question).join('\n');
-      let context = settings.action === 'add_more' 
+      let context = settings.action === 'add_more'
         ? `Existing flashcards:\n${existingQuestions}\n\nPlease generate ${settings.minCount} new flashcards that are different from the existing ones. Focus on topics in the note that haven't been covered yet. Analyze the note content thoroughly to identify important concepts, facts, or relationships that are missing from the existing flashcards.`
         : undefined;
 
-      // Add custom prompt if provided - this will be handled specially by the Gemini service
+      // Add custom prompt if provided
       if (settings.customPrompt.trim()) {
         const customInstruction = `\n\nAdditional Instructions: ${settings.customPrompt}`;
         context = context ? context + customInstruction : customInstruction;
@@ -163,7 +163,7 @@ export default function ReforgeModal({
       total_tokens: 0,
       cost_cents: 0
     };
-    
+
     onFlashcardsGenerated?.(finalResponse, settings.action);
     setShowPreview(false);
     onClose();
@@ -179,19 +179,19 @@ export default function ReforgeModal({
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
           <Card.Header>
             <Card.Title>Reforge Flashcards</Card.Title>
             <Card.Description>
-              {settings.action === 'regenerate' 
-                ? 'Regenerate all flashcards from your note' 
+              {settings.action === 'regenerate'
+                ? 'Regenerate all flashcards from your note'
                 : `Add ${settings.minCount} more flashcards to your existing ${existingFlashcards.length} cards`
               }
             </Card.Description>
@@ -352,7 +352,7 @@ export default function ReforgeModal({
       {/* Preview Modal */}
       {showPreview && (
         <>
-          <div 
+          <div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
             onClick={handleCancelPreview}
           />
@@ -420,4 +420,4 @@ export default function ReforgeModal({
       )}
     </>
   );
-} 
+}

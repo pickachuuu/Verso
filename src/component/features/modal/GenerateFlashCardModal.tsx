@@ -101,13 +101,13 @@ export default function GenerateFlashCardModal({
     setSuccess(null);
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      const apiKey = process.env.NEXT_PUBLIC_PERPLEXITY_API_KEY;
       if (!apiKey) {
-        throw new Error('Gemini API key not configured. Please set NEXT_PUBLIC_GEMINI_API_KEY in your environment variables.');
+        throw new Error('Perplexity API key not configured. Please set NEXT_PUBLIC_PERPLEXITY_API_KEY in your environment variables.');
       }
 
       const geminiService = createGeminiService(apiKey);
-      
+
       const apiDifficulty = settings.difficulty === 'all' ? 'medium' : settings.difficulty;
 
       // Add custom prompt if provided
@@ -148,7 +148,7 @@ export default function GenerateFlashCardModal({
       total_tokens: 0, // We don't have this info in preview mode
       cost_cents: 0
     };
-    
+
     onFlashcardsGenerated?.(geminiResponse);
     setShowPreview(false);
     onClose();
@@ -165,11 +165,11 @@ export default function GenerateFlashCardModal({
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
@@ -302,7 +302,7 @@ export default function GenerateFlashCardModal({
       {/* Preview Modal */}
       {showPreview && (
         <>
-          <div 
+          <div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
             onClick={handleCancelPreview}
           />

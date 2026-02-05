@@ -1,4 +1,4 @@
-// Gemini API service for converting notes to flashcards
+// AI API service for converting notes to flashcards (using Perplexity API)
 export interface GeminiFlashcard {
   question: string;
   answer: string;
@@ -13,7 +13,7 @@ export interface GeminiResponse {
 
 export class GeminiService {
   private apiKey: string;
-  private baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+  private baseUrl = 'https://api.perplexity.ai/chat/completions';
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
@@ -30,49 +30,53 @@ export class GeminiService {
     }
 
     const prompt = this.buildFlashcardPrompt(noteContent, count, difficulty, context);
-    
+
     try {
-      const response = await fetch(`${this.baseUrl}?key=${this.apiKey}`, {
+      const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-          }
+          model: 'sonar',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert educator creating flashcards from study notes. Always respond with valid JSON only, no markdown formatting.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 4096,
         })
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Gemini API error response:', errorText);
-        throw new Error(`Gemini API error: ${response.status} ${response.statusText} - ${errorText}`);
+        console.error('Perplexity API error response:', errorText);
+        throw new Error(`Perplexity API error: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const data = await response.json();
-      
-      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-        console.error('Unexpected Gemini API response structure:', data);
-        throw new Error('Unexpected response structure from Gemini API');
+
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        console.error('Unexpected Perplexity API response structure:', data);
+        throw new Error('Unexpected response structure from Perplexity API');
       }
-      
-      const generatedText = data.candidates[0].content.parts[0].text;
-      
+
+      const generatedText = data.choices[0].message.content;
+
       // Parse the response to extract flashcards
       const flashcards = this.parseFlashcardResponse(generatedText);
-      
-      // Calculate approximate token usage and cost
-      const totalTokens = this.estimateTokenUsage(prompt + generatedText);
-      const costCents = this.calculateCost(totalTokens);
+
+      // Get token usage from response or estimate
+      const totalTokens = data.usage?.total_tokens || this.estimateTokenUsage(prompt + generatedText);
+      const costCents = data.usage?.cost?.total_cost
+        ? Math.round(data.usage.cost.total_cost * 100)
+        : this.calculateCost(totalTokens);
 
       return {
         flashcards,
@@ -80,7 +84,7 @@ export class GeminiService {
         cost_cents: costCents
       };
     } catch (error) {
-      console.error('Gemini API error:', error);
+      console.error('Perplexity API error:', error);
       throw error;
     }
   }
@@ -91,7 +95,7 @@ export class GeminiService {
     difficulty: 'easy' | 'medium' | 'hard',
     context?: string
   ): string {
-    let prompt = `You are an expert educator creating flashcards from study notes. 
+    let prompt = `You are an expert educator creating flashcards from study notes.
 
 Please create ${count} high-quality flashcards from the following note content. The flashcards should be at a ${difficulty} difficulty level.
 
@@ -105,7 +109,7 @@ Keep all answers concise regardless of difficulty level to minimize token usage.
     // Extract custom instructions from context if present
     let customInstructions = '';
     let existingFlashcardsContext = '';
-    
+
     if (context) {
       // Check if context contains custom instructions
       if (context.includes('Additional Instructions:')) {
@@ -148,7 +152,7 @@ SPECIAL INSTRUCTIONS FOR MULTIPLE CHOICE:
 - Then each option on its own line:
   A) [first option] (line break)
   B) [second option] (line break)
-  C) [third option] (line break) 
+  C) [third option] (line break)
   D) [fourth option]
 - The answer should only be the correct option letter (A, B, C, or D)
 - Example format:
@@ -177,7 +181,7 @@ Do not include any additional text outside the JSON array.`;
       }
 
       const flashcards = JSON.parse(jsonMatch[0]);
-      
+
       // Validate the structure
       if (!Array.isArray(flashcards)) {
         throw new Error('Response is not an array');
@@ -187,19 +191,19 @@ Do not include any additional text outside the JSON array.`;
         if (!card.question || !card.answer) {
           throw new Error(`Invalid flashcard at index ${index}`);
         }
-        
+
         // Post-process multiple choice questions to ensure proper formatting
         let processedQuestion = card.question.trim();
         let processedAnswer = card.answer.trim();
-        
+
         // Check if this looks like a multiple choice question that needs formatting
         // Simple check: contains A), B), C), D) and doesn't already have line breaks
-        if (processedQuestion.includes('A)') && processedQuestion.includes('B)') && 
+        if (processedQuestion.includes('A)') && processedQuestion.includes('B)') &&
             processedQuestion.includes('C)') && processedQuestion.includes('D)') &&
             !processedQuestion.includes('\nA)') && !processedQuestion.includes('\nB)')) {
-          
+
           console.log('Processing multiple choice question:', processedQuestion);
-          
+
           // Format the question with line breaks
           processedQuestion = processedQuestion
             .replace(/A\)/g, '\nA)')
@@ -207,15 +211,15 @@ Do not include any additional text outside the JSON array.`;
             .replace(/C\)/g, '\nC)')
             .replace(/D\)/g, '\nD)')
             .trim();
-          
+
           // Remove the first line break if it's at the beginning
           if (processedQuestion.startsWith('\n')) {
             processedQuestion = processedQuestion.substring(1);
           }
-          
+
           console.log('After processing:', processedQuestion);
         }
-        
+
         return {
           question: processedQuestion,
           answer: processedAnswer,
@@ -223,8 +227,8 @@ Do not include any additional text outside the JSON array.`;
         };
       });
     } catch (error) {
-      console.error('Error parsing Gemini response:', error);
-      throw new Error('Failed to parse flashcard response from Gemini API');
+      console.error('Error parsing Perplexity response:', error);
+      throw new Error('Failed to parse flashcard response from Perplexity API');
     }
   }
 
@@ -234,30 +238,30 @@ Do not include any additional text outside the JSON array.`;
   }
 
   private calculateCost(tokens: number): number {
-    // Gemini Pro pricing: $0.00025 per 1K input tokens, $0.0005 per 1K output tokens
+    // Perplexity Sonar pricing (approximate): $1 per 1M input tokens, $1 per 1M output tokens
     // This is a simplified calculation
-    const inputCost = (tokens * 0.00025) / 1000;
-    const outputCost = (tokens * 0.0005) / 1000;
-    return Math.round((inputCost + outputCost) * 100); // Convert to cents
+    const costPerToken = 0.000001; // $1 per 1M tokens
+    return Math.round(tokens * costPerToken * 2 * 100); // Convert to cents
   }
 
   // Helper method to validate API key
   async validateApiKey(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}?key=${this.apiKey}`, {
+      const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: 'Hello, this is a test message.'
-            }]
-          }],
-          generationConfig: {
-            maxOutputTokens: 10,
-          }
+          model: 'sonar',
+          messages: [
+            {
+              role: 'user',
+              content: 'Hello'
+            }
+          ],
+          max_tokens: 10,
         })
       });
 
@@ -271,4 +275,4 @@ Do not include any additional text outside the JSON array.`;
 // Utility function to create Gemini service instance
 export function createGeminiService(apiKey: string): GeminiService {
   return new GeminiService(apiKey);
-} 
+}

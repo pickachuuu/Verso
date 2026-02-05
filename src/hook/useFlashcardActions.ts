@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { GeminiFlashcard, GeminiResponse } from '@/lib/gemini';
-import { FlashcardSetInsert, FlashcardInsert, GeminiRequestInsert } from '@/lib/database.types';
+import { FlashcardSetInsert, FlashcardInsert, GeminiRequestInsert, Flashcard, FlashcardSet } from '@/lib/database.types';
 
 const supabase = createClient();
 
@@ -14,28 +14,45 @@ export interface SaveFlashcardsOptions {
   geminiResponse: GeminiResponse;
 }
 
+export interface FlashcardWithNavigation extends Flashcard {
+  hasNext: boolean;
+  hasPrevious: boolean;
+  currentIndex: number;
+  totalCards: number;
+}
+
+export interface StudySetData {
+  set: FlashcardSet;
+  cards: Flashcard[];
+  progress: {
+    total: number;
+    mastered: number;
+    percentage: number;
+  };
+}
+
 export function useFlashcardActions() {
   // Convert Gemini difficulty to numeric difficulty level
-  const convertDifficultyToLevel = (difficulty: 'easy' | 'medium' | 'hard'): number => {
+  const convertDifficultyToLevel = useCallback((difficulty: 'easy' | 'medium' | 'hard'): number => {
     switch (difficulty) {
       case 'easy': return 1;
       case 'medium': return 2;
       case 'hard': return 3;
       default: return 2;
     }
-  };
+  }, []);
 
   return useMemo(() => {
     // Create a new flashcard set
     const createFlashcardSet = async (noteId: string | null, noteTitle: string): Promise<string> => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session?.user?.id) {
         throw new Error('User not authenticated');
       }
 
       const setTitle = noteTitle ? `Flashcards from: ${noteTitle}` : 'Generated Flashcards';
-      
+
       const flashcardSet: FlashcardSetInsert = {
         user_id: session.user.id,
         note_id: noteId,
@@ -59,15 +76,21 @@ export function useFlashcardActions() {
       return data.id;
     };
 
-    // Save individual flashcards
-    const saveFlashcards = async (setId: string, noteId: string | null, flashcards: GeminiFlashcard[]): Promise<void> => {
-      const flashcardInserts: FlashcardInsert[] = flashcards.map(flashcard => ({
+    // Save individual flashcards with proper positioning
+    const saveFlashcards = async (
+      setId: string,
+      noteId: string | null,
+      flashcards: GeminiFlashcard[],
+      startPosition: number = 0
+    ): Promise<void> => {
+      const flashcardInserts: FlashcardInsert[] = flashcards.map((flashcard, index) => ({
         set_id: setId,
         note_id: noteId,
         question: flashcard.question,
         answer: flashcard.answer,
         status: 'new',
         difficulty_level: convertDifficultyToLevel(flashcard.difficulty),
+        position: startPosition + index,
         review_count: 0,
         correct_count: 0
       }));
@@ -84,14 +107,14 @@ export function useFlashcardActions() {
 
     // Log Gemini API request
     const logGeminiRequest = async (
-      noteId: string | null, 
-      prompt: string, 
+      noteId: string | null,
+      prompt: string,
       response: GeminiResponse,
       status: 'completed' | 'failed' = 'completed',
       errorMessage?: string
     ): Promise<void> => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session?.user?.id) {
         throw new Error('User not authenticated');
       }
@@ -122,24 +145,24 @@ export function useFlashcardActions() {
     // Main function to save generated flashcards
     const saveGeneratedFlashcards = async (options: SaveFlashcardsOptions): Promise<string> => {
       const { noteId, noteTitle, difficulty, geminiResponse } = options;
-      
+
       try {
         // Create flashcard set
         const setId = await createFlashcardSet(noteId || null, noteTitle || 'Untitled Note');
-        
-        // Save individual flashcards
-        await saveFlashcards(setId, noteId || null, geminiResponse.flashcards);
-        
+
+        // Save individual flashcards (positions start at 0)
+        await saveFlashcards(setId, noteId || null, geminiResponse.flashcards, 0);
+
         // Log the Gemini request
         const prompt = `Generate ${geminiResponse.flashcards.length} ${difficulty} flashcards from note content`;
         await logGeminiRequest(noteId || null, prompt, geminiResponse);
-        
+
         return setId;
       } catch (error) {
         // Log failed request
         const prompt = `Generate ${geminiResponse.flashcards.length} ${difficulty} flashcards from note content`;
         await logGeminiRequest(noteId || null, prompt, geminiResponse, 'failed', error instanceof Error ? error.message : 'Unknown error');
-        
+
         throw error;
       }
     };
@@ -151,6 +174,8 @@ export function useFlashcardActions() {
       flashcards: GeminiFlashcard[]
     ): Promise<void> => {
       try {
+        let startPosition = 0;
+
         if (action === 'regenerate') {
           // Delete all existing flashcards in the set
           const { error: deleteError } = await supabase
@@ -162,24 +187,32 @@ export function useFlashcardActions() {
             console.error('Error deleting existing flashcards:', deleteError);
             throw deleteError;
           }
+        } else {
+          // For 'add_more', get the max position to continue from
+          const { data: maxPosData } = await supabase
+            .from('flashcards')
+            .select('position')
+            .eq('set_id', existingSetId)
+            .order('position', { ascending: false })
+            .limit(1)
+            .single();
+
+          startPosition = (maxPosData?.position ?? -1) + 1;
         }
 
-        // For 'add_more', we only save the new flashcards (they're already filtered)
-        // For 'regenerate', we save all the new flashcards
-        await saveFlashcards(existingSetId, null, flashcards);
+        // Save the new flashcards with proper positioning
+        await saveFlashcards(existingSetId, null, flashcards, startPosition);
 
-        // Update the set's total_cards count
-        const { data: existingCards } = await supabase
+        // Update the set's total_cards count and timestamp
+        const { data: cardCount } = await supabase
           .from('flashcards')
-          .select('id')
+          .select('id', { count: 'exact', head: true })
           .eq('set_id', existingSetId);
-
-        const totalCards = existingCards?.length || 0;
 
         const { error: updateError } = await supabase
           .from('flashcard_sets')
-          .update({ 
-            total_cards: totalCards,
+          .update({
+            total_cards: cardCount || 0,
             updated_at: new Date().toISOString()
           })
           .eq('id', existingSetId);
@@ -196,9 +229,9 @@ export function useFlashcardActions() {
     };
 
     // Get user's flashcard sets
-    const getUserFlashcardSets = async () => {
+    const getUserFlashcardSets = async (): Promise<FlashcardSet[]> => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session?.user?.id) return [];
 
       const { data, error } = await supabase
@@ -221,13 +254,60 @@ export function useFlashcardActions() {
       return data || [];
     };
 
-    // Get flashcards for a specific set
-    const getFlashcardsBySet = async (setId: string) => {
+    // Get complete study set data (set + all cards) in a single call
+    // This is the MAIN function to use for loading a study session
+    const getStudySetData = async (setId: string): Promise<StudySetData | null> => {
+      // Fetch set and cards in parallel
+      const [setResult, cardsResult] = await Promise.all([
+        supabase
+          .from('flashcard_sets')
+          .select(`
+            *,
+            notes (
+              id,
+              title
+            )
+          `)
+          .eq('id', setId)
+          .single(),
+        supabase
+          .from('flashcards')
+          .select('*')
+          .eq('set_id', setId)
+          .order('position', { ascending: true })
+      ]);
+
+      if (setResult.error || !setResult.data) {
+        console.error('Error fetching flashcard set:', setResult.error);
+        return null;
+      }
+
+      if (cardsResult.error) {
+        console.error('Error fetching flashcards:', cardsResult.error);
+        return null;
+      }
+
+      const cards = (cardsResult.data || []) as Flashcard[];
+      const masteredCount = cards.filter((c: Flashcard) => c.status === 'mastered').length;
+
+      return {
+        set: setResult.data,
+        cards,
+        progress: {
+          total: cards.length,
+          mastered: masteredCount,
+          percentage: cards.length > 0 ? Math.round((masteredCount / cards.length) * 100) : 0
+        }
+      };
+    };
+
+    // Get flashcards for a specific set (sorted by position)
+    const getFlashcardsBySet = async (setId: string): Promise<Flashcard[]> => {
       const { data, error } = await supabase
         .from('flashcards')
         .select('*')
         .eq('set_id', setId)
-        .order('created_at', { ascending: true });
+        .order('position', { ascending: true });
 
       if (error) {
         console.error('Error fetching flashcards:', error);
@@ -239,47 +319,51 @@ export function useFlashcardActions() {
 
     // Update flashcard status (for study sessions)
     const updateFlashcardStatus = async (
-      flashcardId: string, 
+      flashcardId: string,
       status: 'new' | 'learning' | 'review' | 'mastered',
       wasCorrect?: boolean
-    ) => {
-      const updateData: any = {
+    ): Promise<Flashcard | null> => {
+      // First get the current flashcard
+      const { data: currentCard, error: fetchError } = await supabase
+        .from('flashcards')
+        .select('*')
+        .eq('id', flashcardId)
+        .single();
+
+      if (fetchError || !currentCard) {
+        console.error('Error fetching current flashcard:', fetchError);
+        return null;
+      }
+
+      const updateData: Partial<Flashcard> = {
         status,
         last_reviewed: new Date().toISOString()
       };
 
       if (wasCorrect !== undefined) {
-        // First get the current flashcard to get current values
-        const { data: currentCard, error: fetchError } = await supabase
-          .from('flashcards')
-          .select('review_count, correct_count')
-          .eq('id', flashcardId)
-          .single();
-
-        if (fetchError) {
-          console.error('Error fetching current flashcard:', fetchError);
-          throw fetchError;
-        }
-
-        updateData.review_count = (currentCard?.review_count || 0) + 1;
+        updateData.review_count = currentCard.review_count + 1;
         if (wasCorrect) {
-          updateData.correct_count = (currentCard?.correct_count || 0) + 1;
+          updateData.correct_count = currentCard.correct_count + 1;
         }
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('flashcards')
         .update(updateData)
-        .eq('id', flashcardId);
+        .eq('id', flashcardId)
+        .select('*')
+        .single();
 
       if (error) {
         console.error('Error updating flashcard status:', error);
-        throw error;
+        return null;
       }
+
+      return data as Flashcard;
     };
 
     // Get a single flashcard by ID
-    const getFlashcardById = async (flashcardId: string) => {
+    const getFlashcardById = async (flashcardId: string): Promise<Flashcard | null> => {
       const { data, error } = await supabase
         .from('flashcards')
         .select('*')
@@ -295,7 +379,7 @@ export function useFlashcardActions() {
     };
 
     // Get flashcard set details
-    const getFlashcardSetById = async (setId: string) => {
+    const getFlashcardSetById = async (setId: string): Promise<FlashcardSet | null> => {
       const { data, error } = await supabase
         .from('flashcard_sets')
         .select(`
@@ -316,35 +400,14 @@ export function useFlashcardActions() {
       return data;
     };
 
-    // Mark flashcard as mastered and update set progress
-    const markFlashcardAsMastered = async (flashcardId: string) => {
-      // First get the current flashcard to get current values
-      const { data: currentCard, error: fetchError } = await supabase
-        .from('flashcards')
-        .select('review_count, correct_count')
-        .eq('id', flashcardId)
-        .single();
+    // Mark flashcard as mastered and return updated card
+    const markFlashcardAsMastered = async (flashcardId: string): Promise<Flashcard | null> => {
+      return updateFlashcardStatus(flashcardId, 'mastered', true);
+    };
 
-      if (fetchError) {
-        console.error('Error fetching current flashcard:', fetchError);
-        throw fetchError;
-      }
-
-      // Update with incremented values
-      const { error } = await supabase
-        .from('flashcards')
-        .update({
-          status: 'mastered',
-          last_reviewed: new Date().toISOString(),
-          review_count: (currentCard?.review_count || 0) + 1,
-          correct_count: (currentCard?.correct_count || 0) + 1
-        })
-        .eq('id', flashcardId);
-
-      if (error) {
-        console.error('Error marking flashcard as mastered:', error);
-        throw error;
-      }
+    // Mark flashcard as needs review (got it wrong)
+    const markFlashcardAsLearning = async (flashcardId: string): Promise<Flashcard | null> => {
+      return updateFlashcardStatus(flashcardId, 'learning', false);
     };
 
     // Get progress for a flashcard set
@@ -361,7 +424,7 @@ export function useFlashcardActions() {
       }
 
       const percentage = data.total_cards > 0 ? Math.round((data.mastered_cards / data.total_cards) * 100) : 0;
-      
+
       return {
         total: data.total_cards,
         mastered: data.mastered_cards,
@@ -370,12 +433,12 @@ export function useFlashcardActions() {
     };
 
     // Get first card in a set
-    const getFirstCardInSet = async (setId: string) => {
+    const getFirstCardInSet = async (setId: string): Promise<{ id: string } | null> => {
       const { data, error } = await supabase
         .from('flashcards')
         .select('id')
         .eq('set_id', setId)
-        .order('created_at', { ascending: true })
+        .order('position', { ascending: true })
         .limit(1)
         .single();
 
@@ -387,80 +450,72 @@ export function useFlashcardActions() {
       return data;
     };
 
-    // Get next card in the set (for navigation)
-    const getNextCard = async (currentCardId: string, setId: string) => {
-      // First get all cards in the set ordered by creation date
-      const { data: allCards, error: fetchError } = await supabase
+    // Get next card in the set by position (without fetching all cards)
+    const getNextCard = async (currentCardId: string, setId: string): Promise<{ id: string } | null> => {
+      // Get current card's position
+      const { data: currentCard, error: currentError } = await supabase
         .from('flashcards')
-        .select('id, created_at')
+        .select('position')
+        .eq('id', currentCardId)
+        .single();
+
+      if (currentError || !currentCard) {
+        console.error('Error fetching current card position:', currentError);
+        return null;
+      }
+
+      // Get next card by position
+      const { data: nextCard, error: nextError } = await supabase
+        .from('flashcards')
+        .select('id')
         .eq('set_id', setId)
-        .order('created_at', { ascending: true });
+        .gt('position', currentCard.position)
+        .order('position', { ascending: true })
+        .limit(1)
+        .single();
 
-      if (fetchError) {
-        console.error('Error fetching cards for navigation:', fetchError);
-        return null;
+      if (nextError || !nextCard) {
+        return null; // No next card
       }
 
-      if (!allCards || allCards.length === 0) {
-        return null;
-      }
-
-      // Find the current card's position
-      const currentIndex = allCards.findIndex((card: { id: string; created_at: string }) => card.id === currentCardId);
-      
-      if (currentIndex === -1) {
-        console.error('Current card not found in set');
-        return null;
-      }
-
-      // Return the next card if it exists
-      if (currentIndex < allCards.length - 1) {
-        return { id: allCards[currentIndex + 1].id };
-      }
-
-      // No next card
-      return null;
+      return nextCard;
     };
 
-    // Get previous card in the set (for navigation)
-    const getPreviousCard = async (currentCardId: string, setId: string) => {
-      // First get all cards in the set ordered by creation date
-      const { data: allCards, error: fetchError } = await supabase
+    // Get previous card in the set by position (without fetching all cards)
+    const getPreviousCard = async (currentCardId: string, setId: string): Promise<{ id: string } | null> => {
+      // Get current card's position
+      const { data: currentCard, error: currentError } = await supabase
         .from('flashcards')
-        .select('id, created_at')
+        .select('position')
+        .eq('id', currentCardId)
+        .single();
+
+      if (currentError || !currentCard) {
+        console.error('Error fetching current card position:', currentError);
+        return null;
+      }
+
+      // Get previous card by position
+      const { data: prevCard, error: prevError } = await supabase
+        .from('flashcards')
+        .select('id')
         .eq('set_id', setId)
-        .order('created_at', { ascending: true });
+        .lt('position', currentCard.position)
+        .order('position', { ascending: false })
+        .limit(1)
+        .single();
 
-      if (fetchError) {
-        console.error('Error fetching cards for navigation:', fetchError);
-        return null;
+      if (prevError || !prevCard) {
+        return null; // No previous card
       }
 
-      if (!allCards || allCards.length === 0) {
-        return null;
-      }
-
-      // Find the current card's position
-      const currentIndex = allCards.findIndex((card: { id: string; created_at: string }) => card.id === currentCardId);
-      
-      if (currentIndex === -1) {
-        console.error('Current card not found in set');
-        return null;
-      }
-
-      // Return the previous card if it exists
-      if (currentIndex > 0) {
-        return { id: allCards[currentIndex - 1].id };
-      }
-
-      // No previous card
-      return null;
+      return prevCard;
     };
 
     // Delete a flashcard set and all its cards
     const deleteFlashcardSet = async (setId: string) => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session?.user?.id) {
         throw new Error('User not authenticated');
       }
@@ -480,7 +535,7 @@ export function useFlashcardActions() {
     // Toggle public status of flashcard set
     const togglePublicStatus = async (setId: string, isPublic: boolean) => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session?.user?.id) {
         throw new Error('User not authenticated');
       }
@@ -522,20 +577,20 @@ export function useFlashcardActions() {
       return data;
     };
 
-    // Get public flashcards by set ID
-    const getPublicFlashcards = async (setId: string) => {
+    // Get public flashcards by set ID (sorted by position)
+    const getPublicFlashcards = async (setId: string): Promise<Flashcard[]> => {
       const { data, error } = await supabase
         .from('flashcards')
-        .select('id, question, answer, difficulty_level')
+        .select('id, question, answer, difficulty_level, position')
         .eq('set_id', setId)
-        .order('created_at');
+        .order('position', { ascending: true });
 
       if (error) {
         console.error('Error fetching public flashcards:', error);
         throw error;
       }
 
-      return data || [];
+      return (data || []) as Flashcard[];
     };
 
     return {
@@ -544,11 +599,13 @@ export function useFlashcardActions() {
       saveGeneratedFlashcards,
       reforgeFlashcards,
       getUserFlashcardSets,
+      getStudySetData,
       getFlashcardsBySet,
       updateFlashcardStatus,
       getFlashcardById,
       getFlashcardSetById,
       markFlashcardAsMastered,
+      markFlashcardAsLearning,
       getSetProgress,
       getFirstCardInSet,
       getNextCard,
@@ -558,5 +615,5 @@ export function useFlashcardActions() {
       getPublicFlashcardSet,
       getPublicFlashcards
     };
-  }, []); // Empty dependency array since all functions are stable
+  }, [convertDifficultyToLevel]);
 }

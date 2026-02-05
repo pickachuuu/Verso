@@ -120,6 +120,7 @@ export type Database = {
           answer: string
           status: 'new' | 'learning' | 'review' | 'mastered'
           difficulty_level: number
+          position: number
           last_reviewed: string | null
           next_review: string | null
           review_count: number
@@ -135,6 +136,7 @@ export type Database = {
           answer: string
           status?: 'new' | 'learning' | 'review' | 'mastered'
           difficulty_level?: number
+          position?: number
           last_reviewed?: string | null
           next_review?: string | null
           review_count?: number
@@ -150,6 +152,7 @@ export type Database = {
           answer?: string
           status?: 'new' | 'learning' | 'review' | 'mastered'
           difficulty_level?: number
+          position?: number
           last_reviewed?: string | null
           next_review?: string | null
           review_count?: number

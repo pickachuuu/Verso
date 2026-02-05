@@ -60,12 +60,12 @@ export default function PublicFlashcardSetPage() {
 
         setSet(setData);
 
-        // Fetch the flashcards
+        // Fetch the flashcards (ordered by position for consistent traversal)
         const { data: cardsData, error: cardsError } = await supabase
           .from('flashcards')
           .select('id, question, answer, difficulty_level')
           .eq('set_id', setId)
-          .order('created_at');
+          .order('position', { ascending: true });
 
         if (cardsError) {
           setError('Error loading flashcards');

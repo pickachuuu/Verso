@@ -13,11 +13,12 @@ declare module '@tiptap/core' {
   }
 }
 
-type ImageAlignment = 'left' | 'center' | 'right';
+type ImageAlignment = 'left' | 'center' | 'right' | 'float-left' | 'float-right';
 
-// React component for the polaroid image - now a block element in document flow
+// React component for the polaroid image - block element with optional float
 function PolaroidImageComponent({ node, updateAttributes, selected }: NodeViewProps) {
   const { src, alt, width, alignment, rotation } = node.attrs;
+  const isFloating = alignment === 'float-left' || alignment === 'float-right';
   const containerRef = useRef<HTMLDivElement>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [currentWidth, setCurrentWidth] = useState<number>(width || 200);
@@ -97,7 +98,7 @@ function PolaroidImageComponent({ node, updateAttributes, selected }: NodeViewPr
 
   return (
     <NodeViewWrapper
-      className="polaroid-image-wrapper"
+      className={`polaroid-image-wrapper ${isFloating ? 'polaroid-floating' : ''}`}
       data-alignment={alignment || 'left'}
     >
       <div
@@ -154,12 +155,48 @@ function PolaroidImageComponent({ node, updateAttributes, selected }: NodeViewPr
 
               <div className="polaroid-toolbar-divider" />
 
-              {/* Left align */}
+              {/* Float left - text wraps on right */}
+              <button
+                className={`polaroid-align-button ${alignment === 'float-left' ? 'active' : ''}`}
+                onClick={(e) => handleAlignmentClick(e, 'float-left')}
+                onMouseDown={(e) => e.stopPropagation()}
+                title="Float left (text wraps right)"
+                type="button"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="8" height="8" rx="1" />
+                  <line x1="14" y1="5" x2="21" y2="5" />
+                  <line x1="14" y1="9" x2="21" y2="9" />
+                  <line x1="3" y1="15" x2="21" y2="15" />
+                  <line x1="3" y1="19" x2="21" y2="19" />
+                </svg>
+              </button>
+
+              {/* Float right - text wraps on left */}
+              <button
+                className={`polaroid-align-button ${alignment === 'float-right' ? 'active' : ''}`}
+                onClick={(e) => handleAlignmentClick(e, 'float-right')}
+                onMouseDown={(e) => e.stopPropagation()}
+                title="Float right (text wraps left)"
+                type="button"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="13" y="3" width="8" height="8" rx="1" />
+                  <line x1="3" y1="5" x2="10" y2="5" />
+                  <line x1="3" y1="9" x2="10" y2="9" />
+                  <line x1="3" y1="15" x2="21" y2="15" />
+                  <line x1="3" y1="19" x2="21" y2="19" />
+                </svg>
+              </button>
+
+              <div className="polaroid-toolbar-divider" />
+
+              {/* Left align (block) */}
               <button
                 className={`polaroid-align-button ${!alignment || alignment === 'left' ? 'active' : ''}`}
                 onClick={(e) => handleAlignmentClick(e, 'left')}
                 onMouseDown={(e) => e.stopPropagation()}
-                title="Align left"
+                title="Align left (block)"
                 type="button"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -169,12 +206,12 @@ function PolaroidImageComponent({ node, updateAttributes, selected }: NodeViewPr
                 </svg>
               </button>
 
-              {/* Center align */}
+              {/* Center align (block) */}
               <button
                 className={`polaroid-align-button ${alignment === 'center' ? 'active' : ''}`}
                 onClick={(e) => handleAlignmentClick(e, 'center')}
                 onMouseDown={(e) => e.stopPropagation()}
-                title="Align center"
+                title="Align center (block)"
                 type="button"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -184,12 +221,12 @@ function PolaroidImageComponent({ node, updateAttributes, selected }: NodeViewPr
                 </svg>
               </button>
 
-              {/* Right align */}
+              {/* Right align (block) */}
               <button
                 className={`polaroid-align-button ${alignment === 'right' ? 'active' : ''}`}
                 onClick={(e) => handleAlignmentClick(e, 'right')}
                 onMouseDown={(e) => e.stopPropagation()}
-                title="Align right"
+                title="Align right (block)"
                 type="button"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
