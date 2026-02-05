@@ -662,10 +662,12 @@ export function useFlashcardActions() {
       }
 
       // Update the flashcard with new SM-2 values
+      // Note: interval_days is stored as INTEGER in database, so we need to round
+      // For sub-day intervals (learning cards), we store 0 and rely on next_review for timing
       const updateData = {
         status: sm2Result.status,
         ease_factor: sm2Result.easeFactor,
-        interval_days: sm2Result.interval,
+        interval_days: Math.max(0, Math.round(sm2Result.interval)), // Must be integer
         repetitions: sm2Result.repetitions,
         lapses: sm2Result.lapses,
         next_review: sm2Result.nextReview.toISOString(),
@@ -682,7 +684,16 @@ export function useFlashcardActions() {
         .single();
 
       if (updateError) {
-        console.error('Error updating flashcard with SR data:', updateError);
+        console.error('Error updating flashcard with SR data:', {
+          message: updateError.message,
+          details: updateError.details,
+          hint: updateError.hint,
+          code: updateError.code,
+        });
+        // If columns don't exist, the migration hasn't been run
+        if (updateError.code === '42703' || updateError.message?.includes('column')) {
+          console.error('Database migration may be needed. Run add_spaced_repetition_fields.sql');
+        }
         return null;
       }
 
