@@ -1,15 +1,17 @@
 'use client';
 
-import { useEffect, useState, useRef, ReactNode, useCallback } from 'react';
+import { useEffect, useCallback, ReactNode, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useNoteActions } from '@/hook/useNoteActions';
-import { createClient } from '@/utils/supabase/client';
+import Link from 'next/link';
+
+// UI Components
 import { VerticalEditorToolbar, Editor } from '@/component/ui/RichTextEditor';
 import PageFlipContainer, { ViewType } from '@/component/ui/PageFlipContainer';
-import ClayNotebookCover, { NotebookColorKey, NOTEBOOK_COLORS } from '@/component/ui/ClayNotebookCover';
+import ClayNotebookCover, { NotebookColorKey } from '@/component/ui/ClayNotebookCover';
 import TableOfContents, { NotePage } from '@/component/ui/TableOfContents';
 import NotebookPage from '@/component/ui/NotebookPage';
-import Link from 'next/link';
+
+// Icons
 import {
   ArrowLeft02Icon,
   Tick01Icon,
@@ -27,159 +29,145 @@ import {
   Add01Icon,
 } from 'hugeicons-react';
 
-const supabase = createClient();
+// Stores
+import { useEditorStore, useNoteStore, useUIStore } from '@/stores/editorStore';
+import { useThemeStore } from '@/stores/themeStore';
+
+// TanStack Query hooks
+import {
+  useNote,
+  useNotePages,
+  useCreateNote,
+  useSaveNote,
+  useCreatePage,
+  useSavePage,
+  useDeletePage,
+  extractH1Title,
+} from '@/hooks/useNotes';
 
 export default function EditorPage() {
   const params = useParams();
   const router = useRouter();
   const noteIdOrSlug = params?.noteId as string | undefined;
-  const {
-    createNote,
-    saveNote,
-    getNoteBySlug,
-    createPage,
-    savePage,
-    getPages,
-    deletePage,
-    extractH1Title,
-  } = useNoteActions();
-
-  // View state
-  const [currentView, setCurrentView] = useState<ViewType>('cover');
-  const [currentPageIndex, setCurrentPageIndex] = useState<number | null>(null);
-
-  // Note data
-  const [id, setId] = useState<string | null>(null);
-  const [slug, setSlug] = useState<string | null>(null);
-  const [title, setTitle] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
-  const [showTagInput, setShowTagInput] = useState(false);
-  const [coverColor, setCoverColor] = useState<NotebookColorKey>('lavender');
-  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
-  const [loading, setLoading] = useState(!!noteIdOrSlug && noteIdOrSlug !== 'new');
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  // Pages data
-  const [pages, setPages] = useState<NotePage[]>([]);
-  const [currentPageContent, setCurrentPageContent] = useState('');
-  const [lastSavedContent, setLastSavedContent] = useState('');
-
-  // Editor instance for toolbar
-  const [editor, setEditor] = useState<Editor | null>(null);
-
-  // Callback when editor is ready
-  const handleEditorReady = useCallback((editorInstance: Editor) => {
-    setEditor(editorInstance);
-  }, []);
-
-  // Store the actual previous content component for flip animation
-  const previousContentRef = useRef<ReactNode>(null);
-
-  // Determine if this is a new note
   const isNewNote = !noteIdOrSlug || noteIdOrSlug === 'new';
 
-  // Sync theme with toolbar and other parts of the app
+  // Previous content ref for flip animation
+  const previousContentRef = useRef<ReactNode>(null);
+
+  // ========================================
+  // Zustand Stores
+  // ========================================
+  const {
+    currentView,
+    currentPageIndex,
+    currentPageContent,
+    lastSavedContent,
+    editor,
+    setCurrentView,
+    setCurrentPageIndex,
+    setCurrentPageContent,
+    setLastSavedContent,
+    setEditor,
+    setPreviousContent,
+    navigateToPage,
+    navigateToTOC,
+    reset: resetEditor,
+  } = useEditorStore();
+
+  const {
+    id: noteId,
+    slug,
+    title,
+    tags,
+    coverColor,
+    setId,
+    setSlug,
+    setTitle,
+    setTags,
+    addTag,
+    removeTag,
+    setCoverColor,
+    setNoteData,
+    reset: resetNote,
+  } = useNoteStore();
+
+  const {
+    saveStatus,
+    isLoading,
+    showTagInput,
+    tagInput,
+    setSaveStatus,
+    setIsLoading,
+    setShowTagInput,
+    setTagInput,
+    reset: resetUI,
+  } = useUIStore();
+
+  const { theme, initializeTheme } = useThemeStore();
+
+  // ========================================
+  // TanStack Query Hooks
+  // ========================================
+  const { data: fetchedNote, isLoading: isLoadingNote } = useNote(noteIdOrSlug);
+  const { data: pages = [], refetch: refetchPages } = useNotePages(noteId);
+
+  const createNoteMutation = useCreateNote();
+  const saveNoteMutation = useSaveNote();
+  const createPageMutation = useCreatePage();
+  const savePageMutation = useSavePage();
+  const deletePageMutation = useDeletePage();
+
+  // ========================================
+  // Initialize theme on mount
+  // ========================================
   useEffect(() => {
-    const getTheme = (): 'light' | 'dark' => {
-      const stored = localStorage.getItem('theme');
-      if (stored === 'light' || stored === 'dark') {
-        return stored;
-      }
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    };
+    initializeTheme();
+  }, [initializeTheme]);
 
-    const applyTheme = (newTheme: 'light' | 'dark') => {
-      document.documentElement.classList.toggle('dark', newTheme === 'dark');
-      setTheme(newTheme);
-    };
-
-    const initialTheme = getTheme();
-    applyTheme(initialTheme);
-
-    const handleCustomThemeChange = (e: CustomEvent) => {
-      const newTheme = (e.detail as { theme: string }).theme as 'light' | 'dark';
-      if (newTheme === 'light' || newTheme === 'dark') {
-        applyTheme(newTheme);
-      }
-    };
-
-    const handleStorageChange = () => {
-      const newTheme = getTheme();
-      applyTheme(newTheme);
-    };
-
-    window.addEventListener('themechange', handleCustomThemeChange as EventListener);
-    window.addEventListener('storage', handleStorageChange);
-
-    const interval = setInterval(() => {
-      const currentTheme = getTheme();
-      const isDark = document.documentElement.classList.contains('dark');
-      if ((currentTheme === 'dark' && !isDark) || (currentTheme === 'light' && isDark)) {
-        applyTheme(currentTheme);
-      }
-    }, 100);
-
-    return () => {
-      window.removeEventListener('themechange', handleCustomThemeChange as EventListener);
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
-
-  // Fetch note and pages
+  // ========================================
+  // Load note data when fetched
+  // ========================================
   useEffect(() => {
-    const fetchNote = async () => {
-      if (!noteIdOrSlug || noteIdOrSlug === 'new') return;
+    if (fetchedNote) {
+      setNoteData({
+        id: fetchedNote.id,
+        slug: fetchedNote.slug,
+        title: fetchedNote.title || '',
+        tags: fetchedNote.tags || [],
+        coverColor: (fetchedNote.cover_color as NotebookColorKey) || 'lavender',
+      });
 
-      setLoading(true);
+      // Go directly to TOC for existing notes
+      setCurrentView('toc');
 
-      try {
-        const note = await getNoteBySlug(noteIdOrSlug);
+      // Update URL if needed
+      if (fetchedNote.slug && noteIdOrSlug === fetchedNote.id) {
+        router.replace(`/editor/${fetchedNote.slug}`, { scroll: false });
+      }
+    }
+  }, [fetchedNote, noteIdOrSlug, router, setNoteData, setCurrentView]);
 
-        if (note) {
-          setId(note.id);
-          setSlug(note.slug);
-          setTitle(note.title || '');
-          setTags(note.tags || []);
-          setCoverColor((note.cover_color as NotebookColorKey) || 'lavender');
-
-          // Fetch pages for this note
-          const notePages = await getPages(note.id);
-
-          // Migration: If note has content but no pages, create first page
-          if (notePages.length === 0 && note.content && note.content.trim()) {
-            const pageId = await createPage(note.id, 0);
-            if (pageId) {
-              const pageTitle = extractH1Title(note.content);
-              await savePage(pageId, { title: pageTitle, content: note.content });
-              const updatedPages = await getPages(note.id);
-              setPages(updatedPages);
-            }
-          } else {
-            setPages(notePages);
-          }
-
-          // Go directly to TOC for existing notes
-          setCurrentView('toc');
-
-          if (note.slug && noteIdOrSlug === note.id) {
-            router.replace(`/editor/${note.slug}`, { scroll: false });
-          }
+  // ========================================
+  // Handle page content migration (if note has content but no pages)
+  // ========================================
+  useEffect(() => {
+    const migrateContentToPage = async () => {
+      if (noteId && pages.length === 0 && fetchedNote?.content?.trim()) {
+        const pageId = await createPageMutation.mutateAsync({ noteId, pageOrder: 0 });
+        if (pageId) {
+          const pageTitle = extractH1Title(fetchedNote.content);
+          await savePageMutation.mutateAsync({ pageId, title: pageTitle, content: fetchedNote.content });
+          refetchPages();
         }
-      } catch (error) {
-        console.error('Error fetching note:', error);
-      } finally {
-        setLoading(false);
       }
     };
+    migrateContentToPage();
+  }, [noteId, pages.length, fetchedNote?.content]);
 
-    fetchNote();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [noteIdOrSlug]);
-
-  // Capture current content before navigation - creates a snapshot
-  const captureCurrentState = () => {
+  // ========================================
+  // Capture current state for flip animation
+  // ========================================
+  const captureCurrentState = useCallback(() => {
     if (currentView === 'cover') {
       previousContentRef.current = (
         <ClayNotebookCover
@@ -211,27 +199,29 @@ export default function EditorPage() {
         />
       );
     }
-  };
+  }, [currentView, title, coverColor, theme, pages, currentPageIndex, currentPageContent]);
 
-  // Handle opening the notebook (from cover)
+  // ========================================
+  // Editor callback
+  // ========================================
+  const handleEditorReady = useCallback((editorInstance: Editor) => {
+    setEditor(editorInstance);
+  }, [setEditor]);
+
+  // ========================================
+  // Note Actions
+  // ========================================
   const handleOpenNotebook = async () => {
     if (!title.trim()) return;
-
-    // Capture current state (cover)
     captureCurrentState();
 
-    // Create the note when opening
-    if (!id && isNewNote) {
+    if (!noteId && isNewNote) {
       try {
-        const newId = await createNote(coverColor);
+        const newId = await createNoteMutation.mutateAsync({ coverColor });
         if (newId) {
           setId(newId);
           setSaveStatus('saved');
-
-          // Save the title immediately with cover color
-          await saveNote(newId, { title, content: '', tags: [], coverColor });
-
-          // Go to TOC
+          await saveNoteMutation.mutateAsync({ id: newId, title, tags: [], coverColor });
           setCurrentView('toc');
         }
       } catch (error) {
@@ -243,20 +233,15 @@ export default function EditorPage() {
     }
   };
 
-  // Handle adding a new page
   const handleAddPage = async () => {
-    if (!id) return;
-
-    // Capture current state (TOC)
+    if (!noteId) return;
     captureCurrentState();
 
     try {
-      const pageId = await createPage(id);
+      const pageId = await createPageMutation.mutateAsync({ noteId });
       if (pageId) {
-        const updatedPages = await getPages(id);
-        setPages(updatedPages);
-
-        // Navigate to the new page
+        await refetchPages();
+        const updatedPages = (await refetchPages()).data || [];
         const newPageIndex = updatedPages.length - 1;
         setCurrentPageIndex(newPageIndex);
         setCurrentPageContent('');
@@ -268,13 +253,10 @@ export default function EditorPage() {
     }
   };
 
-  // Handle clicking a page in TOC
   const handlePageClick = (pageIndex: number) => {
     const page = pages[pageIndex];
     if (page) {
-      // Capture current state (TOC)
       captureCurrentState();
-
       setCurrentPageIndex(pageIndex);
       setCurrentPageContent(page.content || '');
       setLastSavedContent(page.content || '');
@@ -282,9 +264,7 @@ export default function EditorPage() {
     }
   };
 
-  // Handle going back to TOC
   const handleBackToContents = async () => {
-    // Capture current state before navigation
     captureCurrentState();
 
     // Save current page content before going back
@@ -293,58 +273,7 @@ export default function EditorPage() {
       if (currentPageContent !== lastSavedContent) {
         try {
           const pageTitle = extractH1Title(currentPageContent);
-          await savePage(page.id, { title: pageTitle, content: currentPageContent });
-
-          // Update local pages state
-          const updatedPages = [...pages];
-          updatedPages[currentPageIndex] = {
-            ...updatedPages[currentPageIndex],
-            title: pageTitle,
-            content: currentPageContent,
-          };
-          setPages(updatedPages);
-        } catch (error) {
-          console.error('Error saving page:', error);
-        }
-      }
-    }
-
-    setCurrentView('toc');
-    setCurrentPageIndex(null);
-    setEditor(null);
-  };
-
-  // Handle deleting a page
-  const handleDeletePage = async (pageId: string) => {
-    if (pages.length <= 1) return; // Keep at least one page
-
-    try {
-      await deletePage(pageId);
-      const updatedPages = await getPages(id!);
-      setPages(updatedPages);
-    } catch (error) {
-      console.error('Error deleting page:', error);
-    }
-  };
-
-  // Save current page and navigate to another
-  const saveAndNavigate = async (targetIndex: number) => {
-    // Capture current state before navigation
-    captureCurrentState();
-
-    if (currentPageIndex !== null && pages[currentPageIndex]) {
-      const page = pages[currentPageIndex];
-      if (currentPageContent !== lastSavedContent) {
-        try {
-          const pageTitle = extractH1Title(currentPageContent);
-          await savePage(page.id, { title: pageTitle, content: currentPageContent });
-          const updatedPages = [...pages];
-          updatedPages[currentPageIndex] = {
-            ...updatedPages[currentPageIndex],
-            title: pageTitle,
-            content: currentPageContent,
-          };
-          setPages(updatedPages);
+          await savePageMutation.mutateAsync({ pageId: page.id, title: pageTitle, content: currentPageContent });
           setLastSavedContent(currentPageContent);
         } catch (error) {
           console.error('Error saving page:', error);
@@ -352,7 +281,40 @@ export default function EditorPage() {
       }
     }
 
-    // Navigate to target page
+    await refetchPages();
+    navigateToTOC();
+  };
+
+  const handleDeletePage = async (pageId: string) => {
+    if (pages.length <= 1) return;
+
+    try {
+      await deletePageMutation.mutateAsync(pageId);
+      refetchPages();
+    } catch (error) {
+      console.error('Error deleting page:', error);
+    }
+  };
+
+  // ========================================
+  // Page Navigation
+  // ========================================
+  const saveAndNavigate = async (targetIndex: number) => {
+    captureCurrentState();
+
+    if (currentPageIndex !== null && pages[currentPageIndex]) {
+      const page = pages[currentPageIndex];
+      if (currentPageContent !== lastSavedContent) {
+        try {
+          const pageTitle = extractH1Title(currentPageContent);
+          await savePageMutation.mutateAsync({ pageId: page.id, title: pageTitle, content: currentPageContent });
+          setLastSavedContent(currentPageContent);
+        } catch (error) {
+          console.error('Error saving page:', error);
+        }
+      }
+    }
+
     const targetPage = pages[targetIndex];
     if (targetPage) {
       setCurrentPageIndex(targetIndex);
@@ -361,13 +323,9 @@ export default function EditorPage() {
     }
   };
 
-  // Page navigation handlers - includes TOC as position 0
   const handleNextPage = async () => {
     if (currentView === 'toc') {
-      // From TOC, go to first page
-      if (pages.length > 0) {
-        handlePageClick(0);
-      }
+      if (pages.length > 0) handlePageClick(0);
     } else if (currentPageIndex !== null && currentPageIndex < pages.length - 1) {
       saveAndNavigate(currentPageIndex + 1);
     }
@@ -375,7 +333,6 @@ export default function EditorPage() {
 
   const handlePrevPage = async () => {
     if (currentView === 'page' && currentPageIndex === 0) {
-      // From first page, go back to TOC
       await handleBackToContents();
     } else if (currentPageIndex !== null && currentPageIndex > 0) {
       saveAndNavigate(currentPageIndex - 1);
@@ -384,23 +341,20 @@ export default function EditorPage() {
 
   const handleFirstPage = async () => {
     if (currentView === 'page') {
-      // Go to TOC (which is the "first" in the sequence)
       await handleBackToContents();
     }
   };
 
   const handleLastPage = () => {
     if (currentView === 'toc' && pages.length > 0) {
-      // From TOC, go to last page
       handlePageClick(pages.length - 1);
     } else if (currentPageIndex !== null && currentPageIndex !== pages.length - 1) {
       saveAndNavigate(pages.length - 1);
     }
   };
 
-  // Add page while viewing pages
   const handleAddPageFromEditor = async () => {
-    if (!id) return;
+    if (!noteId) return;
 
     // Save current page first
     if (currentPageIndex !== null && pages[currentPageIndex]) {
@@ -408,7 +362,7 @@ export default function EditorPage() {
       if (currentPageContent !== lastSavedContent) {
         try {
           const pageTitle = extractH1Title(currentPageContent);
-          await savePage(page.id, { title: pageTitle, content: currentPageContent });
+          await savePageMutation.mutateAsync({ pageId: page.id, title: pageTitle, content: currentPageContent });
         } catch (error) {
           console.error('Error saving page:', error);
         }
@@ -416,10 +370,9 @@ export default function EditorPage() {
     }
 
     try {
-      const pageId = await createPage(id);
+      const pageId = await createPageMutation.mutateAsync({ noteId });
       if (pageId) {
-        const updatedPages = await getPages(id);
-        setPages(updatedPages);
+        const updatedPages = (await refetchPages()).data || [];
         const newPageIndex = updatedPages.length - 1;
         setCurrentPageIndex(newPageIndex);
         setCurrentPageContent('');
@@ -430,7 +383,9 @@ export default function EditorPage() {
     }
   };
 
+  // ========================================
   // Auto-save page content
+  // ========================================
   useEffect(() => {
     if (currentView !== 'page' || currentPageIndex === null || !pages[currentPageIndex]) return;
     if (currentPageContent === lastSavedContent) return;
@@ -440,43 +395,30 @@ export default function EditorPage() {
       try {
         const page = pages[currentPageIndex];
         const pageTitle = extractH1Title(currentPageContent);
-        await savePage(page.id, { title: pageTitle, content: currentPageContent });
-
-        // Update local pages state
-        const updatedPages = [...pages];
-        updatedPages[currentPageIndex] = {
-          ...updatedPages[currentPageIndex],
-          title: pageTitle,
-          content: currentPageContent,
-        };
-        setPages(updatedPages);
+        await savePageMutation.mutateAsync({ pageId: page.id, title: pageTitle, content: currentPageContent });
         setLastSavedContent(currentPageContent);
         setSaveStatus('saved');
+        refetchPages();
       } catch {
         setSaveStatus('error');
       }
     }, 1500);
 
     return () => clearTimeout(timeoutId);
-  }, [currentPageContent, currentPageIndex, pages, lastSavedContent, savePage, extractH1Title, currentView]);
+  }, [currentPageContent, currentPageIndex, pages, lastSavedContent, currentView, setSaveStatus, setLastSavedContent]);
 
-  // Auto-save note metadata (title, tags, coverColor)
+  // ========================================
+  // Auto-save note metadata
+  // ========================================
   useEffect(() => {
-    if (!id || !title.trim() || currentView === 'cover') return;
+    if (!noteId || !title.trim() || currentView === 'cover') return;
 
     const timeoutId = setTimeout(async () => {
       try {
-        await saveNote(id, { title, content: '', tags, coverColor });
-
-        const { data: updatedNote } = await supabase
-          .from('notes')
-          .select('slug')
-          .eq('id', id)
-          .single();
-
-        if (updatedNote?.slug && updatedNote.slug !== slug) {
-          setSlug(updatedNote.slug);
-          router.replace(`/editor/${updatedNote.slug}`, { scroll: false });
+        const newSlug = await saveNoteMutation.mutateAsync({ id: noteId, title, content: '', tags, coverColor });
+        if (newSlug && newSlug !== slug) {
+          setSlug(newSlug);
+          router.replace(`/editor/${newSlug}`, { scroll: false });
         }
       } catch {
         // Silent fail for metadata save
@@ -484,18 +426,17 @@ export default function EditorPage() {
     }, 1500);
 
     return () => clearTimeout(timeoutId);
-  }, [id, title, tags, coverColor, saveNote, slug, router, currentView]);
+  }, [noteId, title, tags, coverColor, slug, router, currentView, setSlug]);
 
+  // ========================================
+  // Tag Handlers
+  // ========================================
   const handleAddTag = () => {
     const trimmedTag = tagInput.trim();
-    if (trimmedTag && !tags.includes(trimmedTag)) {
-      setTags([...tags, trimmedTag]);
+    if (trimmedTag) {
+      addTag(trimmedTag);
       setTagInput('');
     }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
   const handleTagKeyDown = (e: React.KeyboardEvent) => {
@@ -508,8 +449,10 @@ export default function EditorPage() {
     }
   };
 
-  // Loading state
-  if (loading) {
+  // ========================================
+  // Loading State
+  // ========================================
+  if (isLoadingNote && !isNewNote) {
     const loadingBg = theme === 'dark' ? '#1a1a2e' : '#f9f9f6';
     return (
       <div className="h-screen flex items-center justify-center" style={{ backgroundColor: loadingBg }}>
@@ -521,31 +464,29 @@ export default function EditorPage() {
     );
   }
 
+  // ========================================
+  // Theme-based styles
+  // ========================================
   const bgColor = theme === 'dark' ? '#1e1e2e' : '#ffffff';
-  const bgMuted = theme === 'dark' ? '#1a1a2e' : '#f5f5f0';
   const borderColor = theme === 'dark' ? '#374151' : '#e5e7eb';
   const textColor = theme === 'dark' ? '#9ca3af' : '#4b5563';
   const iconColor = theme === 'dark' ? '#9ca3af' : '#4b5563';
 
-  // Handle cover color change
-  const handleColorChange = (newColor: NotebookColorKey) => {
-    setCoverColor(newColor);
-  };
-
-  // Cover component
+  // ========================================
+  // Content Components
+  // ========================================
   const coverComponent = (
     <ClayNotebookCover
       mode="editor"
       title={title}
       onTitleChange={setTitle}
       onOpen={handleOpenNotebook}
-      onColorChange={handleColorChange}
+      onColorChange={setCoverColor}
       color={coverColor}
       theme={theme}
     />
   );
 
-  // TOC component
   const tocComponent = (
     <TableOfContents
       notebookTitle={title}
@@ -557,7 +498,6 @@ export default function EditorPage() {
     />
   );
 
-  // Current page component
   const pageComponent =
     currentPageIndex !== null && pages[currentPageIndex] ? (
       <NotebookPage
@@ -568,30 +508,22 @@ export default function EditorPage() {
       />
     ) : null;
 
-  // Previous content - just return what was captured
-  const getPreviousContentComponent = (): ReactNode => {
-    return previousContentRef.current;
-  };
-
+  const getPreviousContentComponent = (): ReactNode => previousContentRef.current;
   const showHeader = currentView !== 'cover';
 
+  // ========================================
+  // Render
+  // ========================================
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: bgColor }}>
-      {/* Header - visible when not on cover */}
+      {/* Header */}
       {showHeader && (
         <header
           className="border-b flex-shrink-0"
-          style={{
-            backgroundColor: bgColor,
-            borderColor: borderColor,
-          }}
+          style={{ backgroundColor: bgColor, borderColor }}
         >
           {/* Top row - Title and Actions */}
-          <div
-            className="flex items-center gap-2 px-4 py-2 border-b"
-            style={{ borderColor: borderColor }}
-          >
-            {/* Back button - to notebooks or to TOC */}
+          <div className="flex items-center gap-2 px-4 py-2 border-b" style={{ borderColor }}>
             {currentView === 'page' ? (
               <button
                 onClick={handleBackToContents}
@@ -615,7 +547,6 @@ export default function EditorPage() {
               </Link>
             )}
 
-            {/* Notebook icon indicator */}
             <div className={`p-1 rounded ${theme === 'dark' ? 'bg-amber-900/20' : 'bg-amber-100/50'}`}>
               <Book02Icon
                 className="w-4 h-4"
@@ -623,7 +554,6 @@ export default function EditorPage() {
               />
             </div>
 
-            {/* Page indicator when viewing a page */}
             {currentView === 'page' && currentPageIndex !== null && (
               <span className="text-xs font-medium px-2 py-1 rounded" style={{
                 color: textColor,
@@ -633,7 +563,6 @@ export default function EditorPage() {
               </span>
             )}
 
-            {/* Document title */}
             <div className="flex-1 min-w-0">
               <input
                 type="text"
@@ -645,9 +574,7 @@ export default function EditorPage() {
                     ? 'placeholder:text-gray-500 text-gray-100'
                     : 'placeholder:text-gray-400 text-gray-900'
                 }`}
-                style={{
-                  color: theme === 'dark' ? '#f3f3f3' : '#171717',
-                }}
+                style={{ color: theme === 'dark' ? '#f3f3f3' : '#171717' }}
               />
             </div>
 
@@ -704,11 +631,9 @@ export default function EditorPage() {
                   >
                     <Tag01Icon className="w-4 h-4" style={{ color: iconColor }} />
                     {tags.length > 0 && (
-                      <span
-                        className={`text-xs px-1.5 rounded ${
-                          theme === 'dark' ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-600'
-                        }`}
-                      >
+                      <span className={`text-xs px-1.5 rounded ${
+                        theme === 'dark' ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-600'
+                      }`}>
                         {tags.length}
                       </span>
                     )}
@@ -716,7 +641,6 @@ export default function EditorPage() {
                 )}
               </div>
 
-              {/* Dashboard link */}
               <Link
                 href="/dashboard"
                 className={`p-1.5 rounded transition-colors ${
@@ -729,12 +653,9 @@ export default function EditorPage() {
             </div>
           </div>
 
-          {/* Tags row (if any) */}
+          {/* Tags row */}
           {tags.length > 0 && (
-            <div
-              className="flex items-center gap-2 px-4 py-1.5 overflow-x-auto border-b"
-              style={{ borderColor: borderColor }}
-            >
+            <div className="flex items-center gap-2 px-4 py-1.5 overflow-x-auto border-b" style={{ borderColor }}>
               {tags.map((tag) => (
                 <span
                   key={tag}
@@ -745,7 +666,7 @@ export default function EditorPage() {
                   {tag}
                   <button
                     type="button"
-                    onClick={() => handleRemoveTag(tag)}
+                    onClick={() => removeTag(tag)}
                     className={`rounded p-0.5 transition-colors ${
                       theme === 'dark' ? 'hover:bg-blue-900/50' : 'hover:bg-blue-100'
                     }`}
@@ -762,11 +683,9 @@ export default function EditorPage() {
       {/* Content Area */}
       <div
         className="flex-1 overflow-hidden flex relative"
-        style={{
-          backgroundColor: theme === 'dark' ? '#12121a' : '#e8e6e0',
-        }}
+        style={{ backgroundColor: theme === 'dark' ? '#12121a' : '#e8e6e0' }}
       >
-        {/* Subtle gradient background */}
+        {/* Gradient background */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -777,6 +696,7 @@ export default function EditorPage() {
                  radial-gradient(ellipse 60% 40% at 80% 20%, rgba(180, 160, 120, 0.06) 0%, transparent 50%)`,
           }}
         />
+
         {/* Main notebook area */}
         <div className="flex-1 overflow-hidden py-8 px-4 relative z-10 flex items-center justify-center">
           <div
@@ -788,10 +708,9 @@ export default function EditorPage() {
               minHeight: '500px',
             }}
           >
-            {/* Stacked pages effect (only when viewing pages) */}
+            {/* Page stack effect */}
             {currentView === 'page' && pages.length > 1 && (
               <>
-                {/* Page stack layers */}
                 {[...Array(Math.min(pages.length - 1, 4))].map((_, i) => (
                   <div
                     key={i}
@@ -828,14 +747,11 @@ export default function EditorPage() {
           </div>
         </div>
 
-        {/* Right side floating control panel (visible on TOC and pages) */}
+        {/* Right side control panel */}
         {(currentView === 'toc' || currentView === 'page') && (
           <div
             className="absolute right-0 top-0 bottom-0 flex items-center justify-center z-20"
-            style={{
-              width: 'calc((100% - 56rem) / 2 + 60px)',
-              minWidth: '220px',
-            }}
+            style={{ width: 'calc((100% - 56rem) / 2 + 60px)', minWidth: '220px' }}
           >
             <div
               className="rounded-2xl overflow-hidden"
@@ -852,7 +768,7 @@ export default function EditorPage() {
                   : '1px solid rgba(0, 0, 0, 0.06)',
               }}
             >
-              {/* Page indicator section */}
+              {/* Page indicator */}
               <div
                 className="p-3 flex items-center justify-center"
                 style={{
@@ -863,9 +779,7 @@ export default function EditorPage() {
               >
                 <div
                   className={`px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-medium ${
-                    theme === 'dark'
-                      ? 'bg-gray-900/60 text-gray-300'
-                      : 'bg-white/60 text-gray-600'
+                    theme === 'dark' ? 'bg-gray-900/60 text-gray-300' : 'bg-white/60 text-gray-600'
                   }`}
                   style={{
                     boxShadow: theme === 'dark'
@@ -889,7 +803,7 @@ export default function EditorPage() {
                 </div>
               </div>
 
-              {/* Navigation controls - 2x2 grid */}
+              {/* Navigation controls */}
               <div
                 className="p-3"
                 style={{
@@ -899,7 +813,6 @@ export default function EditorPage() {
                 }}
               >
                 <div className="grid grid-cols-2 gap-2">
-                  {/* First / TOC */}
                   <button
                     onClick={handleFirstPage}
                     disabled={currentView === 'toc'}
@@ -920,7 +833,6 @@ export default function EditorPage() {
                     <ArrowDownLeft01Icon className="w-4 h-4" />
                   </button>
 
-                  {/* Last page */}
                   <button
                     onClick={handleLastPage}
                     disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
@@ -941,7 +853,6 @@ export default function EditorPage() {
                     <ArrowUpRight01Icon className="w-4 h-4" />
                   </button>
 
-                  {/* Previous page */}
                   <button
                     onClick={handlePrevPage}
                     disabled={currentView === 'toc'}
@@ -962,7 +873,6 @@ export default function EditorPage() {
                     <ArrowLeft01Icon className="w-4 h-4" />
                   </button>
 
-                  {/* Next page */}
                   <button
                     onClick={handleNextPage}
                     disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
@@ -985,7 +895,7 @@ export default function EditorPage() {
                 </div>
               </div>
 
-              {/* Editor toolbar (shown on TOC and page views) */}
+              {/* Editor toolbar */}
               {(currentView === 'page' || currentView === 'toc') && editor && (
                 <div
                   className="p-3 overflow-y-auto"

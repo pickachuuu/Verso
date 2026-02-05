@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Just_Another_Hand, Varela_Round } from "next/font/google";
 import { Cormorant_Garamond } from "next/font/google";
+import { QueryProvider } from "@/lib/queryClient";
 import "./globals.css";
 
 // Font declarations
@@ -51,7 +52,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${justAnotherHand.variable} ${varelaRound.variable} antialiased`}
       >
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

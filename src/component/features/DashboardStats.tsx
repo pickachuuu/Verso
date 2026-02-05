@@ -2,27 +2,13 @@
 
 import { ClayCard, ClayIconBox } from '@/component/ui/Clay';
 import { File01Icon, BookOpen01Icon, Target01Icon, TickDouble01Icon } from 'hugeicons-react';
-import { useEffect, useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
-
-const supabase = createClient();
+import { useDashboardStats } from '@/hooks/useDashboard';
 
 interface StatCardProps {
   title: string;
   value: string | number;
   icon: React.ReactNode;
   description?: string;
-  accentColor?: string;
-}
-
-interface FlashcardSet {
-  id: string;
-  total_cards: number;
-  mastered_cards: number;
-  flashcards: Array<{
-    id: string;
-    status: string;
-  }>;
 }
 
 function StatCardSkeleton() {
@@ -60,104 +46,36 @@ function StatCard({ title, value, icon, description }: StatCardProps) {
 }
 
 export default function DashboardStats() {
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<StatCardProps[]>([
-    { title: 'Notes', value: 0, icon: <File01Icon className="w-6 h-6 text-accent" />, description: 'Total study notes' },
-    { title: 'Flashcards', value: 0, icon: <BookOpen01Icon className="w-6 h-6 text-accent" />, description: 'Cards created' },
-    { title: 'Sets', value: 0, icon: <Target01Icon className="w-6 h-6 text-accent" />, description: 'Flashcard sets' },
-    { title: 'Mastered', value: 0, icon: <TickDouble01Icon className="w-6 h-6 text-accent" />, description: 'Cards completed' },
-  ]);
+  const { data: stats, isLoading } = useDashboardStats();
 
-  useEffect(() => {
-    async function fetchStats() {
-      setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      let userId = session?.user?.id;
-
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Fetch notes count
-        const { count: notesCount } = await supabase
-          .from('notes')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId);
-
-        // Fetch flashcard sets and their data
-        const { data: flashcardSets } = await supabase
-          .from('flashcard_sets')
-          .select(`
-            id,
-            total_cards,
-            mastered_cards,
-            flashcards (
-              id,
-              status
-            )
-          `)
-          .eq('user_id', userId);
-
-        let totalFlashcardSets = 0;
-        let totalFlashcards = 0;
-        let totalMasteredCards = 0;
-        let fullyMasteredSets = 0;
-
-        if (flashcardSets) {
-          totalFlashcardSets = flashcardSets.length;
-
-          // Calculate totals and check for fully mastered sets
-          flashcardSets.forEach((set: FlashcardSet) => {
-            totalFlashcards += set.total_cards || 0;
-            totalMasteredCards += set.mastered_cards || 0;
-
-            // Check if all cards in this set are mastered
-            if (set.flashcards && set.flashcards.length > 0) {
-              const allMastered = set.flashcards.every((card) => card.status === 'mastered');
-              if (allMastered) {
-                fullyMasteredSets++;
-              }
-            }
-          });
-        }
-
-        setStats([
-          {
-            title: 'Notes',
-            value: notesCount || 0,
-            icon: <File01Icon className="w-6 h-6 text-accent" />,
-            description: 'Total study notes'
-          },
-          {
-            title: 'Flashcards',
-            value: totalFlashcards,
-            icon: <BookOpen01Icon className="w-6 h-6 text-accent" />,
-            description: 'Cards created'
-          },
-          {
-            title: 'Sets',
-            value: totalFlashcardSets,
-            icon: <Target01Icon className="w-6 h-6 text-accent" />,
-            description: fullyMasteredSets > 0 ? `${fullyMasteredSets} completed` : 'Flashcard sets'
-          },
-          {
-            title: 'Mastered',
-            value: totalMasteredCards,
-            icon: <TickDouble01Icon className="w-6 h-6 text-accent" />,
-            description: 'Cards completed'
-          },
-        ]);
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchStats();
-  }, []);
+  const statCards: StatCardProps[] = [
+    {
+      title: 'Notes',
+      value: stats?.notesCount || 0,
+      icon: <File01Icon className="w-6 h-6 text-accent" />,
+      description: 'Total study notes'
+    },
+    {
+      title: 'Flashcards',
+      value: stats?.totalFlashcards || 0,
+      icon: <BookOpen01Icon className="w-6 h-6 text-accent" />,
+      description: 'Cards created'
+    },
+    {
+      title: 'Sets',
+      value: stats?.totalSets || 0,
+      icon: <Target01Icon className="w-6 h-6 text-accent" />,
+      description: stats?.fullyMasteredSets && stats.fullyMasteredSets > 0
+        ? `${stats.fullyMasteredSets} completed`
+        : 'Flashcard sets'
+    },
+    {
+      title: 'Mastered',
+      value: stats?.masteredCards || 0,
+      icon: <TickDouble01Icon className="w-6 h-6 text-accent" />,
+      description: 'Cards completed'
+    },
+  ];
 
   return (
     <div className="space-y-5">
@@ -166,9 +84,9 @@ export default function DashboardStats() {
         <span className="text-sm text-foreground-muted">Your learning stats</span>
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {loading
+        {isLoading
           ? Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
-          : stats.map((stat, index) => <StatCard key={index} {...stat} />)
+          : statCards.map((stat, index) => <StatCard key={index} {...stat} />)
         }
       </div>
     </div>

@@ -2,31 +2,20 @@
 
 import { ClayCard, ClayBadge } from '@/component/ui/Clay';
 import { File01Icon, BookOpen01Icon, Clock01Icon, ArrowRight01Icon } from 'hugeicons-react';
-import { useEffect, useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
+import { useRecentActivity, ActivityItem } from '@/hooks/useDashboard';
 
-const supabase = createClient();
-
-interface ActivityItemProps {
-  id: string;
-  type: 'note' | 'flashcard' | 'session';
-  title: string;
-  description: string;
-  time: string;
+interface ActivityItemComponentProps extends ActivityItem {
   icon: React.ReactNode;
-  href?: string;
 }
 
-function ActivityItem({ type, title, description, time, icon, href }: ActivityItemProps) {
+function ActivityItemComponent({ type, title, description, time, icon, href }: ActivityItemComponentProps) {
   const getTypeBadge = () => {
     switch (type) {
       case 'note':
         return <ClayBadge variant="accent" className="text-xs px-2 py-1">Note</ClayBadge>;
       case 'flashcard':
         return <ClayBadge variant="success" className="text-xs px-2 py-1">Flashcard</ClayBadge>;
-      case 'session':
-        return <ClayBadge variant="warning" className="text-xs px-2 py-1">Session</ClayBadge>;
       default:
         return null;
     }
@@ -89,95 +78,15 @@ function EmptyState() {
 }
 
 export default function RecentActivity() {
-  const [loading, setLoading] = useState(true);
-  const [activities, setActivities] = useState<ActivityItemProps[]>([]);
+  const { data: activities = [], isLoading } = useRecentActivity();
 
-  useEffect(() => {
-    async function fetchActivities() {
-      setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      let userId = session?.user?.id;
-      let items: ActivityItemProps[] = [];
-
-      if (userId) {
-        // Fetch recent notes
-        const { data: notes } = await supabase
-          .from('notes')
-          .select('id, title, slug, updated_at')
-          .eq('user_id', userId)
-          .order('updated_at', { ascending: false })
-          .limit(3);
-
-        if (notes) {
-          items = items.concat(notes.map((note: any) => ({
-            id: note.id,
-            type: 'note' as const,
-            title: note.title || 'Untitled Note',
-            description: 'Updated note',
-            time: note.updated_at ? timeAgo(note.updated_at) : '',
-            icon: <File01Icon className="w-5 h-5 text-accent" />,
-            href: `/notes/${note.slug || note.id}`,
-          })));
-        }
-
-        // Fetch recent flashcard sets
-        const { data: flashcardSets } = await supabase
-          .from('flashcard_sets')
-          .select('id, title, updated_at, total_cards')
-          .eq('user_id', userId)
-          .order('updated_at', { ascending: false })
-          .limit(2);
-
-        if (flashcardSets) {
-          items = items.concat(flashcardSets.map((set: any) => ({
-            id: set.id,
-            type: 'flashcard' as const,
-            title: set.title || 'Flashcard Set',
-            description: `${set.total_cards || 0} cards`,
-            time: set.updated_at ? timeAgo(set.updated_at) : '',
-            icon: <BookOpen01Icon className="w-5 h-5 text-green-600" />,
-            href: `/flashcards/${set.id}`,
-          })));
-        }
-      }
-
-      // Sort by most recent
-      items.sort((a, b) => {
-        const timeA = parseTimeAgo(a.time);
-        const timeB = parseTimeAgo(b.time);
-        return timeA - timeB;
-      });
-
-      setActivities(items.slice(0, 5));
-      setLoading(false);
-    }
-
-    fetchActivities();
-  }, []);
-
-  function timeAgo(dateString: string) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-    if (diff < 60) return `${diff}s ago`;
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return `${Math.floor(diff / 86400)}d ago`;
-  }
-
-  function parseTimeAgo(timeStr: string): number {
-    const match = timeStr.match(/(\d+)([smhd])/);
-    if (!match) return Infinity;
-    const value = parseInt(match[1]);
-    const unit = match[2];
-    switch (unit) {
-      case 's': return value;
-      case 'm': return value * 60;
-      case 'h': return value * 3600;
-      case 'd': return value * 86400;
-      default: return Infinity;
-    }
-  }
+  // Map activities to include icons
+  const activitiesWithIcons: ActivityItemComponentProps[] = activities.map((activity) => ({
+    ...activity,
+    icon: activity.type === 'note'
+      ? <File01Icon className="w-5 h-5 text-accent" />
+      : <BookOpen01Icon className="w-5 h-5 text-green-600" />,
+  }));
 
   return (
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
@@ -193,11 +102,11 @@ export default function RecentActivity() {
       </div>
 
       <div className="space-y-3">
-        {loading ? (
+        {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <ActivityItemSkeleton key={i} />)
-        ) : activities.length > 0 ? (
-          activities.map((activity) => (
-            <ActivityItem key={activity.id} {...activity} />
+        ) : activitiesWithIcons.length > 0 ? (
+          activitiesWithIcons.map((activity) => (
+            <ActivityItemComponent key={activity.id} {...activity} />
           ))
         ) : (
           <EmptyState />
