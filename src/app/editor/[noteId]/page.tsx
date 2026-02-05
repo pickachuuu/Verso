@@ -31,7 +31,6 @@ import {
 
 // Stores
 import { useEditorStore, useNoteStore, useUIStore } from '@/stores/editorStore';
-import { useThemeStore } from '@/stores/themeStore';
 
 // TanStack Query hooks
 import {
@@ -103,7 +102,8 @@ export default function EditorPage() {
     reset: resetUI,
   } = useUIStore();
 
-  const { theme, initializeTheme } = useThemeStore();
+  // Light mode only (dark mode removed)
+  const theme = 'light' as const;
 
   // ========================================
   // TanStack Query Hooks
@@ -116,13 +116,6 @@ export default function EditorPage() {
   const createPageMutation = useCreatePage();
   const savePageMutation = useSavePage();
   const deletePageMutation = useDeletePage();
-
-  // ========================================
-  // Initialize theme on mount
-  // ========================================
-  useEffect(() => {
-    initializeTheme();
-  }, [initializeTheme]);
 
   // ========================================
   // Load note data when fetched
@@ -453,24 +446,23 @@ export default function EditorPage() {
   // Loading State
   // ========================================
   if (isLoadingNote && !isNewNote) {
-    const loadingBg = theme === 'dark' ? '#1a1a2e' : '#f9f9f6';
     return (
-      <div className="h-screen flex items-center justify-center" style={{ backgroundColor: loadingBg }}>
+      <div className="h-screen flex items-center justify-center" style={{ backgroundColor: '#f9f9f6' }}>
         <div className="flex flex-col items-center gap-4">
-          <Loading03Icon className="w-10 h-10 text-accent animate-spin" />
-          <p style={{ color: theme === 'dark' ? '#b5b5b5' : '#4c4c4c' }}>Loading notebook...</p>
+          <Loading03Icon className="w-10 h-10 text-primary animate-spin" />
+          <p style={{ color: '#4c4c4c' }}>Loading notebook...</p>
         </div>
       </div>
     );
   }
 
   // ========================================
-  // Theme-based styles
+  // Light mode styles
   // ========================================
-  const bgColor = theme === 'dark' ? '#1e1e2e' : '#ffffff';
-  const borderColor = theme === 'dark' ? '#374151' : '#e5e7eb';
-  const textColor = theme === 'dark' ? '#9ca3af' : '#4b5563';
-  const iconColor = theme === 'dark' ? '#9ca3af' : '#4b5563';
+  const bgColor = '#ffffff';
+  const borderColor = '#e5e7eb';
+  const textColor = '#4b5563';
+  const iconColor = '#4b5563';
 
   // ========================================
   // Content Components
@@ -527,9 +519,7 @@ export default function EditorPage() {
             {currentView === 'page' ? (
               <button
                 onClick={handleBackToContents}
-                className={`p-1.5 rounded transition-colors flex items-center gap-1.5 ${
-                  theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
-                }`}
+                className="p-1.5 rounded transition-colors flex items-center gap-1.5 hover:bg-gray-100"
                 title="Back to Contents"
               >
                 <Menu01Icon className="w-5 h-5" style={{ color: iconColor }} />
@@ -538,26 +528,24 @@ export default function EditorPage() {
             ) : (
               <Link
                 href="/notes"
-                className={`p-1.5 rounded transition-colors ${
-                  theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
-                }`}
+                className="p-1.5 rounded transition-colors hover:bg-gray-100"
                 title="Back to Notebooks"
               >
                 <ArrowLeft02Icon className="w-5 h-5" style={{ color: iconColor }} />
               </Link>
             )}
 
-            <div className={`p-1 rounded ${theme === 'dark' ? 'bg-amber-900/20' : 'bg-amber-100/50'}`}>
+            <div className="p-1 rounded bg-amber-100/50">
               <Book02Icon
                 className="w-4 h-4"
-                style={{ color: theme === 'dark' ? '#d4a574' : '#8b6914' }}
+                style={{ color: '#8b6914' }}
               />
             </div>
 
             {currentView === 'page' && currentPageIndex !== null && (
               <span className="text-xs font-medium px-2 py-1 rounded" style={{
                 color: textColor,
-                backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
+                backgroundColor: 'rgba(0,0,0,0.05)'
               }}>
                 Page {currentPageIndex + 1} of {pages.length}
               </span>
@@ -569,12 +557,8 @@ export default function EditorPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Untitled notebook"
-                className={`w-full text-sm font-normal bg-transparent border-none focus:outline-none focus:ring-0 ${
-                  theme === 'dark'
-                    ? 'placeholder:text-gray-500 text-gray-100'
-                    : 'placeholder:text-gray-400 text-gray-900'
-                }`}
-                style={{ color: theme === 'dark' ? '#f3f3f3' : '#171717' }}
+                className="w-full text-sm font-normal bg-transparent border-none focus:outline-none focus:ring-0 placeholder:text-gray-400 text-gray-900"
+                style={{ color: '#171717' }}
               />
             </div>
 
@@ -614,9 +598,9 @@ export default function EditorPage() {
                     placeholder="Add tag..."
                     className="w-24 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     style={{
-                      backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
-                      borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db',
-                      color: theme === 'dark' ? '#f3f3f3' : '#171717',
+                      backgroundColor: '#ffffff',
+                      borderColor: '#d1d5db',
+                      color: '#171717',
                     }}
                     autoFocus
                   />
@@ -624,16 +608,12 @@ export default function EditorPage() {
                   <button
                     type="button"
                     onClick={() => setShowTagInput(true)}
-                    className={`p-1.5 rounded transition-colors flex items-center gap-1 ${
-                      theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
-                    }`}
+                    className="p-1.5 rounded transition-colors flex items-center gap-1 hover:bg-gray-100"
                     title="Add tags"
                   >
                     <Tag01Icon className="w-4 h-4" style={{ color: iconColor }} />
                     {tags.length > 0 && (
-                      <span className={`text-xs px-1.5 rounded ${
-                        theme === 'dark' ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-600'
-                      }`}>
+                      <span className="text-xs px-1.5 rounded bg-blue-100 text-blue-600">
                         {tags.length}
                       </span>
                     )}
@@ -643,9 +623,7 @@ export default function EditorPage() {
 
               <Link
                 href="/dashboard"
-                className={`p-1.5 rounded transition-colors ${
-                  theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
-                }`}
+                className="p-1.5 rounded transition-colors hover:bg-gray-100"
                 title="Dashboard"
               >
                 <Home01Icon className="w-5 h-5" style={{ color: iconColor }} />
@@ -659,17 +637,13 @@ export default function EditorPage() {
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${
-                    theme === 'dark' ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-50 text-blue-700'
-                  }`}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap bg-blue-50 text-blue-700"
                 >
                   {tag}
                   <button
                     type="button"
                     onClick={() => removeTag(tag)}
-                    className={`rounded p-0.5 transition-colors ${
-                      theme === 'dark' ? 'hover:bg-blue-900/50' : 'hover:bg-blue-100'
-                    }`}
+                    className="rounded p-0.5 transition-colors hover:bg-blue-100"
                   >
                     <Cancel01Icon className="w-3 h-3" />
                   </button>
@@ -683,16 +657,13 @@ export default function EditorPage() {
       {/* Content Area */}
       <div
         className="flex-1 overflow-hidden flex relative"
-        style={{ backgroundColor: theme === 'dark' ? '#12121a' : '#e8e6e0' }}
+        style={{ backgroundColor: '#e8e6e0' }}
       >
         {/* Gradient background */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: theme === 'dark'
-              ? `radial-gradient(ellipse 80% 50% at 20% 80%, rgba(157, 123, 224, 0.08) 0%, transparent 50%),
-                 radial-gradient(ellipse 60% 40% at 80% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 50%)`
-              : `radial-gradient(ellipse 80% 50% at 20% 80%, rgba(95, 108, 175, 0.08) 0%, transparent 50%),
+            backgroundImage: `radial-gradient(ellipse 80% 50% at 20% 80%, rgba(95, 108, 175, 0.08) 0%, transparent 50%),
                  radial-gradient(ellipse 60% 40% at 80% 20%, rgba(180, 160, 120, 0.06) 0%, transparent 50%)`,
           }}
         />
@@ -720,10 +691,8 @@ export default function EditorPage() {
                       right: `${-(i + 1) * 3}px`,
                       bottom: `${-(i + 1) * 3}px`,
                       left: `${(i + 1) * 3}px`,
-                      background: theme === 'dark'
-                        ? `linear-gradient(135deg, ${i % 2 === 0 ? '#2a2a3a' : '#252535'} 0%, ${i % 2 === 0 ? '#1e1e2e' : '#1a1a2a'} 100%)`
-                        : `linear-gradient(135deg, ${i % 2 === 0 ? '#f8f8f3' : '#f5f5f0'} 0%, ${i % 2 === 0 ? '#f0f0eb' : '#eaeae5'} 100%)`,
-                      boxShadow: `0 ${2 + i}px ${4 + i * 2}px rgba(0,0,0,${theme === 'dark' ? 0.3 - i * 0.05 : 0.1 - i * 0.02})`,
+                      background: `linear-gradient(135deg, ${i % 2 === 0 ? '#f8f8f3' : '#f5f5f0'} 0%, ${i % 2 === 0 ? '#f0f0eb' : '#eaeae5'} 100%)`,
+                      boxShadow: `0 ${2 + i}px ${4 + i * 2}px rgba(0,0,0,${0.1 - i * 0.02})`,
                       zIndex: -i - 1,
                     }}
                   />
@@ -757,34 +726,22 @@ export default function EditorPage() {
               className="rounded-2xl overflow-hidden"
               style={{
                 width: currentView === 'page' ? '160px' : '120px',
-                background: theme === 'dark'
-                  ? 'linear-gradient(145deg, #2a2a3a 0%, #232333 50%, #1e1e2e 100%)'
-                  : 'linear-gradient(160deg, #f8f7f4 0%, #f0efec 50%, #e8e7e4 100%)',
-                boxShadow: theme === 'dark'
-                  ? '0 8px 32px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
-                  : '0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
-                border: theme === 'dark'
-                  ? '1px solid rgba(255, 255, 255, 0.08)'
-                  : '1px solid rgba(0, 0, 0, 0.06)',
+                background: 'linear-gradient(160deg, #f8f7f4 0%, #f0efec 50%, #e8e7e4 100%)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+                border: '1px solid rgba(0, 0, 0, 0.06)',
               }}
             >
               {/* Page indicator */}
               <div
                 className="p-3 flex items-center justify-center"
                 style={{
-                  borderBottom: theme === 'dark'
-                    ? '1px solid rgba(255,255,255,0.06)'
-                    : '1px solid rgba(0,0,0,0.06)',
+                  borderBottom: '1px solid rgba(0,0,0,0.06)',
                 }}
               >
                 <div
-                  className={`px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-medium ${
-                    theme === 'dark' ? 'bg-gray-900/60 text-gray-300' : 'bg-white/60 text-gray-600'
-                  }`}
+                  className="px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-medium bg-white/60 text-gray-600"
                   style={{
-                    boxShadow: theme === 'dark'
-                      ? 'inset 0 2px 4px rgba(0,0,0,0.4)'
-                      : 'inset 0 2px 4px rgba(0,0,0,0.06)',
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.06)',
                   }}
                 >
                   {currentView === 'toc' ? (
@@ -807,9 +764,7 @@ export default function EditorPage() {
               <div
                 className="p-3"
                 style={{
-                  borderBottom: theme === 'dark'
-                    ? '1px solid rgba(255,255,255,0.06)'
-                    : '1px solid rgba(0,0,0,0.06)',
+                  borderBottom: '1px solid rgba(0,0,0,0.06)',
                 }}
               >
                 <div className="grid grid-cols-2 gap-2">
@@ -819,14 +774,10 @@ export default function EditorPage() {
                     className={`w-full h-9 rounded-xl flex items-center justify-center transition-all ${
                       currentView === 'toc'
                         ? 'opacity-30 cursor-not-allowed'
-                        : theme === 'dark'
-                          ? 'bg-gray-800/80 hover:bg-gray-700/80 text-gray-300'
-                          : 'bg-white/80 hover:bg-white text-gray-600'
+                        : 'bg-white/80 hover:bg-white text-gray-600'
                     }`}
                     style={{
-                      boxShadow: currentView === 'toc' ? 'none' : (theme === 'dark'
-                        ? '0 2px 4px rgba(0,0,0,0.3)'
-                        : '0 2px 4px rgba(0,0,0,0.08)'),
+                      boxShadow: currentView === 'toc' ? 'none' : '0 2px 4px rgba(0,0,0,0.08)',
                     }}
                     title="Back to Contents"
                   >
@@ -839,14 +790,10 @@ export default function EditorPage() {
                     className={`w-full h-9 rounded-xl flex items-center justify-center transition-all ${
                       currentView === 'page' && currentPageIndex === pages.length - 1
                         ? 'opacity-30 cursor-not-allowed'
-                        : theme === 'dark'
-                          ? 'bg-gray-800/80 hover:bg-gray-700/80 text-gray-300'
-                          : 'bg-white/80 hover:bg-white text-gray-600'
+                        : 'bg-white/80 hover:bg-white text-gray-600'
                     }`}
                     style={{
-                      boxShadow: (currentView === 'page' && currentPageIndex === pages.length - 1) ? 'none' : (theme === 'dark'
-                        ? '0 2px 4px rgba(0,0,0,0.3)'
-                        : '0 2px 4px rgba(0,0,0,0.08)'),
+                      boxShadow: (currentView === 'page' && currentPageIndex === pages.length - 1) ? 'none' : '0 2px 4px rgba(0,0,0,0.08)',
                     }}
                     title="Last page"
                   >
@@ -859,14 +806,10 @@ export default function EditorPage() {
                     className={`w-full h-9 rounded-xl flex items-center justify-center transition-all ${
                       currentView === 'toc'
                         ? 'opacity-30 cursor-not-allowed'
-                        : theme === 'dark'
-                          ? 'bg-gray-800/80 hover:bg-gray-700/80 text-gray-300'
-                          : 'bg-white/80 hover:bg-white text-gray-600'
+                        : 'bg-white/80 hover:bg-white text-gray-600'
                     }`}
                     style={{
-                      boxShadow: currentView === 'toc' ? 'none' : (theme === 'dark'
-                        ? '0 2px 4px rgba(0,0,0,0.3)'
-                        : '0 2px 4px rgba(0,0,0,0.08)'),
+                      boxShadow: currentView === 'toc' ? 'none' : '0 2px 4px rgba(0,0,0,0.08)',
                     }}
                     title={currentView === 'page' && currentPageIndex === 0 ? 'Back to Contents' : 'Previous page'}
                   >
@@ -879,14 +822,10 @@ export default function EditorPage() {
                     className={`w-full h-9 rounded-xl flex items-center justify-center transition-all ${
                       currentView === 'page' && currentPageIndex === pages.length - 1
                         ? 'opacity-30 cursor-not-allowed'
-                        : theme === 'dark'
-                          ? 'bg-gray-800/80 hover:bg-gray-700/80 text-gray-300'
-                          : 'bg-white/80 hover:bg-white text-gray-600'
+                        : 'bg-white/80 hover:bg-white text-gray-600'
                     }`}
                     style={{
-                      boxShadow: (currentView === 'page' && currentPageIndex === pages.length - 1) ? 'none' : (theme === 'dark'
-                        ? '0 2px 4px rgba(0,0,0,0.3)'
-                        : '0 2px 4px rgba(0,0,0,0.08)'),
+                      boxShadow: (currentView === 'page' && currentPageIndex === pages.length - 1) ? 'none' : '0 2px 4px rgba(0,0,0,0.08)',
                     }}
                     title={currentView === 'toc' ? 'Go to first page' : 'Next page'}
                   >
@@ -901,9 +840,7 @@ export default function EditorPage() {
                   className="p-3 overflow-y-auto"
                   style={{
                     maxHeight: 'calc(100vh - 400px)',
-                    borderBottom: theme === 'dark'
-                      ? '1px solid rgba(255,255,255,0.06)'
-                      : '1px solid rgba(0,0,0,0.06)',
+                    borderBottom: '1px solid rgba(0,0,0,0.06)',
                   }}
                 >
                   <VerticalEditorToolbar editor={editor} theme={theme} />
@@ -914,15 +851,9 @@ export default function EditorPage() {
               <div className="p-3">
                 <button
                   onClick={handleAddPageFromEditor}
-                  className={`w-full h-9 rounded-xl flex items-center justify-center gap-2 transition-all text-sm font-medium ${
-                    theme === 'dark'
-                      ? 'bg-indigo-700/60 hover:bg-indigo-600/60 text-indigo-200'
-                      : 'bg-indigo-500/90 hover:bg-indigo-600/90 text-white'
-                  }`}
+                  className="w-full h-9 rounded-xl flex items-center justify-center gap-2 transition-all text-sm font-medium bg-primary/90 hover:bg-primary text-white"
                   style={{
-                    boxShadow: theme === 'dark'
-                      ? '0 2px 8px rgba(99, 102, 241, 0.3)'
-                      : '0 2px 8px rgba(99, 102, 241, 0.4)',
+                    boxShadow: '0 2px 8px rgba(99, 102, 241, 0.4)',
                   }}
                   title="Add new page"
                 >

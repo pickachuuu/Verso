@@ -125,7 +125,7 @@ function ToolbarButton({ onClick, isActive, disabled, children, title, vertical,
 // ============================================
 function ToolbarDivider({ vertical }: { vertical?: boolean }) {
   if (vertical) {
-    return <div className="w-full h-px bg-gray-200 dark:bg-gray-700 my-1" />;
+    return <div className="w-full h-px bg-gray-200 my-1" />;
   }
   return <div className="w-px h-6 bg-border/50 mx-0.5" />;
 }
@@ -881,7 +881,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     autofocus: autoFocus ? 'end' : false,
     editorProps: {
       attributes: {
-        class: `tiptap-editor prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none focus:outline-none prose-headings:mt-6 prose-headings:mb-3 prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0 ${editorClassName}`,
+        class: `tiptap-editor prose prose-sm sm:prose lg:prose-lg max-w-none focus:outline-none prose-headings:mt-6 prose-headings:mb-3 prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0 ${editorClassName}`,
       },
     },
     onUpdate: ({ editor }) => {
