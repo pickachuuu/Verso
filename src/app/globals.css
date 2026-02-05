@@ -582,6 +582,111 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
+/* ============================================
+   Clay Modal - Claymorphism Multi-Step Modal
+   ============================================ */
+
+.clay-modal {
+  background: linear-gradient(165deg, #ffffff 0%, #fafbfc 50%, #f5f7fa 100%);
+  box-shadow:
+    /* Outer layered shadows for depth */
+    0 0 0 1px rgba(0, 0, 0, 0.03),
+    0 8px 24px -4px rgba(0, 0, 0, 0.08),
+    0 20px 48px -8px rgba(0, 0, 0, 0.1),
+    0 40px 80px -16px rgba(99, 102, 241, 0.12),
+    /* Inner highlights for puffy clay effect */
+    inset 0 2px 0 rgba(255, 255, 255, 1),
+    inset 0 -3px 12px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.clay-modal-header {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
+}
+
+.clay-modal-footer {
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.5) 0%, rgba(241, 245, 249, 0.8) 100%);
+}
+
+/* Step Indicator Styles */
+.clay-step-active {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow:
+    0 2px 8px rgba(99, 102, 241, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.clay-step-completed {
+  background: linear-gradient(145deg, #f0fdf4 0%, #dcfce7 100%);
+  box-shadow:
+    0 2px 6px rgba(34, 197, 94, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.clay-step-inactive {
+  background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+/* Note Selection Card Styles */
+.clay-note-selected {
+  background: linear-gradient(145deg, #ffffff 0%, #faf8ff 100%);
+  box-shadow:
+    0 4px 12px rgba(99, 102, 241, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(99, 102, 241, 0.05);
+}
+
+.clay-note-unselected {
+  background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.clay-note-unselected:hover {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+/* Option Selection Styles (Difficulty, etc.) */
+.clay-option-selected {
+  background: linear-gradient(145deg, #ffffff 0%, #faf8ff 100%);
+  box-shadow:
+    0 2px 8px rgba(99, 102, 241, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(99, 102, 241, 0.05);
+}
+
+.clay-option-unselected {
+  background: linear-gradient(145deg, #fafbfc 0%, #f5f7fa 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.clay-option-unselected:hover {
+  background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Summary Card */
+.clay-summary {
+  background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.03),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
 
 /* ==========================================
    📐 Animated Academic Background
@@ -3972,6 +4077,39 @@ body {
   justify-content: flex-end;
 }
 
+/* Float alignment - allows text to wrap beside image */
+.polaroid-image-wrapper[data-alignment="float-left"] {
+  display: block;
+  float: left;
+  width: auto;
+  margin: 0.5rem 1.5rem 1rem 0;
+  clear: left;
+}
+
+.polaroid-image-wrapper[data-alignment="float-right"] {
+  display: block;
+  float: right;
+  width: auto;
+  margin: 0.5rem 0 1rem 1.5rem;
+  clear: right;
+}
+
+/* When floating, adjust the wrapper behavior */
+.polaroid-image-wrapper.polaroid-floating {
+  width: auto;
+}
+
+/* Clear float after content */
+.polaroid-image-wrapper[data-alignment="float-left"] + p,
+.polaroid-image-wrapper[data-alignment="float-right"] + p {
+  /* Allow text to flow naturally */
+}
+
+/* Clear helper for when you want to break the float */
+.polaroid-clear {
+  clear: both;
+}
+
 .polaroid-image {
   position: relative;
   display: block;
@@ -4220,4 +4358,46 @@ body.polaroid-resizing * {
   opacity: 0.03;
   pointer-events: none;
   border-radius: 4px;
+}
+
+/* ============================================
+   Floating Image Support in Editor
+   ============================================ */
+
+/* Ensure editor content handles floats properly */
+.tiptap-editor,
+.notebook-editor-wrapper .ProseMirror {
+  overflow: auto; /* Contain floated elements */
+}
+
+/* Clear floats on headings to prevent awkward layouts */
+.tiptap-editor h1,
+.tiptap-editor h2,
+.tiptap-editor h3,
+.notebook-editor-wrapper .ProseMirror h1,
+.notebook-editor-wrapper .ProseMirror h2,
+.notebook-editor-wrapper .ProseMirror h3 {
+  clear: both;
+}
+
+/* Ensure blockquotes and code blocks clear floats */
+.tiptap-editor blockquote,
+.tiptap-editor pre,
+.notebook-editor-wrapper .ProseMirror blockquote,
+.notebook-editor-wrapper .ProseMirror pre {
+  clear: both;
+}
+
+/* Lists should clear floats for cleaner appearance */
+.tiptap-editor ul,
+.tiptap-editor ol,
+.notebook-editor-wrapper .ProseMirror ul,
+.notebook-editor-wrapper .ProseMirror ol {
+  clear: both;
+}
+
+/* Horizontal rule clears floats */
+.tiptap-editor hr,
+.notebook-editor-wrapper .ProseMirror hr {
+  clear: both;
 }
