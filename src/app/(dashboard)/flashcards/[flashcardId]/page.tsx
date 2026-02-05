@@ -36,6 +36,9 @@ export default function FlashcardPage() {
     const sessionIdRef = useRef<string | null>(null);
     const cardsStudiedRef = useRef(0);
     const correctAnswersRef = useRef(0);
+    
+    // Track cards reviewed in this session (so we can skip them)
+    const [reviewedCardIds, setReviewedCardIds] = useState<Set<string>>(new Set());
 
     // TanStack Query mutations
     const togglePublicMutation = useTogglePublicStatus();
@@ -72,6 +75,38 @@ export default function FlashcardPage() {
                 : 0
         };
     }, [studyData?.cards]);
+
+    // Cards not yet reviewed in this session
+    const unreviewedCards = useMemo(() => {
+        if (!studyData?.cards) return [];
+        return studyData.cards.filter(c => !reviewedCardIds.has(c.id));
+    }, [studyData?.cards, reviewedCardIds]);
+
+    // Check if current card was already reviewed this session
+    const isCurrentCardReviewed = currentCard ? reviewedCardIds.has(currentCard.id) : false;
+
+    // All cards have been reviewed in this session
+    const allCardsReviewedThisSession = studyData?.cards 
+        ? studyData.cards.length > 0 && unreviewedCards.length === 0 
+        : false;
+
+    // Find next unreviewed card index
+    const findNextUnreviewedIndex = useCallback((fromIndex: number): number | null => {
+        if (!studyData?.cards) return null;
+        // Search forward first
+        for (let i = fromIndex + 1; i < studyData.cards.length; i++) {
+            if (!reviewedCardIds.has(studyData.cards[i].id)) {
+                return i;
+            }
+        }
+        // Then search from beginning
+        for (let i = 0; i < fromIndex; i++) {
+            if (!reviewedCardIds.has(studyData.cards[i].id)) {
+                return i;
+            }
+        }
+        return null;
+    }, [studyData?.cards, reviewedCardIds]);
 
 // Load study set data once based on the flashcard ID
     const loadStudyData = useCallback(async () => {
@@ -169,6 +204,9 @@ export default function FlashcardPage() {
             const result = await reviewFlashcardWithSR(currentCard.id, rating);
 
             if (result) {
+                // Mark this card as reviewed in this session
+                setReviewedCardIds(prev => new Set([...prev, currentCard.id]));
+
                 // Update local state with the reviewed card
                 setStudyData(prev => {
                     if (!prev) return prev;
@@ -181,8 +219,9 @@ export default function FlashcardPage() {
                 });
 
                 // Show the review result briefly
+                const isMastered = result.flashcard.status === 'mastered';
                 setLastReviewResult({
-                    interval: result.nextReviewFormatted,
+                    interval: isMastered ? 'Mastered!' : result.nextReviewFormatted,
                     wasSuccessful: result.wasSuccessful
                 });
 
@@ -206,17 +245,41 @@ export default function FlashcardPage() {
                     );
                 }
 
-                // Auto-advance to next card after a brief delay
+                // Auto-advance to next UNREVIEWED card after a brief delay
                 setTimeout(() => {
                     setLastReviewResult(null);
-                    if (hasNext) {
+                    // Find next unreviewed card (need fresh lookup since state updated)
+                    const newReviewedIds = new Set([...reviewedCardIds, currentCard.id]);
+                    let nextIdx: number | null = null;
+                    
+                    if (studyData?.cards) {
+                        // Search forward first
+                        for (let i = currentIndex + 1; i < studyData.cards.length; i++) {
+                            if (!newReviewedIds.has(studyData.cards[i].id)) {
+                                nextIdx = i;
+                                break;
+                            }
+                        }
+                        // Then search from beginning
+                        if (nextIdx === null) {
+                            for (let i = 0; i < currentIndex; i++) {
+                                if (!newReviewedIds.has(studyData.cards[i].id)) {
+                                    nextIdx = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (nextIdx !== null && studyData?.cards) {
                         setShowAnswer(false);
-                        setCurrentIndex(prev => prev + 1);
-                        const nextCard = studyData?.cards[currentIndex + 1];
+                        setCurrentIndex(nextIdx);
+                        const nextCard = studyData.cards[nextIdx];
                         if (nextCard) {
                             window.history.replaceState(null, '', `/flashcards/${nextCard.id}`);
                         }
                     }
+                    // If no unreviewed cards left, stay on current (completion screen will show)
                 }, 1000);
             }
         } catch (error) {
@@ -224,7 +287,7 @@ export default function FlashcardPage() {
         } finally {
             setIsReviewing(false);
         }
-    }, [currentCard, isReviewing, reviewFlashcardWithSR, hasNext, studyData?.cards, currentIndex]);
+    }, [currentCard, isReviewing, reviewFlashcardWithSR, studyData?.cards, currentIndex, reviewedCardIds]);
 
     // Keyboard navigation with spaced repetition ratings
     useEffect(() => {
@@ -375,6 +438,65 @@ export default function FlashcardPage() {
 
     const isMastered = currentCard.status === 'mastered';
     const isLearning = currentCard.status === 'learning';
+
+    // Session complete - all cards reviewed
+    if (allCardsReviewedThisSession) {
+        const masteredCount = studyData.cards.filter(c => c.status === 'mastered').length;
+        return (
+            <div className="min-h-screen bg-background p-6">
+                <div className="max-w-4xl mx-auto">
+                    <div className="flex items-center gap-4 mb-6">
+                        <button
+                            onClick={handleBackToSets}
+                            className="p-2 rounded-lg hover:bg-background-muted transition-colors"
+                            title="Back to sets"
+                        >
+                            <ArrowLeft01Icon className="w-5 h-5" />
+                        </button>
+                        <Header title={studyData.set.title || "Flashcards"} />
+                    </div>
+                    
+                    <Card className="text-center py-12">
+                        <Card.Header>
+                            <div className="text-6xl mb-4">🎉</div>
+                            <h2 className="text-2xl font-bold text-foreground mb-2">
+                                Session Complete!
+                            </h2>
+                            <p className="text-foreground-muted mb-6">
+                                You've reviewed all {studyData.cards.length} cards in this set.
+                            </p>
+                            
+                            <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mb-8">
+                                <div className="p-4 bg-green-50 rounded-lg">
+                                    <div className="text-2xl font-bold text-green-600">{masteredCount}</div>
+                                    <div className="text-sm text-green-700">Mastered</div>
+                                </div>
+                                <div className="p-4 bg-blue-50 rounded-lg">
+                                    <div className="text-2xl font-bold text-blue-600">{cardsStudiedRef.current}</div>
+                                    <div className="text-sm text-blue-700">Studied</div>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                <Button onClick={handleBackToSets} variant="outline">
+                                    Back to Sets
+                                </Button>
+                                <Button onClick={() => {
+                                    setReviewedCardIds(new Set());
+                                    setCurrentIndex(0);
+                                    setShowAnswer(false);
+                                    cardsStudiedRef.current = 0;
+                                    correctAnswersRef.current = 0;
+                                }}>
+                                    Study Again
+                                </Button>
+                            </div>
+                        </Card.Header>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background p-6">

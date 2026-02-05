@@ -661,6 +661,11 @@ export function useFlashcardActions() {
         });
       }
 
+      // Override: "Easy" (quality 5) immediately masters the card
+      if (rating === 'easy') {
+        sm2Result.status = 'mastered';
+      }
+
       // Update the flashcard with new SM-2 values
       // Note: interval_days is stored as INTEGER in database, so we need to round
       // For sub-day intervals (learning cards), we store 0 and rely on next_review for timing
