@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/utils/supabase/client';
-import { startOfDay, subDays, format, differenceInDays, isToday, isYesterday, parseISO } from 'date-fns';
+import { startOfDay, subDays, format, differenceInDays, parseISO, addDays } from 'date-fns';
+import { isCardDue, sortCardsByUrgency } from '@/lib/spacedRepetition';
 
 const supabase = createClient();
 
@@ -257,9 +258,10 @@ async function fetchStudyStreak(): Promise<StudyStreakData> {
   const today = startOfDay(new Date());
 
   // Fetch study sessions from the last 365 days
+  // Include all activity types that count toward streak
   const { data: sessions } = await supabase
     .from('study_sessions')
-    .select('started_at, cards_studied')
+    .select('started_at, cards_studied, session_type, questions_answered')
     .eq('user_id', userId)
     .gte('started_at', subDays(today, 365).toISOString())
     .order('started_at', { ascending: false });
@@ -268,10 +270,26 @@ async function fetchStudyStreak(): Promise<StudyStreakData> {
     return { currentStreak: 0, longestStreak: 0, studiedToday: false, lastStudyDate: null };
   }
 
-  // Get unique study days
+  // Get unique study days - count any meaningful activity
   const studyDays = new Set<string>();
-  sessions.forEach((s: { started_at: string; cards_studied: number }) => {
-    if (s.cards_studied > 0) {
+  sessions.forEach((s: {
+    started_at: string;
+    cards_studied: number;
+    session_type: string;
+    questions_answered: number | null;
+  }) => {
+    // Count activity as studying if:
+    // - Flashcard study with cards studied
+    // - Exam attempt with questions answered
+    // - Note editing/creation (any completed session)
+    const hasActivity =
+      (s.session_type === 'flashcard_study' && s.cards_studied > 0) ||
+      (s.session_type === 'exam_attempt' && (s.questions_answered || 0) > 0) ||
+      s.session_type === 'note_edit' ||
+      s.session_type === 'note_created' ||
+      s.session_type === 'flashcard_created';
+
+    if (hasActivity) {
       studyDays.add(format(parseISO(s.started_at), 'yyyy-MM-dd'));
     }
   });
@@ -327,10 +345,9 @@ async function fetchCardsDue(): Promise<CardsDueData> {
   const now = new Date();
   const todayEnd = new Date(now);
   todayEnd.setHours(23, 59, 59, 999);
-  const tomorrowEnd = new Date(todayEnd);
-  tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
+  const tomorrowEnd = addDays(todayEnd, 1);
 
-  // Fetch all flashcards with their sets
+  // Fetch all flashcards with their sets, including SM-2 fields
   const { data: flashcards } = await supabase
     .from('flashcards')
     .select(`
@@ -338,6 +355,9 @@ async function fetchCardsDue(): Promise<CardsDueData> {
       status,
       next_review,
       set_id,
+      ease_factor,
+      interval_days,
+      repetitions,
       flashcard_sets!inner (
         id,
         title,
@@ -356,17 +376,41 @@ async function fetchCardsDue(): Promise<CardsDueData> {
   let newCards = 0;
   const setDueCounts: Record<string, { id: string; title: string; count: number }> = {};
 
-  flashcards.forEach((card: { id: string; status: string; next_review: string | null; set_id: string; flashcard_sets: { id: string; title: string } }) => {
+  flashcards.forEach((card: {
+    id: string;
+    status: string;
+    next_review: string | null;
+    set_id: string;
+    flashcard_sets: { id: string; title: string }
+  }) => {
+    // Count new cards separately
     if (card.status === 'new') {
       newCards++;
+      dueToday++; // New cards are always available to study
+      // Track by set
+      if (!setDueCounts[card.set_id]) {
+        setDueCounts[card.set_id] = {
+          id: card.flashcard_sets.id,
+          title: card.flashcard_sets.title,
+          count: 0
+        };
+      }
+      setDueCounts[card.set_id].count++;
       return;
     }
 
-    if (card.status === 'mastered') return;
+    // Mastered cards that aren't due yet shouldn't be counted
+    if (card.status === 'mastered' && !isCardDue(card.next_review)) {
+      return;
+    }
 
+    // Check if card is due using the spaced repetition utility
     if (card.next_review) {
       const reviewDate = parseISO(card.next_review);
-      if (reviewDate <= now) {
+      const isDue = isCardDue(card.next_review);
+
+      if (isDue) {
+        // Card is overdue (past its review date)
         overdue++;
         dueToday++;
         // Track by set
@@ -379,6 +423,7 @@ async function fetchCardsDue(): Promise<CardsDueData> {
         }
         setDueCounts[card.set_id].count++;
       } else if (reviewDate <= todayEnd) {
+        // Due later today
         dueToday++;
         if (!setDueCounts[card.set_id]) {
           setDueCounts[card.set_id] = {
@@ -389,6 +434,7 @@ async function fetchCardsDue(): Promise<CardsDueData> {
         }
         setDueCounts[card.set_id].count++;
       } else if (reviewDate <= tomorrowEnd) {
+        // Due tomorrow
         dueTomorrow++;
       }
     } else if (card.status === 'learning' || card.status === 'review') {
@@ -405,7 +451,7 @@ async function fetchCardsDue(): Promise<CardsDueData> {
     }
   });
 
-  // Find set with most due cards
+  // Find set with most due cards (prioritize for review suggestion)
   let nextReviewSet: CardsDueData['nextReviewSet'] = null;
   let maxDue = 0;
   Object.values(setDueCounts).forEach((set) => {
@@ -469,9 +515,10 @@ async function fetchWeeklyActivity(): Promise<WeeklyActivityData[]> {
   const today = startOfDay(new Date());
   const weekAgo = subDays(today, 6);
 
+  // Fetch all sessions including different activity types
   const { data: sessions } = await supabase
     .from('study_sessions')
-    .select('started_at, cards_studied, duration_minutes')
+    .select('started_at, cards_studied, duration_minutes, session_type, questions_answered')
     .eq('user_id', userId)
     .gte('started_at', weekAgo.toISOString())
     .lte('started_at', new Date().toISOString());
@@ -492,11 +539,23 @@ async function fetchWeeklyActivity(): Promise<WeeklyActivityData[]> {
 
   // Aggregate session data
   if (sessions) {
-    sessions.forEach((s: { started_at: string; cards_studied: number | null; duration_minutes: number | null }) => {
+    sessions.forEach((s: {
+      started_at: string;
+      cards_studied: number | null;
+      duration_minutes: number | null;
+      session_type: string;
+      questions_answered: number | null;
+    }) => {
       const dayStr = format(parseISO(s.started_at), 'yyyy-MM-dd');
       const dayData = weekData.find((d) => d.date === dayStr);
       if (dayData) {
-        dayData.cardsStudied += s.cards_studied || 0;
+        // Count cards/questions studied based on activity type
+        if (s.session_type === 'flashcard_study') {
+          dayData.cardsStudied += s.cards_studied || 0;
+        } else if (s.session_type === 'exam_attempt') {
+          // Count exam questions as activity
+          dayData.cardsStudied += s.questions_answered || 0;
+        }
         dayData.minutesStudied += s.duration_minutes || 0;
         dayData.sessions++;
       }

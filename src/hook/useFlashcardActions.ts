@@ -4,6 +4,17 @@ import { useMemo, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { GeminiFlashcard, GeminiResponse } from '@/lib/gemini';
 import { FlashcardSetInsert, FlashcardInsert, GeminiRequestInsert, Flashcard, FlashcardSet } from '@/lib/database.types';
+import {
+  SimplifiedRating,
+  simplifiedToQuality,
+  calculateSM2,
+  getInitialSM2ForNewCard,
+  getPreviewIntervals,
+  formatInterval,
+  isCardDue,
+  sortCardsByUrgency,
+  SM2_DEFAULTS
+} from '@/lib/spacedRepetition';
 
 const supabase = createClient();
 
@@ -29,6 +40,20 @@ export interface StudySetData {
     mastered: number;
     percentage: number;
   };
+}
+
+export interface SpacedRepetitionReviewResult {
+  flashcard: Flashcard;
+  nextReviewFormatted: string;
+  wasSuccessful: boolean;
+}
+
+// Extended flashcard type with SM-2 fields
+export interface FlashcardWithSM2 extends Flashcard {
+  ease_factor: number;
+  interval_days: number;
+  repetitions: number;
+  lapses: number;
 }
 
 export function useFlashcardActions() {
@@ -593,7 +618,233 @@ export function useFlashcardActions() {
       return (data || []) as Flashcard[];
     };
 
+    // ============================================
+    // Spaced Repetition Functions
+    // ============================================
+
+    /**
+     * Review a flashcard using the SM-2 spaced repetition algorithm
+     * Updates the card's scheduling data and returns the result
+     */
+    const reviewFlashcardWithSR = async (
+      flashcardId: string,
+      rating: SimplifiedRating
+    ): Promise<SpacedRepetitionReviewResult | null> => {
+      // First get the current flashcard
+      const { data: currentCard, error: fetchError } = await supabase
+        .from('flashcards')
+        .select('*')
+        .eq('id', flashcardId)
+        .single();
+
+      if (fetchError || !currentCard) {
+        console.error('Error fetching flashcard for review:', fetchError);
+        return null;
+      }
+
+      const card = currentCard as FlashcardWithSM2;
+      const quality = simplifiedToQuality(rating);
+      const wasSuccessful = quality >= 3;
+
+      // Calculate new SM-2 values
+      let sm2Result;
+      if (card.status === 'new' && card.repetitions === 0) {
+        // First time reviewing this card
+        sm2Result = getInitialSM2ForNewCard(quality);
+      } else {
+        sm2Result = calculateSM2({
+          quality,
+          currentEaseFactor: card.ease_factor || SM2_DEFAULTS.easeFactor,
+          currentInterval: card.interval_days || SM2_DEFAULTS.interval,
+          repetitions: card.repetitions || SM2_DEFAULTS.repetitions,
+          lapses: card.lapses || SM2_DEFAULTS.lapses,
+        });
+      }
+
+      // Update the flashcard with new SM-2 values
+      const updateData = {
+        status: sm2Result.status,
+        ease_factor: sm2Result.easeFactor,
+        interval_days: sm2Result.interval,
+        repetitions: sm2Result.repetitions,
+        lapses: sm2Result.lapses,
+        next_review: sm2Result.nextReview.toISOString(),
+        last_reviewed: new Date().toISOString(),
+        review_count: (card.review_count || 0) + 1,
+        correct_count: wasSuccessful ? (card.correct_count || 0) + 1 : card.correct_count || 0,
+      };
+
+      const { data: updatedCard, error: updateError } = await supabase
+        .from('flashcards')
+        .update(updateData)
+        .eq('id', flashcardId)
+        .select('*')
+        .single();
+
+      if (updateError) {
+        console.error('Error updating flashcard with SR data:', updateError);
+        return null;
+      }
+
+      // Update mastered_cards count in the parent set if status changed to mastered
+      if (sm2Result.status === 'mastered' && card.status !== 'mastered') {
+        const { error: setUpdateError } = await supabase
+          .from('flashcard_sets')
+          .update({
+            mastered_cards: supabase.rpc('increment', { row_id: card.set_id, field_name: 'mastered_cards' }),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', card.set_id);
+
+        // If RPC doesn't exist, do a manual update
+        if (setUpdateError) {
+          const { data: setData } = await supabase
+            .from('flashcard_sets')
+            .select('mastered_cards')
+            .eq('id', card.set_id)
+            .single();
+
+          if (setData) {
+            await supabase
+              .from('flashcard_sets')
+              .update({
+                mastered_cards: (setData.mastered_cards || 0) + 1,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', card.set_id);
+          }
+        }
+      }
+
+      return {
+        flashcard: updatedCard as Flashcard,
+        nextReviewFormatted: formatInterval(sm2Result.interval),
+        wasSuccessful,
+      };
+    };
+
+    /**
+     * Get cards that are due for review in a specific set
+     * Sorted by urgency (most overdue first)
+     */
+    const getDueCardsForSet = async (setId: string): Promise<Flashcard[]> => {
+      const { data, error } = await supabase
+        .from('flashcards')
+        .select('*')
+        .eq('set_id', setId)
+        .or('status.eq.new,status.eq.learning,status.eq.review')
+        .order('next_review', { ascending: true, nullsFirst: true });
+
+      if (error) {
+        console.error('Error fetching due cards:', error);
+        return [];
+      }
+
+      // Filter to only due cards and sort by urgency
+      const dueCards = (data || []).filter((card: Flashcard) =>
+        card.status === 'new' || isCardDue(card.next_review)
+      );
+
+      return sortCardsByUrgency(dueCards);
+    };
+
+    /**
+     * Get all due cards across all user's flashcard sets
+     */
+    const getAllDueCards = async (): Promise<Flashcard[]> => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) return [];
+
+      const { data, error } = await supabase
+        .from('flashcards')
+        .select(`
+          *,
+          flashcard_sets!inner (user_id)
+        `)
+        .eq('flashcard_sets.user_id', session.user.id)
+        .or('status.eq.new,status.eq.learning,status.eq.review');
+
+      if (error) {
+        console.error('Error fetching all due cards:', error);
+        return [];
+      }
+
+      // Filter to only due cards and sort by urgency
+      const dueCards = (data || []).filter((card: Flashcard) =>
+        card.status === 'new' || isCardDue(card.next_review)
+      );
+
+      return sortCardsByUrgency(dueCards);
+    };
+
+    /**
+     * Get preview of next review intervals for each rating option
+     * Useful for showing users what will happen with each choice
+     */
+    const getReviewPreviews = (flashcard: Flashcard): Record<SimplifiedRating, string> => {
+      const card = flashcard as FlashcardWithSM2;
+      return getPreviewIntervals(
+        card.ease_factor || SM2_DEFAULTS.easeFactor,
+        card.interval_days || SM2_DEFAULTS.interval,
+        card.repetitions || SM2_DEFAULTS.repetitions,
+        card.lapses || SM2_DEFAULTS.lapses
+      );
+    };
+
+    /**
+     * Get study statistics for a flashcard set
+     */
+    const getSetStudyStats = async (setId: string) => {
+      const { data: cards, error } = await supabase
+        .from('flashcards')
+        .select('status, next_review, ease_factor, interval_days')
+        .eq('set_id', setId);
+
+      if (error || !cards) {
+        console.error('Error fetching set stats:', error);
+        return null;
+      }
+
+      const now = new Date();
+      let newCount = 0;
+      let learningCount = 0;
+      let reviewCount = 0;
+      let masteredCount = 0;
+      let dueNowCount = 0;
+
+      cards.forEach((card: { status: string; next_review: string | null }) => {
+        switch (card.status) {
+          case 'new':
+            newCount++;
+            dueNowCount++; // New cards are always "due"
+            break;
+          case 'learning':
+            learningCount++;
+            if (isCardDue(card.next_review)) dueNowCount++;
+            break;
+          case 'review':
+            reviewCount++;
+            if (isCardDue(card.next_review)) dueNowCount++;
+            break;
+          case 'mastered':
+            masteredCount++;
+            break;
+        }
+      });
+
+      return {
+        totalCards: cards.length,
+        newCount,
+        learningCount,
+        reviewCount,
+        masteredCount,
+        dueNowCount,
+        masteryPercentage: cards.length > 0 ? Math.round((masteredCount / cards.length) * 100) : 0,
+      };
+    };
+
     return {
+      // Flashcard set operations
       createFlashcardSet,
       saveFlashcards,
       saveGeneratedFlashcards,
@@ -613,7 +864,17 @@ export function useFlashcardActions() {
       deleteFlashcardSet,
       togglePublicStatus,
       getPublicFlashcardSet,
-      getPublicFlashcards
+      getPublicFlashcards,
+      // Spaced repetition functions
+      reviewFlashcardWithSR,
+      getDueCardsForSet,
+      getAllDueCards,
+      getReviewPreviews,
+      getSetStudyStats,
     };
   }, [convertDifficultyToLevel]);
 }
+
+// Re-export spaced repetition utilities for convenience
+export { formatInterval, isCardDue, sortCardsByUrgency, SM2_DEFAULTS };
+export type { SimplifiedRating };

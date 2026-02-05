@@ -1,14 +1,20 @@
 'use client';
 
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Card from "@/component/ui/Card";
 import Header from "@/component/ui/Header";
 import Button from "@/component/ui/Button";
-import { useFlashcardActions } from "@/hook/useFlashcardActions";
+import { useFlashcardActions, SimplifiedRating, formatInterval } from "@/hook/useFlashcardActions";
 import { Flashcard } from "@/lib/database.types";
-import { Share01Icon, ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle01Icon, Cancel01Icon } from "hugeicons-react";
-import { useUpdateFlashcardStatus, useTogglePublicStatus, StudySetData } from "@/hooks/useFlashcards";
+import { Share01Icon, ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle01Icon, Clock01Icon, RepeatIcon, SparklesIcon } from "hugeicons-react";
+import { useTogglePublicStatus, StudySetData } from "@/hooks/useFlashcards";
+import {
+  getOrCreateFlashcardSession,
+  completeStudySession,
+  incrementSessionStats,
+  logCardReview
+} from "@/hooks/useActivityTracking";
 
 export default function FlashcardPage() {
     const params = useParams();
@@ -22,14 +28,20 @@ export default function FlashcardPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSharing, setIsSharing] = useState(false);
     const [shareLinkCopied, setShareLinkCopied] = useState(false);
+    const [isReviewing, setIsReviewing] = useState(false);
+    const [reviewPreviews, setReviewPreviews] = useState<Record<SimplifiedRating, string> | null>(null);
+    const [lastReviewResult, setLastReviewResult] = useState<{ interval: string; wasSuccessful: boolean } | null>(null);
+
+    // Session tracking
+    const sessionIdRef = useRef<string | null>(null);
+    const cardsStudiedRef = useRef(0);
+    const correctAnswersRef = useRef(0);
 
     // TanStack Query mutations
-    const updateStatusMutation = useUpdateFlashcardStatus();
     const togglePublicMutation = useTogglePublicStatus();
-    const isUpdating = updateStatusMutation.isPending;
 
     // Keep old hook for utility functions
-    const { getStudySetData, getFlashcardById } = useFlashcardActions();
+    const { getStudySetData, getFlashcardById, reviewFlashcardWithSR, getReviewPreviews } = useFlashcardActions();
 
     // Derived state from studyData
     const currentCard = useMemo(() => {
@@ -83,6 +95,12 @@ export default function FlashcardPage() {
                 // Find the index of the current flashcard
                 const index = data.cards.findIndex(c => c.id === flashcardId);
                 setCurrentIndex(index >= 0 ? index : 0);
+
+                // Start a study session for activity tracking
+                if (!sessionIdRef.current) {
+                    const sessionId = await getOrCreateFlashcardSession(flashcard.set_id);
+                    sessionIdRef.current = sessionId;
+                }
             }
         } catch (error) {
             console.error('Error loading study data:', error);
@@ -95,7 +113,120 @@ export default function FlashcardPage() {
         loadStudyData();
     }, [loadStudyData]);
 
-    // Keyboard navigation
+    // Update review previews when current card changes
+    useEffect(() => {
+        if (currentCard) {
+            const previews = getReviewPreviews(currentCard);
+            setReviewPreviews(previews);
+        }
+    }, [currentCard, getReviewPreviews]);
+
+    // Complete session on unmount
+    useEffect(() => {
+        return () => {
+            if (sessionIdRef.current && cardsStudiedRef.current > 0) {
+                completeStudySession({
+                    sessionId: sessionIdRef.current,
+                    cardsStudied: cardsStudiedRef.current,
+                    correctAnswers: correctAnswersRef.current,
+                });
+            }
+        };
+    }, []);
+
+    const handleShowAnswer = useCallback(() => {
+        setShowAnswer(true);
+    }, []);
+
+    const handleNextCard = useCallback(() => {
+        if (!hasNext) return;
+        setShowAnswer(false);
+        setCurrentIndex(prev => prev + 1);
+        // Update URL without full page reload
+        const nextCard = studyData?.cards[currentIndex + 1];
+        if (nextCard) {
+            window.history.replaceState(null, '', `/flashcards/${nextCard.id}`);
+        }
+    }, [hasNext, studyData?.cards, currentIndex]);
+
+    const handlePreviousCard = useCallback(() => {
+        if (!hasPrevious) return;
+        setShowAnswer(false);
+        setCurrentIndex(prev => prev - 1);
+        // Update URL without full page reload
+        const prevCard = studyData?.cards[currentIndex - 1];
+        if (prevCard) {
+            window.history.replaceState(null, '', `/flashcards/${prevCard.id}`);
+        }
+    }, [hasPrevious, studyData?.cards, currentIndex]);
+
+    // Handle review with spaced repetition rating
+    const handleReview = useCallback(async (rating: SimplifiedRating) => {
+        if (!currentCard || isReviewing) return;
+
+        setIsReviewing(true);
+        try {
+            const result = await reviewFlashcardWithSR(currentCard.id, rating);
+
+            if (result) {
+                // Update local state with the reviewed card
+                setStudyData(prev => {
+                    if (!prev) return prev;
+                    return {
+                        ...prev,
+                        cards: prev.cards.map(c =>
+                            c.id === currentCard.id ? result.flashcard : c
+                        )
+                    };
+                });
+
+                // Show the review result briefly
+                setLastReviewResult({
+                    interval: result.nextReviewFormatted,
+                    wasSuccessful: result.wasSuccessful
+                });
+
+                // Track the review in the session
+                cardsStudiedRef.current += 1;
+                if (result.wasSuccessful) {
+                    correctAnswersRef.current += 1;
+                }
+
+                // Log to session_results if we have a session
+                if (sessionIdRef.current) {
+                    await logCardReview(
+                        sessionIdRef.current,
+                        currentCard.id,
+                        result.wasSuccessful
+                    );
+                    await incrementSessionStats(
+                        sessionIdRef.current,
+                        1,
+                        result.wasSuccessful
+                    );
+                }
+
+                // Auto-advance to next card after a brief delay
+                setTimeout(() => {
+                    setLastReviewResult(null);
+                    if (hasNext) {
+                        setShowAnswer(false);
+                        setCurrentIndex(prev => prev + 1);
+                        const nextCard = studyData?.cards[currentIndex + 1];
+                        if (nextCard) {
+                            window.history.replaceState(null, '', `/flashcards/${nextCard.id}`);
+                        }
+                    }
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('Error reviewing flashcard:', error);
+        } finally {
+            setIsReviewing(false);
+        }
+    }, [currentCard, isReviewing, reviewFlashcardWithSR, hasNext, studyData?.cards, currentIndex]);
+
+    // Keyboard navigation with spaced repetition ratings
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             // Ignore if user is typing in an input
@@ -125,10 +256,29 @@ export default function FlashcardPage() {
                         handlePreviousCard();
                     }
                     break;
-                case 'm':
+                // Spaced repetition keyboard shortcuts
+                case '1':
                     e.preventDefault();
-                    if (showAnswer && currentCard && currentCard.status !== 'mastered') {
-                        handleMarkAsMastered();
+                    if (showAnswer && !isReviewing) {
+                        handleReview('again');
+                    }
+                    break;
+                case '2':
+                    e.preventDefault();
+                    if (showAnswer && !isReviewing) {
+                        handleReview('hard');
+                    }
+                    break;
+                case '3':
+                    e.preventDefault();
+                    if (showAnswer && !isReviewing) {
+                        handleReview('good');
+                    }
+                    break;
+                case '4':
+                    e.preventDefault();
+                    if (showAnswer && !isReviewing) {
+                        handleReview('easy');
                     }
                     break;
                 case 'Escape':
@@ -142,85 +292,7 @@ export default function FlashcardPage() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [showAnswer, hasNext, hasPrevious, currentCard]);
-
-    const handleShowAnswer = useCallback(() => {
-        setShowAnswer(true);
-    }, []);
-
-    const handleNextCard = useCallback(() => {
-        if (!hasNext) return;
-        setShowAnswer(false);
-        setCurrentIndex(prev => prev + 1);
-        // Update URL without full page reload
-        const nextCard = studyData?.cards[currentIndex + 1];
-        if (nextCard) {
-            window.history.replaceState(null, '', `/flashcards/${nextCard.id}`);
-        }
-    }, [hasNext, studyData?.cards, currentIndex]);
-
-    const handlePreviousCard = useCallback(() => {
-        if (!hasPrevious) return;
-        setShowAnswer(false);
-        setCurrentIndex(prev => prev - 1);
-        // Update URL without full page reload
-        const prevCard = studyData?.cards[currentIndex - 1];
-        if (prevCard) {
-            window.history.replaceState(null, '', `/flashcards/${prevCard.id}`);
-        }
-    }, [hasPrevious, studyData?.cards, currentIndex]);
-
-    const handleMarkAsMastered = useCallback(async () => {
-        if (!currentCard || isUpdating) return;
-
-        try {
-            const updatedCard = await updateStatusMutation.mutateAsync({
-                flashcardId: currentCard.id,
-                status: 'mastered',
-                wasCorrect: true
-            });
-
-            if (updatedCard) {
-                setStudyData(prev => {
-                    if (!prev) return prev;
-                    return {
-                        ...prev,
-                        cards: prev.cards.map(c =>
-                            c.id === currentCard.id ? updatedCard : c
-                        )
-                    };
-                });
-            }
-        } catch (error) {
-            console.error('Error marking as mastered:', error);
-        }
-    }, [currentCard, isUpdating, updateStatusMutation]);
-
-    const handleMarkAsLearning = useCallback(async () => {
-        if (!currentCard || isUpdating) return;
-
-        try {
-            const updatedCard = await updateStatusMutation.mutateAsync({
-                flashcardId: currentCard.id,
-                status: 'learning',
-                wasCorrect: false
-            });
-
-            if (updatedCard) {
-                setStudyData(prev => {
-                    if (!prev) return prev;
-                    return {
-                        ...prev,
-                        cards: prev.cards.map(c =>
-                            c.id === currentCard.id ? updatedCard : c
-                        )
-                    };
-                });
-            }
-        } catch (error) {
-            console.error('Error marking as learning:', error);
-        }
-    }, [currentCard, isUpdating, updateStatusMutation]);
+    }, [showAnswer, hasNext, hasPrevious, isReviewing, handleReview, handleNextCard, handlePreviousCard]);
 
     const handleToggleSharing = useCallback(async () => {
         if (!studyData?.set) return;
@@ -362,7 +434,7 @@ export default function FlashcardPage() {
                         <span className="hidden sm:inline">
                             Shortcuts: <kbd className="px-1.5 py-0.5 bg-background-muted rounded text-xs">Space</kbd> reveal ·
                             <kbd className="px-1.5 py-0.5 bg-background-muted rounded text-xs ml-1">←</kbd><kbd className="px-1.5 py-0.5 bg-background-muted rounded text-xs">→</kbd> navigate ·
-                            <kbd className="px-1.5 py-0.5 bg-background-muted rounded text-xs ml-1">M</kbd> master
+                            <kbd className="px-1.5 py-0.5 bg-background-muted rounded text-xs ml-1">1</kbd>-<kbd className="px-1.5 py-0.5 bg-background-muted rounded text-xs">4</kbd> rate
                         </span>
                     </div>
                 </div>
@@ -398,49 +470,113 @@ export default function FlashcardPage() {
                                 {currentCard.answer}
                             </div>
 
-                            {/* Action buttons */}
-                            <div className="flex gap-3">
-                                {!isMastered && (
-                                    <>
-                                        <Button
-                                            onClick={handleMarkAsLearning}
-                                            disabled={isUpdating}
-                                            variant="outline"
-                                            className="flex-1 border-yellow-300 text-yellow-700 hover:bg-yellow-50"
+                            {/* Review result feedback */}
+                            {lastReviewResult && (
+                                <div className={`mb-4 p-3 rounded-lg text-center ${
+                                    lastReviewResult.wasSuccessful
+                                        ? 'bg-green-50 text-green-800'
+                                        : 'bg-red-50 text-red-800'
+                                }`}>
+                                    <span className="font-medium">
+                                        {lastReviewResult.wasSuccessful ? 'Correct!' : 'Keep practicing!'}
+                                    </span>
+                                    <span className="ml-2 text-sm">
+                                        Next review in {lastReviewResult.interval}
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Spaced Repetition Rating Buttons */}
+                            {!lastReviewResult && (
+                                <div className="space-y-3">
+                                    <p className="text-sm text-foreground-muted text-center">
+                                        How well did you know this?
+                                    </p>
+                                    <div className="grid grid-cols-4 gap-2">
+                                        <button
+                                            onClick={() => handleReview('again')}
+                                            disabled={isReviewing}
+                                            className="flex flex-col items-center p-3 rounded-lg border-2 border-red-200 bg-red-50 hover:bg-red-100 hover:border-red-300 transition-all disabled:opacity-50"
                                         >
-                                            <Cancel01Icon className="w-4 h-4 mr-2" />
-                                            Still Learning
-                                        </Button>
-                                        <Button
-                                            onClick={handleMarkAsMastered}
-                                            disabled={isUpdating}
-                                            className="flex-1 bg-green-600 hover:bg-green-700"
+                                            <RepeatIcon className="w-5 h-5 text-red-600 mb-1" />
+                                            <span className="text-sm font-medium text-red-700">Again</span>
+                                            {reviewPreviews && (
+                                                <span className="text-xs text-red-500 mt-1">
+                                                    {reviewPreviews.again}
+                                                </span>
+                                            )}
+                                        </button>
+                                        <button
+                                            onClick={() => handleReview('hard')}
+                                            disabled={isReviewing}
+                                            className="flex flex-col items-center p-3 rounded-lg border-2 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:border-orange-300 transition-all disabled:opacity-50"
                                         >
-                                            <CheckmarkCircle01Icon className="w-4 h-4 mr-2" />
-                                            {isUpdating ? "Marking..." : "Got It!"}
-                                        </Button>
-                                    </>
-                                )}
-                                {isMastered && (
+                                            <Clock01Icon className="w-5 h-5 text-orange-600 mb-1" />
+                                            <span className="text-sm font-medium text-orange-700">Hard</span>
+                                            {reviewPreviews && (
+                                                <span className="text-xs text-orange-500 mt-1">
+                                                    {reviewPreviews.hard}
+                                                </span>
+                                            )}
+                                        </button>
+                                        <button
+                                            onClick={() => handleReview('good')}
+                                            disabled={isReviewing}
+                                            className="flex flex-col items-center p-3 rounded-lg border-2 border-green-200 bg-green-50 hover:bg-green-100 hover:border-green-300 transition-all disabled:opacity-50"
+                                        >
+                                            <CheckmarkCircle01Icon className="w-5 h-5 text-green-600 mb-1" />
+                                            <span className="text-sm font-medium text-green-700">Good</span>
+                                            {reviewPreviews && (
+                                                <span className="text-xs text-green-500 mt-1">
+                                                    {reviewPreviews.good}
+                                                </span>
+                                            )}
+                                        </button>
+                                        <button
+                                            onClick={() => handleReview('easy')}
+                                            disabled={isReviewing}
+                                            className="flex flex-col items-center p-3 rounded-lg border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-300 transition-all disabled:opacity-50"
+                                        >
+                                            <SparklesIcon className="w-5 h-5 text-blue-600 mb-1" />
+                                            <span className="text-sm font-medium text-blue-700">Easy</span>
+                                            {reviewPreviews && (
+                                                <span className="text-xs text-blue-500 mt-1">
+                                                    {reviewPreviews.easy}
+                                                </span>
+                                            )}
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-foreground-muted text-center">
+                                        Press <kbd className="px-1 py-0.5 bg-background-muted rounded">1</kbd>-<kbd className="px-1 py-0.5 bg-background-muted rounded">4</kbd> for quick rating
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Navigation for mastered cards */}
+                            {isMastered && !lastReviewResult && (
+                                <div className="mt-4">
                                     <Button
                                         variant="outline"
                                         onClick={handleNextCard}
                                         disabled={!hasNext}
-                                        className="flex-1"
+                                        className="w-full"
                                     >
                                         {hasNext ? "Next Card" : "Last Card"}
                                         <ArrowRight01Icon className="w-4 h-4 ml-2" />
                                     </Button>
-                                )}
-                            </div>
+                                </div>
+                            )}
 
-                            {!hasNext && (
+                            {!hasNext && !lastReviewResult && (
                                 <div className="mt-4 p-4 bg-green-50 rounded-lg text-center">
                                     <p className="text-green-800 font-medium">
-                                        You've completed this set! 🎉
+                                        You've completed this set!
                                     </p>
                                     <p className="text-sm text-green-600 mt-1">
                                         {progress.mastered}/{progress.total} cards mastered ({progress.percentage}%)
+                                    </p>
+                                    <p className="text-sm text-green-600 mt-1">
+                                        Cards studied this session: {cardsStudiedRef.current}
                                     </p>
                                 </div>
                             )}
@@ -519,12 +655,32 @@ export default function FlashcardPage() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div className="p-3 bg-background-muted rounded-lg">
                                 <span className="text-foreground-muted block text-xs">Status</span>
-                                <span className="font-medium capitalize">{currentCard.status}</span>
+                                <span className={`font-medium capitalize ${
+                                    currentCard.status === 'mastered' ? 'text-green-600' :
+                                    currentCard.status === 'learning' ? 'text-yellow-600' :
+                                    currentCard.status === 'review' ? 'text-blue-600' : ''
+                                }`}>{currentCard.status}</span>
                             </div>
                             <div className="p-3 bg-background-muted rounded-lg">
-                                <span className="text-foreground-muted block text-xs">Difficulty</span>
-                                <span className="font-medium">Level {currentCard.difficulty_level}</span>
+                                <span className="text-foreground-muted block text-xs">Ease Factor</span>
+                                <span className="font-medium">
+                                    {((currentCard as any).ease_factor || 2.5).toFixed(2)}
+                                </span>
                             </div>
+                            <div className="p-3 bg-background-muted rounded-lg">
+                                <span className="text-foreground-muted block text-xs">Interval</span>
+                                <span className="font-medium">
+                                    {(currentCard as any).interval_days
+                                        ? formatInterval((currentCard as any).interval_days)
+                                        : 'New'}
+                                </span>
+                            </div>
+                            <div className="p-3 bg-background-muted rounded-lg">
+                                <span className="text-foreground-muted block text-xs">Repetitions</span>
+                                <span className="font-medium">{(currentCard as any).repetitions || 0}</span>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-3">
                             <div className="p-3 bg-background-muted rounded-lg">
                                 <span className="text-foreground-muted block text-xs">Reviews</span>
                                 <span className="font-medium">{currentCard.review_count}</span>
@@ -538,6 +694,18 @@ export default function FlashcardPage() {
                                             ({Math.round((currentCard.correct_count / currentCard.review_count) * 100)}%)
                                         </span>
                                     )}
+                                </span>
+                            </div>
+                            <div className="p-3 bg-background-muted rounded-lg">
+                                <span className="text-foreground-muted block text-xs">Lapses</span>
+                                <span className="font-medium">{(currentCard as any).lapses || 0}</span>
+                            </div>
+                            <div className="p-3 bg-background-muted rounded-lg">
+                                <span className="text-foreground-muted block text-xs">Next Review</span>
+                                <span className="font-medium text-xs">
+                                    {currentCard.next_review
+                                        ? new Date(currentCard.next_review).toLocaleDateString()
+                                        : 'Now'}
                                 </span>
                             </div>
                         </div>

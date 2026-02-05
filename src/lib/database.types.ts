@@ -280,6 +280,11 @@ export type Database = {
           next_review: string | null
           review_count: number
           correct_count: number
+          // SM-2 spaced repetition fields
+          ease_factor: number
+          interval_days: number
+          repetitions: number
+          lapses: number
           created_at: string
           updated_at: string
         }
@@ -296,6 +301,11 @@ export type Database = {
           next_review?: string | null
           review_count?: number
           correct_count?: number
+          // SM-2 spaced repetition fields
+          ease_factor?: number
+          interval_days?: number
+          repetitions?: number
+          lapses?: number
           created_at?: string
           updated_at?: string
         }
@@ -312,6 +322,11 @@ export type Database = {
           next_review?: string | null
           review_count?: number
           correct_count?: number
+          // SM-2 spaced repetition fields
+          ease_factor?: number
+          interval_days?: number
+          repetitions?: number
+          lapses?: number
           created_at?: string
           updated_at?: string
         }
@@ -321,10 +336,14 @@ export type Database = {
           id: string
           user_id: string
           set_id: string | null
+          note_id: string | null
+          exam_id: string | null
           session_type: string
           cards_studied: number
           correct_answers: number
           duration_minutes: number
+          questions_answered: number
+          score: number | null
           started_at: string
           completed_at: string | null
         }
@@ -332,10 +351,14 @@ export type Database = {
           id?: string
           user_id: string
           set_id?: string | null
+          note_id?: string | null
+          exam_id?: string | null
           session_type: string
           cards_studied?: number
           correct_answers?: number
           duration_minutes?: number
+          questions_answered?: number
+          score?: number | null
           started_at?: string
           completed_at?: string | null
         }
@@ -343,10 +366,14 @@ export type Database = {
           id?: string
           user_id?: string
           set_id?: string | null
+          note_id?: string | null
+          exam_id?: string | null
           session_type?: string
           cards_studied?: number
           correct_answers?: number
           duration_minutes?: number
+          questions_answered?: number
+          score?: number | null
           started_at?: string
           completed_at?: string | null
         }
