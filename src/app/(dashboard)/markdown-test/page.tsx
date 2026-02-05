@@ -33,7 +33,7 @@ export default function MarkdownEditor() {
                 {editing ? (
                     <textarea
                         ref={textareaRef}
-                        className="w-full h-screen p-2 border rounded resize-y font-mono text-base bg-white text-black dark:bg-gray-900 dark:text-white"
+                        className="w-full h-screen p-2 border rounded resize-y font-mono text-base bg-white text-black"
                         value={markdownContent}
                         onChange={e => {
                             setMarkdownContent(e.target.value);
@@ -45,7 +45,7 @@ export default function MarkdownEditor() {
                     />
                 ) : (
                     <div
-                        className="w-full h-full p-4 border rounded bg-gray-50 dark:bg-gray-800 overflow-auto cursor-pointer prose prose-sm sm:prose lg:prose-lg xl:prose-xl dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-em:text-foreground prose-code:text-foreground prose-pre:text-foreground prose-blockquote:text-foreground prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground prose-table:text-foreground prose-th:text-foreground prose-td:text-foreground"
+                        className="w-full h-full p-4 border rounded bg-gray-50 overflow-auto cursor-pointer prose prose-sm sm:prose lg:prose-lg xl:prose-xl prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-em:text-foreground prose-code:text-foreground prose-pre:text-foreground prose-blockquote:text-foreground prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground prose-table:text-foreground prose-th:text-foreground prose-td:text-foreground"
                         onClick={() => setEditing(true)}
                         title="Click to edit"
                     >

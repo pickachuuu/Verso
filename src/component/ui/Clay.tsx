@@ -11,6 +11,8 @@ import { clsx } from 'clsx';
  * - Inner shadows creating a "puffy" look
  * - Outer shadows for depth
  * - Pastel/muted colors
+ *
+ * Optimized for light backgrounds with enhanced visual depth
  */
 
 // ============================================
@@ -19,7 +21,7 @@ import { clsx } from 'clsx';
 interface ClayCardProps {
   children: ReactNode;
   className?: string;
-  variant?: 'default' | 'elevated' | 'pressed';
+  variant?: 'default' | 'elevated' | 'pressed' | 'floating' | 'glass';
   padding?: 'none' | 'sm' | 'md' | 'lg';
 }
 
@@ -40,6 +42,8 @@ export function ClayCard({
     default: 'clay-card',
     elevated: 'clay-card-elevated',
     pressed: 'clay-card-pressed',
+    floating: 'clay-card-floating',
+    glass: 'clay-card-glass',
   };
 
   return (
@@ -112,7 +116,7 @@ export function ClayButton({
 interface ClayBadgeProps {
   children: ReactNode;
   className?: string;
-  variant?: 'default' | 'accent' | 'success' | 'warning';
+  variant?: 'default' | 'accent' | 'success' | 'warning' | 'error';
 }
 
 export function ClayBadge({
@@ -125,11 +129,12 @@ export function ClayBadge({
     accent: 'clay-badge-accent',
     success: 'clay-badge-success',
     warning: 'clay-badge-warning',
+    error: 'clay-badge-error',
   };
 
   return (
     <span className={clsx(
-      'inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium',
+      'inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold',
       variantClasses[variant],
       className
     )}>
@@ -145,7 +150,7 @@ interface ClayIconBoxProps {
   children: ReactNode;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'accent';
+  variant?: 'default' | 'accent' | 'secondary' | 'tertiary';
 }
 
 export function ClayIconBox({
@@ -163,6 +168,8 @@ export function ClayIconBox({
   const variantClasses = {
     default: 'clay-icon-box',
     accent: 'clay-icon-box-accent',
+    secondary: 'clay-icon-box-secondary',
+    tertiary: 'clay-icon-box-tertiary',
   };
 
   return (

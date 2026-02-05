@@ -17,7 +17,7 @@ export default function Header({ title, description, children, className, icon }
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-start gap-4">
           {icon && (
-            <div className="p-3 rounded-xl bg-accent-muted shrink-0">
+            <div className="p-3 rounded-xl bg-primary-muted shrink-0">
               {icon}
             </div>
           )}

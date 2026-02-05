@@ -176,25 +176,25 @@ export default function FlashcardDashboardPage() {
         <Header
           title="Flashcards"
           description="Study with interactive flashcards"
-          icon={<BookOpen01Icon className="w-6 h-6 text-accent" />}
+          icon={<BookOpen01Icon className="w-6 h-6 text-secondary" />}
         />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[1, 2, 3].map((i) => (
             <ClayCard key={i} variant="default" padding="none" className="rounded-2xl animate-pulse overflow-hidden">
               <div className="p-5 space-y-4">
                 <div className="flex items-start justify-between">
-                  <div className="h-6 w-2/3 bg-background-muted rounded-lg" />
-                  <div className="h-8 w-8 bg-background-muted rounded-lg" />
+                  <div className="h-6 w-2/3 bg-gray-200 rounded-lg" />
+                  <div className="h-8 w-8 bg-gray-200 rounded-lg" />
                 </div>
-                <div className="h-2 w-full bg-background-muted rounded-full" />
+                <div className="h-2 w-full bg-gray-200 rounded-full" />
                 <div className="flex justify-between">
-                  <div className="h-4 w-20 bg-background-muted rounded" />
-                  <div className="h-4 w-16 bg-background-muted rounded" />
+                  <div className="h-4 w-20 bg-gray-200 rounded" />
+                  <div className="h-4 w-16 bg-gray-200 rounded" />
                 </div>
               </div>
-              <div className="px-5 py-4 bg-background-muted/30 flex justify-between">
-                <div className="h-4 w-24 bg-background-muted rounded" />
-                <div className="h-8 w-20 bg-background-muted rounded-lg" />
+              <div className="px-5 py-4 bg-gray-50 flex justify-between">
+                <div className="h-4 w-24 bg-gray-200 rounded" />
+                <div className="h-8 w-20 bg-gray-200 rounded-lg" />
               </div>
             </ClayCard>
           ))}
@@ -209,7 +209,7 @@ export default function FlashcardDashboardPage() {
         <Header
           title="Flashcards"
           description="Study with interactive flashcards"
-          icon={<BookOpen01Icon className="w-6 h-6 text-accent" />}
+          icon={<BookOpen01Icon className="w-6 h-6 text-secondary" />}
         >
           <Link href="/notes">
             <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent text-white font-medium text-sm hover:bg-accent/90 transition-colors">
@@ -226,8 +226,8 @@ export default function FlashcardDashboardPage() {
             padding="sm"
             className={`rounded-xl ${
               saveSuccess.includes('Error')
-                ? 'border-2 border-red-200 bg-red-50 dark:bg-red-950/20'
-                : 'border-2 border-green-200 bg-green-50 dark:bg-green-950/20'
+                ? 'border-2 border-red-200 bg-red-50'
+                : 'border-2 border-green-200 bg-green-50'
             }`}
           >
             <p className={`text-sm font-medium ${
@@ -241,8 +241,8 @@ export default function FlashcardDashboardPage() {
         {flashcardSets.length === 0 ? (
           <ClayCard variant="elevated" padding="lg" className="rounded-2xl">
             <div className="text-center py-12">
-              <div className="w-20 h-20 rounded-2xl bg-accent-muted flex items-center justify-center mx-auto mb-6">
-                <BookOpen01Icon className="w-10 h-10 text-accent" />
+              <div className="w-20 h-20 rounded-2xl bg-secondary-muted flex items-center justify-center mx-auto mb-6">
+                <BookOpen01Icon className="w-10 h-10 text-secondary" />
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">No flashcard sets yet</h3>
               <p className="text-foreground-muted mb-6 max-w-sm mx-auto">
@@ -290,8 +290,8 @@ export default function FlashcardDashboardPage() {
                             {set.description || 'No description'}
                           </p>
                         </div>
-                        <div className="p-2 rounded-xl bg-accent-muted shrink-0">
-                          <BookOpen01Icon className="w-5 h-5 text-accent" />
+                        <div className="p-2 rounded-xl bg-secondary-muted shrink-0">
+                          <BookOpen01Icon className="w-5 h-5 text-secondary" />
                         </div>
                       </div>
 
@@ -301,9 +301,9 @@ export default function FlashcardDashboardPage() {
                           <span className="text-foreground-muted">Progress</span>
                           <span className="font-semibold text-foreground">{progress}%</span>
                         </div>
-                        <div className="w-full bg-background-muted rounded-full h-2.5 overflow-hidden">
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                           <div
-                            className="bg-gradient-to-r from-accent to-accent-light h-full rounded-full transition-all duration-500"
+                            className="bg-gradient-to-r from-secondary to-tertiary h-full rounded-full transition-all duration-500"
                             style={{ width: `${progress}%` }}
                           />
                         </div>
@@ -321,7 +321,7 @@ export default function FlashcardDashboardPage() {
                     </div>
 
                     {/* Card Footer */}
-                    <div className="px-5 py-4 bg-background-muted/30 flex items-center justify-between gap-3 border-t border-border/50">
+                    <div className="px-5 py-4 bg-gray-50 flex items-center justify-between gap-3 border-t border-gray-100">
                       <div className="flex items-center gap-1.5 text-xs text-foreground-muted">
                         <Clock01Icon className="w-3.5 h-3.5" />
                         <span>{set.updated_at ? formatDate(set.updated_at) : 'Never'}</span>
@@ -352,7 +352,7 @@ export default function FlashcardDashboardPage() {
                         </button>
 
                         <button
-                          className="p-2 rounded-lg bg-red-50 dark:bg-red-950/30 hover:bg-red-500 text-red-500 hover:text-white transition-all duration-200"
+                          className="p-2 rounded-lg bg-red-50 hover:bg-red-500 text-red-500 hover:text-white transition-all duration-200"
                           title="Delete set"
                           onClick={(e) => {
                             e.stopPropagation();

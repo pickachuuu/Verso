@@ -31,7 +31,7 @@ interface Flashcard {
 export default function PublicFlashcardSetPage() {
   const params = useParams();
   const setId = params?.setId as string;
-  
+
   const [set, setSet] = useState<FlashcardSet | null>(null);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,7 +148,7 @@ export default function PublicFlashcardSetPage() {
 
       </div>
     <div className="space-y-6">
-      
+
       {/* Set Info */}
       <Card variant="elevated" className="rounded-xl border border-border bg-surface shadow-sm">
         <Card.Header className="pb-4">
@@ -227,7 +227,7 @@ export default function PublicFlashcardSetPage() {
                   </Button>
                 </div>
                 {showAnswer && (
-                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                     <p className="text-foreground">{currentCard.answer}</p>
                   </div>
                 )}
@@ -237,9 +237,9 @@ export default function PublicFlashcardSetPage() {
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-foreground-muted">Difficulty:</span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  currentCard.difficulty_level === 1 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                  currentCard.difficulty_level === 2 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                  'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                  currentCard.difficulty_level === 1 ? 'bg-green-100 text-green-800' :
+                  currentCard.difficulty_level === 2 ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
                 }`}>
                   {currentCard.difficulty_level === 1 ? 'Easy' :
                    currentCard.difficulty_level === 2 ? 'Medium' : 'Hard'}
@@ -259,4 +259,4 @@ export default function PublicFlashcardSetPage() {
     </div>
   </div>
   );
-} 
+}

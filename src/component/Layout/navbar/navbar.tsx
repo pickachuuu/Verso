@@ -3,71 +3,37 @@
 import { navItems } from "./navConfig";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ClayButton } from "@/component/ui/Clay";
-import { Logout01Icon, Sun01Icon, Moon01Icon, Menu01Icon, Cancel01Icon } from "hugeicons-react";
-import { useEffect, useState } from "react";
+import { Logout01Icon, Menu01Icon, Cancel01Icon } from "hugeicons-react";
+import { useState } from "react";
 import { signOut } from '@/hook/useAuthActions';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-
-  // Once mounted on client, get the theme
-  useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem("theme");
-    if (stored === "light" || stored === "dark") {
-      setTheme(stored);
-    } else {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-      setTheme(systemTheme);
-    }
-  }, []);
-
-  // Apply theme and persist
-  useEffect(() => {
-    if (!mounted) return;
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("theme", theme);
-  }, [theme, mounted]);
-
-  // Listen for system theme changes if user hasn't set a preference
-  useEffect(() => {
-    if (!mounted) return;
-    const stored = localStorage.getItem("theme");
-    if (stored === "light" || stored === "dark") return;
-
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => setTheme(media.matches ? "dark" : "light");
-    media.addEventListener("change", handler);
-    return () => media.removeEventListener("change", handler);
-  }, [mounted]);
 
   return (
     <>
       <nav className="sticky top-0 z-50 w-full">
-        {/* Clay navbar container */}
+        {/* Navbar container with glass effect */}
         <div className="mx-4 mt-4">
-          <div className="clay-card rounded-2xl px-4 sm:px-6 lg:px-8 py-3 backdrop-blur-sm">
+          <div className="bg-white/80 backdrop-blur-xl rounded-2xl px-4 sm:px-6 lg:px-8 py-3 shadow-lg shadow-gray-200/50 border border-white/80">
             <div className="flex items-center justify-between">
               {/* Logo */}
               <Link
                 href="/dashboard"
-                className="flex items-center gap-2 group"
+                className="flex items-center gap-2.5 group"
               >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary via-primary to-indigo-600 flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-xl group-hover:shadow-primary/30 group-hover:scale-105 transition-all">
                   <span className="text-white font-bold text-lg">M</span>
                 </div>
-                <span className="text-xl font-bold text-foreground group-hover:text-accent transition-colors hidden sm:block">
+                <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground-muted bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary-light transition-all hidden sm:block">
                   MemoForge
                 </span>
               </Link>
 
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center">
-                <div className="flex items-center bg-background-muted/50 rounded-xl p-1">
+                <div className="flex items-center bg-gray-100/70 rounded-xl p-1 border border-gray-200/50">
                   {navItems.map((item, index) => {
                     const isActive = pathname === item.href;
                     return (
@@ -75,10 +41,10 @@ export default function Navbar() {
                         key={index}
                         href={item.href}
                         className={`
-                          relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                          relative px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200
                           ${isActive
-                            ? 'bg-surface text-accent shadow-sm'
-                            : 'text-foreground-muted hover:text-foreground hover:bg-surface/50'
+                            ? 'bg-white text-primary shadow-md shadow-gray-200/50'
+                            : 'text-foreground-muted hover:text-foreground hover:bg-white/60'
                           }
                         `}
                       >
@@ -91,25 +57,10 @@ export default function Navbar() {
 
               {/* Actions */}
               <div className="flex items-center gap-2">
-                {/* Theme Toggle */}
-                {mounted && (
-                  <button
-                    onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-                    className="p-2.5 rounded-xl bg-background-muted/50 hover:bg-background-muted text-foreground-muted hover:text-foreground transition-all duration-200"
-                    aria-label="Toggle theme"
-                  >
-                    {theme === "light" ? (
-                      <Sun01Icon className="w-5 h-5" />
-                    ) : (
-                      <Moon01Icon className="w-5 h-5" />
-                    )}
-                  </button>
-                )}
-
                 {/* Sign Out */}
                 <button
                   onClick={signOut}
-                  className="p-2.5 rounded-xl bg-background-muted/50 hover:bg-red-50 dark:hover:bg-red-950/30 text-foreground-muted hover:text-red-500 transition-all duration-200"
+                  className="p-2.5 rounded-xl bg-gray-100/70 hover:bg-red-50 text-foreground-muted hover:text-red-500 transition-all duration-200 border border-transparent hover:border-red-100"
                   aria-label="Sign out"
                 >
                   <Logout01Icon className="w-5 h-5" />
@@ -117,7 +68,7 @@ export default function Navbar() {
 
                 {/* Mobile menu button */}
                 <button
-                  className="md:hidden p-2.5 rounded-xl bg-background-muted/50 hover:bg-background-muted text-foreground-muted hover:text-foreground transition-all duration-200"
+                  className="md:hidden p-2.5 rounded-xl bg-gray-100/70 hover:bg-gray-200/70 text-foreground-muted hover:text-foreground transition-all duration-200"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 >
                   {mobileMenuOpen ? (
@@ -134,7 +85,7 @@ export default function Navbar() {
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden mx-4 mt-2">
-            <div className="clay-card rounded-2xl p-4 space-y-2">
+            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-3 space-y-1 shadow-xl shadow-gray-200/50 border border-white/80">
               {navItems.map((item, index) => {
                 const isActive = pathname === item.href;
                 return (
@@ -143,10 +94,10 @@ export default function Navbar() {
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`
-                      block px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
+                      block px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200
                       ${isActive
-                        ? 'bg-accent text-white'
-                        : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
+                        ? 'bg-gradient-to-r from-primary to-primary-light text-white shadow-md shadow-primary/25'
+                        : 'text-foreground-muted hover:bg-gray-100/70 hover:text-foreground'
                       }
                     `}
                   >

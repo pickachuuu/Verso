@@ -103,7 +103,7 @@ export default function NotesPage() {
         <Header
           title="Your Notebooks"
           description="Your personal collection of study notebooks"
-          icon={<Book02Icon className="w-6 h-6 text-accent" />}
+          icon={<Book02Icon className="w-6 h-6 text-primary" />}
         >
           <CreateNoteButton />
         </Header>
@@ -131,7 +131,7 @@ export default function NotesPage() {
         <Header
           title="Your Notebooks"
           description="Your personal collection of study notebooks"
-          icon={<Book02Icon className="w-6 h-6 text-accent" />}
+          icon={<Book02Icon className="w-6 h-6 text-primary" />}
         >
           <CreateNoteButton />
         </Header>
@@ -143,8 +143,8 @@ export default function NotesPage() {
             padding="sm"
             className={`rounded-xl ${
               saveSuccess.includes('Error')
-                ? 'border-2 border-red-200 bg-red-50 dark:bg-red-950/20'
-                : 'border-2 border-green-200 bg-green-50 dark:bg-green-950/20'
+                ? 'border-2 border-red-200 bg-red-50'
+                : 'border-2 border-green-200 bg-green-50'
             }`}
           >
             <p className={`text-sm font-medium ${
@@ -164,8 +164,8 @@ export default function NotesPage() {
         ) : filteredNotes.length === 0 ? (
           <ClayCard variant="elevated" padding="lg" className="rounded-2xl">
             <div className="text-center py-12">
-              <div className="w-20 h-20 rounded-2xl bg-accent-muted flex items-center justify-center mx-auto mb-6">
-                <BookOpen01Icon className="w-10 h-10 text-accent" />
+              <div className="w-20 h-20 rounded-2xl bg-primary-muted flex items-center justify-center mx-auto mb-6">
+                <BookOpen01Icon className="w-10 h-10 text-primary" />
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">No notebooks yet</h3>
               <p className="text-foreground-muted mb-6 max-w-sm mx-auto">
