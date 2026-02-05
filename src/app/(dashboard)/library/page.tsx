@@ -97,13 +97,6 @@ export default function LibraryPage() {
       (note.content && note.content.trim() !== '')
   ).length;
 
-  const recentlyUpdated = notes.filter((note) => {
-    const updated = new Date(note.updated_at);
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return updated > weekAgo;
-  }).length;
-
   const handleGenerateFlashcards = (note: Note) => {
     setSelectedNote(note);
     setIsModalOpen(true);
@@ -165,7 +158,7 @@ export default function LibraryPage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <LibraryHeader totalNotes={0} recentlyUpdated={0} />
+        <LibraryHeader totalNotes={0} />
         <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
           <div className="text-center py-12">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center mx-auto mb-6">
@@ -191,7 +184,7 @@ export default function LibraryPage() {
     <>
       <div className="space-y-6">
         {/* Hero Header */}
-        <LibraryHeader totalNotes={totalNotes} recentlyUpdated={recentlyUpdated} />
+        <LibraryHeader totalNotes={totalNotes} />
 
         {/* Success/Error Message */}
         {saveSuccess && (
@@ -402,7 +395,7 @@ export default function LibraryPage() {
 // Sub-components
 // ============================================
 
-function LibraryHeader({ totalNotes, recentlyUpdated }: { totalNotes: number; recentlyUpdated: number }) {
+function LibraryHeader({ totalNotes }: { totalNotes: number }) {
   return (
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl relative overflow-hidden">
       {/* Background decoration */}
@@ -434,18 +427,8 @@ function LibraryHeader({ totalNotes, recentlyUpdated }: { totalNotes: number; re
             </div>
           </div>
 
-          {/* Stats and CTA */}
-          <div className="flex items-center gap-4">
-            {/* Quick stats */}
-            <div className="hidden sm:flex items-center gap-3">
-              <div className="px-4 py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-sm">
-                <p className="text-xs text-foreground-muted font-medium">Recently active</p>
-                <p className="text-lg font-bold text-foreground">{recentlyUpdated}</p>
-              </div>
-            </div>
-
-            <CreateNoteButton />
-          </div>
+          {/* CTA */}
+          <CreateNoteButton />
         </div>
       </div>
     </ClayCard>

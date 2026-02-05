@@ -112,10 +112,6 @@ export default function ExamsPage() {
 
   // Stats
   const totalExams = exams.length;
-  const totalAttempts = exams.reduce((sum, exam) => sum + exam.attempt_count, 0);
-  const averageBestScore = exams.filter(e => e.best_score !== null).length > 0
-    ? Math.round(exams.filter(e => e.best_score !== null).reduce((sum, e) => sum + (e.best_score || 0), 0) / exams.filter(e => e.best_score !== null).length)
-    : null;
 
   const handleExamGenerated = useCallback(async (
     examResponse: ExamGenerationResponse,
@@ -225,30 +221,14 @@ export default function ExamsPage() {
               </div>
             </div>
 
-            {/* Stats and CTA */}
-            <div className="flex items-center gap-4">
-              {/* Quick stats */}
-              <div className="hidden sm:flex items-center gap-3">
-                <div className="px-4 py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-sm">
-                  <p className="text-xs text-foreground-muted font-medium">Total attempts</p>
-                  <p className="text-lg font-bold text-foreground">{totalAttempts}</p>
-                </div>
-                {averageBestScore !== null && (
-                  <div className="px-4 py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-sm">
-                    <p className="text-xs text-foreground-muted font-medium">Avg best score</p>
-                    <p className="text-lg font-bold text-green-600">{averageBestScore}%</p>
-                  </div>
-                )}
-              </div>
-
-              <HeroActionButton
-                theme="secondary"
-                icon={<Add01Icon className="w-5 h-5" />}
-                onClick={() => setIsModalOpen(true)}
-              >
-                Create Exam
-              </HeroActionButton>
-            </div>
+            {/* CTA */}
+            <HeroActionButton
+              theme="secondary"
+              icon={<Add01Icon className="w-5 h-5" />}
+              onClick={() => setIsModalOpen(true)}
+            >
+              Create Exam
+            </HeroActionButton>
           </div>
         </div>
       </ClayCard>

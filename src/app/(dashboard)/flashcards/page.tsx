@@ -110,8 +110,6 @@ export default function FlashcardDashboardPage() {
 
   // Stats
   const totalSets = flashcardSets.length;
-  const totalCards = flashcardSets.reduce((sum, set) => sum + set.total_cards, 0);
-  const masteredCards = flashcardSets.reduce((sum, set) => sum + set.mastered_cards, 0);
 
   const handleCardClick = useCallback(async (setId: string) => {
     try {
@@ -279,28 +277,14 @@ export default function FlashcardDashboardPage() {
                 </div>
               </div>
 
-              {/* Stats and CTA */}
-              <div className="flex items-center gap-4">
-                {/* Quick stats */}
-                <div className="hidden sm:flex items-center gap-3">
-                  <div className="px-4 py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-sm">
-                    <p className="text-xs text-foreground-muted font-medium">Total cards</p>
-                    <p className="text-lg font-bold text-foreground">{totalCards}</p>
-                  </div>
-                  <div className="px-4 py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-sm">
-                    <p className="text-xs text-foreground-muted font-medium">Mastered</p>
-                    <p className="text-lg font-bold text-green-600">{masteredCards}</p>
-                  </div>
-                </div>
-
-                <HeroActionButton
-                  theme="accent"
-                  icon={<SparklesIcon className="w-5 h-5" />}
-                  onClick={() => setIsForgeModalOpen(true)}
-                >
-                  Forge Flashcards
-                </HeroActionButton>
-              </div>
+              {/* CTA */}
+              <HeroActionButton
+                theme="accent"
+                icon={<SparklesIcon className="w-5 h-5" />}
+                onClick={() => setIsForgeModalOpen(true)}
+              >
+                Forge Flashcards
+              </HeroActionButton>
             </div>
           </div>
         </ClayCard>
