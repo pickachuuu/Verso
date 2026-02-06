@@ -12,6 +12,8 @@ import {
   ExamResponseInsert,
   ExamAttemptUpdate
 } from '@/lib/database.types';
+import { trackExamActivity, trackExamCreated } from './useActivityTracking';
+import { dashboardKeys } from './useDashboard';
 
 const supabase = createClient();
 
@@ -314,6 +316,9 @@ async function createExam({ noteId, title, config, questions }: CreateExamParams
     throw questionsError;
   }
 
+  // Track exam creation as an activity (fire-and-forget — don't block on failure)
+  trackExamCreated(data.id).catch(() => {});
+
   return data.id;
 }
 
@@ -599,7 +604,15 @@ async function submitExam({ attemptId, timeSpentSeconds }: SubmitExamParams): Pr
     .eq('id', attemptId);
 
   console.log('[Grading] ========== GRADING COMPLETE ==========');
-  
+
+  // Track exam attempt as an activity (fire-and-forget — don't block on failure)
+  trackExamActivity({
+    examId: attempt.exam_id,
+    score: percentage,
+    questionsAnswered: responses?.length || 0,
+    durationMinutes: Math.max(1, Math.round(timeSpentSeconds / 60)),
+  }).catch(() => {});
+
   const result = await fetchAttemptResults(attemptId);
   if (!result) {
     throw new Error('Failed to fetch graded results');
@@ -678,6 +691,7 @@ export function useCreateExam() {
     mutationFn: createExam,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: examKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
     },
   });
 }
@@ -726,6 +740,8 @@ export function useSubmitExam() {
       if (result?.id) {
         queryClient.setQueryData(examKeys.attempt(result.id), result);
       }
+      // Refresh dashboard to reflect new exam activity
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
     },
   });
 }

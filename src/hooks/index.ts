@@ -26,6 +26,7 @@ export {
   useMasteryData,
   useWeeklyActivity,
   useContinueLearning,
+  useExamStats,
   dashboardKeys,
   type DashboardStats,
   type ActivityItem,
@@ -34,6 +35,7 @@ export {
   type MasteryData,
   type WeeklyActivityData,
   type ContinueLearningData,
+  type ExamStatsData,
 } from './useDashboard';
 
 // Activity tracking hooks
@@ -42,10 +44,12 @@ export {
   useCompleteStudySession,
   useTrackNoteActivity,
   useTrackExamActivity,
+  useTrackExamCreated,
   startStudySession,
   completeStudySession,
   trackNoteActivity,
   trackExamActivity,
+  trackExamCreated,
   logCardReview,
   getOrCreateFlashcardSession,
   incrementSessionStats,

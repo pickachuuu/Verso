@@ -19,7 +19,7 @@ export interface DashboardStats {
 
 export interface ActivityItem {
   id: string;
-  type: 'note' | 'flashcard';
+  type: 'note' | 'flashcard' | 'exam';
   title: string;
   description: string;
   time: string;
@@ -76,6 +76,20 @@ export interface WeeklyActivityData {
   sessions: number;
 }
 
+export interface ExamStatsData {
+  totalExams: number;
+  totalAttempts: number;
+  averageScore: number;
+  bestScore: number;
+  recentAttempts: Array<{
+    id: string;
+    examTitle: string;
+    examId: string;
+    percentage: number;
+    completedAt: string;
+  }>;
+}
+
 export interface ContinueLearningData {
   hasActivity: boolean;
   lastStudiedSet: {
@@ -102,6 +116,7 @@ export const dashboardKeys = {
   mastery: () => [...dashboardKeys.all, 'mastery'] as const,
   weeklyActivity: () => [...dashboardKeys.all, 'weeklyActivity'] as const,
   continueLearning: () => [...dashboardKeys.all, 'continueLearning'] as const,
+  examStats: () => [...dashboardKeys.all, 'examStats'] as const,
 };
 
 // ============================================
@@ -242,6 +257,45 @@ async function fetchRecentActivity(): Promise<ActivityItem[]> {
     });
   }
 
+  // Fetch recent exam attempts
+  const { data: examAttempts } = await supabase
+    .from('exam_attempts')
+    .select(`
+      id,
+      exam_id,
+      percentage,
+      completed_at,
+      status,
+      exam_sets (
+        id,
+        title
+      )
+    `)
+    .eq('user_id', userId)
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false })
+    .limit(2);
+
+  if (examAttempts) {
+    examAttempts.forEach((attempt: {
+      id: string;
+      exam_id: string;
+      percentage: number;
+      completed_at: string;
+      exam_sets: { id: string; title: string } | null;
+    }) => {
+      items.push({
+        id: attempt.id,
+        type: 'exam',
+        title: attempt.exam_sets?.title || 'Exam',
+        description: `Scored ${attempt.percentage}%`,
+        time: attempt.completed_at ? timeAgo(attempt.completed_at) : '',
+        updatedAt: new Date(attempt.completed_at),
+        href: `/exams/${attempt.exam_id}/results/${attempt.id}`,
+      });
+    });
+  }
+
   // Sort by most recent
   items.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
@@ -281,10 +335,12 @@ async function fetchStudyStreak(): Promise<StudyStreakData> {
     // Count activity as studying if:
     // - Flashcard study with cards studied
     // - Exam attempt with questions answered
+    // - Exam created
     // - Note editing/creation (any completed session)
     const hasActivity =
       (s.session_type === 'flashcard_study' && s.cards_studied > 0) ||
       (s.session_type === 'exam_attempt' && (s.questions_answered || 0) > 0) ||
+      s.session_type === 'exam_created' ||
       s.session_type === 'note_edit' ||
       s.session_type === 'note_created' ||
       s.session_type === 'flashcard_created';
@@ -582,6 +638,72 @@ function generateEmptyWeek(): WeeklyActivityData[] {
   return weekData;
 }
 
+async function fetchExamStats(): Promise<ExamStatsData> {
+  const session = await getSession();
+  if (!session?.user?.id) {
+    return { totalExams: 0, totalAttempts: 0, averageScore: 0, bestScore: 0, recentAttempts: [] };
+  }
+
+  const userId = session.user.id;
+
+  // Fetch exam sets count
+  const { count: totalExams } = await supabase
+    .from('exam_sets')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  // Fetch completed attempts with exam titles
+  const { data: attempts } = await supabase
+    .from('exam_attempts')
+    .select(`
+      id,
+      exam_id,
+      percentage,
+      completed_at,
+      status,
+      exam_sets (
+        title
+      )
+    `)
+    .eq('user_id', userId)
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false });
+
+  const completedAttempts = attempts || [];
+  const totalAttempts = completedAttempts.length;
+
+  let averageScore = 0;
+  let bestScore = 0;
+
+  if (totalAttempts > 0) {
+    const scores = completedAttempts.map((a: { percentage: number }) => a.percentage);
+    averageScore = Math.round(scores.reduce((sum: number, s: number) => sum + s, 0) / totalAttempts);
+    bestScore = Math.max(...scores);
+  }
+
+  const recentAttempts = completedAttempts.slice(0, 5).map((a: {
+    id: string;
+    exam_id: string;
+    percentage: number;
+    completed_at: string;
+    exam_sets: { title: string } | null;
+  }) => ({
+    id: a.id,
+    examTitle: a.exam_sets?.title || 'Untitled Exam',
+    examId: a.exam_id,
+    percentage: a.percentage,
+    completedAt: a.completed_at,
+  }));
+
+  return {
+    totalExams: totalExams || 0,
+    totalAttempts,
+    averageScore,
+    bestScore,
+    recentAttempts,
+  };
+}
+
 async function fetchContinueLearning(): Promise<ContinueLearningData> {
   const session = await getSession();
   if (!session?.user?.id) {
@@ -702,5 +824,13 @@ export function useContinueLearning() {
     queryKey: dashboardKeys.continueLearning(),
     queryFn: fetchContinueLearning,
     staleTime: 30 * 1000, // 30 seconds
+  });
+}
+
+export function useExamStats() {
+  return useQuery({
+    queryKey: dashboardKeys.examStats(),
+    queryFn: fetchExamStats,
+    staleTime: 60 * 1000, // 1 minute
   });
 }

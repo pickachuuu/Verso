@@ -7,6 +7,7 @@ import MasteryProgress from '@/component/features/MasteryProgress';
 import WeeklyActivityChart from '@/component/features/WeeklyActivityChart';
 import ContinueLearning from '@/component/features/ContinueLearning';
 import RecentActivity from '@/component/features/RecentActivity';
+import ExamStats from '@/component/features/ExamStats';
 import { useUserProfile } from '@/hooks/useAuth';
 
 export default function Dashboard() {
@@ -44,6 +45,15 @@ export default function Dashboard() {
             <ContinueLearning />
           </div>
         </div>
+      </section>
+
+      {/* Exam Performance */}
+      <section>
+        <div className="flex items-center gap-3 mb-5">
+          <h2 className="text-base font-semibold text-foreground">Exams</h2>
+          <div className="flex-1 h-px bg-gradient-to-r from-border via-border/50 to-transparent" />
+        </div>
+        <ExamStats />
       </section>
 
       {/* Bottom Row: Recent Activity */}

@@ -1,7 +1,7 @@
 'use client';
 
 import { ClayCard, ClayBadge } from '@/component/ui/Clay';
-import { File01Icon, BookOpen01Icon, Clock01Icon, ArrowRight01Icon } from 'hugeicons-react';
+import { File01Icon, BookOpen01Icon, Clock01Icon, ArrowRight01Icon, TestTube01Icon } from 'hugeicons-react';
 import Link from 'next/link';
 import { useRecentActivity, ActivityItem } from '@/hooks/useDashboard';
 
@@ -17,6 +17,8 @@ function ActivityItemComponent({ type, title, description, time, icon, iconBg, h
         return <ClayBadge variant="accent" className="text-xs px-2 py-0.5">Note</ClayBadge>;
       case 'flashcard':
         return <ClayBadge variant="success" className="text-xs px-2 py-0.5">Flashcard</ClayBadge>;
+      case 'exam':
+        return <ClayBadge variant="warning" className="text-xs px-2 py-0.5">Exam</ClayBadge>;
       default:
         return null;
     }
@@ -82,15 +84,30 @@ export default function RecentActivity() {
   const { data: activities = [], isLoading } = useRecentActivity();
 
   // Map activities to include icons
-  const activitiesWithIcons: ActivityItemComponentProps[] = activities.map((activity) => ({
-    ...activity,
-    icon: activity.type === 'note'
-      ? <File01Icon className="w-5 h-5 text-primary" />
-      : <BookOpen01Icon className="w-5 h-5 text-tertiary" />,
-    iconBg: activity.type === 'note'
-      ? 'bg-gradient-to-br from-primary-muted to-primary-muted/70'
-      : 'bg-gradient-to-br from-tertiary-muted to-tertiary-muted/70',
-  }));
+  const activitiesWithIcons: ActivityItemComponentProps[] = activities.map((activity) => {
+    const iconConfig = {
+      note: {
+        icon: <File01Icon className="w-5 h-5 text-primary" />,
+        iconBg: 'bg-gradient-to-br from-primary-muted to-primary-muted/70',
+      },
+      flashcard: {
+        icon: <BookOpen01Icon className="w-5 h-5 text-tertiary" />,
+        iconBg: 'bg-gradient-to-br from-tertiary-muted to-tertiary-muted/70',
+      },
+      exam: {
+        icon: <TestTube01Icon className="w-5 h-5 text-secondary" />,
+        iconBg: 'bg-gradient-to-br from-secondary-muted to-secondary-muted/70',
+      },
+    };
+
+    const config = iconConfig[activity.type] || iconConfig.note;
+
+    return {
+      ...activity,
+      icon: config.icon,
+      iconBg: config.iconBg,
+    };
+  });
 
   return (
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl">

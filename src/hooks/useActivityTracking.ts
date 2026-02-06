@@ -19,6 +19,7 @@ export type ActivityType =
   | 'flashcard_study'
   | 'note_edit'
   | 'exam_attempt'
+  | 'exam_created'
   | 'flashcard_created'
   | 'note_created';
 
@@ -230,6 +231,42 @@ async function trackExamActivity(params: TrackExamActivityParams): Promise<strin
 }
 
 /**
+ * Track an exam creation event
+ * Creates a completed session entry for the exam creation
+ */
+async function trackExamCreated(examId: string): Promise<string | null> {
+  const session = await getSession();
+  if (!session?.user?.id) {
+    console.warn('Cannot track exam creation: User not authenticated');
+    return null;
+  }
+
+  const now = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from('study_sessions')
+    .insert({
+      user_id: session.user.id,
+      exam_id: examId,
+      session_type: 'exam_created',
+      cards_studied: 0,
+      correct_answers: 0,
+      duration_minutes: 0,
+      started_at: now,
+      completed_at: now,
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    console.error('Error tracking exam creation:', error);
+    return null;
+  }
+
+  return data.id;
+}
+
+/**
  * Quick function to log a single card review
  * Useful for tracking individual card interactions
  */
@@ -375,12 +412,24 @@ export function useTrackExamActivity() {
   });
 }
 
+export function useTrackExamCreated() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: trackExamCreated,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+    },
+  });
+}
+
 // Export utility functions for direct use
 export {
   startStudySession,
   completeStudySession,
   trackNoteActivity,
   trackExamActivity,
+  trackExamCreated,
   logCardReview,
   getOrCreateFlashcardSession,
   incrementSessionStats,
