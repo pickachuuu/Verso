@@ -943,7 +943,7 @@ body {
   animation: ruled-lines-float 25s ease-in-out infinite;
 }
 
-/* Red margin line + hole punches */
+/* Red margin line */
 .notebook-paper-bg::after {
   content: '';
   position: absolute;
@@ -959,12 +959,6 @@ body {
     transparent 100%
   );
   pointer-events: none;
-  box-shadow:
-    -40px 80px 0 8px rgba(0,0,0,0.03),
-    -40px 200px 0 8px rgba(0,0,0,0.03),
-    -40px 320px 0 8px rgba(0,0,0,0.03),
-    -40px 440px 0 8px rgba(0,0,0,0.03),
-    -40px 560px 0 8px rgba(0,0,0,0.03);
 }
 
 @keyframes ruled-lines-float {

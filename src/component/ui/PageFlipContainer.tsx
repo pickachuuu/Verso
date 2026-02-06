@@ -115,8 +115,8 @@ export default function PageFlipContainer({
   const paperBg = isDark
     ? 'linear-gradient(135deg, #2a2a3a 0%, #1e1e2e 100%)'
     : 'linear-gradient(135deg, #fffef8 0%, #f5f5f0 100%)';
-  const lineColor = isDark ? 'rgba(157,123,224,0.1)' : 'rgba(95,108,175,0.08)';
-  const marginColor = isDark ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.2)';
+  const lineColor = isDark ? 'rgba(157,123,224,0.15)' : 'rgba(95,108,175,0.12)';
+  const marginColor = isDark ? 'rgba(180,100,100,0.2)' : 'rgba(220,80,80,0.25)';
 
   // For exam mode: no left stack on first page (toc), and fewer visual stacks overall
   const leftCount = isExam
@@ -124,45 +124,58 @@ export default function PageFlipContainer({
     : Math.min(currentPosition > 0 ? currentPosition : 0, 5);
   const rightCount = Math.min(Math.max(0, 2 + totalPages - currentPosition - 1), 4);
 
-  // Blank paper back - plain white for exam, lined for notebook
-  const BlankPaper = () => (
-    <div className="absolute inset-0 rounded-lg" style={{ background: paperBg }}>
-      {!isExam && (
-        <>
-          <div className="absolute inset-0" style={{
-            backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 31px, ${lineColor} 31px, ${lineColor} 32px)`,
-            backgroundSize: '100% 32px',
-            backgroundPosition: '0 24px',
-          }} />
-          <div className="absolute top-0 bottom-0 w-px" style={{ left: 48, backgroundColor: marginColor }} />
-          <div className="absolute left-3 top-1/4 w-3 h-3 rounded-full"
-            style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)' }} />
-          <div className="absolute left-3 top-1/2 w-3 h-3 rounded-full -translate-y-1/2"
-            style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)' }} />
-          <div className="absolute left-3 top-3/4 w-3 h-3 rounded-full"
-            style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)' }} />
-        </>
-      )}
-    </div>
-  );
+  // All ruled-page visuals as a flat background stack (margin + ruled lines + paper).
+  // The margin uses a vertical gradient (matching NotebookPage's fade at top/bottom)
+  // constrained to 2px width via backgroundSize, instead of a solid horizontal gradient.
+  const ruledPageBackground: React.CSSProperties = !isExam ? {
+    backgroundImage: [
+      `linear-gradient(180deg, transparent 0%, ${marginColor} 5%, ${marginColor} 95%, transparent 100%)`,
+      `repeating-linear-gradient(0deg, transparent, transparent 31px, ${lineColor} 31px, ${lineColor} 32px)`,
+      paperBg,
+    ].join(', '),
+    backgroundSize: '2px 100%, 100% 32px, 100% 100%',
+    backgroundPosition: '71px 0, 0 24px, 0 0',
+    backgroundRepeat: 'no-repeat, repeat, no-repeat',
+  } : { background: paperBg };
+
+  // Pre-mirrored version for the back face of the flipping page.
+  // The back face has `transform: rotateY(180deg)` (default origin = center) which
+  // mirrors content horizontally. To compensate, we position the margin from the
+  // RIGHT side so that after the center-mirror it lands at the same visual position
+  // as the left stack's margin.
+  const backfaceRuledBackground: React.CSSProperties = !isExam ? {
+    backgroundImage: [
+      `linear-gradient(180deg, transparent 0%, ${marginColor} 5%, ${marginColor} 95%, transparent 100%)`,
+      `repeating-linear-gradient(0deg, transparent, transparent 31px, ${lineColor} 31px, ${lineColor} 32px)`,
+      paperBg,
+    ].join(', '),
+    backgroundSize: '2px 100%, 100% 32px, 100% 100%',
+    backgroundPosition: 'calc(100% - 73px) 0, 0 24px, 0 0',
+    backgroundRepeat: 'no-repeat, repeat, no-repeat',
+  } : { background: paperBg };
 
   return (
     <div className="w-full h-full relative" style={{ perspective: '2000px' }}>
       {/* Left stack */}
-      {leftCount > 0 && [...Array(leftCount)].map((_, i) => (
-        <div
-          key={`l${i}`}
-          className="absolute inset-0 rounded-lg"
-          style={{
-            transform: 'rotateY(-180deg)',
-            transformOrigin: 'left center',
-            left: i * 2,
-            top: i,
-            background: paperBg,
-            zIndex: i,
-          }}
-        />
-      ))}
+      {leftCount > 0 && [...Array(leftCount)].map((_, i) => {
+        // i=0 is the back of the cover (stays plain), i>0 are notebook page backs (ruled lines)
+        const isPageBack = i > 0;
+
+        return (
+          <div
+            key={`l${i}`}
+            className="absolute inset-0 rounded-lg overflow-hidden"
+            style={{
+              transform: 'rotateY(-180deg)',
+              transformOrigin: 'left center',
+              left: i * 2,
+              top: i,
+              zIndex: i,
+              ...(isPageBack ? ruledPageBackground : { background: paperBg }),
+            }}
+          />
+        );
+      })}
 
       {/* Right stack */}
       {rightCount > 0 && [...Array(rightCount)].map((_, i) => (
@@ -213,17 +226,17 @@ export default function PageFlipContainer({
             {displayState.flip.frontContent}
           </div>
 
-          {/* Back - blank paper */}
+          {/* Back — all visuals baked into background layers, zero children.
+              Margin gradient is pre-mirrored (-90deg) to compensate for the
+              rotateY(180deg) center-mirror so it lines up with the left stack. */}
           <div
-            className="absolute inset-0 rounded-lg overflow-hidden"
+            className="absolute inset-0 rounded-lg"
             style={{
               backfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)',
-              backgroundColor: paperColor,
+              ...backfaceRuledBackground,
             }}
-          >
-            <BlankPaper />
-          </div>
+          />
         </motion.div>
       )}
 

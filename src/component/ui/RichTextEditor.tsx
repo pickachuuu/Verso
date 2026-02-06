@@ -1048,24 +1048,6 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
               }}
             />
 
-            {/* Hole punches */}
-            <div className="absolute left-4 top-0 bottom-0 w-4 pointer-events-none">
-              {[80, 200, 320, 440, 560, 680].map((top) => (
-                <div
-                  key={top}
-                  className="absolute rounded-full"
-                  style={{
-                    top: `${top}px`,
-                    left: '4px',
-                    width: '16px',
-                    height: '16px',
-                    backgroundColor: theme === 'dark' ? '#1a1a2e' : '#f5f5f0',
-                    boxShadow: `inset 2px 2px 4px ${theme === 'dark' ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'}`,
-                  }}
-                />
-              ))}
-            </div>
-
             {/* Content area */}
             <div
               className="relative z-10 pl-24 pr-12 py-8"

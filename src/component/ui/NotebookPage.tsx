@@ -25,7 +25,6 @@ export default function NotebookPage({
   const editorBg = isDark ? '#1e1e2e' : '#fffef8';
   const lineColor = isDark ? 'rgba(157, 123, 224, 0.15)' : 'rgba(95, 108, 175, 0.12)';
   const marginColor = isDark ? 'rgba(180, 100, 100, 0.2)' : 'rgba(220, 80, 80, 0.25)';
-  const bgMuted = isDark ? '#1a1a2e' : '#f5f5f0';
 
   return (
     <div
@@ -62,24 +61,6 @@ export default function NotebookPage({
           background: `linear-gradient(180deg, transparent 0%, ${marginColor} 5%, ${marginColor} 95%, transparent 100%)`,
         }}
       />
-
-      {/* Hole punches */}
-      <div className="absolute left-4 top-0 bottom-0 w-4 pointer-events-none">
-        {[80, 200, 320, 440, 560, 680].map((top) => (
-          <div
-            key={top}
-            className="absolute rounded-full"
-            style={{
-              top: `${top}px`,
-              left: '4px',
-              width: '16px',
-              height: '16px',
-              backgroundColor: bgMuted,
-              boxShadow: `inset 2px 2px 4px ${isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'}`,
-            }}
-          />
-        ))}
-      </div>
 
       {/* Paper texture overlay */}
       <div
