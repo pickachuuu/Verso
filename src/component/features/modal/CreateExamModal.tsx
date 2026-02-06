@@ -5,6 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { useUserNotes, Note } from '@/hooks/useNotes';
 import { createGeminiService, ExamGenerationResponse, ExamGenerationConfig } from '@/lib/gemini';
 import { ClayCard, ClayButton, ClayBadge } from '@/component/ui/Clay';
+import Modal from '@/component/ui/Modal';
 import {
   Cancel01Icon,
   ArrowRight01Icon,
@@ -407,19 +408,9 @@ export default function CreateExamModal({
     }
   }, [generatedExam, selectedNotes, examTitle, config, onExamGenerated, onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
-        onClick={onClose}
-      />
-
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="clay-modal w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-3xl">
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div className="clay-modal w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-3xl flex flex-col">
           {/* Header */}
           <div className="clay-modal-header px-6 py-5 border-b border-gray-100">
             <div className="flex items-center justify-between">
@@ -447,7 +438,7 @@ export default function CreateExamModal({
           </div>
 
           {/* Content */}
-          <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-280px)]">
+          <div className="px-6 py-4 overflow-y-auto flex-1 min-h-0">
             {/* Step 1: Select Notes */}
             {currentStep === 1 && (
               <div className="space-y-4">
@@ -809,7 +800,7 @@ export default function CreateExamModal({
           </div>
 
           {/* Footer */}
-          <div className="clay-modal-footer px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+          <div className="clay-modal-footer px-6 py-4 border-t border-gray-100 flex items-center justify-between shrink-0">
             <div>
               {currentStep > 1 && (
                 <ClayButton
@@ -866,7 +857,6 @@ export default function CreateExamModal({
             </div>
           </div>
         </div>
-      </div>
-    </>
+    </Modal>
   );
 }

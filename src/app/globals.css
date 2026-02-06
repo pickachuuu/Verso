@@ -605,7 +605,7 @@ body {
 }
 
 .clay-modal-footer {
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.5) 0%, rgba(241, 245, 249, 0.8) 100%);
+  background: transparent;
 }
 
 /* Step Indicator Styles */
@@ -837,6 +837,7 @@ body {
 
 .memoforge-bg {
   position: relative;
+  isolation: isolate;
   min-height: 100vh;
   background: var(--background);
   background-attachment: fixed;
@@ -857,7 +858,7 @@ body {
     /* Top left soft glow */
     radial-gradient(ellipse 500px 400px at 5% 15%, rgba(99, 102, 241, 0.04) 0%, transparent 50%);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 /* Subtle grid pattern for depth */
@@ -870,7 +871,7 @@ body {
     linear-gradient(90deg, rgba(99, 102, 241, 0.02) 1px, transparent 1px);
   background-size: 60px 60px;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 20%, transparent 70%);
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 20%, transparent 70%);
 }

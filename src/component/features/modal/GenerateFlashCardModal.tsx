@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { createGeminiService, GeminiFlashcard, GeminiResponse } from '@/lib/gemini';
 import Button from '@/component/ui/Button';
 import Card from '@/component/ui/Card';
+import Modal from '@/component/ui/Modal';
 import { cn } from '@/lib/utils';
 
 export interface GenerateFlashCardModalProps {
@@ -159,19 +160,8 @@ export default function GenerateFlashCardModal({
     setGeneratedFlashcards([]);
   }, []);
 
-  // Don't render if not open
-  if (!isOpen) return null;
-
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-        onClick={onClose}
-      />
-
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <Modal isOpen={isOpen} onClose={onClose}>
         <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
           <Card.Header>
             <Card.Title>Generate Flashcards from Note</Card.Title>
@@ -297,16 +287,9 @@ export default function GenerateFlashCardModal({
             </Button>
           </Card.Footer>
         </Card>
-      </div>
 
       {/* Preview Modal */}
-      {showPreview && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
-            onClick={handleCancelPreview}
-          />
-          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+      <Modal isOpen={showPreview} onClose={handleCancelPreview} nested>
             <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
               <Card.Header>
                 <Card.Title>Generated Flashcards Preview</Card.Title>
@@ -363,9 +346,7 @@ export default function GenerateFlashCardModal({
                 </Button>
               </Card.Footer>
             </Card>
-          </div>
-        </>
-      )}
-    </>
+      </Modal>
+    </Modal>
   );
 }

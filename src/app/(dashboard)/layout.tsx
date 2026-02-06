@@ -8,7 +8,7 @@ export default function DashboardLayout({ children }: Readonly<{
   return (
     <div className="min-h-screen memoforge-bg">
       <Navbar />
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 max-w-7xl main-content relative z-10">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 max-w-7xl main-content relative">
         {children}
       </main>
     </div>
