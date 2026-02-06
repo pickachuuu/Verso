@@ -31,34 +31,18 @@ export default function NotebookPage({
       className="w-full h-full rounded-lg relative overflow-hidden"
       style={{ backgroundColor: editorBg }}
     >
-      {/* Notebook lines - aligned with text (32px line-height grid) */}
+      {/* Notebook lines + red margin line — combined as background layers
+          so both sides of the book use the same rendering technique */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: `repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 31px,
-            ${lineColor} 31px,
-            ${lineColor} 32px
-          )`,
-          backgroundSize: '100% 32px',
-          /*
-           * Position lines so text baselines sit on them
-           * With padding-top: 31px and 32px line-height, baseline is ~23px from top
-           * Line offset = 31px (padding) + 24px (baseline in line box) - 31px (line pos in gradient) = 24px
-           * Fine-tuned to 23px for better visual alignment with handwritten fonts
-           */
-          backgroundPosition: '0 23px',
-        }}
-      />
-
-      {/* Red margin line */}
-      <div
-        className="absolute top-0 bottom-0 w-0.5 pointer-events-none"
-        style={{
-          left: '72px',
-          background: `linear-gradient(180deg, transparent 0%, ${marginColor} 5%, ${marginColor} 95%, transparent 100%)`,
+          backgroundImage: [
+            `linear-gradient(180deg, transparent 0%, ${marginColor} 5%, ${marginColor} 95%, transparent 100%)`,
+            `repeating-linear-gradient(0deg, transparent, transparent 31px, ${lineColor} 31px, ${lineColor} 32px)`,
+          ].join(', '),
+          backgroundSize: '2px 100%, 100% 32px',
+          backgroundPosition: '71px 0, 0 23px',
+          backgroundRepeat: 'no-repeat, repeat',
         }}
       />
 

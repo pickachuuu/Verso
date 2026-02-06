@@ -242,11 +242,11 @@ export default function PageFlipContainer({
 
       {/* Spine */}
       {currentView !== 'cover' && (
-        <div className="absolute left-0 top-2 bottom-2 w-1.5 rounded-l" style={{
+        <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l" style={{
           background: isDark
             ? 'linear-gradient(90deg, rgba(50,50,60,0.9), rgba(40,40,50,0.5))'
             : 'linear-gradient(90deg, rgba(180,160,140,0.9), rgba(200,180,160,0.5))',
-          zIndex: 25,
+          zIndex: 60,
         }} />
       )}
     </div>
