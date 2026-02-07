@@ -18,8 +18,6 @@ import {
 } from 'hugeicons-react';
 import { FlashcardIcon, FlashcardAddIcon } from '@/component/icons';
 import HeroActionButton from '@/component/ui/HeroActionButton';
-import CardsDueToday from '@/component/features/CardsDueToday';
-import MasteryProgress from '@/component/features/MasteryProgress';
 import { useFlashcardActions } from '@/hook/useFlashcardActions';
 import { FlashcardSet } from '@/lib/database.types';
 import ReforgeModal from '@/component/features/modal/ReforgeModal';
@@ -259,12 +257,6 @@ export default function FlashcardDashboardPage() {
           totalCards={totalCards}
           onCreateNew={() => setIsForgeModalOpen(true)}
         />
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CardsDueToday />
-          <MasteryProgress />
-        </div>
 
         {/* Success/Error Message */}
         {saveSuccess && (
