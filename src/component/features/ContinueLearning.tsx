@@ -46,7 +46,7 @@ export default function ContinueLearning() {
           subtitle: `${dueCardsCount} cards waiting`,
           icon: <Clock01Icon className="w-6 h-6" />,
           href: '/flashcards',
-          gradient: 'from-secondary via-orange-500 to-amber-500',
+          gradient: 'from-secondary via-secondary to-secondary-light',
           accentColor: 'secondary',
           priority: 'high',
         };
@@ -56,7 +56,7 @@ export default function ContinueLearning() {
           subtitle: lastStudiedSet ? `${lastStudiedSet.title}` : 'Pick up where you left off',
           icon: <PlayIcon className="w-6 h-6" />,
           href: lastStudiedSet ? `/flashcards/${lastStudiedSet.id}/study` : '/flashcards',
-          gradient: 'from-primary via-indigo-500 to-violet-500',
+          gradient: 'from-primary via-primary to-primary-light',
           accentColor: 'primary',
           priority: 'medium',
         };
@@ -66,7 +66,7 @@ export default function ContinueLearning() {
           subtitle: 'Begin studying a new set',
           icon: <FlashcardIcon className="w-6 h-6" />,
           href: '/flashcards',
-          gradient: 'from-tertiary via-teal-500 to-emerald-500',
+          gradient: 'from-primary-light via-primary to-primary-dark',
           accentColor: 'tertiary',
           priority: 'normal',
         };
@@ -77,7 +77,7 @@ export default function ContinueLearning() {
           subtitle: 'Generate from your notes',
           icon: <Add01Icon className="w-6 h-6" />,
           href: '/library',
-          gradient: 'from-primary via-indigo-500 to-violet-500',
+          gradient: 'from-primary via-primary to-primary-dark',
           accentColor: 'primary',
           priority: 'normal',
         };

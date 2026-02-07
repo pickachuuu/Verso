@@ -30,9 +30,9 @@ function ProgressRing({ percentage, size = 120, strokeWidth = 10 }: ProgressRing
   const offset = circumference - (percentage / 100) * circumference;
 
   const getColor = () => {
-    if (percentage >= 80) return { stroke: '#14B8A6', bg: '#F0FDFA', glow: 'rgba(20, 184, 166, 0.2)' };
-    if (percentage >= 50) return { stroke: '#F97316', bg: '#FFF7ED', glow: 'rgba(249, 115, 22, 0.2)' };
-    if (percentage >= 25) return { stroke: '#6366F1', bg: '#EEF2FF', glow: 'rgba(99, 102, 241, 0.2)' };
+    if (percentage >= 80) return { stroke: '#22C55E', bg: '#F0FDF4', glow: 'rgba(34, 197, 94, 0.2)' };
+    if (percentage >= 50) return { stroke: '#F68048', bg: '#FEF0E7', glow: 'rgba(246, 128, 72, 0.2)' };
+    if (percentage >= 25) return { stroke: '#2845D6', bg: '#EFF6FF', glow: 'rgba(40, 69, 214, 0.2)' };
     return { stroke: '#94A3B8', bg: '#F8FAFC', glow: 'rgba(148, 163, 184, 0.1)' };
   };
 

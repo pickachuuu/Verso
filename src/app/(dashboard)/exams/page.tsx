@@ -314,7 +314,7 @@ export default function ExamsPage() {
                 onClick={() => setQuestionTypeFilter('essay')}
                 className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                   questionTypeFilter === 'essay'
-                    ? 'bg-purple-100 text-purple-700 shadow-sm'
+                    ? 'bg-primary-muted text-primary-dark shadow-sm'
                     : 'text-foreground-muted hover:text-foreground'
                 }`}
               >
@@ -458,8 +458,10 @@ export default function ExamsPage() {
         }}
         onConfirm={handleConfirmDelete}
         title="Delete Exam"
-        message={`Are you sure you want to delete "${examToDelete?.title}"? This will also delete all attempts and cannot be undone.`}
-        isDeleting={isDeleting}
+        description={`Are you sure you want to delete "${examToDelete?.title}"? This will also delete all attempts and cannot be undone.`}
+        itemName={examToDelete?.title || 'this exam'}
+        itemType="note"
+        loading={isDeleting}
       />
     </div>
   );

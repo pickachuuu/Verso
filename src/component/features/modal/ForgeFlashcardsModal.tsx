@@ -319,7 +319,7 @@ export default function ForgeFlashcardsModal({
           <div className="clay-modal-header px-6 py-5 border-b border-gray-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-purple-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
                   <SparklesIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -510,7 +510,7 @@ export default function ForgeFlashcardsModal({
                 {/* Generate Button or Results */}
                 {!generatedFlashcards && !isGenerating && (
                   <div className="text-center py-8">
-                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-accent/20 to-purple-500/20 flex items-center justify-center mx-auto mb-4">
+                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-primary-dark/20 flex items-center justify-center mx-auto mb-4">
                       <SparklesIcon className="w-10 h-10 text-accent" />
                     </div>
                     <p className="text-foreground-muted mb-6">
@@ -532,7 +532,7 @@ export default function ForgeFlashcardsModal({
                 {isGenerating && (
                   <div className="text-center py-12">
                     <div className="relative w-20 h-20 mx-auto mb-4">
-                      <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-accent to-purple-500 animate-pulse" />
+                      <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary to-primary-dark animate-pulse" />
                       <div className="absolute inset-2 rounded-2xl bg-white flex items-center justify-center">
                         <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
                       </div>

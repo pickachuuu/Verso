@@ -132,7 +132,7 @@ export default function RecentActivity() {
       <div
         className="h-2 opacity-[0.06]"
         style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, #6366F1 3px, #6366F1 4px)',
+          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, #2845D6 3px, #2845D6 4px)',
         }}
       />
 

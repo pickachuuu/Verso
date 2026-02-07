@@ -18,7 +18,7 @@ export function useNoteActions() {
                 title: '',
                 content: '',
                 tags: [],
-                cover_color: coverColor || 'lavender',
+                cover_color: coverColor || 'royal',
                 user_id: session?.user?.id,
                 slug: null // Slug will be generated when title is set
             }])

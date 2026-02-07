@@ -49,7 +49,7 @@ export default function DashboardHeader({ user }: { user?: UserProfile | null })
           </div>
 
           {/* Date */}
-          <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/70 shadow-sm">
+          <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-surface/60 backdrop-blur-sm border border-primary-muted/70 shadow-sm">
             <div className="p-2 rounded-xl bg-gradient-to-br from-primary-muted to-primary-muted/60">
               <Calendar03Icon className="w-5 h-5 text-primary" />
             </div>

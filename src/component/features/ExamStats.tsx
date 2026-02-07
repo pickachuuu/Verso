@@ -43,9 +43,9 @@ function ScoreRing({ percentage, size = 44 }: { percentage: number; size?: numbe
   const offset = circumference - (percentage / 100) * circumference;
 
   const getColor = () => {
-    if (percentage >= 80) return '#14B8A6';
-    if (percentage >= 60) return '#F97316';
-    if (percentage >= 40) return '#6366F1';
+    if (percentage >= 80) return '#22C55E';
+    if (percentage >= 60) return '#F68048';
+    if (percentage >= 40) return '#2845D6';
     return '#94A3B8';
   };
 
@@ -116,7 +116,7 @@ export default function ExamStats() {
   return (
     <ClayCard variant="default" padding="none" className="rounded-2xl h-full overflow-hidden">
       {/* Top accent */}
-      <div className="h-1 bg-gradient-to-r from-secondary via-orange-400 to-amber-400" />
+      <div className="h-1 bg-gradient-to-r from-secondary via-secondary-light to-secondary-light" />
 
       <div className="p-5">
         {/* Header */}

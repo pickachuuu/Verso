@@ -19,7 +19,7 @@ export default function Navbar() {
           <div
             className="rounded-2xl px-4 sm:px-6 lg:px-8 py-3"
             style={{
-              background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(250,251,252,0.92) 100%)',
+              background: 'linear-gradient(145deg, rgba(248,250,255,0.95) 0%, rgba(240,244,255,0.92) 100%)',
               backdropFilter: 'blur(24px)',
               WebkitBackdropFilter: 'blur(24px)',
               boxShadow: [
@@ -27,13 +27,13 @@ export default function Navbar() {
                 '0 8px 32px -4px rgba(0, 0, 0, 0.08)',
                 '0 4px 12px -2px rgba(0, 0, 0, 0.05)',
                 // Colored ambient glow
-                '0 12px 40px -8px rgba(99, 102, 241, 0.07)',
+                '0 12px 40px -8px rgba(40, 69, 214, 0.07)',
                 // Inner highlight for puffy top edge
-                'inset 0 2px 0 rgba(255, 255, 255, 1)',
+                'inset 0 2px 0 rgba(248, 250, 255, 1)',
                 // Inner bottom shadow for 3D depth
                 'inset 0 -2px 6px rgba(0, 0, 0, 0.03)',
               ].join(', '),
-              border: '1px solid rgba(255, 255, 255, 0.85)',
+              border: '1px solid rgba(221, 228, 255, 0.7)',
             }}
           >
             <div className="flex items-center justify-between">
@@ -47,7 +47,7 @@ export default function Navbar() {
                   style={{
                     background: 'linear-gradient(145deg, var(--primary-light) 0%, var(--primary) 60%, var(--primary-dark) 100%)',
                     boxShadow: [
-                      '0 6px 16px -2px rgba(99, 102, 241, 0.45)',
+                      '0 6px 16px -2px rgba(40, 69, 214, 0.45)',
                       '0 2px 4px rgba(0, 0, 0, 0.08)',
                       'inset 0 1px 1px rgba(255, 255, 255, 0.3)',
                       'inset 0 -1px 2px rgba(0, 0, 0, 0.15)',
@@ -66,7 +66,7 @@ export default function Navbar() {
                 <div
                   className="flex items-center rounded-xl p-1.5 gap-1"
                   style={{
-                    background: 'linear-gradient(145deg, #f1f5f9 0%, #e8ecf1 100%)',
+                    background: 'linear-gradient(145deg, #e0e7ff 0%, #d4dcf5 100%)',
                     boxShadow: [
                       'inset 0 2px 6px rgba(0, 0, 0, 0.06)',
                       'inset 0 1px 2px rgba(0, 0, 0, 0.04)',
@@ -83,13 +83,13 @@ export default function Navbar() {
                         href={item.href}
                         className="relative px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
                         style={isActive ? {
-                          background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                          background: 'linear-gradient(145deg, #f8faff 0%, #f0f4ff 100%)',
                           color: 'var(--primary)',
                           boxShadow: [
                             '0 4px 12px -2px rgba(0, 0, 0, 0.08)',
                             '0 2px 4px rgba(0, 0, 0, 0.04)',
                             // Colored glow for active state
-                            '0 4px 16px -4px rgba(99, 102, 241, 0.2)',
+                            '0 4px 16px -4px rgba(40, 69, 214, 0.2)',
                             // Inner highlights for puffy clay feel
                             'inset 0 1px 0 rgba(255, 255, 255, 1)',
                             'inset 0 -1px 2px rgba(0, 0, 0, 0.03)',
@@ -101,7 +101,7 @@ export default function Navbar() {
                         }}
                         onMouseEnter={(e) => {
                           if (!isActive) {
-                            e.currentTarget.style.background = 'linear-gradient(145deg, rgba(255,255,255,0.7) 0%, rgba(248,250,252,0.5) 100%)';
+                            e.currentTarget.style.background = 'linear-gradient(145deg, rgba(240,244,255,0.7) 0%, rgba(224,231,255,0.5) 100%)';
                             e.currentTarget.style.color = 'var(--foreground)';
                             e.currentTarget.style.boxShadow = [
                               '0 2px 6px -1px rgba(0, 0, 0, 0.05)',
@@ -133,7 +133,7 @@ export default function Navbar() {
                   onClick={signOut}
                   className="p-2.5 rounded-xl transition-all duration-200 group/btn"
                   style={{
-                    background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                    background: 'linear-gradient(145deg, #f8faff 0%, #f0f4ff 100%)',
                     boxShadow: [
                       '0 3px 8px rgba(0, 0, 0, 0.05)',
                       '0 1px 3px rgba(0, 0, 0, 0.03)',
@@ -154,7 +154,7 @@ export default function Navbar() {
                     e.currentTarget.style.transform = 'translateY(-1px)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)';
+                    e.currentTarget.style.background = 'linear-gradient(145deg, #f8faff 0%, #f0f4ff 100%)';
                     e.currentTarget.style.boxShadow = [
                       '0 3px 8px rgba(0, 0, 0, 0.05)',
                       '0 1px 3px rgba(0, 0, 0, 0.03)',
@@ -174,7 +174,7 @@ export default function Navbar() {
                   className="md:hidden p-2.5 rounded-xl transition-all duration-200"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   style={{
-                    background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                    background: 'linear-gradient(145deg, #f8faff 0%, #f0f4ff 100%)',
                     boxShadow: [
                       '0 3px 8px rgba(0, 0, 0, 0.05)',
                       '0 1px 3px rgba(0, 0, 0, 0.03)',
@@ -201,17 +201,17 @@ export default function Navbar() {
             <div
               className="rounded-2xl p-3 space-y-1.5"
               style={{
-                background: 'linear-gradient(165deg, rgba(255,255,255,0.97) 0%, rgba(250,251,252,0.95) 100%)',
+                background: 'linear-gradient(165deg, rgba(248,250,255,0.97) 0%, rgba(240,244,255,0.95) 100%)',
                 backdropFilter: 'blur(24px)',
                 WebkitBackdropFilter: 'blur(24px)',
                 boxShadow: [
                   '0 12px 40px -6px rgba(0, 0, 0, 0.1)',
                   '0 6px 16px -4px rgba(0, 0, 0, 0.06)',
-                  '0 20px 50px -12px rgba(99, 102, 241, 0.08)',
-                  'inset 0 2px 0 rgba(255, 255, 255, 1)',
+                  '0 20px 50px -12px rgba(40, 69, 214, 0.08)',
+                  'inset 0 2px 0 rgba(248, 250, 255, 1)',
                   'inset 0 -2px 6px rgba(0, 0, 0, 0.02)',
                 ].join(', '),
-                border: '1px solid rgba(255, 255, 255, 0.85)',
+                border: '1px solid rgba(221, 228, 255, 0.7)',
               }}
             >
               {navItems.map((item, index) => {
@@ -226,7 +226,7 @@ export default function Navbar() {
                       background: 'linear-gradient(145deg, var(--primary-light) 0%, var(--primary) 100%)',
                       color: '#ffffff',
                       boxShadow: [
-                        '0 4px 14px -2px rgba(99, 102, 241, 0.4)',
+                        '0 4px 14px -2px rgba(40, 69, 214, 0.4)',
                         '0 2px 4px rgba(0, 0, 0, 0.06)',
                         'inset 0 1px 0 rgba(255, 255, 255, 0.2)',
                         'inset 0 -1px 0 rgba(0, 0, 0, 0.1)',

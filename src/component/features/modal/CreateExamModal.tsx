@@ -414,7 +414,7 @@ export default function CreateExamModal({
           <div className="clay-modal-header px-6 py-5 border-b border-gray-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-secondary to-orange-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-secondary to-secondary-light flex items-center justify-center">
                   <ExamIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -445,7 +445,7 @@ export default function CreateExamModal({
                   <h3 className="font-semibold text-foreground">
                     Select notes to create exam from
                   </h3>
-                  <ClayBadge variant="secondary" className="text-xs">
+                  <ClayBadge variant="accent" className="text-xs">
                     {selectedNotes.length} selected
                   </ClayBadge>
                 </div>
@@ -669,7 +669,7 @@ export default function CreateExamModal({
                         </span>
                       )}
                       {config.includeEssay && (
-                        <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs">
+                        <span className="px-2 py-1 bg-primary-muted text-primary-dark rounded-lg text-xs">
                           {config.essayCount} Essay
                         </span>
                       )}
@@ -680,7 +680,7 @@ export default function CreateExamModal({
                 {/* Generate Button or Results */}
                 {!generatedExam && !isGenerating && (
                   <div className="text-center py-8">
-                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-secondary/20 to-orange-500/20 flex items-center justify-center mx-auto mb-4">
+                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-secondary/20 to-secondary-light/20 flex items-center justify-center mx-auto mb-4">
                       <ExamIcon className="w-10 h-10 text-secondary" />
                     </div>
                     <p className="text-foreground-muted mb-6">
@@ -702,7 +702,7 @@ export default function CreateExamModal({
                 {isGenerating && (
                   <div className="text-center py-12">
                     <div className="relative w-20 h-20 mx-auto mb-4">
-                      <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-secondary to-orange-500 animate-pulse" />
+                      <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-secondary to-secondary-light animate-pulse" />
                       <div className="absolute inset-2 rounded-2xl bg-white flex items-center justify-center">
                         <div className="w-8 h-8 border-3 border-secondary border-t-transparent rounded-full animate-spin" />
                       </div>
@@ -770,15 +770,15 @@ export default function CreateExamModal({
                       {/* Essay Preview */}
                       {generatedExam.questions.filter(q => q.question_type === 'essay').length > 0 && (
                         <div>
-                          <h5 className="text-sm font-medium text-purple-700 mb-2 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                          <h5 className="text-sm font-medium text-primary-dark mb-2 flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-primary"></span>
                             Essay
                           </h5>
                           {generatedExam.questions
                             .filter(q => q.question_type === 'essay')
                             .slice(0, 1)
                             .map((q, idx) => (
-                              <div key={idx} className="p-3 rounded-xl bg-purple-50 border border-purple-100 mb-2">
+                              <div key={idx} className="p-3 rounded-xl bg-primary-muted/50 border border-primary/15 mb-2">
                                 <p className="text-sm text-foreground line-clamp-2">{q.question}</p>
                               </div>
                             ))}

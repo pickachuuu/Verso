@@ -87,8 +87,8 @@ function ToolbarButton({ onClick, isActive, disabled, children, title, vertical,
           disabled:opacity-30 disabled:cursor-not-allowed
           ${isActive
             ? theme === 'dark'
-              ? 'bg-indigo-900/50 text-indigo-300'
-              : 'bg-indigo-100 text-indigo-600'
+              ? 'bg-blue-900/50 text-blue-300'
+              : 'bg-blue-100 text-blue-600'
             : theme === 'dark'
               ? 'bg-gray-800 hover:bg-gray-700 text-gray-300'
               : 'bg-white hover:bg-gray-50 text-gray-600 shadow-sm'
@@ -166,8 +166,8 @@ function VerticalToolbarButton({
         disabled:opacity-30 disabled:cursor-not-allowed
         ${isActive
           ? isDark
-            ? 'bg-indigo-700/60 text-indigo-200'
-            : 'bg-indigo-500/20 text-indigo-600'
+            ? 'bg-blue-700/60 text-blue-200'
+            : 'bg-blue-500/20 text-blue-600'
           : isDark
             ? 'bg-gray-800/80 hover:bg-gray-700/80 text-gray-300'
             : 'bg-white/80 hover:bg-white text-gray-600'
@@ -423,8 +423,8 @@ export function VerticalEditorToolbar({ editor, theme }: VerticalEditorToolbarPr
               disabled:opacity-30 disabled:cursor-not-allowed
               ${canEdit && editor?.isActive('highlight')
                 ? isDark
-                  ? 'bg-indigo-900/50 text-indigo-300 border border-indigo-700/50'
-                  : 'bg-indigo-100 text-indigo-600 border border-indigo-200'
+                  ? 'bg-blue-900/50 text-blue-300 border border-blue-700/50'
+                  : 'bg-blue-100 text-blue-600 border border-blue-200'
                 : isDark
                   ? 'bg-gray-800/80 hover:bg-gray-700/80 text-gray-300 border border-gray-700/50'
                   : 'bg-white hover:bg-gray-50 text-gray-600 border border-gray-200/80 shadow-sm'

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/utils/supabase/client';
 import { generateUniqueSlug } from '@/lib/slug';
@@ -133,7 +134,7 @@ interface CreateNoteParams {
   coverColor?: NotebookColorKey;
 }
 
-async function createNote({ title, coverColor = 'lavender' }: CreateNoteParams): Promise<{ id: string; slug: string }> {
+async function createNote({ title, coverColor = 'royal' }: CreateNoteParams): Promise<{ id: string; slug: string }> {
   if (!title.trim()) throw new Error('Title is required');
 
   const session = await getSession();

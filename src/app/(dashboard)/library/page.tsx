@@ -65,7 +65,7 @@ export default function LibraryPage() {
 
     // Color filter
     if (selectedColor !== 'all') {
-      filtered = filtered.filter((note) => (note.cover_color || 'lavender') === selectedColor);
+      filtered = filtered.filter((note) => (note.cover_color || 'royal') === selectedColor);
     }
 
     // Sort
@@ -341,7 +341,7 @@ export default function LibraryPage() {
                       title={note.title}
                       tags={note.tags || []}
                       updatedAt={note.updated_at}
-                      color={(note.cover_color as NotebookColorKey) || 'lavender'}
+                      color={(note.cover_color as NotebookColorKey) || 'royal'}
                       onGenerateFlashcards={() => handleGenerateFlashcards(note)}
                       onDelete={() => handleDeleteNote(note)}
                     />
@@ -504,7 +504,7 @@ function NotebookListItem({
   onGenerateFlashcards: () => void;
   onDelete: () => void;
 }) {
-  const color = (note.cover_color as NotebookColorKey) || 'lavender';
+  const color = (note.cover_color as NotebookColorKey) || 'royal';
   const colorTheme = NOTEBOOK_COLORS[color];
 
   const formatDate = (dateString: string) => {

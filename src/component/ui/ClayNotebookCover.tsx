@@ -16,27 +16,27 @@ export const NOTEBOOK_COLORS = {
   },
   ocean: {
     name: 'Ocean',
-    primary: '#4ECDC4',
-    secondary: '#6EE7DE',
-    accent: '#A8F0EB',
+    primary: '#1A2CA3',
+    secondary: '#3B50C9',
+    accent: '#7B8FE0',
     text: '#FFFFFF',
-    shadow: 'rgba(78, 205, 196, 0.4)',
+    shadow: 'rgba(26, 44, 163, 0.4)',
   },
-  lavender: {
-    name: 'Lavender',
-    primary: '#9B87F5',
-    secondary: '#B4A7F7',
-    accent: '#D4CDF9',
+  royal: {
+    name: 'Royal',
+    primary: '#2845D6',
+    secondary: '#5B7BF0',
+    accent: '#93AAFF',
     text: '#FFFFFF',
-    shadow: 'rgba(155, 135, 245, 0.4)',
+    shadow: 'rgba(40, 69, 214, 0.4)',
   },
   sunset: {
     name: 'Sunset',
-    primary: '#F59E0B',
-    secondary: '#FBBF24',
-    accent: '#FCD34D',
+    primary: '#F68048',
+    secondary: '#F9A07A',
+    accent: '#FCC4A8',
     text: '#FFFFFF',
-    shadow: 'rgba(245, 158, 11, 0.4)',
+    shadow: 'rgba(246, 128, 72, 0.4)',
   },
   forest: {
     name: 'Forest',
@@ -106,7 +106,7 @@ type ClayNotebookCoverProps = ClayNotebookCoverEditorProps | ClayNotebookCoverCa
  * Can be used in editor mode (with input) or card mode (display only).
  */
 export default function ClayNotebookCover(props: ClayNotebookCoverProps) {
-  const { color = 'lavender', theme = 'light' } = props;
+  const { color = 'royal', theme = 'light' } = props;
   const colorTheme = NOTEBOOK_COLORS[color];
 
   if (props.mode === 'editor') {
@@ -128,7 +128,7 @@ function EditorCover({
   onTitleChange,
   onOpen,
   onColorChange,
-  color = 'lavender',
+  color = 'royal',
   colorTheme,
   theme = 'light',
 }: EditorCoverInternalProps) {

@@ -25,12 +25,12 @@ function ChartSkeleton() {
 
 // Gradient colors for each day to add visual variety
 const BAR_COLORS = [
-  'from-indigo-300 to-primary',
-  'from-violet-300 to-indigo-500',
+  'from-blue-300 to-primary',
   'from-primary-light to-primary',
-  'from-blue-300 to-indigo-500',
-  'from-violet-400 to-primary-dark',
-  'from-indigo-400 to-violet-500',
+  'from-blue-200 to-primary-light',
+  'from-blue-300 to-primary',
+  'from-primary to-primary-dark',
+  'from-primary-light to-primary-dark',
   'from-primary to-primary-dark', // today - most vivid
 ];
 

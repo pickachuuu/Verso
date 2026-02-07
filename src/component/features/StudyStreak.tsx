@@ -40,9 +40,9 @@ export default function StudyStreak() {
   const isActive = currentStreak > 0;
 
   const flameGradient = isOnFire
-    ? 'from-orange-500 via-red-500 to-amber-500'
+    ? 'from-secondary via-red-500 to-secondary-light'
     : isWarm
-      ? 'from-secondary via-orange-500 to-amber-400'
+      ? 'from-secondary via-secondary to-secondary-light'
       : isActive
         ? 'from-secondary/90 to-secondary-light'
         : 'from-gray-200 to-gray-300';
@@ -52,7 +52,7 @@ export default function StudyStreak() {
       {/* Subtle gradient background for active streaks */}
       {isActive && (
         <div className={`absolute inset-0 bg-gradient-to-b ${
-          isOnFire ? 'from-orange-50/80 via-white to-white' :
+          isOnFire ? 'from-secondary-muted/80 via-white to-white' :
           isWarm ? 'from-secondary-muted/60 via-white to-white' :
           'from-secondary-muted/30 to-white'
         } pointer-events-none`} />
@@ -66,13 +66,13 @@ export default function StudyStreak() {
             <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${flameGradient} opacity-20 blur-xl scale-150`} />
           )}
           <div className={`relative w-20 h-20 rounded-full bg-gradient-to-br ${flameGradient} flex items-center justify-center shadow-lg ${
-            isOnFire ? 'shadow-orange-300/40' : isWarm ? 'shadow-secondary/30' : isActive ? 'shadow-secondary/20' : 'shadow-gray-200/50'
+            isOnFire ? 'shadow-secondary/40' : isWarm ? 'shadow-secondary/30' : isActive ? 'shadow-secondary/20' : 'shadow-gray-200/50'
           }`}>
             <FireIcon className={`w-10 h-10 text-white ${isOnFire ? 'animate-pulse' : ''}`} />
           </div>
           {/* Fire badge for 7+ */}
           {isOnFire && (
-            <div className="absolute -top-1 -right-1 w-7 h-7 bg-gradient-to-br from-yellow-300 to-amber-400 rounded-full flex items-center justify-center shadow-md border-2 border-white">
+            <div className="absolute -top-1 -right-1 w-7 h-7 bg-gradient-to-br from-secondary-light to-secondary rounded-full flex items-center justify-center shadow-md border-2 border-white">
               <span className="text-xs">🔥</span>
             </div>
           )}

@@ -32,9 +32,9 @@ const questionTypeStyles = {
     label: 'Identification'
   },
   essay: {
-    bg: 'bg-purple-50',
-    border: 'border-purple-200',
-    badge: 'bg-purple-100 text-purple-700',
+    bg: 'bg-primary-muted/50',
+    border: 'border-primary/20',
+    badge: 'bg-primary-muted text-primary-dark',
     label: 'Essay'
   }
 };
@@ -49,7 +49,7 @@ const getScoreColor = (percentage: number) => {
 
 const getScoreBg = (percentage: number) => {
   if (percentage >= 90) return 'from-green-500 to-emerald-500';
-  if (percentage >= 70) return 'from-blue-500 to-indigo-500';
+  if (percentage >= 70) return 'from-blue-500 to-primary';
   if (percentage >= 50) return 'from-yellow-500 to-orange-500';
   return 'from-red-500 to-rose-500';
 };
@@ -172,7 +172,7 @@ export default function ExamResultsPage() {
               </div>
             </div>
             <ClayButton
-              variant="outline"
+              variant="secondary"
               onClick={() => router.push(`/exams/${examId}`)}
             >
               <RotateClockwiseIcon className="w-4 h-4 mr-2" />
@@ -271,8 +271,8 @@ export default function ExamResultsPage() {
             {stats.essay.total > 0 && (
               <ClayCard variant="elevated" padding="md" className="rounded-2xl">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-                    <SparklesIcon className="w-5 h-5 text-purple-600" />
+                  <div className="w-10 h-10 rounded-xl bg-primary-muted flex items-center justify-center">
+                    <SparklesIcon className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <h3 className="font-medium text-foreground">Essay</h3>
@@ -280,7 +280,7 @@ export default function ExamResultsPage() {
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-purple-600">
+                  <span className="text-3xl font-bold text-primary">
                     {Math.round((stats.essay.points / stats.essay.maxPoints) * 100)}%
                   </span>
                   <span className="text-sm text-foreground-muted">
@@ -412,7 +412,7 @@ export default function ExamResultsPage() {
                 {/* Essay answer and feedback */}
                 {question.question_type === 'essay' && (
                   <div className="space-y-3">
-                    <div className="p-4 rounded-lg bg-purple-50">
+                    <div className="p-4 rounded-lg bg-primary-muted/50">
                       <span className="text-xs text-foreground-muted block mb-2">Your Answer:</span>
                       <p className="text-foreground whitespace-pre-wrap">
                         {response.user_answer || '(No answer)'}
@@ -420,10 +420,10 @@ export default function ExamResultsPage() {
                     </div>
 
                     {response.ai_feedback && (
-                      <div className="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200">
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-primary-muted/50 to-primary-muted border border-primary/20">
                         <div className="flex items-center gap-2 mb-2">
-                          <SparklesIcon className="w-4 h-4 text-purple-600" />
-                          <span className="text-sm font-medium text-purple-700">AI Feedback</span>
+                          <SparklesIcon className="w-4 h-4 text-primary" />
+                          <span className="text-sm font-medium text-primary-dark">AI Feedback</span>
                         </div>
                         <p className="text-foreground-muted text-sm">{response.ai_feedback}</p>
                       </div>
@@ -443,7 +443,7 @@ export default function ExamResultsPage() {
         {/* Action buttons */}
         <div className="flex justify-center gap-4 mt-8 pb-8">
           <ClayButton
-            variant="outline"
+            variant="secondary"
             size="lg"
             onClick={() => router.push('/exams')}
           >

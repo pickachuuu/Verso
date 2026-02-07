@@ -141,7 +141,7 @@ const initialNoteState: NoteState = {
   slug: null,
   title: '',
   tags: [],
-  coverColor: 'lavender',
+  coverColor: 'royal',
 };
 
 export const useNoteStore = create<NoteState & NoteActions>((set, get) => ({

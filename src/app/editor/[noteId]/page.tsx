@@ -158,7 +158,7 @@ export default function EditorPage() {
         slug: fetchedNote.slug,
         title: fetchedNote.title || '',
         tags: fetchedNote.tags || [],
-        coverColor: (fetchedNote.cover_color as NotebookColorKey) || 'lavender',
+        coverColor: (fetchedNote.cover_color as NotebookColorKey) || 'royal',
       });
 
       // Go directly to TOC for existing notes
@@ -943,7 +943,7 @@ export default function EditorPage() {
                   onClick={handleAddPageFromEditor}
                   className="w-full h-9 rounded-xl flex items-center justify-center gap-2 transition-all text-sm font-medium bg-primary/90 hover:bg-primary text-white"
                   style={{
-                    boxShadow: '0 2px 8px rgba(99, 102, 241, 0.4)',
+                    boxShadow: '0 2px 8px rgba(40, 69, 214, 0.4)',
                   }}
                   title="Add new page"
                 >
