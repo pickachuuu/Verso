@@ -208,7 +208,7 @@ export default function LibraryPage() {
                 placeholder="Search notebooks by title or tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100/50 border border-gray-200/80 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
+                className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100/50 border border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
               />
             </div>
 
@@ -217,12 +217,12 @@ export default function LibraryPage() {
               {/* Color Filter */}
               <div className="flex items-center gap-2">
                 <FilterIcon className="w-4 h-4 text-foreground-muted" />
-                <div className="flex items-center gap-1 p-1 rounded-lg bg-gray-100/70 border border-gray-200/50">
+                <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
                   <button
                     onClick={() => setSelectedColor('all')}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                       selectedColor === 'all'
-                        ? 'bg-white text-foreground shadow-sm'
+                        ? 'bg-surface-elevated text-foreground shadow-sm'
                         : 'text-foreground-muted hover:text-foreground'
                     }`}
                   >
@@ -243,12 +243,12 @@ export default function LibraryPage() {
               </div>
 
               {/* Sort */}
-              <div className="flex items-center gap-1 p-1 rounded-lg bg-gray-100/70 border border-gray-200/50">
+              <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
                 <button
                   onClick={() => setSortBy('recent')}
                   className={`p-2 rounded-md transition-all ${
                     sortBy === 'recent'
-                      ? 'bg-white text-primary shadow-sm'
+                      ? 'bg-surface-elevated text-primary shadow-sm'
                       : 'text-foreground-muted hover:text-foreground'
                   }`}
                   title="Sort by recent"
@@ -259,7 +259,7 @@ export default function LibraryPage() {
                   onClick={() => setSortBy('alphabetical')}
                   className={`p-2 rounded-md transition-all ${
                     sortBy === 'alphabetical'
-                      ? 'bg-white text-primary shadow-sm'
+                      ? 'bg-surface-elevated text-primary shadow-sm'
                       : 'text-foreground-muted hover:text-foreground'
                   }`}
                   title="Sort alphabetically"
@@ -270,7 +270,7 @@ export default function LibraryPage() {
                   onClick={() => setSortBy('oldest')}
                   className={`p-2 rounded-md transition-all ${
                     sortBy === 'oldest'
-                      ? 'bg-white text-primary shadow-sm'
+                      ? 'bg-surface-elevated text-primary shadow-sm'
                       : 'text-foreground-muted hover:text-foreground'
                   }`}
                   title="Sort by oldest"
@@ -280,12 +280,12 @@ export default function LibraryPage() {
               </div>
 
               {/* View Toggle */}
-              <div className="flex items-center gap-1 p-1 rounded-lg bg-gray-100/70 border border-gray-200/50">
+              <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-md transition-all ${
                     viewMode === 'grid'
-                      ? 'bg-white text-primary shadow-sm'
+                      ? 'bg-surface-elevated text-primary shadow-sm'
                       : 'text-foreground-muted hover:text-foreground'
                   }`}
                   title="Grid view"
@@ -296,7 +296,7 @@ export default function LibraryPage() {
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-md transition-all ${
                     viewMode === 'list'
-                      ? 'bg-white text-primary shadow-sm'
+                      ? 'bg-surface-elevated text-primary shadow-sm'
                       : 'text-foreground-muted hover:text-foreground'
                   }`}
                   title="List view"
@@ -476,7 +476,7 @@ function EmptyState({
             </p>
             <button
               onClick={onClearFilters}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-gray-100 to-gray-50 text-foreground font-semibold border border-gray-200/80 hover:shadow-md transition-all"
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-gray-100 to-gray-50 text-foreground font-semibold border border-border/80 hover:shadow-md transition-all"
             >
               Clear filters
             </button>

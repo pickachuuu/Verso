@@ -117,7 +117,7 @@ function StepIndicator({ currentStep, steps }: { currentStep: Step; steps: typeo
                   'w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300',
                   isCurrent && 'bg-secondary text-white',
                   isCompleted && 'bg-green-500 text-white',
-                  !isCurrent && !isCompleted && 'bg-gray-200 text-gray-400'
+                  !isCurrent && !isCompleted && 'bg-border text-gray-400'
                 )}
               >
                 {isCompleted ? (
@@ -141,7 +141,7 @@ function StepIndicator({ currentStep, steps }: { currentStep: Step; steps: typeo
               <div
                 className={clsx(
                   'w-8 h-0.5 mx-1 rounded-full transition-all duration-300',
-                  currentStep > step.number ? 'bg-green-500' : 'bg-gray-200'
+                  currentStep > step.number ? 'bg-green-500' : 'bg-border'
                 )}
               />
             )}
@@ -176,7 +176,7 @@ function NoteCard({
         <div
           className={clsx(
             'w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200',
-            isSelected ? 'bg-secondary text-white' : 'bg-gray-100 text-gray-400'
+            isSelected ? 'bg-secondary text-white' : 'bg-surface text-gray-400'
           )}
         >
           {isSelected ? (
@@ -194,7 +194,7 @@ function NoteCard({
               {note.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
+                  className="text-xs px-2 py-0.5 rounded-full bg-surface text-foreground-muted"
                 >
                   {tag}
                 </span>
@@ -241,7 +241,7 @@ function QuestionTypeToggle({
             onClick={onToggle}
             className={clsx(
               'w-6 h-6 rounded-lg flex items-center justify-center transition-all',
-              enabled ? 'bg-secondary text-white' : 'bg-gray-200'
+              enabled ? 'bg-secondary text-white' : 'bg-border'
             )}
           >
             {enabled && <Tick01Icon className="w-4 h-4" />}
@@ -424,7 +424,7 @@ export default function CreateExamModal({
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
+                className="p-2 rounded-xl hover:bg-surface transition-colors"
               >
                 <Cancel01Icon className="w-5 h-5 text-gray-400" />
               </button>
@@ -456,7 +456,7 @@ export default function CreateExamModal({
                   </div>
                 ) : notes.length === 0 ? (
                   <div className="text-center py-12">
-                    <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-2xl bg-surface flex items-center justify-center mx-auto mb-4">
                       <NotebookIcon className="w-8 h-8 text-gray-400" />
                     </div>
                     <p className="text-foreground-muted">No notes found. Create some notes first!</p>
@@ -576,7 +576,7 @@ export default function CreateExamModal({
                       onClick={() => setValue('config.timeLimitEnabled', !config.timeLimitEnabled)}
                       className={clsx(
                         'w-6 h-6 rounded-lg flex items-center justify-center transition-all',
-                        config.timeLimitEnabled ? 'bg-secondary text-white' : 'bg-gray-200'
+                        config.timeLimitEnabled ? 'bg-secondary text-white' : 'bg-border'
                       )}
                     >
                       {config.timeLimitEnabled && <Tick01Icon className="w-4 h-4" />}
@@ -703,7 +703,7 @@ export default function CreateExamModal({
                   <div className="text-center py-12">
                     <div className="relative w-20 h-20 mx-auto mb-4">
                       <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-secondary to-secondary-light animate-pulse" />
-                      <div className="absolute inset-2 rounded-2xl bg-white flex items-center justify-center">
+                      <div className="absolute inset-2 rounded-2xl bg-surface-elevated flex items-center justify-center">
                         <div className="w-8 h-8 border-3 border-secondary border-t-transparent rounded-full animate-spin" />
                       </div>
                     </div>

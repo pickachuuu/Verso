@@ -19,7 +19,7 @@ const HeroActionButton = forwardRef<HTMLButtonElement, HeroActionButtonProps>(
         ref={ref}
         className={cn(
           'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl',
-          'bg-white border border-gray-200/80',
+          'bg-surface border border-border/80',
           'text-foreground font-semibold text-sm',
           'shadow-sm hover:shadow-md',
           'hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm',

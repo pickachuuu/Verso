@@ -259,7 +259,7 @@ export default function FlashcardDashboardPage() {
                 <h1 className="text-xl font-semibold tracking-tight text-foreground">
                   Flashcards
                 </h1>
-                <span className="text-xs font-medium text-foreground-muted bg-gray-100 px-2 py-0.5 rounded-md">
+                <span className="text-xs font-medium text-foreground-muted bg-surface px-2 py-0.5 rounded-md">
                   {totalSets} sets
                 </span>
               </div>
@@ -311,7 +311,7 @@ export default function FlashcardDashboardPage() {
                 placeholder="Search flashcard sets by title or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100/50 border border-gray-200/80 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
+                className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100/50 border border-border/80 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
               />
             </div>
 
@@ -320,12 +320,12 @@ export default function FlashcardDashboardPage() {
               {/* Mastery Filter */}
               <div className="flex items-center gap-2">
                 <FilterIcon className="w-4 h-4 text-foreground-muted" />
-                <div className="flex items-center gap-1 p-1 rounded-lg bg-gray-100/70 border border-gray-200/50">
+                <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
                   <button
                     onClick={() => setMasteryFilter('all')}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                       masteryFilter === 'all'
-                        ? 'bg-white text-foreground shadow-sm'
+                        ? 'bg-surface-elevated text-foreground shadow-sm'
                         : 'text-foreground-muted hover:text-foreground'
                     }`}
                   >
@@ -335,7 +335,7 @@ export default function FlashcardDashboardPage() {
                     onClick={() => setMasteryFilter('learning')}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${
                       masteryFilter === 'learning'
-                        ? 'bg-white text-foreground shadow-sm'
+                        ? 'bg-surface-elevated text-foreground shadow-sm'
                         : 'text-foreground-muted hover:text-foreground'
                     }`}
                   >
@@ -346,7 +346,7 @@ export default function FlashcardDashboardPage() {
                     onClick={() => setMasteryFilter('mastered')}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${
                       masteryFilter === 'mastered'
-                        ? 'bg-white text-foreground shadow-sm'
+                        ? 'bg-surface-elevated text-foreground shadow-sm'
                         : 'text-foreground-muted hover:text-foreground'
                     }`}
                   >
@@ -357,12 +357,12 @@ export default function FlashcardDashboardPage() {
               </div>
 
               {/* Sort */}
-              <div className="flex items-center gap-1 p-1 rounded-lg bg-gray-100/70 border border-gray-200/50">
+              <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
                 <button
                   onClick={() => setSortBy('recent')}
                   className={`p-2 rounded-md transition-all ${
                     sortBy === 'recent'
-                      ? 'bg-white text-accent shadow-sm'
+                      ? 'bg-surface-elevated text-accent shadow-sm'
                       : 'text-foreground-muted hover:text-foreground'
                   }`}
                   title="Sort by recent"
@@ -373,7 +373,7 @@ export default function FlashcardDashboardPage() {
                   onClick={() => setSortBy('alphabetical')}
                   className={`p-2 rounded-md transition-all ${
                     sortBy === 'alphabetical'
-                      ? 'bg-white text-accent shadow-sm'
+                      ? 'bg-surface-elevated text-accent shadow-sm'
                       : 'text-foreground-muted hover:text-foreground'
                   }`}
                   title="Sort alphabetically"
@@ -384,7 +384,7 @@ export default function FlashcardDashboardPage() {
                   onClick={() => setSortBy('oldest')}
                   className={`p-2 rounded-md transition-all ${
                     sortBy === 'oldest'
-                      ? 'bg-white text-accent shadow-sm'
+                      ? 'bg-surface-elevated text-accent shadow-sm'
                       : 'text-foreground-muted hover:text-foreground'
                   }`}
                   title="Sort by oldest"
@@ -394,12 +394,12 @@ export default function FlashcardDashboardPage() {
               </div>
 
               {/* View Toggle */}
-              <div className="flex items-center gap-1 p-1 rounded-lg bg-gray-100/70 border border-gray-200/50">
+              <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-md transition-all ${
                     viewMode === 'grid'
-                      ? 'bg-white text-accent shadow-sm'
+                      ? 'bg-surface-elevated text-accent shadow-sm'
                       : 'text-foreground-muted hover:text-foreground'
                   }`}
                   title="Grid view"
@@ -410,7 +410,7 @@ export default function FlashcardDashboardPage() {
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-md transition-all ${
                     viewMode === 'list'
-                      ? 'bg-white text-accent shadow-sm'
+                      ? 'bg-surface-elevated text-accent shadow-sm'
                       : 'text-foreground-muted hover:text-foreground'
                   }`}
                   title="List view"
@@ -521,7 +521,7 @@ function FlashcardsSkeleton({ viewMode }: { viewMode: ViewMode }) {
     return (
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-[68px] rounded-xl bg-gray-100/60 animate-pulse" />
+          <div key={i} className="h-[68px] rounded-xl bg-surface/60 animate-pulse" />
         ))}
       </div>
     );
@@ -531,15 +531,15 @@ function FlashcardsSkeleton({ viewMode }: { viewMode: ViewMode }) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       {Array.from({ length: 6 }).map((_, i) => (
         <ClayCard key={i} variant="default" padding="none" className="rounded-2xl animate-pulse overflow-hidden">
-          <div className="h-1 w-full bg-gray-100" />
+          <div className="h-1 w-full bg-surface" />
           <div className="p-5 space-y-4">
-            <div className="h-5 w-3/4 bg-gray-100 rounded-md" />
-            <div className="h-3 w-1/2 bg-gray-100/60 rounded" />
+            <div className="h-5 w-3/4 bg-surface rounded-md" />
+            <div className="h-3 w-1/2 bg-surface/60 rounded" />
             <div className="space-y-2 pt-2">
-              <div className="h-3 w-32 bg-gray-100/60 rounded" />
-              <div className="h-1.5 w-full bg-gray-100 rounded-full" />
+              <div className="h-3 w-32 bg-surface/60 rounded" />
+              <div className="h-1.5 w-full bg-surface rounded-full" />
             </div>
-            <div className="h-3 w-16 bg-gray-50 rounded pt-2" />
+            <div className="h-3 w-16 bg-background-muted rounded pt-2" />
           </div>
         </ClayCard>
       ))}
@@ -573,7 +573,7 @@ function EmptyState({
             </p>
             <button
               onClick={onClearFilters}
-              className="px-4 py-2 rounded-lg bg-white text-sm text-foreground font-medium border border-gray-200 hover:shadow-sm transition-all"
+              className="px-4 py-2 rounded-lg bg-surface-elevated text-sm text-foreground font-medium border border-border hover:shadow-sm transition-all"
             >
               Clear filters
             </button>
@@ -599,7 +599,7 @@ function EmptyState({
             </p>
             <button
               onClick={onClearFilters}
-              className="px-4 py-2 rounded-lg bg-white text-sm text-foreground font-medium border border-gray-200 hover:shadow-sm transition-all"
+              className="px-4 py-2 rounded-lg bg-surface-elevated text-sm text-foreground font-medium border border-border hover:shadow-sm transition-all"
             >
               Clear filters
             </button>
@@ -638,7 +638,7 @@ function FlashcardGridItem({
         className="rounded-2xl overflow-hidden h-full flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
       >
         {/* Thin progress accent bar at top */}
-        <div className="h-1 w-full bg-gray-100">
+        <div className="h-1 w-full bg-surface">
           <div
             className={`h-full rounded-r-full transition-all duration-500 ${
               isMastered ? 'bg-emerald-400' : 'bg-accent'
@@ -687,7 +687,7 @@ function FlashcardGridItem({
           </div>
 
           {/* Progress bar */}
-          <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-surface rounded-full h-1.5 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 isMastered ? 'bg-emerald-400' : 'bg-accent/70'

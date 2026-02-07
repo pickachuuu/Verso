@@ -156,13 +156,13 @@ export default function ExamResultsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-surface-elevated border-b border-border">
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/exams')}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="p-2 rounded-lg hover:bg-surface transition-colors"
               >
                 <ArrowLeft01Icon className="w-5 h-5" />
               </button>
@@ -203,14 +203,14 @@ export default function ExamResultsPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/20 rounded-2xl p-4 backdrop-blur-sm">
+              <div className="bg-surface-elevated/20 rounded-2xl p-4 backdrop-blur-sm">
                 <div className="flex items-center gap-2 mb-1">
                   <Target01Icon className="w-4 h-4" />
                   <span className="text-sm opacity-80">Questions</span>
                 </div>
                 <p className="text-2xl font-bold">{results.responses.length}</p>
               </div>
-              <div className="bg-white/20 rounded-2xl p-4 backdrop-blur-sm">
+              <div className="bg-surface-elevated/20 rounded-2xl p-4 backdrop-blur-sm">
                 <div className="flex items-center gap-2 mb-1">
                   <Clock01Icon className="w-4 h-4" />
                   <span className="text-sm opacity-80">Time</span>
@@ -354,7 +354,7 @@ export default function ExamResultsPage() {
                             'p-3 rounded-lg border-2',
                             isCorrectAnswer && 'bg-green-50 border-green-300',
                             isUserAnswer && !isCorrectAnswer && 'bg-red-50 border-red-300',
-                            !isUserAnswer && !isCorrectAnswer && 'bg-gray-50 border-gray-200'
+                            !isUserAnswer && !isCorrectAnswer && 'bg-background-muted border-border'
                           )}
                         >
                           <div className="flex items-center gap-3">
@@ -362,7 +362,7 @@ export default function ExamResultsPage() {
                               'w-6 h-6 rounded flex items-center justify-center text-xs font-bold',
                               isCorrectAnswer && 'bg-green-500 text-white',
                               isUserAnswer && !isCorrectAnswer && 'bg-red-500 text-white',
-                              !isUserAnswer && !isCorrectAnswer && 'bg-gray-300 text-gray-600'
+                              !isUserAnswer && !isCorrectAnswer && 'bg-border text-foreground-muted'
                             )}>
                               {letter}
                             </span>
@@ -429,7 +429,7 @@ export default function ExamResultsPage() {
                       </div>
                     )}
 
-                    <div className="p-4 rounded-lg bg-gray-50">
+                    <div className="p-4 rounded-lg bg-background-muted">
                       <span className="text-xs text-foreground-muted block mb-2">Model Answer / Key Points:</span>
                       <p className="text-foreground text-sm whitespace-pre-wrap">{question.correct_answer}</p>
                     </div>

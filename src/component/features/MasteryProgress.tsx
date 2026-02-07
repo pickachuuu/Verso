@@ -8,10 +8,10 @@ function MasterySkeleton() {
     <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse h-full">
       <div className="flex flex-col items-center gap-4 py-4">
         <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full" />
-        <div className="h-4 w-32 bg-gray-100 rounded-lg" />
+        <div className="h-4 w-32 bg-surface rounded-lg" />
         <div className="w-full space-y-2">
-          <div className="h-3 w-full bg-gray-100 rounded-lg" />
-          <div className="h-3 w-3/4 bg-gray-100 rounded-lg" />
+          <div className="h-3 w-full bg-surface rounded-lg" />
+          <div className="h-3 w-3/4 bg-surface rounded-lg" />
         </div>
       </div>
     </ClayCard>
@@ -106,7 +106,7 @@ export default function MasteryProgress() {
 
   // Status segments for horizontal bar
   const segments = [
-    { label: 'New', count: newCards, color: 'bg-gray-300' },
+    { label: 'New', count: newCards, color: 'bg-border-light' },
     { label: 'Learning', count: learningCards, color: 'bg-primary' },
     { label: 'Review', count: reviewCards, color: 'bg-secondary' },
     { label: 'Mastered', count: masteredCards, color: 'bg-tertiary' },
@@ -139,7 +139,7 @@ export default function MasteryProgress() {
 
         {/* Stacked bar */}
         <div className="w-full mt-4">
-          <div className="h-3 rounded-full overflow-hidden flex bg-gray-100 shadow-inner">
+          <div className="h-3 rounded-full overflow-hidden flex bg-surface shadow-inner">
             {segments.map((seg) => {
               const width = totalCards > 0 ? (seg.count / totalCards) * 100 : 0;
               return width > 0 ? (

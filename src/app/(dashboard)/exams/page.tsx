@@ -193,7 +193,7 @@ export default function ExamsPage() {
               <h1 className="text-xl font-semibold tracking-tight text-foreground">
                 Exams
               </h1>
-              <span className="text-xs font-medium text-foreground-muted bg-gray-100 px-2 py-0.5 rounded-md">
+              <span className="text-xs font-medium text-foreground-muted bg-surface px-2 py-0.5 rounded-md">
                 {totalExams} exams
               </span>
             </div>
@@ -225,7 +225,7 @@ export default function ExamsPage() {
               placeholder="Search exams by title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100/50 border border-gray-200/80 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
+              className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100/50 border border-border/80 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
             />
           </div>
 
@@ -234,12 +234,12 @@ export default function ExamsPage() {
             {/* Difficulty Filter */}
             <div className="flex items-center gap-2">
               <FilterIcon className="w-4 h-4 text-foreground-muted" />
-              <div className="flex items-center gap-1 p-1 rounded-lg bg-gray-100/70 border border-gray-200/50">
+              <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
                 <button
                   onClick={() => setDifficultyFilter('all')}
                   className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                     difficultyFilter === 'all'
-                      ? 'bg-white text-foreground shadow-sm'
+                      ? 'bg-surface-elevated text-foreground shadow-sm'
                       : 'text-foreground-muted hover:text-foreground'
                   }`}
                 >
@@ -279,12 +279,12 @@ export default function ExamsPage() {
             </div>
 
             {/* Question Type Filter */}
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-gray-100/70 border border-gray-200/50">
+            <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
               <button
                 onClick={() => setQuestionTypeFilter('all')}
                 className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                   questionTypeFilter === 'all'
-                    ? 'bg-white text-foreground shadow-sm'
+                    ? 'bg-surface-elevated text-foreground shadow-sm'
                     : 'text-foreground-muted hover:text-foreground'
                 }`}
               >
@@ -323,12 +323,12 @@ export default function ExamsPage() {
             </div>
 
             {/* Sort */}
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-gray-100/70 border border-gray-200/50">
+            <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
               <button
                 onClick={() => setSortBy('recent')}
                 className={`p-2 rounded-md transition-all ${
                     sortBy === 'recent'
-                    ? 'bg-white text-accent shadow-sm'
+                    ? 'bg-surface-elevated text-accent shadow-sm'
                     : 'text-foreground-muted hover:text-foreground'
                 }`}
                 title="Sort by recent"
@@ -339,7 +339,7 @@ export default function ExamsPage() {
                 onClick={() => setSortBy('alphabetical')}
                 className={`p-2 rounded-md transition-all ${
                     sortBy === 'alphabetical'
-                    ? 'bg-white text-accent shadow-sm'
+                    ? 'bg-surface-elevated text-accent shadow-sm'
                     : 'text-foreground-muted hover:text-foreground'
                 }`}
                 title="Sort alphabetically"
@@ -350,7 +350,7 @@ export default function ExamsPage() {
                 onClick={() => setSortBy('oldest')}
                 className={`p-2 rounded-md transition-all ${
                     sortBy === 'oldest'
-                    ? 'bg-white text-accent shadow-sm'
+                    ? 'bg-surface-elevated text-accent shadow-sm'
                     : 'text-foreground-muted hover:text-foreground'
                 }`}
                 title="Sort by oldest"
@@ -360,12 +360,12 @@ export default function ExamsPage() {
             </div>
 
             {/* View Toggle */}
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-gray-100/70 border border-gray-200/50">
+            <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded-md transition-all ${
                   viewMode === 'grid'
-                    ? 'bg-white text-accent shadow-sm'
+                    ? 'bg-surface-elevated text-accent shadow-sm'
                     : 'text-foreground-muted hover:text-foreground'
                 }`}
                 title="Grid view"
@@ -376,7 +376,7 @@ export default function ExamsPage() {
                 onClick={() => setViewMode('list')}
                 className={`p-2 rounded-md transition-all ${
                   viewMode === 'list'
-                    ? 'bg-white text-accent shadow-sm'
+                    ? 'bg-surface-elevated text-accent shadow-sm'
                     : 'text-foreground-muted hover:text-foreground'
                 }`}
                 title="List view"
@@ -476,7 +476,7 @@ function ExamsSkeleton({ viewMode }: { viewMode: ViewMode }) {
     return (
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-[68px] rounded-xl bg-gray-100/60 animate-pulse" />
+          <div key={i} className="h-[68px] rounded-xl bg-surface/60 animate-pulse" />
         ))}
       </div>
     );
@@ -486,18 +486,18 @@ function ExamsSkeleton({ viewMode }: { viewMode: ViewMode }) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       {Array.from({ length: 6 }).map((_, i) => (
         <ClayCard key={i} variant="default" padding="none" className="rounded-2xl animate-pulse overflow-hidden">
-          <div className="h-1 w-full bg-gray-100" />
+          <div className="h-1 w-full bg-surface" />
           <div className="p-5 space-y-4">
-            <div className="h-5 w-3/4 bg-gray-100 rounded-md" />
+            <div className="h-5 w-3/4 bg-surface rounded-md" />
             <div className="flex gap-2">
-              <div className="h-4 w-12 bg-gray-100/60 rounded" />
-              <div className="h-4 w-8 bg-gray-100/60 rounded" />
+              <div className="h-4 w-12 bg-surface/60 rounded" />
+              <div className="h-4 w-8 bg-surface/60 rounded" />
             </div>
             <div className="space-y-2 pt-2">
-              <div className="h-3 w-40 bg-gray-100/60 rounded" />
-              <div className="h-1.5 w-full bg-gray-100 rounded-full" />
+              <div className="h-3 w-40 bg-surface/60 rounded" />
+              <div className="h-1.5 w-full bg-surface rounded-full" />
             </div>
-            <div className="h-3 w-16 bg-gray-50 rounded pt-2" />
+            <div className="h-3 w-16 bg-background-muted rounded pt-2" />
           </div>
         </ClayCard>
       ))}
@@ -531,7 +531,7 @@ function EmptyState({
             </p>
             <button
               onClick={onClearFilters}
-              className="px-4 py-2 rounded-lg bg-white text-sm text-foreground font-medium border border-gray-200 hover:shadow-sm transition-all"
+              className="px-4 py-2 rounded-lg bg-surface-elevated text-sm text-foreground font-medium border border-border hover:shadow-sm transition-all"
             >
               Clear filters
             </button>
@@ -552,17 +552,17 @@ function EmptyState({
 
             {/* Feature preview */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto mt-10">
-              <div className="p-3 rounded-xl bg-gray-50/80 border border-gray-100">
+              <div className="p-3 rounded-xl bg-background-muted/80 border border-border">
                 <SparklesIcon className="w-4 h-4 text-accent mx-auto mb-2" />
                 <h4 className="font-medium text-foreground text-xs mb-0.5">AI-Generated</h4>
                 <p className="text-[11px] text-foreground-muted/60">From your notes</p>
               </div>
-              <div className="p-3 rounded-xl bg-gray-50/80 border border-gray-100">
+              <div className="p-3 rounded-xl bg-background-muted/80 border border-border">
                 <Clock01Icon className="w-4 h-4 text-accent mx-auto mb-2" />
                 <h4 className="font-medium text-foreground text-xs mb-0.5">Timed Tests</h4>
                 <p className="text-[11px] text-foreground-muted/60">Real exam conditions</p>
               </div>
-              <div className="p-3 rounded-xl bg-gray-50/80 border border-gray-100">
+              <div className="p-3 rounded-xl bg-background-muted/80 border border-border">
                 <Target01Icon className="w-4 h-4 text-accent mx-auto mb-2" />
                 <h4 className="font-medium text-foreground text-xs mb-0.5">Track Progress</h4>
                 <p className="text-[11px] text-foreground-muted/60">Improve over time</p>
@@ -577,7 +577,7 @@ function EmptyState({
             </p>
             <button
               onClick={onClearFilters}
-              className="px-4 py-2 rounded-lg bg-white text-sm text-foreground font-medium border border-gray-200 hover:shadow-sm transition-all"
+              className="px-4 py-2 rounded-lg bg-surface-elevated text-sm text-foreground font-medium border border-border hover:shadow-sm transition-all"
             >
               Clear filters
             </button>
@@ -637,13 +637,13 @@ function ExamGridItem({
               {exam.difficulty}
             </span>
             {exam.include_multiple_choice && (
-              <span className="text-[10px] font-medium text-foreground-muted/60 bg-gray-50 px-1.5 py-0.5 rounded">MC</span>
+              <span className="text-[10px] font-medium text-foreground-muted/60 bg-background-muted px-1.5 py-0.5 rounded">MC</span>
             )}
             {exam.include_identification && (
-              <span className="text-[10px] font-medium text-foreground-muted/60 bg-gray-50 px-1.5 py-0.5 rounded">ID</span>
+              <span className="text-[10px] font-medium text-foreground-muted/60 bg-background-muted px-1.5 py-0.5 rounded">ID</span>
             )}
             {exam.include_essay && (
-              <span className="text-[10px] font-medium text-foreground-muted/60 bg-gray-50 px-1.5 py-0.5 rounded">Essay</span>
+              <span className="text-[10px] font-medium text-foreground-muted/60 bg-background-muted px-1.5 py-0.5 rounded">Essay</span>
             )}
           </div>
 
@@ -668,7 +668,7 @@ function ExamGridItem({
           {/* Best score bar (if any) */}
           {exam.best_score !== null && (
             <div className="flex items-center gap-2 mt-3">
-              <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+              <div className="flex-1 bg-surface rounded-full h-1.5 overflow-hidden">
                 <div
                   className={clsx('h-full rounded-full transition-all duration-500', {
                     'bg-emerald-400': exam.best_score >= 80,
@@ -685,7 +685,7 @@ function ExamGridItem({
           )}
 
           {/* Footer: actions */}
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100/80">
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/80">
             <span className="text-[11px] text-foreground-muted/60">
               {exam.attempt_count > 0 ? `Best: ${exam.best_score ?? '—'}%` : 'Not attempted'}
             </span>

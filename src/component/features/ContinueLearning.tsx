@@ -18,11 +18,11 @@ function ContinueSkeleton() {
   return (
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl animate-pulse h-full">
       <div className="space-y-4">
-        <div className="h-5 w-32 bg-gray-100 rounded-lg" />
+        <div className="h-5 w-32 bg-surface rounded-lg" />
         <div className="h-28 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl" />
         <div className="grid grid-cols-2 gap-3">
-          <div className="h-14 bg-gray-100 rounded-xl" />
-          <div className="h-14 bg-gray-100 rounded-xl" />
+          <div className="h-14 bg-surface rounded-xl" />
+          <div className="h-14 bg-surface rounded-xl" />
         </div>
       </div>
     </ClayCard>

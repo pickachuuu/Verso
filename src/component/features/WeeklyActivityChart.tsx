@@ -10,12 +10,12 @@ const SKELETON_HEIGHTS = [45, 65, 30, 80, 55, 40, 70];
 function ChartSkeleton() {
   return (
     <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse h-full">
-      <div className="h-5 w-32 bg-gray-100 rounded-lg mb-4" />
+      <div className="h-5 w-32 bg-surface rounded-lg mb-4" />
       <div className="flex items-end justify-between gap-2 h-32">
         {SKELETON_HEIGHTS.map((height, i) => (
           <div key={i} className="flex-1 flex flex-col items-center gap-2">
-            <div className="w-full bg-gray-100 rounded-lg" style={{ height: `${height}%` }} />
-            <div className="h-3 w-6 bg-gray-100 rounded" />
+            <div className="w-full bg-surface rounded-lg" style={{ height: `${height}%` }} />
+            <div className="h-3 w-6 bg-surface rounded" />
           </div>
         ))}
       </div>
@@ -138,7 +138,7 @@ export default function WeeklyActivityChart() {
                 className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                   i < activeDays
                     ? 'bg-gradient-to-br from-primary-light to-primary shadow-sm shadow-primary/20'
-                    : 'bg-gray-200'
+                    : 'bg-border'
                 }`}
               />
             ))}

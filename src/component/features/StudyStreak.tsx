@@ -9,11 +9,11 @@ function StreakSkeleton() {
     <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse h-full">
       <div className="flex flex-col items-center gap-4 py-6">
         <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full" />
-        <div className="h-8 w-16 bg-gray-100 rounded-lg" />
-        <div className="h-4 w-24 bg-gray-100 rounded-lg" />
+        <div className="h-8 w-16 bg-surface rounded-lg" />
+        <div className="h-4 w-24 bg-surface rounded-lg" />
         <div className="flex gap-1.5 mt-4">
           {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} className="w-8 h-8 bg-gray-100 rounded-lg" />
+            <div key={i} className="w-8 h-8 bg-surface rounded-lg" />
           ))}
         </div>
       </div>
@@ -121,7 +121,7 @@ export default function StudyStreak() {
                           : intensity === 'med'
                             ? 'bg-gradient-to-br from-primary/60 to-primary-light/60'
                             : 'bg-gradient-to-br from-primary/30 to-primary-light/30'
-                        : 'bg-gray-100'
+                        : 'bg-surface'
                     } ${isToday ? 'ring-2 ring-primary/30 ring-offset-1' : ''}`}
                     title={`${day.shortDay}: ${day.cardsStudied} cards`}
                   />

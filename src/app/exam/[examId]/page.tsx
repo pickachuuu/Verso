@@ -232,13 +232,13 @@ export default function TakeExamPage() {
   return (
     <div className="min-h-screen flex flex-col bg-neutral-100">
       {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b bg-white border-gray-200">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b bg-surface border-border">
         <div className="flex items-center gap-3 px-4 py-2">
           <Link
             href="/exams"
-            className="p-1.5 rounded transition-colors hover:bg-gray-100"
+            className="p-1.5 rounded transition-colors hover:bg-surface-elevated"
           >
-            <ArrowLeft02Icon className="w-5 h-5 text-gray-600" />
+            <ArrowLeft02Icon className="w-5 h-5 text-foreground-muted" />
           </Link>
 
           <div className="p-1 rounded bg-amber-100/50">
@@ -246,17 +246,17 @@ export default function TakeExamPage() {
           </div>
 
           <div className="flex-1 min-w-0">
-            <span className="text-sm font-medium text-gray-900">{exam.title}</span>
+            <span className="text-sm font-medium text-foreground">{exam.title}</span>
           </div>
 
           {timeRemaining !== null && (
-            <div className={`flex items-center gap-1.5 text-sm font-mono ${timeRemaining <= 300 ? 'text-red-600' : 'text-gray-600'}`}>
+            <div className={`flex items-center gap-1.5 text-sm font-mono ${timeRemaining <= 300 ? 'text-red-600' : 'text-foreground-muted'}`}>
               <Clock01Icon className="w-4 h-4" />
               <span>{formatTime(timeRemaining)}</span>
             </div>
           )}
 
-          <span className="text-xs text-gray-500">{progress.answered}/{progress.total}</span>
+          <span className="text-xs text-foreground-muted">{progress.answered}/{progress.total}</span>
 
           <button
             onClick={() => setShowConfirmSubmit(true)}
@@ -267,9 +267,9 @@ export default function TakeExamPage() {
 
           <Link
             href="/dashboard"
-            className="p-1.5 rounded transition-colors hover:bg-gray-100"
+            className="p-1.5 rounded transition-colors hover:bg-surface-elevated"
           >
-            <Home01Icon className="w-5 h-5 text-gray-600" />
+            <Home01Icon className="w-5 h-5 text-foreground-muted" />
           </Link>
         </div>
       </header>
@@ -277,7 +277,7 @@ export default function TakeExamPage() {
       {/* Scrollable Exam Paper */}
       <main className="flex-1 pt-14 pb-8">
         <div className="max-w-3xl mx-auto px-4 py-8">
-          <div className="bg-white shadow-sm rounded-sm">
+          <div className="bg-surface shadow-sm rounded-sm">
             {/* Paper content */}
             <div className="px-10 py-12 sm:px-16">
               {/* Header */}
@@ -418,7 +418,7 @@ export default function TakeExamPage() {
         <>
           <div className="fixed inset-0 bg-black/40 z-50" onClick={() => !isSubmitting && setShowConfirmSubmit(false)} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-xl">
+            <div className="bg-surface rounded-lg p-6 w-full max-w-sm shadow-xl">
               {isSubmitting ? (
                 <div className="text-center py-4">
                   <Loading03Icon className="w-8 h-8 text-neutral-600 animate-spin mx-auto mb-3" />

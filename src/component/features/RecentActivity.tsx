@@ -69,12 +69,12 @@ function ActivityItemSkeleton({ isLast }: { isLast: boolean }) {
   return (
     <div className="flex gap-4 animate-pulse">
       <div className="flex flex-col items-center">
-        <div className="w-10 h-10 rounded-xl bg-gray-200 flex-shrink-0" />
-        {!isLast && <div className="w-0.5 flex-1 mt-2 bg-gray-200 rounded-full" />}
+        <div className="w-10 h-10 rounded-xl bg-border flex-shrink-0" />
+        {!isLast && <div className="w-0.5 flex-1 mt-2 bg-border rounded-full" />}
       </div>
       <div className={`flex-1 ${!isLast ? 'pb-5' : 'pb-1'}`}>
-        <div className="h-4 w-40 bg-gray-200 rounded-lg mb-2" />
-        <div className="h-3 w-56 bg-gray-200 rounded-lg" />
+        <div className="h-4 w-40 bg-border rounded-lg mb-2" />
+        <div className="h-3 w-56 bg-border rounded-lg" />
       </div>
     </div>
   );
@@ -84,7 +84,7 @@ function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-10 text-center">
       <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 mb-4 shadow-inner">
-        <Clock01Icon className="w-8 h-8 text-gray-400" />
+        <Clock01Icon className="w-8 h-8 text-foreground-muted" />
       </div>
       <h4 className="font-semibold text-foreground text-sm mb-1">No recent activity</h4>
       <p className="text-xs text-foreground-muted max-w-[220px]">

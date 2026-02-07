@@ -11,13 +11,13 @@ function CardsDueSkeleton() {
     <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse h-full">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="h-5 w-32 bg-gray-100 rounded-lg" />
-          <div className="h-8 w-16 bg-gray-100 rounded-lg" />
+          <div className="h-5 w-32 bg-surface rounded-lg" />
+          <div className="h-8 w-16 bg-surface rounded-lg" />
         </div>
         <div className="grid grid-cols-3 gap-3">
-          <div className="h-14 bg-gray-100 rounded-xl" />
-          <div className="h-14 bg-gray-100 rounded-xl" />
-          <div className="h-14 bg-gray-100 rounded-xl" />
+          <div className="h-14 bg-surface rounded-xl" />
+          <div className="h-14 bg-surface rounded-xl" />
+          <div className="h-14 bg-surface rounded-xl" />
         </div>
       </div>
     </ClayCard>
@@ -82,7 +82,7 @@ export default function CardsDueToday() {
           <div className={`flex-1 py-2 rounded-lg text-center border ${
             overdue > 0
               ? 'bg-red-50 border-red-100'
-              : 'bg-gray-50 border-gray-100'
+              : 'bg-background-muted border-border'
           }`}>
             {overdue > 0 && <AlertCircleIcon className="w-3 h-3 text-error mx-auto mb-0.5" />}
             <p className={`text-sm font-bold ${overdue > 0 ? 'text-error' : 'text-foreground'}`}>{overdue}</p>
@@ -92,7 +92,7 @@ export default function CardsDueToday() {
             <p className="text-sm font-bold text-primary">{newCards}</p>
             <p className="text-[10px] text-foreground-muted">New</p>
           </div>
-          <div className="flex-1 py-2 rounded-lg text-center bg-gray-50 border border-gray-100">
+          <div className="flex-1 py-2 rounded-lg text-center bg-background-muted border border-border">
             <Notification03Icon className="w-3 h-3 text-foreground-muted mx-auto mb-0.5" />
             <p className="text-sm font-bold text-foreground">{dueTomorrow}</p>
             <p className="text-[10px] text-foreground-muted">Tomorrow</p>

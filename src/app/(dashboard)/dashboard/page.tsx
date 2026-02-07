@@ -11,30 +11,15 @@ export default function Dashboard() {
   const { data: user } = useUserProfile();
 
   return (
-    <div className="pb-10">
+    <div className="pb-10 max-w-3xl mx-auto">
       {/* Header */}
       <DashboardHeader user={user ?? undefined} />
 
-      {/* Bento Grid: Streak + Activity Chart + Recommended */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 auto-rows-min">
-        {/* Study Streak - tall on desktop */}
-        <div className="xl:row-span-2">
-          <StudyStreak />
-        </div>
-
-        {/* Weekly Activity Chart - wide */}
-        <div className="md:col-span-1 xl:col-span-2 xl:row-span-2">
-          <WeeklyActivityChart />
-        </div>
-
-        {/* Continue Learning / Recommended */}
-        <div className="xl:row-span-2">
-          <ContinueLearning />
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="mt-5">
+      {/* Single column layout - 1 widget per row */}
+      <div className="mt-6 space-y-5">
+        <StudyStreak />
+        <WeeklyActivityChart />
+        <ContinueLearning />
         <RecentActivity />
       </div>
     </div>

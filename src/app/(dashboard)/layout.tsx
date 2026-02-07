@@ -15,10 +15,12 @@ export default function DashboardLayout({ children }: Readonly<{
   }, [pathname]);
 
   return (
-    <div className="min-h-screen memoforge-bg flex flex-col">
+    <div className="min-h-screen flex">
       <Navbar />
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-4 max-w-7xl relative flex-1">
-        {children}
+      <main className="flex-1 md:ml-60 min-h-screen memoforge-bg pt-16 md:pt-0">
+        <div className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
+          {children}
+        </div>
       </main>
     </div>
   );

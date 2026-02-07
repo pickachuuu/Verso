@@ -753,7 +753,7 @@ export default function FlashcardPage() {
                                                         ? 'bg-green-400'
                                                         : isReviewed
                                                             ? 'bg-blue-400 opacity-50'
-                                                            : 'bg-gray-300 hover:bg-gray-400'
+                                                            : 'bg-border hover:bg-border-light'
                                             }`}
                                             title={`Card ${idx + 1}${card.status === 'mastered' ? ' (mastered)' : isReviewed ? ' (reviewed)' : ''}`}
                                         />

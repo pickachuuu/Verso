@@ -12,13 +12,13 @@ function ExamStatsSkeleton() {
       <div className="flex items-center gap-4 mb-5">
         <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl" />
         <div className="flex-1 space-y-2">
-          <div className="h-4 w-28 bg-gray-100 rounded-lg" />
-          <div className="h-3 w-20 bg-gray-100 rounded-lg" />
+          <div className="h-4 w-28 bg-surface rounded-lg" />
+          <div className="h-3 w-20 bg-surface rounded-lg" />
         </div>
       </div>
       <div className="grid grid-cols-3 gap-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="p-3 rounded-xl bg-gray-50">
+          <div key={i} className="p-3 rounded-xl bg-background-muted">
             <div className="h-6 w-10 bg-gray-200 rounded mb-1" />
             <div className="h-3 w-16 bg-gray-200 rounded" />
           </div>
@@ -56,7 +56,7 @@ function ScoreRing({ percentage, size = 44 }: { percentage: number; size?: numbe
           cx={size / 2} cy={size / 2} r={radius}
           fill="none" stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-gray-100"
+          className="text-border"
         />
         <circle
           cx={size / 2} cy={size / 2} r={radius}
@@ -93,7 +93,7 @@ export default function ExamStats() {
       <ClayCard variant="default" padding="md" className="rounded-2xl h-full">
         <div className="flex items-center gap-6 py-4">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center shadow-inner flex-shrink-0">
-            <ExamIcon className="w-8 h-8 text-gray-400" />
+            <ExamIcon className="w-8 h-8 text-foreground-muted" />
           </div>
           <div>
             <h3 className="font-semibold text-foreground mb-1">No exams yet</h3>
@@ -149,18 +149,18 @@ export default function ExamStats() {
 
           {/* Stat pills */}
           <div className="flex-1 grid grid-cols-3 gap-2">
-            <div className="text-center py-2 px-1 rounded-xl bg-gray-50 border border-gray-100">
+            <div className="text-center py-2 px-1 rounded-xl bg-background-muted border border-border">
               <p className="text-lg font-bold text-foreground leading-none">{totalAttempts}</p>
               <p className="text-[10px] text-foreground-muted font-medium mt-1">Attempts</p>
             </div>
-            <div className="text-center py-2 px-1 rounded-xl bg-gray-50 border border-gray-100">
+            <div className="text-center py-2 px-1 rounded-xl bg-background-muted border border-border">
               <div className="flex items-center justify-center gap-1">
                 <Target01Icon className="w-3.5 h-3.5 text-secondary" />
                 <p className="text-lg font-bold text-foreground leading-none">{averageScore}%</p>
               </div>
               <p className="text-[10px] text-foreground-muted font-medium mt-1">Avg</p>
             </div>
-            <div className="text-center py-2 px-1 rounded-xl bg-gray-50 border border-gray-100">
+            <div className="text-center py-2 px-1 rounded-xl bg-background-muted border border-border">
               <div className="flex items-center justify-center gap-1">
                 <Award02Icon className="w-3.5 h-3.5 text-tertiary" />
                 <p className="text-lg font-bold text-foreground leading-none">{bestScore}%</p>
@@ -179,7 +179,7 @@ export default function ExamStats() {
                 <Link
                   key={attempt.id}
                   href={`/exams/${attempt.examId}/results/${attempt.id}`}
-                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors group"
+                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-background-muted transition-colors group"
                 >
                   <ScoreRing percentage={attempt.percentage} size={36} />
                   <div className="flex-1 min-w-0">

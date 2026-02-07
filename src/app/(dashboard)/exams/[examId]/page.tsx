@@ -15,7 +15,7 @@ export default function ExamRedirect() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <p className="text-gray-500">Loading exam...</p>
+      <p className="text-foreground-muted">Loading exam...</p>
     </div>
   );
 }
