@@ -1167,7 +1167,8 @@ body {
 }
 
 
-/* Ensure editor content inherits color */
+/* Ensure editor content inherits color — but NOT span,
+   because TipTap's Color extension sets inline colors on <span> */
 .tiptap-editor p,
 .tiptap-editor h1,
 .tiptap-editor h2,
@@ -1175,9 +1176,15 @@ body {
 .tiptap-editor h4,
 .tiptap-editor h5,
 .tiptap-editor h6,
+.tiptap-editor ul,
+.tiptap-editor ol,
 .tiptap-editor li,
-.tiptap-editor span,
 .tiptap-editor div {
+  color: inherit !important;
+}
+
+/* Spans without an explicit inline color should inherit */
+.tiptap-editor span:not([style*="color"]) {
   color: inherit !important;
 }
 
@@ -1325,7 +1332,7 @@ body {
   background-color: transparent;
   padding: 0;
   border-radius: 0;
-  color: var(--foreground);
+  color: inherit;
   font-size: 0.875rem;
   line-height: 1.6;
 }
@@ -1340,7 +1347,7 @@ body {
 /* Text Decorations */
 .tiptap-editor strong {
   font-weight: 600;
-  color: var(--foreground);
+  color: inherit;
 }
 
 .tiptap-editor em {
@@ -2798,6 +2805,31 @@ body {
 
 .notebook-editor-wrapper {
   height: 100%;
+}
+
+/* Force dark text inside the notebook editor (it lives on light paper)
+   This overrides the global .prose rules that use var(--foreground) */
+.notebook-editor-wrapper .tiptap-editor,
+.notebook-editor-wrapper .tiptap-editor.prose,
+.notebook-editor-wrapper .ProseMirror {
+  color: #202124 !important;
+}
+
+.notebook-editor-wrapper .prose p,
+.notebook-editor-wrapper .prose h1,
+.notebook-editor-wrapper .prose h2,
+.notebook-editor-wrapper .prose h3,
+.notebook-editor-wrapper .prose h4,
+.notebook-editor-wrapper .prose h5,
+.notebook-editor-wrapper .prose h6,
+.notebook-editor-wrapper .prose ul,
+.notebook-editor-wrapper .prose ol,
+.notebook-editor-wrapper .prose li,
+.notebook-editor-wrapper .prose strong,
+.notebook-editor-wrapper .prose em,
+.notebook-editor-wrapper .prose code,
+.notebook-editor-wrapper .prose pre code {
+  color: inherit !important;
 }
 
 /*
