@@ -15,6 +15,52 @@ import {
 } from 'hugeicons-react';
 
 // ============================================
+// Shared Rich Formatting Guide for AI
+// ============================================
+// This tells the AI exactly which HTML tags TipTap understands,
+// so the AI can "use the toolbar" by outputting the right HTML.
+export const TIPTAP_FORMATTING_GUIDE = `
+You MUST return your response as rich HTML. You have access to the following formatting tools — use them liberally to make the output clear, scannable, and visually structured for a student's notebook:
+
+STRUCTURE:
+- <h2>...</h2> and <h3>...</h3> for section headings
+- <p>...</p> for paragraphs
+- <ul><li>...</li></ul> for bullet lists
+- <ol><li>...</li></ol> for numbered lists
+- <blockquote><p>...</p></blockquote> for callouts or quotes
+- <hr> for horizontal dividers
+
+TEXT FORMATTING:
+- <strong>...</strong> for bold (key terms, definitions)
+- <em>...</em> for italic (emphasis, examples)
+- <u>...</u> for underline (important points)
+- <s>...</s> for strikethrough
+
+HIGHLIGHTS (use colored backgrounds to visually categorize):
+- <mark data-color="#fef08a" style="background-color: #fef08a">...</mark> — Yellow highlight (key definitions)
+- <mark data-color="#bbf7d0" style="background-color: #bbf7d0">...</mark> — Green highlight (examples, correct info)
+- <mark data-color="#bfdbfe" style="background-color: #bfdbfe">...</mark> — Blue highlight (concepts, theories)
+- <mark data-color="#e9d5ff" style="background-color: #e9d5ff">...</mark> — Purple highlight (formulas, rules)
+- <mark data-color="#fbcfe8" style="background-color: #fbcfe8">...</mark> — Pink highlight (warnings, exceptions)
+- <mark data-color="#fed7aa" style="background-color: #fed7aa">...</mark> — Orange highlight (tips, mnemonics)
+
+TEXT COLORS (use sparingly for emphasis):
+- <span style="color: #ef4444">...</span> — Red text (critical warnings)
+- <span style="color: #22c55e">...</span> — Green text (positive, correct)
+- <span style="color: #3b82f6">...</span> — Blue text (references, links)
+- <span style="color: #a855f7">...</span> — Purple text (technical terms)
+
+CODE:
+- <code>...</code> for inline code
+- <pre><code>...</code></pre> for code blocks
+
+RULES:
+- Return ONLY valid HTML, no markdown, no wrapping code blocks, no backticks.
+- Use formatting purposefully — highlight key terms, bold definitions, use lists for steps.
+- Make content look like a well-formatted notebook page a student would be proud of.
+`.trim();
+
+// ============================================
 // AI Action Types & Config
 // ============================================
 type AIAction = 'explain' | 'expand' | 'summarize' | 'simplify' | 'fix_grammar' | 'flashcards';
@@ -31,41 +77,41 @@ const AI_ACTIONS: Record<AIAction, AIActionConfig> = {
     label: 'Explain',
     icon: <BookOpen01Icon className="w-3.5 h-3.5" />,
     systemPrompt:
-      'You are a helpful tutor. Explain the following text clearly and concisely so a student can understand it. Use simple language and provide examples if helpful. Return only the explanation, no introductory sentences.',
+      `You are a helpful tutor. Explain the following text clearly and concisely so a student can understand it. Use simple language and provide examples if helpful.\n\n${TIPTAP_FORMATTING_GUIDE}`,
     mode: 'insert_below',
   },
   expand: {
     label: 'Expand',
     icon: <TextWrapIcon className="w-3.5 h-3.5" />,
     systemPrompt:
-      'You are a study assistant. Expand on the following text with more detail, examples, and context. Make it more comprehensive for studying. Return only the expanded content, no introductory sentences.',
+      `You are a study assistant. Expand on the following text with more detail, examples, and context. Make it comprehensive for studying.\n\n${TIPTAP_FORMATTING_GUIDE}`,
     mode: 'insert_below',
   },
   summarize: {
     label: 'Summarize',
     icon: <SummationCircleIcon className="w-3.5 h-3.5" />,
     systemPrompt:
-      'You are a study assistant. Summarize the following text into a brief, clear summary. Keep the key points and main ideas. Return only the summary, no introductory sentences.',
+      `You are a study assistant. Summarize the following text into a brief, clear summary. Keep the key points and main ideas. Use bullet points and highlights for scannability.\n\n${TIPTAP_FORMATTING_GUIDE}`,
     mode: 'insert_below',
   },
   simplify: {
     label: 'Simplify',
     icon: <StarIcon className="w-3.5 h-3.5" />,
     systemPrompt:
-      'You are a study assistant. Rewrite the following text in simpler, easier-to-understand language. Keep all the key information but use shorter sentences and simpler words. Return only the simplified text.',
+      `You are a study assistant. Rewrite the following text in simpler, easier-to-understand language. Keep all the key information but use shorter sentences and simpler words.\n\n${TIPTAP_FORMATTING_GUIDE}`,
     mode: 'insert_below',
   },
   fix_grammar: {
     label: 'Fix Grammar',
     icon: <CheckmarkCircle03Icon className="w-3.5 h-3.5" />,
     systemPrompt:
-      'You are an expert editor. Fix all grammar, spelling, and punctuation errors in the following text. Maintain the original meaning and tone. Return only the corrected text, nothing else.',
+      `You are an expert editor. Fix all grammar, spelling, and punctuation errors in the following text. Maintain the original meaning, tone, and any existing HTML formatting. Return the corrected text as HTML.\n\n${TIPTAP_FORMATTING_GUIDE}`,
     mode: 'replace',
   },
   flashcards: {
     label: 'Flashcards',
     icon: <FlashIcon className="w-3.5 h-3.5" />,
-    systemPrompt: '', // Handled separately via existing flashcard generation
+    systemPrompt: '',
     mode: 'flashcards',
   },
 };
@@ -164,14 +210,20 @@ export default function AISelectionBubble({ editor, onGenerateFlashcards }: AISe
           return;
         }
 
+        // Strip markdown code fences if the AI wrapped it
+        const cleanResult = result
+          .replace(/^```html?\s*\n?/i, '')
+          .replace(/\n?```\s*$/i, '')
+          .trim();
+
         if (config.mode === 'replace') {
-          // Replace selected text
-          editor.chain().focus().deleteSelection().insertContent(result).run();
+          // Replace selected text with AI-formatted HTML
+          editor.chain().focus().deleteSelection().insertContent(cleanResult).run();
         } else {
-          // Insert below selection
+          // Insert below selection — add a divider and label heading
           const endPos = to;
-          const insertText = `\n\n💡 **AI ${config.label}:**\n${result}`;
-          editor.chain().focus().setTextSelection(endPos).insertContent(insertText).run();
+          const htmlBlock = `<hr><h3><span style="color: #3b82f6">AI ${config.label}</span></h3>${cleanResult}`;
+          editor.chain().focus().setTextSelection(endPos).insertContent(htmlBlock).run();
         }
       } catch (err) {
         console.error('AI action error:', err);

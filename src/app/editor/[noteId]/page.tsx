@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 // UI Components
 import { VerticalEditorToolbar, Editor } from '@/component/ui/RichTextEditor';
+import { TIPTAP_FORMATTING_GUIDE } from '@/component/ui/AISelectionBubble';
 import PageFlipContainer, { ViewType } from '@/component/ui/PageFlipContainer';
 import ClayNotebookCover, { NotebookColorKey } from '@/component/ui/ClayNotebookCover';
 import TableOfContents, { NotePage } from '@/component/ui/TableOfContents';
@@ -293,36 +294,35 @@ export default function EditorPage() {
     try {
       let result = '';
 
+      const cleanAIResult = (raw: string) =>
+        raw.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+
       switch (action) {
         case 'continue_writing': {
           result = await callAI(
-            'You are a helpful writing assistant. Continue writing from where the user left off. Match the tone, style, and topic of the existing content. Return only the continuation text, no introductory phrases.',
+            `You are a helpful writing assistant. Continue writing from where the user left off. Match the tone, style, and topic of the existing content. Write 2-3 paragraphs of continuation.\n\n${TIPTAP_FORMATTING_GUIDE}`,
             textContent || 'This is an empty page. Write an engaging opening paragraph on a general study topic.'
           );
-          // Insert at end of document
-          editor.chain().focus('end').insertContent(`\n${result}`).run();
+          editor.chain().focus('end').insertContent(cleanAIResult(result)).run();
           break;
         }
         case 'generate_outline': {
           result = await callAI(
-            'You are a study assistant. Based on the following content, generate a structured outline using headings (H2 and H3). Return as HTML with <h2> and <h3> tags. Include brief placeholder text under each heading. Return only the HTML, no wrapping code blocks.',
+            `You are a study assistant. Based on the following content, generate a structured outline. Use <h2> for main sections and <h3> for subsections. Include brief placeholder text under each heading to guide the student.\n\n${TIPTAP_FORMATTING_GUIDE}`,
             textContent || 'Generate a general study outline for a student notebook page.'
           );
-          editor.chain().focus('end').insertContent(`\n${result}`).run();
+          editor.chain().focus('end').insertContent(cleanAIResult(result)).run();
           break;
         }
         case 'summarize_page': {
           result = await callAI(
-            'You are a study assistant. Summarize the following note content into a concise, well-structured summary. Use bullet points for key ideas. Return as HTML. Return only the HTML, no wrapping code blocks.',
+            `You are a study assistant. Summarize the following note content into a concise, well-structured summary. Use bullet points for key ideas, highlight important terms, and use headings to organize.\n\n${TIPTAP_FORMATTING_GUIDE}`,
             textContent
           );
-          editor.chain().focus('end').insertContent(`\n<h2>Summary</h2>\n${result}`).run();
+          editor.chain().focus('end').insertContent(`<hr>${cleanAIResult(result)}`).run();
           break;
         }
         case 'generate_flashcards': {
-          // Use the existing flashcard generation flow
-          // Navigate to the flashcard forge modal
-          // For now, extract content and could open a modal
           alert('To generate flashcards, select specific text in the editor or use the Flashcards page with this note.');
           break;
         }
