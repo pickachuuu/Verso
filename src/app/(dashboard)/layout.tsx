@@ -15,9 +15,9 @@ export default function DashboardLayout({ children }: Readonly<{
   }, [pathname]);
 
   return (
-    <div className="min-h-screen flex">
+    <div className="flex">
       <Navbar />
-      <main className="flex-1 md:ml-60 min-h-screen memoforge-bg pt-16 md:pt-0">
+      <main className="flex-1 md:ml-60 memoforge-bg pt-16 md:pt-0">
         <div className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
           {children}
         </div>

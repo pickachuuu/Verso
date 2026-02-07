@@ -10,7 +10,7 @@ function ExamStatsSkeleton() {
   return (
     <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse h-full">
       <div className="flex items-center gap-4 mb-5">
-        <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl" />
+        <div className="w-12 h-12 bg-gradient-to-br from-surface to-surface-elevated rounded-xl" />
         <div className="flex-1 space-y-2">
           <div className="h-4 w-28 bg-surface rounded-lg" />
           <div className="h-3 w-20 bg-surface rounded-lg" />
@@ -19,8 +19,8 @@ function ExamStatsSkeleton() {
       <div className="grid grid-cols-3 gap-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="p-3 rounded-xl bg-background-muted">
-            <div className="h-6 w-10 bg-gray-200 rounded mb-1" />
-            <div className="h-3 w-16 bg-gray-200 rounded" />
+            <div className="h-6 w-10 bg-border rounded mb-1" />
+            <div className="h-3 w-16 bg-border rounded" />
           </div>
         ))}
       </div>
@@ -33,7 +33,7 @@ function getGrade(score: number) {
   if (score >= 80) return { letter: 'B', color: 'text-tertiary', bg: 'bg-tertiary-muted', border: 'border-tertiary/20' };
   if (score >= 70) return { letter: 'C', color: 'text-primary', bg: 'bg-primary-muted', border: 'border-primary/20' };
   if (score >= 60) return { letter: 'D', color: 'text-secondary', bg: 'bg-secondary-muted', border: 'border-secondary/20' };
-  return { letter: 'F', color: 'text-error', bg: 'bg-red-50', border: 'border-error/20' };
+  return { letter: 'F', color: 'text-error', bg: 'bg-error/10', border: 'border-error/20' };
 }
 
 function ScoreRing({ percentage, size = 44 }: { percentage: number; size?: number }) {
@@ -92,7 +92,7 @@ export default function ExamStats() {
     return (
       <ClayCard variant="default" padding="md" className="rounded-2xl h-full">
         <div className="flex items-center gap-6 py-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center shadow-inner flex-shrink-0">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-surface to-surface-elevated flex items-center justify-center shadow-inner flex-shrink-0">
             <ExamIcon className="w-8 h-8 text-foreground-muted" />
           </div>
           <div>

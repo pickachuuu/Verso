@@ -19,7 +19,7 @@ function ContinueSkeleton() {
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl animate-pulse h-full">
       <div className="space-y-4">
         <div className="h-5 w-32 bg-surface rounded-lg" />
-        <div className="h-28 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl" />
+        <div className="h-28 bg-gradient-to-br from-surface to-surface-elevated rounded-2xl" />
         <div className="grid grid-cols-2 gap-3">
           <div className="h-14 bg-surface rounded-xl" />
           <div className="h-14 bg-surface rounded-xl" />
@@ -153,7 +153,7 @@ export default function ContinueLearning() {
         {/* Quick Actions */}
         <div className="mt-4 grid grid-cols-2 gap-2.5">
           <Link href="/library">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 hover:from-secondary-muted/30 hover:to-secondary-muted/50 border border-gray-100 hover:border-secondary/20 transition-all cursor-pointer group">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-surface to-surface-elevated/50 hover:from-secondary-muted/30 hover:to-secondary-muted/50 border border-border hover:border-secondary/20 transition-all cursor-pointer group">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-gradient-to-br from-secondary-muted to-secondary-muted/70">
                   <PencilEdit01Icon className="w-3.5 h-3.5 text-secondary" />
@@ -166,7 +166,7 @@ export default function ContinueLearning() {
           </Link>
 
           <Link href="/flashcards">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 hover:from-tertiary-muted/30 hover:to-tertiary-muted/50 border border-gray-100 hover:border-tertiary/20 transition-all cursor-pointer group">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-surface to-surface-elevated/50 hover:from-tertiary-muted/30 hover:to-tertiary-muted/50 border border-border hover:border-tertiary/20 transition-all cursor-pointer group">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-gradient-to-br from-tertiary-muted to-tertiary-muted/70">
                   <FlashcardIcon className="w-3.5 h-3.5 text-tertiary" />

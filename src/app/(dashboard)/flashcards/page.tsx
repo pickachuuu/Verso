@@ -311,7 +311,7 @@ export default function FlashcardDashboardPage() {
                 placeholder="Search flashcard sets by title or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100/50 border border-border/80 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
+                className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-surface to-surface-elevated/50 border border-border/80 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
               />
             </div>
 
@@ -678,7 +678,7 @@ function FlashcardGridItem({
             <span>
               <span className="font-medium text-foreground">{set.total_cards}</span> cards
             </span>
-            <span className="text-gray-300">&middot;</span>
+            <span className="text-border-light">&middot;</span>
             <span>
               <span className={`font-medium ${isMastered ? 'text-emerald-600' : 'text-foreground'}`}>
                 {set.mastered_cards}
@@ -697,7 +697,7 @@ function FlashcardGridItem({
           </div>
 
           {/* Footer: timestamp + actions */}
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100/80">
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/80">
             <span className="text-[11px] text-foreground-muted/60">
               {set.updated_at ? formatDate(set.updated_at) : 'Never'}
             </span>
@@ -775,7 +775,7 @@ function FlashcardListItem({
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2.5"
-                className="text-gray-100"
+                className="text-border"
               />
               <circle
                 cx="18" cy="18" r="15"

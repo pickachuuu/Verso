@@ -83,7 +83,7 @@ function ActivityItemSkeleton({ isLast }: { isLast: boolean }) {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-10 text-center">
-      <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 mb-4 shadow-inner">
+      <div className="p-4 rounded-2xl bg-gradient-to-br from-surface to-surface-elevated mb-4 shadow-inner">
         <Clock01Icon className="w-8 h-8 text-foreground-muted" />
       </div>
       <h4 className="font-semibold text-foreground text-sm mb-1">No recent activity</h4>

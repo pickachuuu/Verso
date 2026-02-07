@@ -117,7 +117,7 @@ function StepIndicator({ currentStep, steps }: { currentStep: Step; steps: typeo
                   'w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300',
                   isCurrent && 'bg-secondary text-white',
                   isCompleted && 'bg-green-500 text-white',
-                  !isCurrent && !isCompleted && 'bg-border text-gray-400'
+                  !isCurrent && !isCompleted && 'bg-border text-foreground-muted'
                 )}
               >
                 {isCompleted ? (
@@ -131,7 +131,7 @@ function StepIndicator({ currentStep, steps }: { currentStep: Step; steps: typeo
                   'text-sm font-medium hidden sm:block',
                   isCurrent && 'text-foreground',
                   isCompleted && 'text-green-600',
-                  !isCurrent && !isCompleted && 'text-gray-400'
+                  !isCurrent && !isCompleted && 'text-foreground-muted'
                 )}
               >
                 {step.title}
@@ -169,14 +169,14 @@ function NoteCard({
         'w-full text-left p-4 rounded-2xl transition-all duration-200 border-2',
         isSelected
           ? 'clay-note-selected border-secondary bg-secondary/5'
-          : 'clay-note-unselected border-transparent hover:border-gray-200'
+          : 'clay-note-unselected border-transparent hover:border-border'
       )}
     >
       <div className="flex items-start gap-3">
         <div
           className={clsx(
             'w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200',
-            isSelected ? 'bg-secondary text-white' : 'bg-surface text-gray-400'
+            isSelected ? 'bg-secondary text-white' : 'bg-surface text-foreground-muted'
           )}
         >
           {isSelected ? (
@@ -200,7 +200,7 @@ function NoteCard({
                 </span>
               ))}
               {note.tags.length > 3 && (
-                <span className="text-xs text-gray-400">+{note.tags.length - 3}</span>
+                <span className="text-xs text-foreground-muted">+{note.tags.length - 3}</span>
               )}
             </div>
           )}
@@ -232,7 +232,7 @@ function QuestionTypeToggle({
   return (
     <div className={clsx(
       'p-4 rounded-xl border-2 transition-all duration-200',
-      enabled ? 'border-secondary bg-secondary/5' : 'border-gray-200'
+      enabled ? 'border-secondary bg-secondary/5' : 'border-border'
     )}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
@@ -411,7 +411,7 @@ export default function CreateExamModal({
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="clay-modal w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-3xl flex flex-col">
           {/* Header */}
-          <div className="clay-modal-header px-6 py-5 border-b border-gray-100">
+          <div className="clay-modal-header px-6 py-5 border-b border-border">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-secondary to-secondary-light flex items-center justify-center">
@@ -426,7 +426,7 @@ export default function CreateExamModal({
                 onClick={onClose}
                 className="p-2 rounded-xl hover:bg-surface transition-colors"
               >
-                <Cancel01Icon className="w-5 h-5 text-gray-400" />
+                <Cancel01Icon className="w-5 h-5 text-foreground-muted" />
               </button>
             </div>
           </div>
@@ -457,7 +457,7 @@ export default function CreateExamModal({
                 ) : notes.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 rounded-2xl bg-surface flex items-center justify-center mx-auto mb-4">
-                      <NotebookIcon className="w-8 h-8 text-gray-400" />
+                      <NotebookIcon className="w-8 h-8 text-foreground-muted" />
                     </div>
                     <p className="text-foreground-muted">No notes found. Create some notes first!</p>
                   </div>
@@ -517,7 +517,7 @@ export default function CreateExamModal({
                               'p-3 rounded-xl text-left transition-all duration-200 border-2',
                               field.value === option.value
                                 ? 'clay-option-selected border-secondary bg-secondary/5'
-                                : 'clay-option-unselected border-transparent hover:border-gray-200'
+                                : 'clay-option-unselected border-transparent hover:border-border'
                             )}
                           >
                             <div className="font-medium text-sm">{option.label}</div>
@@ -655,7 +655,7 @@ export default function CreateExamModal({
                       </span>
                     </div>
                   </div>
-                  <div className="pt-2 border-t border-gray-100 text-sm">
+                  <div className="pt-2 border-t border-border text-sm">
                     <span className="text-foreground-muted">Breakdown:</span>
                     <div className="flex gap-3 mt-1">
                       {config.includeMultipleChoice && (
@@ -799,7 +799,7 @@ export default function CreateExamModal({
           </div>
 
           {/* Footer */}
-          <div className="clay-modal-footer px-6 py-4 border-t border-gray-100 flex items-center justify-between shrink-0">
+          <div className="clay-modal-footer px-6 py-4 border-t border-border flex items-center justify-between shrink-0">
             <div>
               {currentStep > 1 && (
                 <ClayButton

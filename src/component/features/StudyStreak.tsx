@@ -8,7 +8,7 @@ function StreakSkeleton() {
   return (
     <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse h-full">
       <div className="flex flex-col items-center gap-4 py-6">
-        <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full" />
+        <div className="w-20 h-20 bg-gradient-to-br from-surface to-surface-elevated rounded-full" />
         <div className="h-8 w-16 bg-surface rounded-lg" />
         <div className="h-4 w-24 bg-surface rounded-lg" />
         <div className="flex gap-1.5 mt-4">
@@ -45,16 +45,16 @@ export default function StudyStreak() {
       ? 'from-secondary via-secondary to-secondary-light'
       : isActive
         ? 'from-secondary/90 to-secondary-light'
-        : 'from-gray-200 to-gray-300';
+        : 'from-border to-border-light';
 
   return (
     <ClayCard variant="default" padding="none" className="rounded-2xl h-full overflow-hidden relative">
       {/* Subtle gradient background for active streaks */}
       {isActive && (
         <div className={`absolute inset-0 bg-gradient-to-b ${
-          isOnFire ? 'from-secondary-muted/80 via-white to-white' :
-          isWarm ? 'from-secondary-muted/60 via-white to-white' :
-          'from-secondary-muted/30 to-white'
+          isOnFire ? 'from-secondary-muted/80 via-transparent to-transparent' :
+          isWarm ? 'from-secondary-muted/60 via-transparent to-transparent' :
+          'from-secondary-muted/30 to-transparent'
         } pointer-events-none`} />
       )}
 
@@ -122,7 +122,7 @@ export default function StudyStreak() {
                             ? 'bg-gradient-to-br from-primary/60 to-primary-light/60'
                             : 'bg-gradient-to-br from-primary/30 to-primary-light/30'
                         : 'bg-surface'
-                    } ${isToday ? 'ring-2 ring-primary/30 ring-offset-1' : ''}`}
+                    } ${isToday ? 'ring-2 ring-primary/30 ring-offset-1 ring-offset-surface' : ''}`}
                     title={`${day.shortDay}: ${day.cardsStudied} cards`}
                   />
                   <span className={`text-[10px] font-medium ${isToday ? 'text-primary font-bold' : 'text-foreground-muted'}`}>

@@ -7,7 +7,7 @@ function MasterySkeleton() {
   return (
     <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse h-full">
       <div className="flex flex-col items-center gap-4 py-4">
-        <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full" />
+        <div className="w-24 h-24 bg-gradient-to-br from-surface to-surface-elevated rounded-full" />
         <div className="h-4 w-32 bg-surface rounded-lg" />
         <div className="w-full space-y-2">
           <div className="h-3 w-full bg-surface rounded-lg" />
@@ -30,10 +30,10 @@ function ProgressRing({ percentage, size = 120, strokeWidth = 10 }: ProgressRing
   const offset = circumference - (percentage / 100) * circumference;
 
   const getColor = () => {
-    if (percentage >= 80) return { stroke: '#22C55E', bg: '#F0FDF4', glow: 'rgba(34, 197, 94, 0.2)' };
-    if (percentage >= 50) return { stroke: '#F68048', bg: '#FEF0E7', glow: 'rgba(246, 128, 72, 0.2)' };
-    if (percentage >= 25) return { stroke: '#2845D6', bg: '#EFF6FF', glow: 'rgba(40, 69, 214, 0.2)' };
-    return { stroke: '#94A3B8', bg: '#F8FAFC', glow: 'rgba(148, 163, 184, 0.1)' };
+    if (percentage >= 80) return { stroke: '#22C55E', bg: 'rgba(34, 197, 94, 0.1)', glow: 'rgba(34, 197, 94, 0.15)' };
+    if (percentage >= 50) return { stroke: '#F68048', bg: 'rgba(246, 128, 72, 0.1)', glow: 'rgba(246, 128, 72, 0.15)' };
+    if (percentage >= 25) return { stroke: '#2845D6', bg: 'rgba(40, 69, 214, 0.1)', glow: 'rgba(40, 69, 214, 0.15)' };
+    return { stroke: '#94A3B8', bg: 'rgba(148, 163, 184, 0.08)', glow: 'rgba(148, 163, 184, 0.08)' };
   };
 
   const color = getColor();
@@ -92,7 +92,7 @@ export default function MasteryProgress() {
     return (
       <ClayCard variant="default" padding="md" className="rounded-2xl h-full">
         <div className="text-center py-6">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center shadow-inner">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-surface to-surface-elevated flex items-center justify-center shadow-inner">
             <span className="text-2xl">📚</span>
           </div>
           <h3 className="font-semibold text-foreground mb-1 text-sm">No flashcards yet</h3>
@@ -119,7 +119,7 @@ export default function MasteryProgress() {
         masteryPercentage >= 80 ? 'bg-gradient-to-r from-tertiary via-tertiary-light to-tertiary' :
         masteryPercentage >= 50 ? 'bg-gradient-to-r from-secondary via-secondary-light to-secondary' :
         masteryPercentage >= 25 ? 'bg-gradient-to-r from-primary via-primary-light to-primary' :
-        'bg-gradient-to-r from-gray-300 to-gray-400'
+        'bg-gradient-to-r from-border to-border-light'
       }`} />
 
       <div className="p-5 flex flex-col items-center text-center h-full">

@@ -208,7 +208,7 @@ export default function LibraryPage() {
                 placeholder="Search notebooks by title or tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100/50 border border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
+                className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-surface to-surface-elevated/50 border border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
               />
             </div>
 
@@ -434,7 +434,7 @@ function NotebooksSkeleton({ viewMode }: { viewMode: ViewMode }) {
     return (
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-20 rounded-2xl bg-gradient-to-r from-gray-100 to-gray-50 animate-pulse" />
+          <div key={i} className="h-20 rounded-2xl bg-gradient-to-r from-surface to-surface-elevated/50 animate-pulse" />
         ))}
       </div>
     );
@@ -443,7 +443,7 @@ function NotebooksSkeleton({ viewMode }: { viewMode: ViewMode }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-gray-100 to-gray-50 animate-pulse" />
+        <div key={i} className="aspect-[3/4] rounded-2xl bg-gradient-to-br from-surface to-surface-elevated/50 animate-pulse" />
       ))}
     </div>
   );
@@ -476,7 +476,7 @@ function EmptyState({
             </p>
             <button
               onClick={onClearFilters}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-gray-100 to-gray-50 text-foreground font-semibold border border-border/80 hover:shadow-md transition-all"
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-surface to-surface-elevated/50 text-foreground font-semibold border border-border/80 hover:shadow-md transition-all"
             >
               Clear filters
             </button>

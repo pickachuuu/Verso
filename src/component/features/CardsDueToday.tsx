@@ -103,7 +103,7 @@ export default function CardsDueToday() {
         {hasCardsDue && nextReviewSet ? (
           <Link href={`/flashcards/${nextReviewSet.id}/study`}>
             <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-primary-muted/40 to-primary-muted/60 hover:from-primary-muted/60 hover:to-primary-muted/80 transition-all group cursor-pointer border border-primary/10">
-              <div className="p-1.5 rounded-lg bg-white/80 shadow-sm">
+              <div className="p-1.5 rounded-lg bg-surface-elevated shadow-sm">
                 <FlashcardIcon className="w-3.5 h-3.5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">

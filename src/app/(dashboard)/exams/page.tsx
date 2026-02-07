@@ -225,7 +225,7 @@ export default function ExamsPage() {
               placeholder="Search exams by title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100/50 border border-border/80 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
+              className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-surface to-surface-elevated/50 border border-border/80 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
             />
           </div>
 
@@ -657,11 +657,11 @@ function ExamGridItem({
             </span>
             {exam.time_limit_minutes && (
               <>
-                <span className="text-gray-300">&middot;</span>
+                <span className="text-border-light">&middot;</span>
                 <span>{exam.time_limit_minutes} min</span>
               </>
             )}
-            <span className="text-gray-300">&middot;</span>
+            <span className="text-border-light">&middot;</span>
             <span>{exam.attempt_count} {exam.attempt_count === 1 ? 'attempt' : 'attempts'}</span>
           </div>
 
@@ -727,7 +727,7 @@ function ExamListItemComponent({
   const scorePercent = exam.best_score ?? 0;
   const scoreColor = exam.best_score !== null
     ? exam.best_score >= 80 ? 'text-emerald-400' : exam.best_score >= 50 ? 'text-amber-400' : 'text-red-400'
-    : 'text-gray-200';
+    : 'text-border';
 
   return (
     <div onClick={onTakeExam} className="cursor-pointer">
@@ -741,7 +741,7 @@ function ExamListItemComponent({
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2.5"
-                className="text-gray-100"
+                className="text-border"
               />
               <circle
                 cx="18" cy="18" r="15"

@@ -25,7 +25,7 @@ export default function DashboardLoading() {
             <div className="w-20 h-20 bg-surface rounded-full" />
             <div className="h-10 w-12 bg-surface rounded-lg" />
             <div className="h-4 w-24 bg-surface/60 rounded" />
-            <div className="w-full mt-4 pt-4 border-t border-gray-100">
+            <div className="w-full mt-4 pt-4 border-t border-border">
               <div className="grid grid-cols-7 gap-1.5">
                 {Array.from({ length: 7 }).map((_, i) => (
                   <div key={i} className="aspect-square bg-surface rounded-lg" />

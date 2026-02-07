@@ -24,7 +24,7 @@ function ActionItem({ title, description, icon, href, variant = 'default', accen
       case 'tertiary':
         return 'bg-gradient-to-br from-tertiary to-tertiary-light text-white shadow-lg hover:shadow-xl hover:scale-[1.02]';
       default:
-        return 'bg-gray-50 hover:bg-gray-100 hover:scale-[1.02]';
+        return 'bg-surface hover:bg-surface-elevated hover:scale-[1.02]';
     }
   };
 

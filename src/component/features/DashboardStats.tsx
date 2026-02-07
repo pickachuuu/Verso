@@ -19,11 +19,11 @@ function StatCardSkeleton() {
     <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse">
       <div className="flex items-start justify-between">
         <div className="space-y-3 flex-1">
-          <div className="h-4 w-24 bg-gray-200 rounded-lg" />
-          <div className="h-9 w-16 bg-gray-200 rounded-lg" />
-          <div className="h-3 w-32 bg-gray-200 rounded-lg" />
+          <div className="h-4 w-24 bg-border rounded-lg" />
+          <div className="h-9 w-16 bg-border rounded-lg" />
+          <div className="h-3 w-32 bg-border rounded-lg" />
         </div>
-        <div className="w-14 h-14 bg-gray-200 rounded-2xl" />
+        <div className="w-14 h-14 bg-border rounded-2xl" />
       </div>
     </ClayCard>
   );
@@ -83,8 +83,8 @@ export default function DashboardStats() {
       value: stats?.masteredCards || 0,
       icon: <TickDouble01Icon className="w-6 h-6" />,
       description: 'Cards completed',
-      colorClass: 'bg-green-100',
-      iconColorClass: 'text-green-600',
+      colorClass: 'bg-success/10',
+      iconColorClass: 'text-success',
     },
   ];
 

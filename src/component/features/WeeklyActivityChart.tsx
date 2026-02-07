@@ -97,8 +97,8 @@ export default function WeeklyActivityChart() {
                 <div
                   className={`w-full rounded-xl transition-all duration-500 cursor-pointer hover:opacity-90 ${
                     hasActivity
-                      ? `bg-gradient-to-t ${barColor} ${isToday ? 'shadow-lg shadow-primary/25 ring-2 ring-primary/20 ring-offset-2' : 'shadow-sm'}`
-                      : 'bg-gradient-to-t from-gray-100 to-gray-50'
+                      ? `bg-gradient-to-t ${barColor} ${isToday ? 'shadow-lg shadow-primary/25 ring-2 ring-primary/20 ring-offset-2 ring-offset-surface' : 'shadow-sm'}`
+                      : 'bg-gradient-to-t from-surface to-surface-elevated/50'
                   }`}
                   style={{
                     height: hasActivity ? `${Math.max(heightPercent, 12)}%` : '8px',
