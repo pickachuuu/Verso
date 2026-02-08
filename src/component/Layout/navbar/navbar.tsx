@@ -3,8 +3,8 @@
 import { navItems } from "./navConfig";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Logout01Icon, Menu01Icon, Cancel01Icon, DashboardSpeed01Icon } from "hugeicons-react";
-import { useState } from "react";
+import { Logout01Icon, Menu01Icon, Cancel01Icon, DashboardSpeed01Icon, Notification03Icon, Bookmark01Icon } from "hugeicons-react";
+import { useEffect, useRef, useState } from "react";
 import { signOut } from '@/hook/useAuthActions';
 import { NotebookIcon, FlashcardIcon, ExamIcon } from '@/component/icons';
 
@@ -21,6 +21,34 @@ const getNavIcon = (href: string) => {
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notificationRef = useRef<HTMLDivElement | null>(null);
+
+  const secondaryItems = [
+    { name: 'Saved Materials', href: '/saved', icon: <Bookmark01Icon className="w-6 h-6" /> },
+  ];
+  const notifications = [] as { id: string; title: string; detail: string }[];
+
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      setNotificationsOpen(false);
+    }
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    setNotificationsOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!notificationRef.current) return;
+      if (!notificationRef.current.contains(event.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <>
@@ -60,6 +88,68 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          <div className="my-3 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+          {secondaryItems.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 border ${
+                  isActive
+                    ? "bg-background-muted text-foreground border-pencil/40 shadow-sm relative after:content-[''] after:absolute after:left-4 after:right-4 after:bottom-2 after:h-[2px] after:bg-pencil/50 after:rounded-full"
+                    : 'text-foreground-muted border-transparent hover:bg-background-muted hover:text-foreground hover:border-border'
+                }`}
+              >
+                {item.icon}
+                {item.name}
+              </Link>
+            );
+          })}
+
+          <div ref={notificationRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setNotificationsOpen((prev) => !prev)}
+              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 border ${
+                notificationsOpen
+                  ? 'bg-background-muted text-foreground border-pencil/40 shadow-sm'
+                  : 'text-foreground-muted border-transparent hover:bg-background-muted hover:text-foreground hover:border-border'
+              }`}
+            >
+              <Notification03Icon className="w-6 h-6" />
+              Notifications
+            </button>
+
+            {notificationsOpen && (
+              <div className="absolute left-full top-0 ml-3 w-72 z-50">
+                <div className="rounded-2xl bg-surface border border-dashed border-pencil/40 shadow-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-foreground">Notifications</span>
+                    <span className="text-xs text-foreground-muted">
+                      {notifications.length === 0 ? 'No new' : `${notifications.length} new`}
+                    </span>
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div className="text-xs text-foreground-muted bg-background-muted border border-border rounded-xl px-3 py-3 text-center">
+                      You&apos;re all caught up.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {notifications.map((note) => (
+                        <div key={note.id} className="rounded-xl border border-border bg-background-muted px-3 py-2">
+                          <p className="text-xs font-semibold text-foreground">{note.title}</p>
+                          <p className="text-[11px] text-foreground-muted">{note.detail}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Sign Out */}
@@ -119,6 +209,67 @@ export default function Navbar() {
                 );
               })}
             </nav>
+
+            <div className="my-3 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+            <div className="space-y-1">
+              {secondaryItems.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all border ${
+                      isActive
+                        ? 'bg-background-muted text-foreground border-pencil/40 shadow-sm'
+                        : 'text-foreground-muted border-transparent hover:bg-background-muted hover:text-foreground hover:border-border'
+                    }`}
+                  >
+                    {item.icon}
+                    {item.name}
+                  </Link>
+                );
+              })}
+
+              <button
+                type="button"
+                onClick={() => setNotificationsOpen((prev) => !prev)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all border ${
+                  notificationsOpen
+                    ? 'bg-background-muted text-foreground border-pencil/40 shadow-sm'
+                    : 'text-foreground-muted border-transparent hover:bg-background-muted hover:text-foreground hover:border-border'
+                }`}
+              >
+                <Notification03Icon className="w-5 h-5" />
+                Notifications
+              </button>
+
+              {notificationsOpen && (
+                <div className="rounded-2xl bg-surface border border-dashed border-pencil/40 shadow-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-foreground">Notifications</span>
+                    <span className="text-[10px] text-foreground-muted">
+                      {notifications.length === 0 ? 'No new' : `${notifications.length} new`}
+                    </span>
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div className="text-[11px] text-foreground-muted bg-background-muted border border-border rounded-xl px-3 py-2 text-center">
+                      You&apos;re all caught up.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {notifications.map((note) => (
+                        <div key={note.id} className="rounded-xl border border-border bg-background-muted px-3 py-2">
+                          <p className="text-[11px] font-semibold text-foreground">{note.title}</p>
+                          <p className="text-[10px] text-foreground-muted">{note.detail}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
