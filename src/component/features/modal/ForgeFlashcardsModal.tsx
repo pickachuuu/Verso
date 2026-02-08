@@ -624,7 +624,6 @@ export default function ForgeFlashcardsModal({
                   disabled={currentStep === 1 && selectedNotes.length === 0}
                 >
                   Continue
-                  <ArrowRight01Icon className="w-4 h-4 ml-2" />
                 </ClayButton>
               )}
 

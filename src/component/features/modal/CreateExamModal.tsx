@@ -829,7 +829,6 @@ export default function CreateExamModal({
                   className="bg-secondary hover:bg-secondary/90"
                 >
                   Continue
-                  <ArrowRight01Icon className="w-4 h-4 ml-2" />
                 </ClayButton>
               )}
 
