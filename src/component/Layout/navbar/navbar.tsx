@@ -28,12 +28,13 @@ export default function Navbar() {
       <aside
         className="hidden md:flex fixed left-0 top-0 bottom-0 w-60 z-50 flex-col"
         style={{
-          background: 'linear-gradient(180deg, #0D1A3A 0%, #091228 100%)',
+          background: 'linear-gradient(180deg, #1E293B 0%, #172033 100%)',
           boxShadow: [
-            '4px 0 24px rgba(0, 0, 0, 0.35)',
+            '4px 0 24px rgba(0, 0, 0, 0.3)',
             '1px 0 0 rgba(255, 255, 255, 0.04)',
             'inset -1px 0 0 rgba(255, 255, 255, 0.06)',
           ].join(', '),
+          borderRight: '1px solid rgba(255, 255, 255, 0.06)',
         }}
       >
         {/* Logo */}
@@ -132,10 +133,11 @@ export default function Navbar() {
         <div
           className="px-4 py-3"
           style={{
-            background: 'linear-gradient(180deg, rgba(13, 26, 58, 0.98) 0%, rgba(13, 26, 58, 0.95) 100%)',
+            background: 'linear-gradient(180deg, rgba(30, 41, 59, 0.98) 0%, rgba(23, 32, 51, 0.95) 100%)',
             backdropFilter: 'blur(24px)',
             WebkitBackdropFilter: 'blur(24px)',
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.35)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
           }}
         >
           <div className="flex items-center justify-between">
@@ -166,9 +168,9 @@ export default function Navbar() {
           <div
             className="px-4 pb-4"
             style={{
-              background: 'rgba(13, 26, 58, 0.98)',
+              background: 'rgba(30, 41, 59, 0.98)',
               backdropFilter: 'blur(24px)',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
               borderTop: '1px solid rgba(255, 255, 255, 0.06)',
             }}
           >

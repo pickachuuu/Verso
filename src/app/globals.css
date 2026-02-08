@@ -826,18 +826,54 @@ body {
   position: relative;
   isolation: isolate;
   min-height: 100vh;
-  /* Solid dark navy backdrop with subtle gradient */
-  background: linear-gradient(180deg, #0F172A 0%, #0C1322 100%);
+  /* Rich gradient with subtle depth shifts */
+  background:
+    linear-gradient(165deg, #0F172A 0%, #111D35 25%, #0E1629 50%, #0C1322 100%);
 }
 
-/* Subtle ambient glow - very minimal */
+/* Grid pattern - structured mesh lines */
 .memoforge-bg::before {
   content: '';
   position: fixed;
   inset: 0;
+  background-image:
+    /* Vertical grid lines */
+    repeating-linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.08) 0px,
+      rgba(148, 163, 184, 0.08) 1px,
+      transparent 1px,
+      transparent 48px
+    ),
+    /* Horizontal grid lines */
+    repeating-linear-gradient(
+      0deg,
+      rgba(148, 163, 184, 0.08) 0px,
+      rgba(148, 163, 184, 0.08) 1px,
+      transparent 1px,
+      transparent 48px
+    );
+  /* Mask: fade grid toward edges */
+  -webkit-mask-image: radial-gradient(ellipse 90% 85% at 50% 50%, black 40%, transparent 80%);
+  mask-image: radial-gradient(ellipse 90% 85% at 50% 50%, black 40%, transparent 80%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Ambient glow layers for depth and warmth over the grid */
+.memoforge-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
   background:
-    radial-gradient(ellipse 900px 500px at 70% 0%, rgba(40, 69, 214, 0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 600px 400px at 20% 100%, rgba(246, 128, 72, 0.02) 0%, transparent 50%);
+    /* Primary blue glow - top right */
+    radial-gradient(ellipse 1000px 600px at 80% 0%, rgba(40, 69, 214, 0.18) 0%, transparent 55%),
+    /* Secondary warm glow - bottom left */
+    radial-gradient(ellipse 900px 600px at 5% 90%, rgba(246, 128, 72, 0.08) 0%, transparent 50%),
+    /* Soft center glow for depth */
+    radial-gradient(ellipse 1400px 900px at 50% 35%, rgba(30, 41, 59, 0.4) 0%, transparent 60%),
+    /* Top-left blue highlight */
+    radial-gradient(ellipse 800px 300px at 25% 0%, rgba(91, 123, 240, 0.1) 0%, transparent 60%);
   pointer-events: none;
   z-index: -1;
 }

@@ -594,11 +594,22 @@ function FlashcardListItem({
 }) {
   const progress = Math.round((set.mastered_cards / set.total_cards) * 100) || 0;
   const isMastered = progress === 100;
+  const learningCards = set.total_cards - set.mastered_cards;
 
   // Choose accent colors based on mastery
   const accentColor = isMastered ? '#10b981' : '#6366f1';
   const accentColorLight = isMastered ? '#34d399' : '#818cf8';
   const accentShadow = isMastered ? 'rgba(16,185,129,0.3)' : 'rgba(99,102,241,0.3)';
+
+  // Mastery status label
+  const getMasteryLabel = () => {
+    if (isMastered) return { text: 'Mastered', className: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' };
+    if (progress >= 50) return { text: 'In Progress', className: 'text-amber-600 bg-amber-500/10 border-amber-500/20' };
+    if (progress > 0) return { text: 'Learning', className: 'text-primary bg-primary/10 border-primary/20' };
+    return { text: 'New', className: 'text-foreground-muted bg-surface border-border/50' };
+  };
+
+  const masteryLabel = getMasteryLabel();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -612,151 +623,181 @@ function FlashcardListItem({
     return date.toLocaleDateString();
   };
 
+  // Get the source note name from the set metadata
+  const sourceNote = (set as FlashcardSet & { notes?: { id: string; title: string } | null }).notes;
+
   return (
     <div onClick={onClick} className="block group cursor-pointer">
       <ClayCard variant="default" padding="none" className="rounded-2xl overflow-hidden hover:shadow-lg transition-all">
-        <div className="flex items-center gap-4 p-3 pr-5">
-          {/* 3D mini flashcard stack */}
-          <div className="relative flex-shrink-0" style={{ width: 56, height: 44 }}>
-            {/* Bottom card (3rd in stack) — offset right + down */}
-            <div
-              className="absolute rounded-[6px]"
-              style={{
-                top: 4,
-                left: 4,
-                right: 0,
-                bottom: 0,
-                background: 'linear-gradient(135deg, #d1d5db, #c4c8cd)',
-                boxShadow: '1px 1px 2px rgba(0,0,0,0.10)',
-              }}
-            />
-            {/* Middle card (2nd in stack) */}
-            <div
-              className="absolute rounded-[6px]"
-              style={{
-                top: 2,
-                left: 2,
-                right: 2,
-                bottom: 2,
-                background: 'linear-gradient(135deg, #e2e5ea, #d5d8dd)',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
-              }}
-            />
-            {/* Front card — main colored card */}
-            <div
-              className="absolute rounded-[6px] overflow-hidden"
-              style={{
-                top: 0,
-                left: 0,
-                right: 4,
-                bottom: 4,
-                background: `linear-gradient(145deg, ${accentColorLight} 0%, ${accentColor} 60%, ${accentColor} 100%)`,
-                boxShadow: `2px 3px 6px ${accentShadow}`,
-              }}
-            >
-              {/* Glossy highlight */}
-              <div
-                className="absolute pointer-events-none"
-                style={{
-                  top: '-15%',
-                  left: '5%',
-                  right: '35%',
-                  bottom: '55%',
-                  background: 'linear-gradient(160deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
-                  borderRadius: '50%',
-                  filter: 'blur(1px)',
-                }}
-              />
-              {/* Divider line (Q/A split) */}
-              <div
-                className="absolute left-[15%] right-[15%]"
-                style={{
-                  top: '50%',
-                  height: 1,
-                  background: 'rgba(255,255,255,0.3)',
-                }}
-              />
-              {/* Lightning bolt icon */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <SparklesIcon className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.35)' }} />
-              </div>
-            </div>
-          </div>
+        <div className="flex items-stretch">
+          {/* Mastery accent left border */}
+          <div
+            className="w-1 flex-shrink-0 rounded-l-2xl"
+            style={{
+              background: isMastered
+                ? 'linear-gradient(180deg, #34d399, #10b981)'
+                : progress >= 50
+                  ? 'linear-gradient(180deg, #fbbf24, #f59e0b)'
+                  : progress > 0
+                    ? 'linear-gradient(180deg, #818cf8, #6366f1)'
+                    : 'linear-gradient(180deg, #94a3b8, #64748b)'
+            }}
+          />
 
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                {set.title}
-              </h3>
-              {set.is_public && (
-                <span className="text-[10px] font-medium uppercase tracking-wide text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">
-                  Public
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-3 mt-0.5">
-              <span className="text-xs text-foreground-muted flex items-center gap-1">
-                <Clock01Icon className="w-3 h-3" />
-                {formatDate(set.updated_at || set.created_at)}
-              </span>
-              <span className="text-xs text-foreground-muted">
-                <span className="font-medium text-foreground">{set.total_cards}</span> cards
-              </span>
-              <span className={`text-xs ${isMastered ? 'text-emerald-600 font-medium' : 'text-foreground-muted'}`}>
-                {set.mastered_cards}/{set.total_cards} mastered
-              </span>
-              {/* Mini progress bar */}
-              <div className="hidden sm:flex items-center gap-1.5">
-                <div className="w-16 bg-surface rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      isMastered ? 'bg-emerald-400' : 'bg-primary/70'
-                    }`}
-                    style={{ width: `${progress}%` }}
-                  />
+          <div className="flex items-center gap-4 p-3 pr-5 flex-1 min-w-0">
+            {/* 3D mini flashcard stack */}
+            <div className="relative flex-shrink-0" style={{ width: 56, height: 44 }}>
+              {/* Bottom card (3rd in stack) — offset right + down */}
+              <div
+                className="absolute rounded-[6px]"
+                style={{
+                  top: 4,
+                  left: 4,
+                  right: 0,
+                  bottom: 0,
+                  background: 'linear-gradient(135deg, #d1d5db, #c4c8cd)',
+                  boxShadow: '1px 1px 2px rgba(0,0,0,0.10)',
+                }}
+              />
+              {/* Middle card (2nd in stack) */}
+              <div
+                className="absolute rounded-[6px]"
+                style={{
+                  top: 2,
+                  left: 2,
+                  right: 2,
+                  bottom: 2,
+                  background: 'linear-gradient(135deg, #e2e5ea, #d5d8dd)',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                }}
+              />
+              {/* Front card — main colored card */}
+              <div
+                className="absolute rounded-[6px] overflow-hidden"
+                style={{
+                  top: 0,
+                  left: 0,
+                  right: 4,
+                  bottom: 4,
+                  background: `linear-gradient(145deg, ${accentColorLight} 0%, ${accentColor} 60%, ${accentColor} 100%)`,
+                  boxShadow: `2px 3px 6px ${accentShadow}`,
+                }}
+              >
+                {/* Glossy highlight */}
+                <div
+                  className="absolute pointer-events-none"
+                  style={{
+                    top: '-15%',
+                    left: '5%',
+                    right: '35%',
+                    bottom: '55%',
+                    background: 'linear-gradient(160deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
+                    borderRadius: '50%',
+                    filter: 'blur(1px)',
+                  }}
+                />
+                {/* Divider line (Q/A split) */}
+                <div
+                  className="absolute left-[15%] right-[15%]"
+                  style={{
+                    top: '50%',
+                    height: 1,
+                    background: 'rgba(255,255,255,0.3)',
+                  }}
+                />
+                {/* Lightning bolt icon */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <SparklesIcon className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.35)' }} />
                 </div>
-                <span className="text-[10px] font-medium text-foreground-muted">{progress}%</span>
               </div>
             </div>
-          </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-            <button
-              className={`p-2 rounded-lg transition-colors ${
-                shareLinkCopied
-                  ? 'bg-emerald-500/10 text-emerald-500'
-                  : 'bg-primary/10 text-primary hover:bg-primary/20'
-              }`}
-              title={shareLinkCopied ? 'Copied!' : 'Share'}
-              onClick={(e) => {
-                e.stopPropagation();
-                onShare(e);
-              }}
-            >
-              <Share01Icon className="w-4 h-4" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onReforge();
-              }}
-              className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-              title="Reforge flashcards"
-            >
-              <RefreshIcon className="w-4 h-4" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
-              title="Delete set"
-            >
-              <Delete01Icon className="w-4 h-4" />
-            </button>
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                  {set.title}
+                </h3>
+                {set.is_public && (
+                  <span className="text-[10px] font-medium uppercase tracking-wide text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">
+                    Public
+                  </span>
+                )}
+                <span className={`hidden sm:inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0 ${masteryLabel.className}`}>
+                  {masteryLabel.text}
+                </span>
+              </div>
+              {/* Source note */}
+              {sourceNote && (
+                <p className="text-[11px] text-foreground-muted/70 truncate mt-0.5">
+                  From: {sourceNote.title}
+                </p>
+              )}
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-xs text-foreground-muted flex items-center gap-1">
+                  <Clock01Icon className="w-3 h-3" />
+                  {formatDate(set.updated_at || set.created_at)}
+                </span>
+                <span className="text-xs text-foreground-muted">
+                  <span className="font-medium text-foreground">{set.total_cards}</span> cards
+                </span>
+                {learningCards > 0 && !isMastered && (
+                  <span className="text-xs text-foreground-muted">
+                    <span className="font-medium text-primary">{learningCards}</span> to learn
+                  </span>
+                )}
+                {/* Mini progress bar */}
+                <div className="hidden sm:flex items-center gap-1.5">
+                  <div className="w-20 bg-surface rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        isMastered ? 'bg-emerald-400' : progress >= 50 ? 'bg-amber-400' : 'bg-primary/70'
+                      }`}
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <span className={`text-[10px] font-bold ${isMastered ? 'text-emerald-600' : 'text-foreground-muted'}`}>{progress}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <button
+                className={`p-2 rounded-lg transition-colors ${
+                  shareLinkCopied
+                    ? 'bg-emerald-500/10 text-emerald-500'
+                    : 'bg-primary/10 text-primary hover:bg-primary/20'
+                }`}
+                title={shareLinkCopied ? 'Copied!' : 'Share'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShare(e);
+                }}
+              >
+                <Share01Icon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReforge();
+                }}
+                className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                title="Reforge flashcards"
+              >
+                <RefreshIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                title="Delete set"
+              >
+                <Delete01Icon className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </ClayCard>

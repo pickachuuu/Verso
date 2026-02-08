@@ -416,126 +416,162 @@ function NotebookListItem({
     return date.toLocaleDateString();
   };
 
+  // Extract a plain-text preview from HTML content
+  const getContentPreview = (content: string) => {
+    if (!content) return null;
+    const text = content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    if (text.length === 0) return null;
+    return text.length > 80 ? text.slice(0, 80) + '...' : text;
+  };
+
+  // Estimate word count from content
+  const getWordCount = (content: string) => {
+    if (!content) return 0;
+    const text = content.replace(/<[^>]*>/g, '').trim();
+    if (text.length === 0) return 0;
+    return text.split(/\s+/).filter(Boolean).length;
+  };
+
+  const preview = getContentPreview(note.content);
+  const wordCount = getWordCount(note.content);
+
   return (
     <Link href={`/editor/${note.slug || note.id}`} className="block group">
       <ClayCard variant="default" padding="none" className="rounded-2xl overflow-hidden hover:shadow-lg transition-all">
-        <div className="flex items-center gap-4 p-3 pr-5">
-          {/* 3D mini notebook */}
-          <div className="relative flex-shrink-0" style={{ width: 54, height: 62 }}>
-            {/* Page edges — thin stack, only visible on right + bottom */}
-            <div
-              className="absolute rounded-[5px]"
-              style={{ top: 3, left: 3, right: 0, bottom: 0, background: '#d8d5d0', boxShadow: '1px 1px 2px rgba(0,0,0,0.12)' }}
-            />
-            <div
-              className="absolute rounded-[5px]"
-              style={{ top: 2, left: 2, right: 1, bottom: 1, background: '#e5e2dd' }}
-            />
-            <div
-              className="absolute rounded-[5px]"
-              style={{ top: 1, left: 1, right: 2, bottom: 2, background: '#eeecea' }}
-            />
+        <div className="flex items-stretch">
+          {/* Color accent left border */}
+          <div
+            className="w-1 flex-shrink-0 rounded-l-2xl"
+            style={{ background: `linear-gradient(180deg, ${colorTheme.primary}, ${colorTheme.secondary})` }}
+          />
 
-            {/* Cover — sits on top */}
-            <div
-              className="absolute rounded-[5px] overflow-hidden"
-              style={{
-                top: 0,
-                left: 0,
-                right: 3,
-                bottom: 3,
-                background: `linear-gradient(145deg, ${colorTheme.primary} 0%, ${colorTheme.secondary} 60%, ${colorTheme.primary} 100%)`,
-                boxShadow: `2px 3px 6px ${colorTheme.shadow}`,
-              }}
-            >
-              {/* Glossy highlight */}
+          <div className="flex items-center gap-4 p-3 pr-5 flex-1 min-w-0">
+            {/* 3D mini notebook */}
+            <div className="relative flex-shrink-0" style={{ width: 54, height: 62 }}>
+              {/* Page edges — thin stack, only visible on right + bottom */}
               <div
-                className="absolute pointer-events-none"
+                className="absolute rounded-[5px]"
+                style={{ top: 3, left: 3, right: 0, bottom: 0, background: '#d8d5d0', boxShadow: '1px 1px 2px rgba(0,0,0,0.12)' }}
+              />
+              <div
+                className="absolute rounded-[5px]"
+                style={{ top: 2, left: 2, right: 1, bottom: 1, background: '#e5e2dd' }}
+              />
+              <div
+                className="absolute rounded-[5px]"
+                style={{ top: 1, left: 1, right: 2, bottom: 2, background: '#eeecea' }}
+              />
+
+              {/* Cover — sits on top */}
+              <div
+                className="absolute rounded-[5px] overflow-hidden"
                 style={{
-                  top: '-10%',
-                  left: '10%',
-                  right: '30%',
-                  bottom: '50%',
-                  background: 'linear-gradient(160deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
-                  borderRadius: '50%',
-                  filter: 'blur(1px)',
+                  top: 0,
+                  left: 0,
+                  right: 3,
+                  bottom: 3,
+                  background: `linear-gradient(145deg, ${colorTheme.primary} 0%, ${colorTheme.secondary} 60%, ${colorTheme.primary} 100%)`,
+                  boxShadow: `2px 3px 6px ${colorTheme.shadow}`,
                 }}
-              />
-              {/* Spine shadow */}
-              <div
-                className="absolute left-0 top-0 bottom-0 w-[5px]"
-                style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.25) 0%, transparent 100%)' }}
-              />
-              {/* Elastic band */}
-              <div
-                className="absolute right-[4px] top-0 bottom-0 w-[2px] rounded-full"
-                style={{ background: 'rgba(0,0,0,0.25)' }}
-              />
-              {/* Icon */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <NotebookIcon className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.3)' }} />
+              >
+                {/* Glossy highlight */}
+                <div
+                  className="absolute pointer-events-none"
+                  style={{
+                    top: '-10%',
+                    left: '10%',
+                    right: '30%',
+                    bottom: '50%',
+                    background: 'linear-gradient(160deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
+                    borderRadius: '50%',
+                    filter: 'blur(1px)',
+                  }}
+                />
+                {/* Spine shadow */}
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-[5px]"
+                  style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.25) 0%, transparent 100%)' }}
+                />
+                {/* Elastic band */}
+                <div
+                  className="absolute right-[4px] top-0 bottom-0 w-[2px] rounded-full"
+                  style={{ background: 'rgba(0,0,0,0.25)' }}
+                />
+                {/* Icon */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <NotebookIcon className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-              {note.title || 'Untitled Notebook'}
-            </h3>
-            <div className="flex items-center gap-3 mt-0.5">
-              <span className="text-xs text-foreground-muted flex items-center gap-1">
-                <Clock01Icon className="w-3 h-3" />
-                {formatDate(note.updated_at)}
-              </span>
-              {note.tags && note.tags.length > 0 && (
-                <div className="flex items-center gap-1">
-                  {note.tags.slice(0, 2).map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-0.5 rounded-full text-[10px] font-medium"
-                      style={{
-                        background: `${colorTheme.primary}15`,
-                        color: colorTheme.primary,
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  {note.tags.length > 2 && (
-                    <span className="text-xs text-foreground-muted">+{note.tags.length - 2}</span>
-                  )}
-                </div>
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                {note.title || 'Untitled Notebook'}
+              </h3>
+              {/* Content preview */}
+              {preview && (
+                <p className="text-xs text-foreground-muted/70 truncate mt-0.5">{preview}</p>
               )}
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-xs text-foreground-muted flex items-center gap-1">
+                  <Clock01Icon className="w-3 h-3" />
+                  {formatDate(note.updated_at)}
+                </span>
+                {wordCount > 0 && (
+                  <span className="text-xs text-foreground-muted">
+                    {wordCount.toLocaleString()} words
+                  </span>
+                )}
+                {note.tags && note.tags.length > 0 && (
+                  <div className="hidden sm:flex items-center gap-1">
+                    {note.tags.slice(0, 2).map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-0.5 rounded-full text-[10px] font-medium"
+                        style={{
+                          background: `${colorTheme.primary}15`,
+                          color: colorTheme.primary,
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {note.tags.length > 2 && (
+                      <span className="text-xs text-foreground-muted">+{note.tags.length - 2}</span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onGenerateFlashcards();
-              }}
-              className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-              title="Generate flashcards"
-            >
-              <SparklesIcon className="w-4 h-4" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onDelete();
-              }}
-              className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
-              title="Delete notebook"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
+            {/* Actions */}
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onGenerateFlashcards();
+                }}
+                className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                title="Generate flashcards"
+              >
+                <SparklesIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                title="Delete notebook"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </ClayCard>

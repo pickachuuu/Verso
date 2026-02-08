@@ -75,7 +75,18 @@ export default function WeeklyActivityChart() {
       </div>
 
       {/* Bar Chart */}
-      <div className="flex-1 flex items-end justify-between gap-3 mb-3 px-1 min-h-[140px]">
+      <div className="flex-1 flex items-end justify-between gap-3 mb-3 px-1 min-h-[140px] relative">
+        {/* Empty state overlay when no activity */}
+        {totalCards === 0 && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-primary-muted/40 to-primary-muted/20 mb-3">
+              <Activity03Icon className="w-6 h-6 text-primary/40" />
+            </div>
+            <p className="text-sm font-medium text-foreground-muted">No activity this week</p>
+            <p className="text-xs text-foreground-muted/70 mt-1">Study some cards to see your chart fill up!</p>
+          </div>
+        )}
+
         {data.map((day, index) => {
           const heightPercent = maxCards > 0 ? (day.cardsStudied / maxCards) * 100 : 0;
           const isToday = index === data.length - 1;

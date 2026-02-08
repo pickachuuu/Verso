@@ -153,26 +153,28 @@ export default function ContinueLearning() {
         {/* Quick Actions */}
         <div className="mt-4 grid grid-cols-2 gap-2.5">
           <Link href="/library">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-surface to-surface-elevated/50 hover:from-secondary-muted/30 hover:to-secondary-muted/50 border border-border hover:border-secondary/20 transition-all cursor-pointer group">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-gradient-to-br from-secondary-muted to-secondary-muted/70">
-                  <PencilEdit01Icon className="w-3.5 h-3.5 text-secondary" />
+            <div className="p-3.5 rounded-xl bg-gradient-to-br from-surface to-surface-elevated/50 hover:from-secondary-muted/30 hover:to-secondary-muted/50 border border-border hover:border-secondary/20 transition-all cursor-pointer group">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-secondary-muted to-secondary-muted/70">
+                  <PencilEdit01Icon className="w-4 h-4 text-secondary" />
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-xs text-foreground group-hover:text-secondary transition-colors">New Note</p>
+                  <p className="text-[10px] text-foreground-muted mt-0.5">Create a study note</p>
                 </div>
               </div>
             </div>
           </Link>
 
           <Link href="/flashcards">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-surface to-surface-elevated/50 hover:from-tertiary-muted/30 hover:to-tertiary-muted/50 border border-border hover:border-tertiary/20 transition-all cursor-pointer group">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-gradient-to-br from-tertiary-muted to-tertiary-muted/70">
-                  <FlashcardIcon className="w-3.5 h-3.5 text-tertiary" />
+            <div className="p-3.5 rounded-xl bg-gradient-to-br from-surface to-surface-elevated/50 hover:from-tertiary-muted/30 hover:to-tertiary-muted/50 border border-border hover:border-tertiary/20 transition-all cursor-pointer group">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-tertiary-muted to-tertiary-muted/70">
+                  <FlashcardIcon className="w-4 h-4 text-tertiary" />
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-xs text-foreground group-hover:text-tertiary transition-colors">Browse Sets</p>
+                  <p className="text-[10px] text-foreground-muted mt-0.5">Review flashcards</p>
                 </div>
               </div>
             </div>
