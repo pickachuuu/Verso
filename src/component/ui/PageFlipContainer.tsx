@@ -41,6 +41,9 @@ export default function PageFlipContainer({
   const currentPosition = getPosition(currentView, currentPageIndex);
   const prevPositionRef = useRef(currentPosition);
   const animIdRef = useRef(0);
+  const [leftStackOpacity, setLeftStackOpacity] = useState(() => (
+    currentView === 'cover' ? 1 : 0
+  ));
 
   // Store what to display - this is the KEY to preventing jitter
   const [displayState, setDisplayState] = useState<{
@@ -71,7 +74,11 @@ export default function PageFlipContainer({
         flip: null,
       };
     });
-  }, []);
+
+    if (!isExam) {
+      setLeftStackOpacity(0);
+    }
+  }, [isExam]);
 
   // useLayoutEffect runs BEFORE browser paint - prevents visual jitter
   // Only handles position/view changes that require animation
@@ -79,6 +86,9 @@ export default function PageFlipContainer({
     if (currentPosition !== prevPositionRef.current) {
       // Position changed - trigger flip animation
       const dir = currentPosition > prevPositionRef.current ? 'forward' : 'backward';
+      if (!isExam && currentView !== 'cover' && dir === 'forward') {
+        setLeftStackOpacity(1);
+      }
       animIdRef.current++;
 
       const newContent = getCurrentContent();
@@ -97,7 +107,7 @@ export default function PageFlipContainer({
 
       prevPositionRef.current = currentPosition;
     }
-  }, [currentPosition, previousContent]);
+  }, [currentPosition, previousContent, isExam, currentView]);
 
   // Track if position is about to change (before useLayoutEffect runs)
   const positionChanged = currentPosition !== prevPositionRef.current;
@@ -168,25 +178,35 @@ export default function PageFlipContainer({
   return (
     <div className="w-full h-full relative" style={{ perspective: '2000px', ...notebookGlow }}>
       {/* Left stack */}
-      {leftCount > 0 && [...Array(leftCount)].map((_, i) => {
-        // i=0 is the back of the cover (stays plain), i>0 are notebook page backs (ruled lines)
-        const isPageBack = i > 0;
+      {leftCount > 0 && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            opacity: leftStackOpacity,
+            transition: 'opacity 0.35s ease',
+          }}
+        >
+          {[...Array(leftCount)].map((_, i) => {
+            // i=0 is the back of the cover (stays plain), i>0 are notebook page backs (ruled lines)
+            const isPageBack = i > 0;
 
-        return (
-          <div
-            key={`l${i}`}
-            className="absolute inset-0 rounded-lg overflow-hidden"
-            style={{
-              transform: 'rotateY(-180deg)',
-              transformOrigin: 'left center',
-              left: i * 2,
-              top: i,
-              zIndex: i,
-              ...(isPageBack ? ruledPageBackground : { background: paperBg }),
-            }}
-          />
-        );
-      })}
+            return (
+              <div
+                key={`l${i}`}
+                className="absolute inset-0 rounded-lg overflow-hidden"
+                style={{
+                  transform: 'rotateY(-180deg)',
+                  transformOrigin: 'left center',
+                  left: i * 2,
+                  top: i,
+                  zIndex: i,
+                  ...(isPageBack ? ruledPageBackground : { background: paperBg }),
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
 
       {/* Right stack */}
       {rightCount > 0 && [...Array(rightCount)].map((_, i) => (

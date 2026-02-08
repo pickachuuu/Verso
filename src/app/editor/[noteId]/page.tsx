@@ -8,10 +8,11 @@ import { useQueryClient } from '@tanstack/react-query';
 // UI Components
 import { VerticalEditorToolbar, Editor } from '@/component/ui/RichTextEditor';
 import { TIPTAP_FORMATTING_GUIDE } from '@/component/ui/AISelectionBubble';
-import PageFlipContainer, { ViewType } from '@/component/ui/PageFlipContainer';
+import PageFlipContainer from '@/component/ui/PageFlipContainer';
 import ClayNotebookCover, { NotebookColorKey } from '@/component/ui/ClayNotebookCover';
 import TableOfContents, { NotePage } from '@/component/ui/TableOfContents';
 import NotebookPage from '@/component/ui/NotebookPage';
+import { ClayCard } from '@/component/ui/Clay';
 
 // Hooks
 import { useNotebookScale, NOTEBOOK_WIDTH, NOTEBOOK_HEIGHT } from '@/hooks/useNotebookScale';
@@ -116,9 +117,9 @@ export default function EditorPage() {
     reset: resetUI,
   } = useUIStore();
 
-  // Notebook paper stays light; surrounding UI uses dark styling
+  // Notebook paper stays light; surrounding UI uses paper styling
   const theme = 'light' as const;
-  const toolbarTheme = 'dark' as const;
+  const toolbarTheme = 'light' as const;
 
   // ========================================
   // Reset stores when creating a new notebook
@@ -694,14 +695,6 @@ export default function EditorPage() {
   }
 
   // ========================================
-  // Dark blue theme styles (matching app theme)
-  // ========================================
-  const bgColor = '#141420';
-  const borderColor = 'rgba(255, 255, 255, 0.08)';
-  const textColor = '#94A3B8';
-  const iconColor = '#94A3B8';
-
-  // ========================================
   // Content Components
   // ========================================
   const coverComponent = (
@@ -739,200 +732,247 @@ export default function EditorPage() {
     ) : null;
 
   const getPreviousContentComponent = (): ReactNode => previousContentRef.current;
-  const showHeader = currentView !== 'cover';
+  const showControls = currentView !== 'cover';
+  const controlsPanel = (
+    <div className="space-y-4">
+      <ClayCard variant="elevated" padding="md" className="rounded-3xl">
+        <div className="flex items-center justify-between">
+          {currentView === 'page' ? (
+            <button
+              onClick={handleBackToContents}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border border-border bg-surface hover:bg-background-muted transition-all"
+            >
+              <Menu01Icon className="w-4 h-4 text-foreground-muted" />
+              Contents
+            </button>
+          ) : (
+            <Link
+              href="/library"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border border-border bg-surface hover:bg-background-muted transition-all"
+            >
+              <ArrowLeft02Icon className="w-4 h-4 text-foreground-muted" />
+              Library
+            </Link>
+          )}
+
+          <Link
+            href="/dashboard"
+            className="h-9 w-9 rounded-xl border border-border bg-surface hover:bg-background-muted transition-all flex items-center justify-center"
+            title="Dashboard"
+          >
+            <Home01Icon className="w-4 h-4 text-foreground-muted" />
+          </Link>
+        </div>
+
+        <div className="mt-4 flex items-start gap-3">
+          <div className="p-2.5 rounded-2xl bg-background-muted border border-border">
+            <NotebookIcon className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">Notebook</p>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Untitled notebook"
+              className="w-full mt-1 text-base font-semibold bg-transparent border-none focus:outline-none placeholder:text-foreground-muted text-foreground"
+            />
+          </div>
+        </div>
+
+        {currentView === 'page' && currentPageIndex !== null && (
+          <div className="mt-3">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-background-muted border border-border text-foreground-muted">
+              Page {currentPageIndex + 1} of {pages.length}
+            </span>
+          </div>
+        )}
+
+        <div className="mt-4">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+            <Tag01Icon className="w-4 h-4" />
+            Tags
+          </div>
+          {tags.length > 0 ? (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-background-muted border border-border text-foreground-muted"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="rounded transition-colors hover:text-foreground"
+                  >
+                    <Cancel01Icon className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-2 text-xs text-foreground-muted">
+              Add tags to keep your notebook organized.
+            </p>
+          )}
+          <div className="mt-2">
+            {showTagInput ? (
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                onBlur={() => {
+                  if (tagInput.trim()) handleAddTag();
+                  setTimeout(() => setShowTagInput(false), 150);
+                }}
+                placeholder="Add tag..."
+                className="w-full px-3 py-2 rounded-xl text-sm bg-surface border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground placeholder:text-foreground-muted"
+                autoFocus
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowTagInput(true)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border border-border bg-surface text-foreground-muted hover:text-foreground hover:bg-background-muted transition-all"
+              >
+                <Tag01Icon className="w-4 h-4" />
+                Add tag
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center gap-2 text-xs font-semibold">
+          {saveStatus === 'saving' && (
+            <span className="inline-flex items-center gap-1.5 text-foreground-muted">
+              <Loading03Icon className="w-3.5 h-3.5 animate-spin" />
+              Saving
+            </span>
+          )}
+          {saveStatus === 'saved' && (
+            <span className="inline-flex items-center gap-1.5 text-emerald-600">
+              <Tick01Icon className="w-3.5 h-3.5" />
+              Saved
+            </span>
+          )}
+          {saveStatus === 'error' && (
+            <span className="inline-flex items-center gap-1.5 text-red-500">
+              <AlertCircleIcon className="w-3.5 h-3.5" />
+              Error
+            </span>
+          )}
+        </div>
+      </ClayCard>
+
+      {(currentView === 'toc' || currentView === 'page') && (
+        <ClayCard variant="default" padding="md" className="rounded-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+              <Menu01Icon className="w-4 h-4" />
+              Navigation
+            </div>
+            <span className="text-xs font-semibold text-foreground-muted">
+              {currentView === 'toc'
+                ? `${pages.length} pages`
+                : `Page ${(currentPageIndex ?? 0) + 1} / ${pages.length}`}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 mt-3">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentView === 'toc'}
+              className="px-3 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <span className="inline-flex items-center gap-1.5 justify-center">
+                <ArrowLeft01Icon className="w-4 h-4" />
+                Prev
+              </span>
+            </button>
+            <button
+              onClick={handleNextPage}
+              disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
+              className="px-3 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <span className="inline-flex items-center gap-1.5 justify-center">
+                <ArrowRight01Icon className="w-4 h-4" />
+                {currentView === 'toc' ? 'Open First' : 'Next'}
+              </span>
+            </button>
+            <button
+              onClick={handleFirstPage}
+              disabled={currentView === 'toc'}
+              className="px-3 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <span className="inline-flex items-center gap-1.5 justify-center">
+                <ArrowDownLeft01Icon className="w-4 h-4" />
+                Contents
+              </span>
+            </button>
+            <button
+              onClick={handleLastPage}
+              disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
+              className="px-3 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <span className="inline-flex items-center gap-1.5 justify-center">
+                <ArrowUpRight01Icon className="w-4 h-4" />
+                Last
+              </span>
+            </button>
+          </div>
+        </ClayCard>
+      )}
+
+      {(currentView === 'page' || currentView === 'toc') && (
+        <ClayCard variant="default" padding="md" className="rounded-2xl">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">Editor tools</span>
+            {aiLoading && (
+              <span className="text-[10px] text-foreground-muted">Running…</span>
+            )}
+          </div>
+          <div className="max-h-[360px] overflow-y-auto pr-1">
+            <VerticalEditorToolbar editor={editor} theme={toolbarTheme} onAIAction={handleAIAction} aiLoading={aiLoading} />
+          </div>
+        </ClayCard>
+      )}
+
+      {(currentView === 'page' || currentView === 'toc') && (
+        <ClayCard variant="default" padding="md" className="rounded-2xl">
+          <button
+            onClick={handleAddPageFromEditor}
+            className="w-full h-10 rounded-xl flex items-center justify-center gap-2 transition-all text-sm font-semibold bg-primary hover:bg-primary-dark text-white"
+            title="Add new page"
+          >
+            <Add01Icon className="w-4 h-4" />
+            <span>Add Page</span>
+          </button>
+        </ClayCard>
+      )}
+    </div>
+  );
 
   // ========================================
   // Render
   // ========================================
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: bgColor }}>
-      {/* Header — seamless dark bar */}
-      {showHeader && (
-        <header
-          className="flex-shrink-0 relative z-30"
-          style={{
-            background: 'linear-gradient(180deg, rgba(20, 20, 32, 0.95) 0%, rgba(18, 17, 30, 0.9) 100%)',
-            backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-          }}
-        >
-          <div className="flex items-center gap-3 px-5 h-12">
-            {/* Left: navigation */}
-            {currentView === 'page' ? (
-              <button
-                onClick={handleBackToContents}
-                className="h-8 px-2.5 rounded-lg transition-all flex items-center gap-1.5"
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                }}
-                title="Back to Contents"
-              >
-                <Menu01Icon className="w-4 h-4" style={{ color: '#94A3B8' }} />
-                <span className="text-xs font-medium" style={{ color: '#94A3B8' }}>Contents</span>
-              </button>
-            ) : (
-              <Link
-                href="/library"
-                className="h-8 w-8 rounded-lg transition-all flex items-center justify-center"
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                }}
-                title="Back to Library"
-              >
-                <ArrowLeft02Icon className="w-4 h-4" style={{ color: '#94A3B8' }} />
-              </Link>
-            )}
-
-            {/* Separator dot */}
-            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }} />
-
-            {/* Notebook icon + title */}
-            <NotebookIcon className="w-4 h-4 flex-shrink-0" style={{ color: '#F68048' }} />
-
-            <div className="flex-1 min-w-0">
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Untitled notebook"
-                className="w-full text-sm font-medium bg-transparent border-none focus:outline-none focus:ring-0 placeholder:text-slate-600"
-                style={{ color: '#E2E8F0' }}
-              />
-            </div>
-
-            {/* Page indicator (inline) */}
-            {currentView === 'page' && currentPageIndex !== null && (
-              <span className="text-xs font-medium flex-shrink-0" style={{ color: '#64748B' }}>
-                {currentPageIndex + 1} / {pages.length}
-              </span>
-            )}
-
-            {/* Tags inline */}
-            {tags.length > 0 && (
-              <div className="flex items-center gap-1.5 flex-shrink-0 overflow-x-auto max-w-[200px]">
-                {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap"
-                    style={{
-                      backgroundColor: 'rgba(40, 69, 214, 0.15)',
-                      color: '#5B7BF0',
-                    }}
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="rounded transition-colors hover:bg-white/10"
-                    >
-                      <Cancel01Icon className="w-2.5 h-2.5" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Separator dot */}
-            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }} />
-
-            {/* Right actions */}
-            <div className="flex items-center gap-1 flex-shrink-0">
-              {/* Save status */}
-              {saveStatus === 'saving' && (
-                <div className="flex items-center gap-1 text-xs px-2" style={{ color: '#64748B' }}>
-                  <Loading03Icon className="w-3 h-3 animate-spin" />
-                  <span>Saving</span>
-                </div>
-              )}
-              {saveStatus === 'saved' && (
-                <div className="flex items-center gap-1 text-xs px-2" style={{ color: '#22C55E' }}>
-                  <Tick01Icon className="w-3 h-3" />
-                  <span>Saved</span>
-                </div>
-              )}
-              {saveStatus === 'error' && (
-                <div className="flex items-center gap-1 text-xs px-2 text-red-400">
-                  <AlertCircleIcon className="w-3 h-3" />
-                  <span>Error</span>
-                </div>
-              )}
-
-              {/* Tags button */}
-              <div className="relative">
-                {showTagInput ? (
-                  <input
-                    type="text"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={handleTagKeyDown}
-                    onBlur={() => {
-                      if (tagInput.trim()) handleAddTag();
-                      setTimeout(() => setShowTagInput(false), 150);
-                    }}
-                    placeholder="Add tag..."
-                    className="w-24 px-2 py-1 text-xs rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/50"
-                    style={{
-                      backgroundColor: 'rgba(255,255,255,0.06)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      color: '#F1F5F9',
-                    }}
-                    autoFocus
-                  />
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setShowTagInput(true)}
-                    className="h-8 w-8 rounded-lg transition-all flex items-center justify-center hover:bg-white/8"
-                    title="Add tags"
-                  >
-                    <Tag01Icon className="w-4 h-4" style={{ color: '#64748B' }} />
-                  </button>
-                )}
-              </div>
-
-              <Link
-                href="/dashboard"
-                className="h-8 w-8 rounded-lg transition-all flex items-center justify-center hover:bg-white/8"
-                title="Dashboard"
-              >
-                <Home01Icon className="w-4 h-4" style={{ color: '#64748B' }} />
-              </Link>
-            </div>
-          </div>
-        </header>
-      )}
-
-      {/* Content Area */}
-      <div
-        className="flex-1 overflow-hidden flex relative"
-        style={{ backgroundColor: '#12111E' }}
-      >
-        {/* Gradient background */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(ellipse 70% 60% at 50% 50%, rgba(180, 150, 110, 0.06) 0%, transparent 60%),
-                 radial-gradient(ellipse 80% 50% at 20% 80%, rgba(40, 50, 120, 0.04) 0%, transparent 50%),
-                 radial-gradient(ellipse 60% 40% at 80% 20%, rgba(30, 30, 80, 0.03) 0%, transparent 50%)`,
-          }}
-        />
-
-        {/* Main notebook area — ref used by useNotebookScale to measure available space */}
+    <div className="min-h-screen flex flex-col paper-bg text-foreground">
+      <div className="flex-1 relative px-4 sm:px-6 lg:px-8 py-6 flex flex-col">
         <div
           ref={notebookContainerRef}
-          className="flex-1 overflow-hidden py-8 px-4 relative z-10 flex items-center justify-center"
+          className="relative w-full flex-1 min-h-[640px] flex items-center justify-center py-8 px-4 sm:px-6"
         >
-          {/* Outer wrapper sized to the *scaled* dimensions so surrounding
-              layout (right-side panel, centering) flows correctly */}
+          <div className="absolute inset-0 rounded-[36px] bg-surface/80 border border-border shadow-[0_20px_60px_rgba(60,50,40,0.16)] pointer-events-none" />
+
           <div
+            className="relative z-10"
             style={{
               width: NOTEBOOK_WIDTH * scale,
               height: NOTEBOOK_HEIGHT * scale,
             }}
           >
-            {/* Inner notebook at canonical (fixed) size, then scaled down */}
             <div
               className="relative"
               style={{
@@ -948,14 +988,15 @@ export default function EditorPage() {
                   {[...Array(Math.min(pages.length - 1, 4))].map((_, i) => (
                     <div
                       key={i}
-                      className="absolute rounded-lg"
+                      className="absolute rounded-[18px]"
                       style={{
                         top: `${(i + 1) * 3}px`,
                         right: `${-(i + 1) * 3}px`,
                         bottom: `${-(i + 1) * 3}px`,
                         left: `${(i + 1) * 3}px`,
-                        background: `linear-gradient(135deg, ${i % 2 === 0 ? '#1E293B' : '#1A2438'} 0%, ${i % 2 === 0 ? '#172033' : '#151E30'} 100%)`,
-                        boxShadow: `0 ${2 + i}px ${4 + i * 2}px rgba(0,0,0,${0.25 - i * 0.03})`,
+                        background: `linear-gradient(135deg, rgba(255, 249, 241, 0.98) 0%, rgba(244, 235, 223, 0.98) 100%)`,
+                        boxShadow: `0 ${2 + i}px ${6 + i * 2}px rgba(60,50,40,${0.18 - i * 0.02})`,
+                        border: '1px solid rgba(60, 50, 40, 0.08)',
                         zIndex: -i - 1,
                       }}
                     />
@@ -964,7 +1005,7 @@ export default function EditorPage() {
               )}
 
               {/* Main notebook */}
-              <div className="relative h-full rounded-lg shadow-xl">
+              <div className="relative h-full rounded-[22px] shadow-[0_18px_48px_rgba(60,50,40,0.2)]">
                 <PageFlipContainer
                   currentView={currentView}
                   currentPageIndex={currentPageIndex}
@@ -980,110 +1021,20 @@ export default function EditorPage() {
           </div>
         </div>
 
-        {/* Right side control panel — centered in the right gutter, fills space */}
-        {(currentView === 'toc' || currentView === 'page') && (
-          <div
-            className="absolute right-0 top-0 bottom-0 flex items-center justify-center z-20"
-            style={{ width: `calc((100% - ${NOTEBOOK_WIDTH * scale}px) / 2)`, minWidth: '220px' }}
+        {showControls && (
+          <aside
+            className="hidden lg:flex absolute right-0 top-0 bottom-0 items-center justify-center z-20"
+            style={{ width: `calc((100% - ${NOTEBOOK_WIDTH * scale}px) / 2)`, minWidth: '240px' }}
           >
-            <div
-              className="rounded-2xl overflow-hidden flex flex-col"
-              style={{
-                width: 'calc(100% - 40px)',
-                maxWidth: '230px',
-                maxHeight: 'calc(100vh - 140px)',
-                background: 'linear-gradient(160deg, rgba(28, 28, 42, 0.88) 0%, rgba(22, 21, 35, 0.92) 100%)',
-                backdropFilter: 'blur(12px)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
-              }}
-            >
-              {/* Page indicator + nav */}
-              <div
-                className="p-3 flex items-center justify-between flex-shrink-0"
-                style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
-              >
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handlePrevPage}
-                    disabled={currentView === 'toc'}
-                    className="h-8 w-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-25 disabled:cursor-not-allowed text-slate-400 hover:text-white"
-                    style={{
-                      backgroundColor: currentView === 'toc' ? 'transparent' : 'rgba(255,255,255,0.06)',
-                    }}
-                    title={currentView === 'page' && currentPageIndex === 0 ? 'Back to Contents' : 'Previous page'}
-                  >
-                    <ArrowLeft01Icon className="w-4 h-4" />
-                  </button>
-
-                  <span className="text-sm font-medium select-none" style={{ color: '#94A3B8' }}>
-                    {currentView === 'toc' ? (
-                      'Contents'
-                    ) : (
-                      <><span style={{ color: '#E2E8F0', fontWeight: 700 }}>{(currentPageIndex ?? 0) + 1}</span> / {pages.length}</>
-                    )}
-                  </span>
-
-                  <button
-                    onClick={handleNextPage}
-                    disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
-                    className="h-8 w-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-25 disabled:cursor-not-allowed text-slate-400 hover:text-white"
-                    style={{
-                      backgroundColor: (currentView === 'page' && currentPageIndex === pages.length - 1) ? 'transparent' : 'rgba(255,255,255,0.06)',
-                    }}
-                    title={currentView === 'toc' ? 'Go to first page' : 'Next page'}
-                  >
-                    <ArrowRight01Icon className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={handleFirstPage}
-                    disabled={currentView === 'toc'}
-                    className="h-8 w-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-25 disabled:cursor-not-allowed text-slate-500 hover:text-white"
-                    title="Back to Contents"
-                  >
-                    <ArrowDownLeft01Icon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={handleLastPage}
-                    disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
-                    className="h-8 w-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-25 disabled:cursor-not-allowed text-slate-500 hover:text-white"
-                    title="Last page"
-                  >
-                    <ArrowUpRight01Icon className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Editor toolbar - scrollable, takes all remaining vertical space */}
-              {(currentView === 'page' || currentView === 'toc') && (
-                <div
-                  className="p-3 overflow-y-auto flex-1 min-h-0"
-                  style={{
-                    borderBottom: '1px solid rgba(255,255,255,0.04)',
-                  }}
-                >
-                  <VerticalEditorToolbar editor={editor} theme={toolbarTheme} onAIAction={handleAIAction} aiLoading={aiLoading} />
-                </div>
-              )}
-
-              {/* Add new page */}
-              <div className="p-3 flex-shrink-0">
-                <button
-                  onClick={handleAddPageFromEditor}
-                  className="w-full h-9 rounded-xl flex items-center justify-center gap-2 transition-all text-sm font-medium bg-primary/90 hover:bg-primary text-white"
-                  style={{
-                    boxShadow: '0 2px 8px rgba(40, 69, 214, 0.3)',
-                  }}
-                  title="Add new page"
-                >
-                  <Add01Icon className="w-4 h-4" />
-                  <span>Add Page</span>
-                </button>
-              </div>
+            <div className="w-full max-w-[280px] max-h-[calc(100vh-140px)] overflow-y-auto pr-2">
+              {controlsPanel}
             </div>
+          </aside>
+        )}
+
+        {showControls && (
+          <div className="lg:hidden mt-6">
+            {controlsPanel}
           </div>
         )}
       </div>
