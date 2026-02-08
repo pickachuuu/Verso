@@ -998,7 +998,7 @@ export default function EditorPage() {
           className={`flex-1 grid gap-4 ${showControls ? 'lg:grid-cols-[240px_minmax(0,1fr)_240px] 2xl:grid-cols-[280px_minmax(0,1fr)_280px]' : 'grid-cols-1'}`}
         >
           {showControls && (
-            <aside className="space-y-4 lg:sticky lg:top-6 self-start order-2 lg:order-none">
+            <aside className="space-y-4 lg:sticky lg:top-6 self-start order-2 lg:order-none relative z-[60]">
               {leftRail}
             </aside>
           )}

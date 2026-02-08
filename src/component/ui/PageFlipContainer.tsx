@@ -176,7 +176,7 @@ export default function PageFlipContainer({
     : {};
 
   return (
-    <div className="w-full h-full relative" style={{ perspective: '2000px', ...notebookGlow }}>
+    <div className="w-full h-full relative" style={{ contain: 'layout', perspective: '2000px', ...notebookGlow }}>
       {/* Left stack */}
       {leftCount > 0 && (
         <div
