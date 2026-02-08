@@ -199,7 +199,7 @@ export default function StudyPage() {
   // ═══════════════════════════════════════════
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto py-8 space-y-6">
+      <div className="max-w-4xl mx-auto py-8 space-y-6">
         <div className="animate-pulse space-y-6">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-surface-elevated rounded-xl" />
@@ -224,7 +224,7 @@ export default function StudyPage() {
   // ═══════════════════════════════════════════
   if (dueCards.length === 0 && !sessionComplete) {
     return (
-      <div className="max-w-3xl mx-auto py-8 space-y-6">
+      <div className="max-w-4xl mx-auto py-8 space-y-6">
         <button
           onClick={handleBackToSet}
           className="flex items-center gap-2 text-foreground-muted hover:text-foreground transition-colors"
@@ -233,13 +233,10 @@ export default function StudyPage() {
           <span className="text-sm font-medium">Back to {setTitle}</span>
         </button>
 
-        <ClayCard variant="elevated" padding="lg" className="rounded-3xl relative overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-20 -right-20 w-72 h-72 bg-gradient-to-bl from-primary/15 via-primary/5 to-transparent rounded-full blur-3xl" />
-          </div>
-          <div className="relative z-10 text-center py-8">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/15 border border-primary/20 flex items-center justify-center">
-              <CheckmarkCircle01Icon className="w-10 h-10 text-primary-light" />
+        <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
+          <div className="text-center py-8">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-background-muted border border-border flex items-center justify-center">
+              <CheckmarkCircle01Icon className="w-10 h-10 text-primary" />
             </div>
             <h2 className="text-3xl font-bold text-foreground mb-2">All Caught Up!</h2>
             <p className="text-foreground-muted mb-8 max-w-md mx-auto">
@@ -275,7 +272,7 @@ export default function StudyPage() {
         : 0;
 
     return (
-      <div className="max-w-3xl mx-auto py-8 space-y-6">
+      <div className="max-w-4xl mx-auto py-8 space-y-6">
         <button
           onClick={() => router.push('/flashcards')}
           className="flex items-center gap-2 text-foreground-muted hover:text-foreground transition-colors"
@@ -284,15 +281,10 @@ export default function StudyPage() {
           <span className="text-sm font-medium">Back to sets</span>
         </button>
 
-        <ClayCard variant="elevated" padding="lg" className="rounded-3xl relative overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-20 -right-20 w-72 h-72 bg-gradient-to-bl from-primary/15 via-primary/5 to-transparent rounded-full blur-3xl" />
-            <div className="absolute -bottom-20 -left-20 w-56 h-56 bg-gradient-to-tr from-primary-light/10 to-transparent rounded-full blur-3xl" />
-          </div>
-
-          <div className="relative z-10 text-center py-8">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/15 border border-primary/20 flex items-center justify-center">
-              <Award01Icon className="w-10 h-10 text-primary-light" />
+        <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
+          <div className="text-center py-8">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-background-muted border border-border flex items-center justify-center">
+              <Award01Icon className="w-10 h-10 text-primary" />
             </div>
             <h2 className="text-3xl font-bold text-foreground mb-2">Session Complete!</h2>
             <p className="text-foreground-muted mb-8">
@@ -342,46 +334,48 @@ export default function StudyPage() {
     dueCards.length > 0 ? Math.round((currentIndex / dueCards.length) * 100) : 0;
 
   return (
-    <div className="max-w-3xl mx-auto py-8 space-y-5">
+    <div className="max-w-4xl mx-auto py-8 space-y-6">
       {/* Top bar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={handleBackToSet}
-            className="p-2 rounded-xl bg-surface-elevated/60 border border-border/30 hover:bg-surface-elevated transition-all flex-shrink-0"
-            title="Back to set"
-          >
-            <ArrowLeft01Icon className="w-4 h-4 text-foreground-muted" />
-          </button>
-          <div className="min-w-0">
-            <h1 className="text-lg font-bold text-foreground truncate">{setTitle}</h1>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-xs text-foreground-muted">
-                Card {currentIndex + 1} of {dueCards.length} due
-              </span>
+      <ClayCard variant="elevated" padding="md" className="rounded-3xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={handleBackToSet}
+              className="p-2 rounded-xl bg-background-muted border border-border hover:bg-background-muted/70 transition-all flex-shrink-0"
+              title="Back to set"
+            >
+              <ArrowLeft01Icon className="w-4 h-4 text-foreground-muted" />
+            </button>
+            <div className="min-w-0">
+              <h1 className="text-lg font-bold text-foreground truncate">{setTitle}</h1>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-xs text-foreground-muted">
+                  Card {currentIndex + 1} of {dueCards.length} due
+                </span>
+              </div>
             </div>
           </div>
+          <span className="text-xs font-medium text-foreground-muted bg-background-muted px-3 py-1.5 rounded-lg border border-border">
+            Study Mode
+          </span>
         </div>
-        <span className="text-xs font-medium text-foreground-muted bg-surface-elevated/80 px-3 py-1.5 rounded-lg border border-border/30">
-          Study Mode
-        </span>
-      </div>
+      </ClayCard>
 
       {/* Progress bar */}
-      <div>
+      <ClayCard variant="default" padding="md" className="rounded-2xl">
         <div className="flex justify-between items-center mb-2">
           <span className="text-xs text-foreground-muted">
             {currentIndex}/{dueCards.length} reviewed
           </span>
           <span className="text-xs font-semibold text-primary-light">{progressPercent}%</span>
         </div>
-        <div className="h-1.5 rounded-full bg-surface-elevated overflow-hidden border border-border/20">
+        <div className="h-1.5 rounded-full bg-background-muted overflow-hidden border border-border/20">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-primary to-primary-light transition-all duration-500"
+            className="h-full rounded-full bg-primary/70 transition-all duration-500"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
-      </div>
+      </ClayCard>
 
       {/* Flashcard */}
       {currentCard && (
@@ -484,7 +478,7 @@ export default function StudyPage() {
             <div className="px-6 pb-6">
               <button
                 onClick={handleShowAnswer}
-                className="w-full py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-primary to-primary-light hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl font-semibold text-white bg-primary hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2"
               >
                 <ViewIcon className="w-5 h-5" />
                 Reveal Answer
@@ -495,22 +489,24 @@ export default function StudyPage() {
       )}
 
       {/* Keyboard hint */}
-      <div className="flex items-center justify-center gap-1.5 text-[10px] text-foreground-muted/50">
-        <kbd className="px-1.5 py-0.5 rounded bg-surface-elevated border border-border/30 text-foreground-muted/60">
-          Space
-        </kbd>
-        <span>reveal</span>
-        <span className="mx-1">·</span>
-        <kbd className="px-1.5 py-0.5 rounded bg-surface-elevated border border-border/30 text-foreground-muted/60">
-          1-4
-        </kbd>
-        <span>rate</span>
-        <span className="mx-1">·</span>
-        <kbd className="px-1.5 py-0.5 rounded bg-surface-elevated border border-border/30 text-foreground-muted/60">
-          Esc
-        </kbd>
-        <span>exit</span>
-      </div>
+      <ClayCard variant="default" padding="sm" className="rounded-2xl">
+        <div className="flex items-center justify-center gap-1.5 text-[10px] text-foreground-muted/70">
+          <kbd className="px-1.5 py-0.5 rounded bg-background-muted border border-border/30 text-foreground-muted/70">
+            Space
+          </kbd>
+          <span>reveal</span>
+          <span className="mx-1">·</span>
+          <kbd className="px-1.5 py-0.5 rounded bg-background-muted border border-border/30 text-foreground-muted/70">
+            1-4
+          </kbd>
+          <span>rate</span>
+          <span className="mx-1">·</span>
+          <kbd className="px-1.5 py-0.5 rounded bg-background-muted border border-border/30 text-foreground-muted/70">
+            Esc
+          </kbd>
+          <span>exit</span>
+        </div>
+      </ClayCard>
     </div>
   );
 }

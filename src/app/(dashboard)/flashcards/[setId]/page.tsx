@@ -130,134 +130,140 @@ export default function FlashcardBrowsePage() {
   const progress = studyData.progress;
 
   return (
-    <div className="max-w-4xl mx-auto py-8 space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={() => router.push('/flashcards')}
-            className="p-2 rounded-xl bg-surface-elevated/60 border border-border/30 hover:bg-surface-elevated transition-all flex-shrink-0"
-            title="Back to sets"
-          >
-            <ArrowLeft01Icon className="w-4 h-4 text-foreground-muted" />
-          </button>
-          <div className="min-w-0">
-            <h1 className="text-xl font-bold text-foreground truncate">
-              {studyData.set.title || 'Flashcards'}
-            </h1>
-            <p className="text-xs text-foreground-muted mt-0.5">
-              {progress.total} cards · {progress.mastered} mastered
-            </p>
+    <div className="max-w-5xl mx-auto py-8 space-y-6">
+      <ClayCard variant="elevated" padding="md" className="rounded-3xl">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={() => router.push('/flashcards')}
+              className="p-2 rounded-xl bg-background-muted border border-border hover:bg-background-muted/70 transition-all flex-shrink-0"
+              title="Back to sets"
+            >
+              <ArrowLeft01Icon className="w-4 h-4 text-foreground-muted" />
+            </button>
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold text-foreground truncate">
+                {studyData.set.title || 'Flashcards'}
+              </h1>
+              <p className="text-xs text-foreground-muted mt-0.5">
+                {progress.total} cards · {progress.mastered} mastered
+              </p>
+            </div>
           </div>
+
+          <button
+            onClick={() => router.push(`/flashcards/${setId}/study`)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-primary text-white hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
+          >
+            <BookOpen01Icon className="w-4 h-4" />
+            Study Due Cards
+          </button>
+        </div>
+      </ClayCard>
+
+      <div className="grid gap-4 lg:grid-cols-12">
+        <div className="lg:col-span-8 space-y-3">
+          <ClayCard variant="default" padding="md" className="rounded-2xl">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 relative">
+                <Search01Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+                <input
+                  type="text"
+                  placeholder="Search cards..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm text-foreground placeholder:text-foreground-muted"
+                />
+              </div>
+              <button
+                onClick={allExpanded ? collapseAll : expandAll}
+                className="px-3 py-2.5 rounded-xl text-xs font-medium border border-border bg-background-muted hover:bg-background-muted/70 text-foreground-muted hover:text-foreground transition-all whitespace-nowrap"
+              >
+                {allExpanded ? 'Collapse All' : 'Expand All'}
+              </button>
+            </div>
+          </ClayCard>
+
+          {filteredCards.length === 0 ? (
+            <ClayCard variant="default" padding="lg" className="rounded-2xl text-center">
+              <p className="text-foreground-muted py-8">
+                {searchQuery || statusFilter !== 'all'
+                  ? 'No cards match your filters.'
+                  : 'No cards in this set.'}
+              </p>
+            </ClayCard>
+          ) : (
+            <div className="space-y-2">
+              {filteredCards.map((card, index) => (
+                <BrowseCard
+                  key={card.id}
+                  card={card}
+                  index={index}
+                  isExpanded={expandedCards.has(card.id)}
+                  onToggle={() => toggleCard(card.id)}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        <button
-          onClick={() => router.push(`/flashcards/${setId}/study`)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-primary text-white hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
-        >
-          <BookOpen01Icon className="w-4 h-4" />
-          Study Due Cards
-        </button>
+        <div className="lg:col-span-4 space-y-3">
+          <ClayCard variant="default" padding="md" className="rounded-2xl">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs text-foreground-muted">
+                {progress.mastered}/{progress.total} mastered
+              </span>
+              <span className="text-xs font-semibold text-primary-light">{progress.percentage}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-background-muted overflow-hidden border border-border/20">
+              <div
+            className="h-full rounded-full bg-primary/70 transition-all duration-500"
+                style={{ width: `${progress.percentage}%` }}
+              />
+            </div>
+          </ClayCard>
+
+          <ClayCard variant="default" padding="md" className="rounded-2xl">
+            <div className="flex items-center gap-2 flex-wrap">
+              <StatusPill
+                label="All"
+                count={studyData.cards.length}
+                active={statusFilter === 'all'}
+                onClick={() => setStatusFilter('all')}
+              />
+              <StatusPill
+                label="New"
+                count={statusCounts.new}
+                active={statusFilter === 'new'}
+                onClick={() => setStatusFilter('new')}
+                color="text-blue-400"
+              />
+              <StatusPill
+                label="Learning"
+                count={statusCounts.learning}
+                active={statusFilter === 'learning'}
+                onClick={() => setStatusFilter('learning')}
+                color="text-orange-400"
+              />
+              <StatusPill
+                label="Review"
+                count={statusCounts.review}
+                active={statusFilter === 'review'}
+                onClick={() => setStatusFilter('review')}
+                color="text-purple-400"
+              />
+              <StatusPill
+                label="Mastered"
+                count={statusCounts.mastered}
+                active={statusFilter === 'mastered'}
+                onClick={() => setStatusFilter('mastered')}
+                color="text-emerald-400"
+              />
+            </div>
+          </ClayCard>
+        </div>
       </div>
 
-      {/* Mastery progress */}
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs text-foreground-muted">
-            {progress.mastered}/{progress.total} mastered
-          </span>
-          <span className="text-xs font-semibold text-primary-light">{progress.percentage}%</span>
-        </div>
-        <div className="h-1.5 rounded-full bg-surface-elevated overflow-hidden border border-border/20">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-primary to-primary-light transition-all duration-500"
-            style={{ width: `${progress.percentage}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Status pills */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <StatusPill
-          label="All"
-          count={studyData.cards.length}
-          active={statusFilter === 'all'}
-          onClick={() => setStatusFilter('all')}
-        />
-        <StatusPill
-          label="New"
-          count={statusCounts.new}
-          active={statusFilter === 'new'}
-          onClick={() => setStatusFilter('new')}
-          color="text-blue-400"
-        />
-        <StatusPill
-          label="Learning"
-          count={statusCounts.learning}
-          active={statusFilter === 'learning'}
-          onClick={() => setStatusFilter('learning')}
-          color="text-orange-400"
-        />
-        <StatusPill
-          label="Review"
-          count={statusCounts.review}
-          active={statusFilter === 'review'}
-          onClick={() => setStatusFilter('review')}
-          color="text-purple-400"
-        />
-        <StatusPill
-          label="Mastered"
-          count={statusCounts.mastered}
-          active={statusFilter === 'mastered'}
-          onClick={() => setStatusFilter('mastered')}
-          color="text-emerald-400"
-        />
-      </div>
-
-      {/* Search + expand/collapse */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1 relative">
-          <Search01Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" />
-          <input
-            type="text"
-            placeholder="Search cards..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-elevated/50 border border-border/60 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm text-foreground placeholder:text-foreground-muted"
-          />
-        </div>
-        <button
-          onClick={allExpanded ? collapseAll : expandAll}
-          className="px-3 py-2.5 rounded-xl text-xs font-medium border border-border/60 bg-surface-elevated/50 hover:bg-surface-elevated text-foreground-muted hover:text-foreground transition-all whitespace-nowrap"
-        >
-          {allExpanded ? 'Collapse All' : 'Expand All'}
-        </button>
-      </div>
-
-      {/* Cards list */}
-      {filteredCards.length === 0 ? (
-        <ClayCard variant="default" padding="lg" className="rounded-2xl text-center">
-          <p className="text-foreground-muted py-8">
-            {searchQuery || statusFilter !== 'all'
-              ? 'No cards match your filters.'
-              : 'No cards in this set.'}
-          </p>
-        </ClayCard>
-      ) : (
-        <div className="space-y-2">
-          {filteredCards.map((card, index) => (
-            <BrowseCard
-              key={card.id}
-              card={card}
-              index={index}
-              isExpanded={expandedCards.has(card.id)}
-              onToggle={() => toggleCard(card.id)}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Bottom info */}
       <p className="text-center text-xs text-foreground-muted/60 pb-4">
         Showing {filteredCards.length} of {studyData.cards.length} cards
       </p>

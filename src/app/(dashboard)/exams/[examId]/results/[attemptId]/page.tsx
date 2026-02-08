@@ -47,13 +47,6 @@ const getScoreColor = (percentage: number) => {
   return 'text-red-600';
 };
 
-const getScoreBg = (percentage: number) => {
-  if (percentage >= 90) return 'from-green-500 to-emerald-500';
-  if (percentage >= 70) return 'from-blue-500 to-primary';
-  if (percentage >= 50) return 'from-yellow-500 to-orange-500';
-  return 'from-red-500 to-rose-500';
-};
-
 const getGradeLabel = (percentage: number) => {
   if (percentage >= 90) return 'Excellent!';
   if (percentage >= 80) return 'Great Job!';
@@ -154,15 +147,14 @@ export default function ExamResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background-muted">
-      {/* Header */}
-      <div className="bg-surface-elevated border-b border-border">
-        <div className="max-w-4xl mx-auto px-6 py-4">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+        <ClayCard variant="elevated" padding="md" className="rounded-3xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/exams')}
-                className="p-2 rounded-lg hover:bg-surface transition-colors"
+                className="p-2 rounded-xl bg-background-muted border border-border hover:bg-background-muted/70 transition-colors"
               >
                 <ArrowLeft01Icon className="w-5 h-5" />
               </button>
@@ -179,47 +171,42 @@ export default function ExamResultsPage() {
               Retake Exam
             </ClayButton>
           </div>
-        </div>
-      </div>
+        </ClayCard>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Score Summary Card */}
-        <div className={clsx(
-          'rounded-3xl p-8 text-white mb-8 bg-gradient-to-br',
-          getScoreBg(results.percentage)
-        )}>
+        <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <Award01Icon className="w-8 h-8" />
-                <span className="text-xl font-medium opacity-90">{getGradeLabel(results.percentage)}</span>
+                <Award01Icon className={`w-8 h-8 ${getScoreColor(results.percentage)}`} />
+                <span className="text-xl font-medium text-foreground">{getGradeLabel(results.percentage)}</span>
               </div>
-              <div className="text-6xl font-bold mb-2">
+              <div className={`text-5xl font-bold mb-2 ${getScoreColor(results.percentage)}`}>
                 {results.percentage}%
               </div>
-              <p className="text-lg opacity-90">
+              <p className="text-sm text-foreground-muted">
                 {results.total_score} / {results.max_score} points
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-surface-elevated/20 rounded-2xl p-4 backdrop-blur-sm">
+              <div className="bg-background-muted rounded-2xl p-4 border border-border">
                 <div className="flex items-center gap-2 mb-1">
-                  <Target01Icon className="w-4 h-4" />
-                  <span className="text-sm opacity-80">Questions</span>
+                  <Target01Icon className="w-4 h-4 text-foreground-muted" />
+                  <span className="text-sm text-foreground-muted">Questions</span>
                 </div>
-                <p className="text-2xl font-bold">{results.responses.length}</p>
+                <p className="text-2xl font-bold text-foreground">{results.responses.length}</p>
               </div>
-              <div className="bg-surface-elevated/20 rounded-2xl p-4 backdrop-blur-sm">
+              <div className="bg-background-muted rounded-2xl p-4 border border-border">
                 <div className="flex items-center gap-2 mb-1">
-                  <Clock01Icon className="w-4 h-4" />
-                  <span className="text-sm opacity-80">Time</span>
+                  <Clock01Icon className="w-4 h-4 text-foreground-muted" />
+                  <span className="text-sm text-foreground-muted">Time</span>
                 </div>
-                <p className="text-2xl font-bold">{formatTime(results.time_spent_seconds)}</p>
+                <p className="text-2xl font-bold text-foreground">{formatTime(results.time_spent_seconds)}</p>
               </div>
             </div>
           </div>
-        </div>
+        </ClayCard>
 
         {/* Stats by Question Type */}
         {stats && (
@@ -420,7 +407,7 @@ export default function ExamResultsPage() {
                     </div>
 
                     {response.ai_feedback && (
-                      <div className="p-4 rounded-lg bg-gradient-to-br from-primary-muted/50 to-primary-muted border border-primary/20">
+                      <div className="p-4 rounded-lg bg-primary-muted/40 border border-primary/20">
                         <div className="flex items-center gap-2 mb-2">
                           <SparklesIcon className="w-4 h-4 text-primary" />
                           <span className="text-sm font-medium text-primary-dark">AI Feedback</span>

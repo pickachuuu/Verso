@@ -86,6 +86,8 @@ export default function LibraryPage() {
       (note.title && note.title.trim() !== '') ||
       (note.content && note.content.trim() !== '')
   ).length;
+  const sortLabel = sortBy === 'recent' ? 'Most recent' : sortBy === 'alphabetical' ? 'A–Z' : 'Oldest';
+  const colorLabel = selectedColor === 'all' ? 'All colors' : NOTEBOOK_COLORS[selectedColor].name;
 
   const handleGenerateFlashcards = (note: Note) => {
     setSelectedNote(note);
@@ -151,7 +153,7 @@ export default function LibraryPage() {
         <LibraryHeader totalNotes={0} />
         <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
           <div className="text-center py-12">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto mb-6">
               <NotebookIcon className="w-10 h-10 text-red-500" />
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-2">Error loading notebooks</h3>
@@ -160,7 +162,7 @@ export default function LibraryPage() {
             </p>
             <button
               onClick={() => refetch()}
-              className="px-6 py-3 bg-gradient-to-r from-primary to-primary-light text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all"
+              className="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all"
             >
               Retry
             </button>
@@ -181,8 +183,8 @@ export default function LibraryPage() {
           <div
             className={`px-4 py-3 rounded-xl border-2 transition-all ${
               saveSuccess.includes('Error')
-                ? 'border-red-200 bg-gradient-to-r from-red-50 to-red-100/50'
-                : 'border-green-200 bg-gradient-to-r from-green-50 to-green-100/50'
+                ? 'border-red-200 bg-red-50'
+                : 'border-green-200 bg-green-50'
             }`}
           >
             <p className={`text-sm font-semibold ${
@@ -193,128 +195,154 @@ export default function LibraryPage() {
           </div>
         )}
 
-        {/* Search and Filters */}
-        <ClayCard variant="default" padding="md" className="rounded-2xl">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <Search01Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-muted" />
-              <input
-                type="text"
-                placeholder="Search notebooks by title or tags..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-surface to-surface-elevated/50 border border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
+        <div className="grid gap-6 lg:grid-cols-12">
+          {/* Main content */}
+          <div className="lg:col-span-8 space-y-4">
+            {isLoading ? (
+              <NotebooksSkeleton />
+            ) : processedNotes.length === 0 ? (
+              <EmptyState
+                hasFilters={searchQuery.trim() !== '' || selectedColor !== 'all'}
+                onClearFilters={() => {
+                  setSearchQuery('');
+                  setSelectedColor('all');
+                }}
               />
-            </div>
+            ) : (
+              <>
+                {/* Results count */}
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-foreground-muted">
+                    Showing <span className="font-semibold text-foreground">{processedNotes.length}</span> notebook{processedNotes.length !== 1 ? 's' : ''}
+                    {(searchQuery || selectedColor !== 'all') && (
+                      <span> matching your filters</span>
+                    )}
+                  </p>
+                </div>
 
-            {/* Filters */}
-            <div className="flex items-center gap-3 flex-wrap">
-              {/* Color Filter */}
-              <div className="flex items-center gap-2">
-                <FilterIcon className="w-4 h-4 text-foreground-muted" />
-                <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
-                  <button
-                    onClick={() => setSelectedColor('all')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      selectedColor === 'all'
-                        ? 'bg-surface-elevated text-foreground shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
-                  >
-                    All
-                  </button>
-                  {(Object.keys(NOTEBOOK_COLORS) as NotebookColorKey[]).slice(0, 4).map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`w-6 h-6 rounded-md transition-all ${
-                        selectedColor === color ? 'ring-2 ring-offset-1 ring-foreground/30 scale-110' : 'hover:scale-105'
-                      }`}
-                      style={{ background: NOTEBOOK_COLORS[color].primary }}
-                      title={NOTEBOOK_COLORS[color].name}
+                {/* Notebooks List */}
+                <div className="space-y-3">
+                  {processedNotes.map((note) => (
+                    <NotebookListItem
+                      key={note.id}
+                      note={note}
+                      onGenerateFlashcards={() => handleGenerateFlashcards(note)}
+                      onDelete={() => handleDeleteNote(note)}
                     />
                   ))}
                 </div>
-              </div>
-
-              {/* Sort */}
-              <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
-                <button
-                  onClick={() => setSortBy('recent')}
-                  className={`p-2 rounded-md transition-all ${
-                    sortBy === 'recent'
-                      ? 'bg-surface-elevated text-primary shadow-sm'
-                      : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                  title="Sort by recent"
-                >
-                  <Clock01Icon className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setSortBy('alphabetical')}
-                  className={`p-2 rounded-md transition-all ${
-                    sortBy === 'alphabetical'
-                      ? 'bg-surface-elevated text-primary shadow-sm'
-                      : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                  title="Sort alphabetically"
-                >
-                  <SortingAZ01Icon className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setSortBy('oldest')}
-                  className={`p-2 rounded-md transition-all ${
-                    sortBy === 'oldest'
-                      ? 'bg-surface-elevated text-primary shadow-sm'
-                      : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                  title="Sort by oldest"
-                >
-                  <Calendar03Icon className="w-4 h-4" />
-                </button>
-              </div>
-
-            </div>
+              </>
+            )}
           </div>
-        </ClayCard>
 
-        {/* Content */}
-        {isLoading ? (
-          <NotebooksSkeleton />
-        ) : processedNotes.length === 0 ? (
-          <EmptyState
-            hasFilters={searchQuery.trim() !== '' || selectedColor !== 'all'}
-            onClearFilters={() => {
-              setSearchQuery('');
-              setSelectedColor('all');
-            }}
-          />
-        ) : (
-          <>
-            {/* Results count */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-foreground-muted">
-                Showing <span className="font-semibold text-foreground">{processedNotes.length}</span> notebook{processedNotes.length !== 1 ? 's' : ''}
-                {(searchQuery || selectedColor !== 'all') && (
-                  <span> matching your filters</span>
-                )}
-              </p>
-            </div>
-
-            {/* Notebooks List */}
-            <div className="space-y-3">
-              {processedNotes.map((note) => (
-                <NotebookListItem
-                  key={note.id}
-                  note={note}
-                  onGenerateFlashcards={() => handleGenerateFlashcards(note)}
-                  onDelete={() => handleDeleteNote(note)}
+          {/* Sidebar controls */}
+          <div className="lg:col-span-4 space-y-4">
+            <ClayCard variant="default" padding="md" className="rounded-2xl">
+              <div className="flex items-center gap-2">
+                <Search01Icon className="w-5 h-5 text-foreground-muted" />
+                <input
+                  type="text"
+                  placeholder="Search notebooks..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
                 />
-              ))}
-            </div>
-          </>
-        )}
+              </div>
+            </ClayCard>
+
+            <ClayCard variant="default" padding="md" className="rounded-2xl">
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
+                    <FilterIcon className="w-4 h-4" />
+                    Color
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      onClick={() => setSelectedColor('all')}
+                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
+                        selectedColor === 'all'
+                          ? 'bg-background-muted text-foreground border-border'
+                          : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
+                      }`}
+                    >
+                      All
+                    </button>
+                    {(Object.keys(NOTEBOOK_COLORS) as NotebookColorKey[]).slice(0, 6).map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`w-7 h-7 rounded-md transition-all border ${
+                          selectedColor === color ? 'border-pencil/60 ring-2 ring-offset-1 ring-foreground/20 scale-105' : 'border-transparent hover:scale-105'
+                        }`}
+                        style={{ background: NOTEBOOK_COLORS[color].primary }}
+                        title={NOTEBOOK_COLORS[color].name}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
+                    <SortingAZ01Icon className="w-4 h-4" />
+                    Sort
+                  </div>
+                  <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
+                    <button
+                      onClick={() => setSortBy('recent')}
+                      className={`p-2 rounded-md transition-all ${
+                        sortBy === 'recent'
+                          ? 'bg-surface text-primary shadow-sm'
+                          : 'text-foreground-muted hover:text-foreground'
+                      }`}
+                      title="Sort by recent"
+                    >
+                      <Clock01Icon className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setSortBy('alphabetical')}
+                      className={`p-2 rounded-md transition-all ${
+                        sortBy === 'alphabetical'
+                          ? 'bg-surface text-primary shadow-sm'
+                          : 'text-foreground-muted hover:text-foreground'
+                      }`}
+                      title="Sort alphabetically"
+                    >
+                      <SortingAZ01Icon className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setSortBy('oldest')}
+                      className={`p-2 rounded-md transition-all ${
+                        sortBy === 'oldest'
+                          ? 'bg-surface text-primary shadow-sm'
+                          : 'text-foreground-muted hover:text-foreground'
+                      }`}
+                      title="Sort by oldest"
+                    >
+                      <Calendar03Icon className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </ClayCard>
+
+            <ClayCard variant="default" padding="md" className="rounded-2xl">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-foreground-muted">Total</p>
+                  <p className="text-2xl font-bold text-foreground">{totalNotes}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-foreground-muted">Showing</p>
+                  <p className="text-2xl font-bold text-foreground">{processedNotes.length}</p>
+                </div>
+              </div>
+              <div className="mt-3 text-xs text-foreground-muted">
+                {colorLabel} · {sortLabel}
+              </div>
+            </ClayCard>
+          </div>
+        </div>
       </div>
 
       <GenerateFlashCardModal
@@ -344,39 +372,31 @@ export default function LibraryPage() {
 
 function LibraryHeader({ totalNotes }: { totalNotes: number }) {
   return (
-    <ClayCard variant="elevated" padding="lg" className="rounded-3xl relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-72 h-72 bg-gradient-to-bl from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-gradient-to-tr from-secondary/8 via-secondary/4 to-transparent rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          {/* Title area */}
-          <div className="flex items-start gap-4">
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-primary-muted to-primary-muted/60 shadow-lg shadow-primary/10">
-              <NotebookIcon className="w-8 h-8 text-primary" />
-            </div>
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                  Your Library
-                </h1>
-                <ClayBadge variant="accent" className="text-xs px-2 py-1">
-                  <SparklesIcon className="w-3 h-3" />
-                  {totalNotes} notebooks
-                </ClayBadge>
-              </div>
-              <p className="text-foreground-muted">
-                Your personal collection of study notebooks and knowledge
-              </p>
-            </div>
+    <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        {/* Title area */}
+        <div className="flex items-start gap-4">
+          <div className="p-4 rounded-2xl bg-background-muted border border-border">
+            <NotebookIcon className="w-8 h-8 text-primary" />
           </div>
-
-          {/* CTA */}
-          <CreateNoteButton />
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+                Your Library
+              </h1>
+              <ClayBadge variant="accent" className="text-xs px-2 py-1">
+                <SparklesIcon className="w-3 h-3" />
+                {totalNotes} notebooks
+              </ClayBadge>
+            </div>
+            <p className="text-foreground-muted">
+              Your personal collection of study notebooks and knowledge
+            </p>
+          </div>
         </div>
+
+        {/* CTA */}
+        <CreateNoteButton />
       </div>
     </ClayCard>
   );
@@ -386,7 +406,7 @@ function NotebooksSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="h-[72px] rounded-2xl bg-gradient-to-r from-surface to-surface-elevated/50 animate-pulse" />
+        <div key={i} className="h-[72px] rounded-2xl bg-background-muted border border-border/50 animate-pulse" />
       ))}
     </div>
   );
@@ -589,13 +609,8 @@ function EmptyState({
   return (
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
       <div className="text-center py-16">
-        <div className="relative w-32 h-32 mx-auto mb-8">
-          {/* Decorative background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl rotate-6" />
-          <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 to-secondary/5 rounded-3xl -rotate-6" />
-          <div className="relative w-full h-full rounded-3xl bg-gradient-to-br from-primary-muted to-primary-muted/60 flex items-center justify-center shadow-lg">
-            <NotebookIcon className="w-16 h-16 text-primary" />
-          </div>
+        <div className="w-28 h-28 mx-auto mb-8 rounded-3xl bg-background-muted border border-border flex items-center justify-center">
+          <NotebookIcon className="w-14 h-14 text-primary" />
         </div>
 
         {hasFilters ? (
@@ -606,7 +621,7 @@ function EmptyState({
             </p>
             <button
               onClick={onClearFilters}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-surface to-surface-elevated/50 text-foreground font-semibold border border-border/80 hover:shadow-md transition-all"
+              className="px-6 py-3 rounded-xl bg-surface text-foreground font-semibold border border-border hover:shadow-md transition-all"
             >
               Clear filters
             </button>

@@ -103,6 +103,9 @@ export default function ExamsPage() {
   // Stats
   const totalExams = exams.length;
   const totalQuestions = exams.reduce((sum, e) => sum + e.total_questions, 0);
+  const sortLabel = sortBy === 'recent' ? 'Most recent' : sortBy === 'alphabetical' ? 'A–Z' : 'Oldest';
+  const difficultyLabel = difficultyFilter === 'all' ? 'All' : difficultyFilter;
+  const questionTypeLabel = questionTypeFilter === 'all' ? 'All types' : questionTypeFilter.toUpperCase();
 
   const handleExamGenerated = useCallback(async (
     examResponse: ExamGenerationResponse,
@@ -188,232 +191,267 @@ export default function ExamsPage() {
         onCreateNew={() => setIsModalOpen(true)}
       />
 
-      {/* Search and Filters */}
-      <ClayCard variant="default" padding="md" className="rounded-2xl">
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1 relative">
-            <Search01Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-muted" />
-            <input
-              type="text"
-              placeholder="Search exams by title..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-surface to-surface-elevated/50 border border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
+      <div className="grid gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-8 space-y-4">
+          {isLoading ? (
+            <ExamsSkeleton viewMode={viewMode} />
+          ) : processedExams.length === 0 ? (
+            <EmptyState
+              hasFilters={searchQuery.trim() !== '' || difficultyFilter !== 'all' || questionTypeFilter !== 'all'}
+              onClearFilters={() => {
+                setSearchQuery('');
+                setDifficultyFilter('all');
+                setQuestionTypeFilter('all');
+              }}
+              onCreateNew={() => setIsModalOpen(true)}
+              totalExams={totalExams}
             />
-          </div>
+          ) : (
+            <>
+              {/* Results count */}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-foreground-muted">
+                  Showing <span className="font-semibold text-foreground">{processedExams.length}</span> exam{processedExams.length !== 1 ? 's' : ''}
+                  {(searchQuery || difficultyFilter !== 'all' || questionTypeFilter !== 'all') && (
+                    <span> matching your filters</span>
+                  )}
+                </p>
+              </div>
 
-          {/* Filters */}
-          <div className="flex items-center gap-3 flex-wrap">
-            {/* Difficulty Filter */}
+              {/* Exams Grid/List */}
+              {viewMode === 'grid' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                  {processedExams.map((exam) => (
+                    <ExamGridItem
+                      key={exam.id}
+                      exam={exam}
+                      onTakeExam={() => handleTakeExam(exam.id)}
+                      onDelete={() => handleDeleteClick(exam)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {processedExams.map((exam) => (
+                    <ExamListItemComponent
+                      key={exam.id}
+                      exam={exam}
+                      onTakeExam={() => handleTakeExam(exam.id)}
+                      onDelete={() => handleDeleteClick(exam)}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="lg:col-span-4 space-y-4">
+          <ClayCard variant="default" padding="md" className="rounded-2xl">
             <div className="flex items-center gap-2">
-              <FilterIcon className="w-4 h-4 text-foreground-muted" />
-              <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
-                <button
-                  onClick={() => setDifficultyFilter('all')}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                    difficultyFilter === 'all'
-                      ? 'bg-surface-elevated text-foreground shadow-sm'
-                      : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setDifficultyFilter('easy')}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                    difficultyFilter === 'easy'
-                      ? 'bg-green-100 text-green-700 shadow-sm'
-                      : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                >
-                  Easy
-                </button>
-                <button
-                  onClick={() => setDifficultyFilter('medium')}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                    difficultyFilter === 'medium'
-                      ? 'bg-yellow-100 text-yellow-700 shadow-sm'
-                      : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                >
-                  Medium
-                </button>
-                <button
-                  onClick={() => setDifficultyFilter('hard')}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                    difficultyFilter === 'hard'
-                      ? 'bg-red-100 text-red-700 shadow-sm'
-                      : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                >
-                  Hard
-                </button>
+              <Search01Icon className="w-5 h-5 text-foreground-muted" />
+              <input
+                type="text"
+                placeholder="Search exams..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
+              />
+            </div>
+          </ClayCard>
+
+          <ClayCard variant="default" padding="md" className="rounded-2xl">
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
+                  <FilterIcon className="w-4 h-4" />
+                  Difficulty
+                </div>
+                <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border flex-wrap">
+                  <button
+                    onClick={() => setDifficultyFilter('all')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                      difficultyFilter === 'all'
+                        ? 'bg-surface text-foreground shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setDifficultyFilter('easy')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                      difficultyFilter === 'easy'
+                        ? 'bg-background-muted text-emerald-700 border border-emerald-200 shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                  >
+                    Easy
+                  </button>
+                  <button
+                    onClick={() => setDifficultyFilter('medium')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                      difficultyFilter === 'medium'
+                        ? 'bg-background-muted text-amber-700 border border-amber-200 shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                  >
+                    Medium
+                  </button>
+                  <button
+                    onClick={() => setDifficultyFilter('hard')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                      difficultyFilter === 'hard'
+                        ? 'bg-background-muted text-red-700 border border-red-200 shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                  >
+                    Hard
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
+                  <Target01Icon className="w-4 h-4" />
+                  Question Types
+                </div>
+                <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border flex-wrap">
+                  <button
+                    onClick={() => setQuestionTypeFilter('all')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                      questionTypeFilter === 'all'
+                        ? 'bg-surface text-foreground shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                  >
+                    All Types
+                  </button>
+                  <button
+                    onClick={() => setQuestionTypeFilter('mc')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                      questionTypeFilter === 'mc'
+                        ? 'bg-background-muted text-blue-700 border border-blue-200 shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                  >
+                    MC
+                  </button>
+                  <button
+                    onClick={() => setQuestionTypeFilter('id')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                      questionTypeFilter === 'id'
+                        ? 'bg-background-muted text-green-700 border border-green-200 shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                  >
+                    ID
+                  </button>
+                  <button
+                    onClick={() => setQuestionTypeFilter('essay')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                      questionTypeFilter === 'essay'
+                        ? 'bg-background-muted text-primary-dark border border-primary/20 shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                  >
+                    Essay
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
+                  <SortingAZ01Icon className="w-4 h-4" />
+                  Sort
+                </div>
+                <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
+                  <button
+                    onClick={() => setSortBy('recent')}
+                    className={`p-2 rounded-md transition-all ${
+                      sortBy === 'recent'
+                        ? 'bg-surface text-primary shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                    title="Sort by recent"
+                  >
+                    <Clock01Icon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setSortBy('alphabetical')}
+                    className={`p-2 rounded-md transition-all ${
+                      sortBy === 'alphabetical'
+                        ? 'bg-surface text-primary shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                    title="Sort alphabetically"
+                  >
+                    <SortingAZ01Icon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setSortBy('oldest')}
+                    className={`p-2 rounded-md transition-all ${
+                      sortBy === 'oldest'
+                        ? 'bg-surface text-primary shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                    title="Sort by oldest"
+                  >
+                    <Calendar03Icon className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
+                  <GridViewIcon className="w-4 h-4" />
+                  View
+                </div>
+                <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded-md transition-all ${
+                      viewMode === 'grid'
+                        ? 'bg-surface text-primary shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                    title="Grid view"
+                  >
+                    <GridViewIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-md transition-all ${
+                      viewMode === 'list'
+                        ? 'bg-surface text-primary shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                    title="List view"
+                  >
+                    <Menu01Icon className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
+          </ClayCard>
 
-            {/* Question Type Filter */}
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
-              <button
-                onClick={() => setQuestionTypeFilter('all')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  questionTypeFilter === 'all'
-                    ? 'bg-surface-elevated text-foreground shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
-              >
-                All Types
-              </button>
-              <button
-                onClick={() => setQuestionTypeFilter('mc')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  questionTypeFilter === 'mc'
-                    ? 'bg-blue-100 text-blue-700 shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
-              >
-                MC
-              </button>
-              <button
-                onClick={() => setQuestionTypeFilter('id')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  questionTypeFilter === 'id'
-                    ? 'bg-green-100 text-green-700 shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
-              >
-                ID
-              </button>
-              <button
-                onClick={() => setQuestionTypeFilter('essay')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  questionTypeFilter === 'essay'
-                    ? 'bg-primary-muted text-primary-dark shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
-              >
-                Essay
-              </button>
+          <ClayCard variant="default" padding="md" className="rounded-2xl">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-foreground-muted">Exams</p>
+                <p className="text-2xl font-bold text-foreground">{totalExams}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-foreground-muted">Questions</p>
+                <p className="text-2xl font-bold text-foreground">{totalQuestions}</p>
+              </div>
             </div>
-
-            {/* Sort */}
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
-              <button
-                onClick={() => setSortBy('recent')}
-                className={`p-2 rounded-md transition-all ${
-                    sortBy === 'recent'
-                    ? 'bg-surface-elevated text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
-                title="Sort by recent"
-              >
-                <Clock01Icon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setSortBy('alphabetical')}
-                className={`p-2 rounded-md transition-all ${
-                    sortBy === 'alphabetical'
-                    ? 'bg-surface-elevated text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
-                title="Sort alphabetically"
-              >
-                <SortingAZ01Icon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setSortBy('oldest')}
-                className={`p-2 rounded-md transition-all ${
-                    sortBy === 'oldest'
-                    ? 'bg-surface-elevated text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
-                title="Sort by oldest"
-              >
-                <Calendar03Icon className="w-4 h-4" />
-              </button>
+            <div className="mt-3 text-xs text-foreground-muted">
+              {difficultyLabel} · {questionTypeLabel} · {sortLabel}
             </div>
-
-            {/* View Toggle */}
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-md transition-all ${
-                  viewMode === 'grid'
-                    ? 'bg-surface-elevated text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
-                title="Grid view"
-              >
-                <GridViewIcon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md transition-all ${
-                  viewMode === 'list'
-                    ? 'bg-surface-elevated text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
-                title="List view"
-              >
-                <Menu01Icon className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+          </ClayCard>
         </div>
-      </ClayCard>
-
-      {/* Content */}
-      {isLoading ? (
-        <ExamsSkeleton viewMode={viewMode} />
-      ) : processedExams.length === 0 ? (
-        <EmptyState
-          hasFilters={searchQuery.trim() !== '' || difficultyFilter !== 'all' || questionTypeFilter !== 'all'}
-          onClearFilters={() => {
-            setSearchQuery('');
-            setDifficultyFilter('all');
-            setQuestionTypeFilter('all');
-          }}
-          onCreateNew={() => setIsModalOpen(true)}
-          totalExams={totalExams}
-        />
-      ) : (
-        <>
-          {/* Results count */}
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-foreground-muted">
-              Showing <span className="font-semibold text-foreground">{processedExams.length}</span> exam{processedExams.length !== 1 ? 's' : ''}
-              {(searchQuery || difficultyFilter !== 'all' || questionTypeFilter !== 'all') && (
-                <span> matching your filters</span>
-              )}
-            </p>
-          </div>
-
-          {/* Exams Grid/List */}
-          {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {processedExams.map((exam) => (
-                <ExamGridItem
-                  key={exam.id}
-                  exam={exam}
-                  onTakeExam={() => handleTakeExam(exam.id)}
-                  onDelete={() => handleDeleteClick(exam)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {processedExams.map((exam) => (
-                <ExamListItemComponent
-                  key={exam.id}
-                  exam={exam}
-                  onTakeExam={() => handleTakeExam(exam.id)}
-                  onDelete={() => handleDeleteClick(exam)}
-                />
-              ))}
-            </div>
-          )}
-        </>
-      )}
+      </div>
 
       {/* Create Exam Modal */}
       <CreateExamModal
@@ -455,44 +493,36 @@ function ExamsHeader({
   onCreateNew: () => void;
 }) {
   return (
-    <ClayCard variant="elevated" padding="lg" className="rounded-3xl relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-72 h-72 bg-gradient-to-bl from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-gradient-to-tr from-secondary/8 via-secondary/4 to-transparent rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          {/* Title area */}
-          <div className="flex items-start gap-4">
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-primary-muted to-primary-muted/60 shadow-lg shadow-primary/10">
-              <ExamIcon className="w-8 h-8 text-primary" />
-            </div>
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                  Exams
-                </h1>
-                <ClayBadge variant="accent" className="text-xs px-2 py-1">
-                  <SparklesIcon className="w-3 h-3" />
-                  {totalExams} exams &middot; {totalQuestions} questions
-                </ClayBadge>
-              </div>
-              <p className="text-foreground-muted">
-                Test your knowledge with AI-generated practice exams
-              </p>
-            </div>
+    <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        {/* Title area */}
+        <div className="flex items-start gap-4">
+          <div className="p-4 rounded-2xl bg-background-muted border border-border">
+            <ExamIcon className="w-8 h-8 text-primary" />
           </div>
-
-          {/* CTA */}
-          <HeroActionButton
-            icon={<ExamAddIcon className="w-5 h-5" />}
-            onClick={onCreateNew}
-          >
-            Create Exam
-          </HeroActionButton>
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+                Exams
+              </h1>
+              <ClayBadge variant="accent" className="text-xs px-2 py-1">
+                <SparklesIcon className="w-3 h-3" />
+                {totalExams} exams &middot; {totalQuestions} questions
+              </ClayBadge>
+            </div>
+            <p className="text-foreground-muted">
+              Test your knowledge with AI-generated practice exams
+            </p>
+          </div>
         </div>
+
+        {/* CTA */}
+        <HeroActionButton
+          icon={<ExamAddIcon className="w-5 h-5" />}
+          onClick={onCreateNew}
+        >
+          Create Exam
+        </HeroActionButton>
       </div>
     </ClayCard>
   );
@@ -503,7 +533,7 @@ function ExamsSkeleton({ viewMode }: { viewMode: ViewMode }) {
     return (
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-[72px] rounded-2xl bg-gradient-to-r from-surface to-surface-elevated/50 animate-pulse" />
+          <div key={i} className="h-[72px] rounded-2xl bg-background-muted border border-border/50 animate-pulse" />
         ))}
       </div>
     );
@@ -513,20 +543,20 @@ function ExamsSkeleton({ viewMode }: { viewMode: ViewMode }) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       {Array.from({ length: 6 }).map((_, i) => (
         <ClayCard key={i} variant="default" padding="none" className="rounded-2xl animate-pulse overflow-hidden">
-          <div className="h-1 w-full bg-surface" />
+          <div className="h-1 w-full bg-background-muted" />
           <div className="p-5 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-surface rounded-lg" />
+              <div className="w-12 h-12 bg-background-muted rounded-lg" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 w-3/4 bg-surface rounded-md" />
-                <div className="h-3 w-1/2 bg-surface/60 rounded" />
+                <div className="h-4 w-3/4 bg-background-muted rounded-md" />
+                <div className="h-3 w-1/2 bg-background-muted/80 rounded" />
               </div>
             </div>
             <div className="flex gap-2">
-              <div className="h-5 w-14 bg-surface/60 rounded-full" />
-              <div className="h-5 w-10 bg-surface/60 rounded-full" />
+              <div className="h-5 w-14 bg-background-muted/80 rounded-full" />
+              <div className="h-5 w-10 bg-background-muted/80 rounded-full" />
             </div>
-            <div className="h-1.5 w-full bg-surface rounded-full" />
+            <div className="h-1.5 w-full bg-background-muted rounded-full" />
           </div>
         </ClayCard>
       ))}
@@ -548,13 +578,8 @@ function EmptyState({
   return (
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
       <div className="text-center py-16">
-        <div className="relative w-32 h-32 mx-auto mb-8">
-          {/* Decorative background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl rotate-6" />
-          <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 to-secondary/5 rounded-3xl -rotate-6" />
-          <div className="relative w-full h-full rounded-3xl bg-gradient-to-br from-primary-muted to-primary-muted/60 flex items-center justify-center shadow-lg">
-            <ExamIcon className="w-16 h-16 text-primary" />
-          </div>
+        <div className="w-28 h-28 mx-auto mb-8 rounded-3xl bg-background-muted border border-border flex items-center justify-center">
+          <ExamIcon className="w-14 h-14 text-primary" />
         </div>
 
         {hasFilters ? (
@@ -565,7 +590,7 @@ function EmptyState({
             </p>
             <button
               onClick={onClearFilters}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-surface to-surface-elevated/50 text-foreground font-semibold border border-border/80 hover:shadow-md transition-all"
+              className="px-6 py-3 rounded-xl bg-surface text-foreground font-semibold border border-border hover:shadow-md transition-all"
             >
               Clear filters
             </button>
@@ -585,17 +610,17 @@ function EmptyState({
 
             {/* Feature preview */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto mt-10">
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-surface to-surface-elevated/50 border border-border/50">
+              <div className="p-4 rounded-2xl bg-surface border border-border/50">
                 <SparklesIcon className="w-5 h-5 text-primary mx-auto mb-2.5" />
                 <h4 className="font-semibold text-foreground text-xs mb-1">AI-Generated</h4>
                 <p className="text-[11px] text-foreground-muted">From your notes</p>
               </div>
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-surface to-surface-elevated/50 border border-border/50">
+              <div className="p-4 rounded-2xl bg-surface border border-border/50">
                 <Clock01Icon className="w-5 h-5 text-primary mx-auto mb-2.5" />
                 <h4 className="font-semibold text-foreground text-xs mb-1">Timed Tests</h4>
                 <p className="text-[11px] text-foreground-muted">Real exam conditions</p>
               </div>
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-surface to-surface-elevated/50 border border-border/50">
+              <div className="p-4 rounded-2xl bg-surface border border-border/50">
                 <Target01Icon className="w-5 h-5 text-primary mx-auto mb-2.5" />
                 <h4 className="font-semibold text-foreground text-xs mb-1">Track Progress</h4>
                 <p className="text-[11px] text-foreground-muted">Improve over time</p>
@@ -610,7 +635,7 @@ function EmptyState({
             </p>
             <button
               onClick={onClearFilters}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-surface to-surface-elevated/50 text-foreground font-semibold border border-border/80 hover:shadow-md transition-all"
+              className="px-6 py-3 rounded-xl bg-surface text-foreground font-semibold border border-border hover:shadow-md transition-all"
             >
               Clear filters
             </button>

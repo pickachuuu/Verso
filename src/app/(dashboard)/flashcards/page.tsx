@@ -106,6 +106,9 @@ export default function FlashcardDashboardPage() {
   // Stats
   const totalSets = flashcardSets.length;
   const totalCards = flashcardSets.reduce((sum, s) => sum + s.total_cards, 0);
+  const masteredSets = flashcardSets.filter((set) => set.total_cards > 0 && set.mastered_cards === set.total_cards).length;
+  const sortLabel = sortBy === 'recent' ? 'Most recent' : sortBy === 'alphabetical' ? 'A–Z' : 'Oldest';
+  const masteryLabel = masteryFilter === 'all' ? 'All' : masteryFilter === 'learning' ? 'Learning' : 'Mastered';
 
   const handleCardClick = useCallback((set: FlashcardSet) => {
     setSelectedSet(set);
@@ -228,7 +231,7 @@ export default function FlashcardDashboardPage() {
         <FlashcardsHeader totalSets={0} totalCards={0} onCreateNew={() => setIsForgeModalOpen(true)} />
         <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
           <div className="text-center py-12">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto mb-6">
               <FlashcardIcon className="w-10 h-10 text-red-500" />
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-2">Error loading flashcards</h3>
@@ -256,8 +259,8 @@ export default function FlashcardDashboardPage() {
           <div
             className={`px-4 py-3 rounded-xl border-2 transition-all ${
               saveSuccess.includes('Error')
-                ? 'border-red-200 bg-gradient-to-r from-red-50 to-red-100/50'
-                : 'border-green-200 bg-gradient-to-r from-green-50 to-green-100/50'
+                ? 'border-red-200 bg-red-50'
+                : 'border-green-200 bg-green-50'
             }`}
           >
             <p className={`text-sm font-semibold ${
@@ -268,143 +271,174 @@ export default function FlashcardDashboardPage() {
           </div>
         )}
 
-        {/* Search and Filters */}
-        <ClayCard variant="default" padding="md" className="rounded-2xl">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <Search01Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-muted" />
-              <input
-                type="text"
-                placeholder="Search flashcard sets by title or description..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl bg-gradient-to-r from-surface to-surface-elevated/50 border border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
+        <div className="grid gap-6 lg:grid-cols-12">
+          {/* Main content */}
+          <div className="lg:col-span-8 space-y-4">
+            {isLoading ? (
+              <FlashcardsSkeleton />
+            ) : processedSets.length === 0 ? (
+              <EmptyState
+                hasFilters={searchQuery.trim() !== '' || masteryFilter !== 'all'}
+                onClearFilters={() => {
+                  setSearchQuery('');
+                  setMasteryFilter('all');
+                }}
+                onCreateNew={() => setIsForgeModalOpen(true)}
+                totalSets={totalSets}
               />
-            </div>
+            ) : (
+              <>
+                {/* Results count */}
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-foreground-muted">
+                    Showing <span className="font-semibold text-foreground">{processedSets.length}</span> set{processedSets.length !== 1 ? 's' : ''}
+                    {(searchQuery || masteryFilter !== 'all') && (
+                      <span> matching your filters</span>
+                    )}
+                  </p>
+                </div>
 
-            {/* Filters */}
-            <div className="flex items-center gap-3 flex-wrap">
-              {/* Mastery Filter */}
+                {/* Flashcard Sets List */}
+                <div className="space-y-3">
+                  {processedSets.map((set) => (
+                    <FlashcardListItem
+                      key={set.id}
+                      set={set}
+                      onClick={() => handleCardClick(set)}
+                      onReforge={() => handleReforgeFlashcards(set)}
+                      onDelete={() => handleDeleteFlashcardSet(set)}
+                      onShare={(e) => handleCopyShareLink(set, e)}
+                      shareLinkCopied={shareLinkCopied === set.id}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Sidebar controls */}
+          <div className="lg:col-span-4 space-y-4">
+            <ClayCard variant="default" padding="md" className="rounded-2xl">
               <div className="flex items-center gap-2">
-                <FilterIcon className="w-4 h-4 text-foreground-muted" />
-                <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
-                  <button
-                    onClick={() => setMasteryFilter('all')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      masteryFilter === 'all'
-                        ? 'bg-surface-elevated text-foreground shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
-                  >
-                    All
-                  </button>
-                  <button
-                    onClick={() => setMasteryFilter('learning')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${
-                      masteryFilter === 'learning'
-                        ? 'bg-surface-elevated text-foreground shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
-                  >
-                    <Loading01Icon className="w-3 h-3" />
-                    Learning
-                  </button>
-                  <button
-                    onClick={() => setMasteryFilter('mastered')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${
-                      masteryFilter === 'mastered'
-                        ? 'bg-surface-elevated text-foreground shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
-                  >
-                    <CheckmarkCircle01Icon className="w-3 h-3" />
-                    Mastered
-                  </button>
+                <Search01Icon className="w-5 h-5 text-foreground-muted" />
+                <input
+                  type="text"
+                  placeholder="Search flashcard sets..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
+                />
+              </div>
+            </ClayCard>
+
+            <ClayCard variant="default" padding="md" className="rounded-2xl">
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
+                    <FilterIcon className="w-4 h-4" />
+                    Mastery
+                  </div>
+                  <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
+                    <button
+                      onClick={() => setMasteryFilter('all')}
+                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                        masteryFilter === 'all'
+                          ? 'bg-surface text-foreground shadow-sm'
+                          : 'text-foreground-muted hover:text-foreground'
+                      }`}
+                    >
+                      All
+                    </button>
+                    <button
+                      onClick={() => setMasteryFilter('learning')}
+                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${
+                        masteryFilter === 'learning'
+                          ? 'bg-surface text-foreground shadow-sm'
+                          : 'text-foreground-muted hover:text-foreground'
+                      }`}
+                    >
+                      <Loading01Icon className="w-3 h-3" />
+                      Learning
+                    </button>
+                    <button
+                      onClick={() => setMasteryFilter('mastered')}
+                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${
+                        masteryFilter === 'mastered'
+                          ? 'bg-surface text-foreground shadow-sm'
+                          : 'text-foreground-muted hover:text-foreground'
+                      }`}
+                    >
+                      <CheckmarkCircle01Icon className="w-3 h-3" />
+                      Mastered
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
+                    <SortingAZ01Icon className="w-4 h-4" />
+                    Sort
+                  </div>
+                  <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
+                    <button
+                      onClick={() => setSortBy('recent')}
+                      className={`p-2 rounded-md transition-all ${
+                        sortBy === 'recent'
+                          ? 'bg-surface text-primary shadow-sm'
+                          : 'text-foreground-muted hover:text-foreground'
+                      }`}
+                      title="Sort by recent"
+                    >
+                      <Clock01Icon className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setSortBy('alphabetical')}
+                      className={`p-2 rounded-md transition-all ${
+                        sortBy === 'alphabetical'
+                          ? 'bg-surface text-primary shadow-sm'
+                          : 'text-foreground-muted hover:text-foreground'
+                      }`}
+                      title="Sort alphabetically"
+                    >
+                      <SortingAZ01Icon className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setSortBy('oldest')}
+                      className={`p-2 rounded-md transition-all ${
+                        sortBy === 'oldest'
+                          ? 'bg-surface text-primary shadow-sm'
+                          : 'text-foreground-muted hover:text-foreground'
+                      }`}
+                      title="Sort by oldest"
+                    >
+                      <Calendar03Icon className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
+            </ClayCard>
 
-              {/* Sort */}
-              <div className="flex items-center gap-1 p-1 rounded-lg bg-surface/70 border border-border/50">
-                <button
-                  onClick={() => setSortBy('recent')}
-                  className={`p-2 rounded-md transition-all ${
-                    sortBy === 'recent'
-                      ? 'bg-surface-elevated text-primary shadow-sm'
-                      : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                  title="Sort by recent"
-                >
-                  <Clock01Icon className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setSortBy('alphabetical')}
-                  className={`p-2 rounded-md transition-all ${
-                    sortBy === 'alphabetical'
-                      ? 'bg-surface-elevated text-primary shadow-sm'
-                      : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                  title="Sort alphabetically"
-                >
-                  <SortingAZ01Icon className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setSortBy('oldest')}
-                  className={`p-2 rounded-md transition-all ${
-                    sortBy === 'oldest'
-                      ? 'bg-surface-elevated text-primary shadow-sm'
-                      : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                  title="Sort by oldest"
-                >
-                  <Calendar03Icon className="w-4 h-4" />
-                </button>
+            <ClayCard variant="default" padding="md" className="rounded-2xl">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-foreground-muted">Sets</p>
+                  <p className="text-2xl font-bold text-foreground">{totalSets}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-foreground-muted">Cards</p>
+                  <p className="text-2xl font-bold text-foreground">{totalCards}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs uppercase tracking-wide text-foreground-muted">Mastered sets</p>
+                  <p className="text-lg font-semibold text-foreground">{masteredSets}</p>
+                </div>
               </div>
-            </div>
+              <div className="mt-3 text-xs text-foreground-muted">
+                {masteryLabel} · {sortLabel}
+              </div>
+            </ClayCard>
           </div>
-        </ClayCard>
-
-        {/* Content */}
-        {isLoading ? (
-          <FlashcardsSkeleton />
-        ) : processedSets.length === 0 ? (
-          <EmptyState
-            hasFilters={searchQuery.trim() !== '' || masteryFilter !== 'all'}
-            onClearFilters={() => {
-              setSearchQuery('');
-              setMasteryFilter('all');
-            }}
-            onCreateNew={() => setIsForgeModalOpen(true)}
-            totalSets={totalSets}
-          />
-        ) : (
-          <>
-            {/* Results count */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-foreground-muted">
-                Showing <span className="font-semibold text-foreground">{processedSets.length}</span> set{processedSets.length !== 1 ? 's' : ''}
-                {(searchQuery || masteryFilter !== 'all') && (
-                  <span> matching your filters</span>
-                )}
-              </p>
-            </div>
-
-            {/* Flashcard Sets List */}
-            <div className="space-y-3">
-              {processedSets.map((set) => (
-                <FlashcardListItem
-                  key={set.id}
-                  set={set}
-                  onClick={() => handleCardClick(set)}
-                  onReforge={() => handleReforgeFlashcards(set)}
-                  onDelete={() => handleDeleteFlashcardSet(set)}
-                  onShare={(e) => handleCopyShareLink(set, e)}
-                  shareLinkCopied={shareLinkCopied === set.id}
-                />
-              ))}
-            </div>
-          </>
-        )}
+        </div>
       </div>
 
       <ReforgeModal
@@ -456,44 +490,36 @@ function FlashcardsHeader({
   onCreateNew: () => void;
 }) {
   return (
-    <ClayCard variant="elevated" padding="lg" className="rounded-3xl relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-72 h-72 bg-gradient-to-bl from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-gradient-to-tr from-secondary/8 via-secondary/4 to-transparent rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          {/* Title area */}
-          <div className="flex items-start gap-4">
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-primary-muted to-primary-muted/60 shadow-lg shadow-primary/10">
-              <FlashcardIcon className="w-8 h-8 text-primary" />
-            </div>
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                  Flashcards
-                </h1>
-                <ClayBadge variant="accent" className="text-xs px-2 py-1">
-                  <SparklesIcon className="w-3 h-3" />
-                  {totalSets} sets &middot; {totalCards} cards
-                </ClayBadge>
-              </div>
-              <p className="text-foreground-muted">
-                Study with AI-generated interactive flashcards
-              </p>
-            </div>
+    <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        {/* Title area */}
+        <div className="flex items-start gap-4">
+          <div className="p-4 rounded-2xl bg-background-muted border border-border">
+            <FlashcardIcon className="w-8 h-8 text-primary" />
           </div>
-
-          {/* CTA */}
-          <HeroActionButton
-            icon={<FlashcardAddIcon className="w-5 h-5" />}
-            onClick={onCreateNew}
-          >
-            Forge Flashcards
-          </HeroActionButton>
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+                Flashcards
+              </h1>
+              <ClayBadge variant="accent" className="text-xs px-2 py-1">
+                <SparklesIcon className="w-3 h-3" />
+                {totalSets} sets &middot; {totalCards} cards
+              </ClayBadge>
+            </div>
+            <p className="text-foreground-muted">
+              Study with AI-generated interactive flashcards
+            </p>
+          </div>
         </div>
+
+        {/* CTA */}
+        <HeroActionButton
+          icon={<FlashcardAddIcon className="w-5 h-5" />}
+          onClick={onCreateNew}
+        >
+          Forge Flashcards
+        </HeroActionButton>
       </div>
     </ClayCard>
   );
@@ -503,7 +529,7 @@ function FlashcardsSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="h-[72px] rounded-2xl bg-gradient-to-r from-surface to-surface-elevated/50 animate-pulse" />
+        <div key={i} className="h-[72px] rounded-2xl bg-background-muted border border-border/50 animate-pulse" />
       ))}
     </div>
   );
@@ -523,13 +549,8 @@ function EmptyState({
   return (
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
       <div className="text-center py-16">
-        <div className="relative w-32 h-32 mx-auto mb-8">
-          {/* Decorative background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl rotate-6" />
-          <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 to-secondary/5 rounded-3xl -rotate-6" />
-          <div className="relative w-full h-full rounded-3xl bg-gradient-to-br from-primary-muted to-primary-muted/60 flex items-center justify-center shadow-lg">
-            <FlashcardIcon className="w-16 h-16 text-primary" />
-          </div>
+        <div className="w-28 h-28 mx-auto mb-8 rounded-3xl bg-background-muted border border-border flex items-center justify-center">
+          <FlashcardIcon className="w-14 h-14 text-primary" />
         </div>
 
         {hasFilters ? (
@@ -540,7 +561,7 @@ function EmptyState({
             </p>
             <button
               onClick={onClearFilters}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-surface to-surface-elevated/50 text-foreground font-semibold border border-border/80 hover:shadow-md transition-all"
+              className="px-6 py-3 rounded-xl bg-surface text-foreground font-semibold border border-border hover:shadow-md transition-all"
             >
               Clear filters
             </button>
@@ -566,7 +587,7 @@ function EmptyState({
             </p>
             <button
               onClick={onClearFilters}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-surface to-surface-elevated/50 text-foreground font-semibold border border-border/80 hover:shadow-md transition-all"
+              className="px-6 py-3 rounded-xl bg-surface text-foreground font-semibold border border-border hover:shadow-md transition-all"
             >
               Clear filters
             </button>
