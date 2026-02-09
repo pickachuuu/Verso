@@ -66,7 +66,11 @@ export default function EditorPage() {
 
   // Notebook scaling – keeps a fixed number of grid lines on every screen size
   const notebookContainerRef = useRef<HTMLDivElement>(null);
-  const scale = useNotebookScale(notebookContainerRef);
+  const rawScale = useNotebookScale(notebookContainerRef);
+  // Clamp scale so the notebook stays usable on small screens.
+  const minScale = 0.6;
+  const scale = Math.max(rawScale, minScale);
+  const isScaleClamped = rawScale < minScale;
 
   // ========================================
   // Zustand Stores
@@ -796,6 +800,28 @@ export default function EditorPage() {
       </button>
     </ClayCard>
   );
+  const saveStatusIndicator = (
+    <>
+      {saveStatus === 'saving' && (
+        <span className="inline-flex items-center gap-1.5 text-foreground-muted">
+          <Loading03Icon className="w-3.5 h-3.5 animate-spin" />
+          Saving
+        </span>
+      )}
+      {saveStatus === 'saved' && (
+        <span className="inline-flex items-center gap-1.5 text-emerald-600">
+          <Tick01Icon className="w-3.5 h-3.5" />
+          Saved
+        </span>
+      )}
+      {saveStatus === 'error' && (
+        <span className="inline-flex items-center gap-1.5 text-red-500">
+          <AlertCircleIcon className="w-3.5 h-3.5" />
+          Error
+        </span>
+      )}
+    </>
+  );
   const notebookCard = (
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
         <div className="flex items-start gap-3">
@@ -871,25 +897,30 @@ export default function EditorPage() {
         </div>
 
         <div className="mt-4 flex items-center gap-2 text-sm font-semibold">
-          {saveStatus === 'saving' && (
-            <span className="inline-flex items-center gap-1.5 text-foreground-muted">
-              <Loading03Icon className="w-3.5 h-3.5 animate-spin" />
-              Saving
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="inline-flex items-center gap-1.5 text-emerald-600">
-              <Tick01Icon className="w-3.5 h-3.5" />
-              Saved
-            </span>
-          )}
-          {saveStatus === 'error' && (
-            <span className="inline-flex items-center gap-1.5 text-red-500">
-              <AlertCircleIcon className="w-3.5 h-3.5" />
-              Error
-            </span>
-          )}
+          {saveStatusIndicator}
         </div>
+    </ClayCard>
+  );
+  const mobileTitleCard = (
+    <ClayCard variant="elevated" padding="sm" className="rounded-2xl">
+      <div className="flex items-start gap-3">
+        <div className="p-2 rounded-xl bg-background-muted border border-border">
+          <NotebookIcon className="w-4 h-4 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">Notebook</p>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Untitled notebook"
+            className="w-full mt-1 text-base font-semibold bg-transparent border-none focus:outline-none placeholder:text-foreground-muted text-foreground"
+          />
+        </div>
+      </div>
+      <div className="mt-3 flex items-center gap-2 text-xs font-semibold">
+        {saveStatusIndicator}
+      </div>
     </ClayCard>
   );
   const navCard = (
@@ -978,6 +1009,64 @@ export default function EditorPage() {
         </div>
     </ClayCard>
   );
+  const mobileNavCard = (
+    <ClayCard variant="default" padding="sm" className="rounded-2xl">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+          <Menu01Icon className="w-4 h-4" />
+          Navigation
+        </div>
+        <span className="text-xs font-semibold text-foreground-muted">
+          {currentView === 'toc'
+            ? `${pages.length} pages`
+            : `Page ${(currentPageIndex ?? 0) + 1} / ${pages.length}`}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mt-3">
+        <button
+          onClick={handlePrevPage}
+          disabled={currentView === 'toc'}
+          className="px-3 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span className="inline-flex items-center gap-1.5 justify-center">
+            <ArrowLeft01Icon className="w-4 h-4" />
+            Prev
+          </span>
+        </button>
+        <button
+          onClick={handleNextPage}
+          disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
+          className="px-3 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span className="inline-flex items-center gap-1.5 justify-center">
+            <ArrowRight01Icon className="w-4 h-4" />
+            {currentView === 'toc' ? 'Open First' : 'Next'}
+          </span>
+        </button>
+        <button
+          onClick={handleFirstPage}
+          disabled={currentView === 'toc'}
+          className="px-3 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span className="inline-flex items-center gap-1.5 justify-center">
+            <ArrowDownLeft01Icon className="w-4 h-4" />
+            Contents
+          </span>
+        </button>
+        <button
+          onClick={handleLastPage}
+          disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
+          className="px-3 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span className="inline-flex items-center gap-1.5 justify-center">
+            <ArrowUpRight01Icon className="w-4 h-4" />
+            Last
+          </span>
+        </button>
+      </div>
+    </ClayCard>
+  );
   const toolsPanel = (currentView === 'page' || currentView === 'toc') ? (
     <ClayCard variant="default" padding="lg" className="rounded-2xl">
       <div className="flex items-center justify-between mb-3">
@@ -987,6 +1076,19 @@ export default function EditorPage() {
         )}
       </div>
       <div className="pr-1">
+        <VerticalEditorToolbar editor={editor} theme={toolbarTheme} onAIAction={handleAIAction} aiLoading={aiLoading} />
+      </div>
+    </ClayCard>
+  ) : null;
+  const mobileToolsPanel = (currentView === 'page' || currentView === 'toc') ? (
+    <ClayCard variant="default" padding="sm" className="rounded-2xl">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">Editor tools</span>
+        {aiLoading && (
+          <span className="text-[11px] text-foreground-muted">Running…</span>
+        )}
+      </div>
+      <div className="max-h-[45vh] overflow-y-auto pr-1">
         <VerticalEditorToolbar editor={editor} theme={toolbarTheme} onAIAction={handleAIAction} aiLoading={aiLoading} />
       </div>
     </ClayCard>
@@ -1011,15 +1113,15 @@ export default function EditorPage() {
   return (
     <div className="min-h-[100dvh] flex flex-col paper-bg text-foreground">
       {/* Main content area — extra bottom padding on mobile for the fixed bottom bar */}
-      <div className={`flex-1 relative px-3 sm:px-4 py-4 sm:py-5 flex flex-col max-w-none mx-auto w-full ${showControls ? 'pb-24 desktop:pb-5' : ''}`}>
+      <div className={`flex-1 relative px-3 sm:px-4 py-4 sm:py-5 flex flex-col max-w-none mx-auto w-full ${showControls ? 'pb-6 min-[75rem]:pb-5' : ''}`}>
         <div className="flex-1 flex items-start justify-center">
           <div
-            className={`w-full max-w-[1920px] grid gap-4 sm:gap-6 justify-items-center items-start ${showControls ? 'desktop:grid-cols-[minmax(280px,420px)_minmax(0,58rem)_minmax(280px,420px)]' : 'grid-cols-1'}`}
+            className={`w-full max-w-[1920px] grid gap-4 sm:gap-6 justify-items-center items-start ${showControls ? 'min-[75rem]:grid-cols-[minmax(280px,420px)_minmax(0,58rem)_minmax(280px,420px)]' : 'grid-cols-1'}`}
           >
 
           {/* Left sidebar — hidden below desktop breakpoint, visible as column on desktop */}
           {showControls && (
-            <aside className="hidden desktop:block space-y-4 desktop:sticky desktop:top-6 self-start relative z-[60] pt-4 sm:pt-6">
+            <aside className="hidden min-[75rem]:block space-y-4 min-[75rem]:sticky min-[75rem]:top-6 self-start relative z-[60] pt-4 sm:pt-6">
               {leftRail}
             </aside>
           )}
@@ -1028,7 +1130,9 @@ export default function EditorPage() {
           <div className="flex flex-col pt-4 sm:pt-6 w-full">
             <div
               ref={notebookContainerRef}
-              className="relative w-full flex-1 min-h-[520px] sm:min-h-[640px] max-h-[calc(100dvh-9rem)] sm:max-h-none flex items-start justify-center"
+              className={`relative w-full flex-1 min-h-[520px] sm:min-h-[640px] max-h-[calc(100dvh-9rem)] sm:max-h-none flex items-start ${
+                isScaleClamped ? 'justify-start overflow-auto' : 'justify-center'
+              }`}
             >
               <div
                 className="relative"
@@ -1088,7 +1192,7 @@ export default function EditorPage() {
 
           {/* Right sidebar — hidden below desktop breakpoint, visible as column on desktop */}
           {showControls && (
-            <aside className="hidden desktop:block space-y-4 desktop:sticky desktop:top-6 self-start pt-4 sm:pt-6">
+            <aside className="hidden min-[75rem]:block space-y-4 min-[75rem]:sticky min-[75rem]:top-6 self-start pt-4 sm:pt-6">
               {rightRail}
             </aside>
           )}
@@ -1096,75 +1200,21 @@ export default function EditorPage() {
         </div>
       </div>
 
-      {/* ====== Mobile / Tablet Bottom Bar (< desktop breakpoint) ====== */}
-      {showControls && (
-        <div
-          className="fixed bottom-0 left-0 right-0 z-50 desktop:hidden"
-          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      {/* ====== Mobile Floating Menu Button ====== */}
+      {showControls && !mobileDrawerOpen && (
+        <button
+          onClick={() => setMobileDrawerOpen(true)}
+          className="fixed right-4 bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] z-50 min-[75rem]:hidden inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-border bg-surface shadow-lg text-sm font-semibold text-foreground hover:bg-background-muted transition-colors"
+          aria-label="Open notebook panel"
         >
-          <div className="bg-surface/95 backdrop-blur-md border-t border-border shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-            <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 max-w-2xl mx-auto">
-              {/* Left: Context action */}
-              {currentView === 'page' ? (
-                <button
-                  onClick={handleBackToContents}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-foreground hover:bg-background-muted transition-colors min-w-[44px] min-h-[44px]"
-                >
-                  <Menu01Icon className="w-5 h-5 text-foreground-muted" />
-                  <span className="hidden sm:inline">Contents</span>
-                </button>
-              ) : (
-                <Link
-                  href="/library"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-foreground hover:bg-background-muted transition-colors min-w-[44px] min-h-[44px]"
-                >
-                  <ArrowLeft02Icon className="w-5 h-5 text-foreground-muted" />
-                  <span className="hidden sm:inline">Library</span>
-                </Link>
-              )}
-
-              {/* Center: Page indicator */}
-              <span className="text-sm font-semibold text-foreground-muted tabular-nums">
-                {currentView === 'toc'
-                  ? `${pages.length} page${pages.length !== 1 ? 's' : ''}`
-                  : `${(currentPageIndex ?? 0) + 1} / ${pages.length}`}
-              </span>
-
-              {/* Right: Prev / Next + Drawer toggle */}
-              <div className="flex items-center gap-0.5">
-                <button
-                  onClick={handlePrevPage}
-                  disabled={currentView === 'toc'}
-                  className="p-2.5 rounded-xl text-foreground hover:bg-background-muted transition-colors disabled:opacity-30 disabled:pointer-events-none min-w-[44px] min-h-[44px] flex items-center justify-center"
-                  aria-label="Previous page"
-                >
-                  <ArrowLeft01Icon className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={handleNextPage}
-                  disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
-                  className="p-2.5 rounded-xl text-foreground hover:bg-background-muted transition-colors disabled:opacity-30 disabled:pointer-events-none min-w-[44px] min-h-[44px] flex items-center justify-center"
-                  aria-label="Next page"
-                >
-                  <ArrowRight01Icon className="w-5 h-5" />
-                </button>
-                <div className="w-px h-5 bg-border mx-1" aria-hidden="true" />
-                <button
-                  onClick={() => setMobileDrawerOpen(true)}
-                  className="p-2.5 rounded-xl text-foreground hover:bg-background-muted transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                  aria-label="Open notebook panel"
-                >
-                  <Menu01Icon className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+          <Menu01Icon className="w-4 h-4 text-foreground-muted" />
+          Notebook
+        </button>
       )}
 
       {/* ====== Mobile / Tablet Slide-out Drawer (< desktop breakpoint) ====== */}
       <div
-        className={`fixed inset-0 z-[70] desktop:hidden transition-[visibility] duration-300 ${
+        className={`fixed inset-0 z-[70] min-[75rem]:hidden transition-[visibility] duration-300 ${
           mobileDrawerOpen ? 'visible' : 'invisible'
         }`}
       >
@@ -1177,15 +1227,17 @@ export default function EditorPage() {
           aria-hidden="true"
         />
 
-        {/* Drawer panel — slides in from the right */}
+        {/* Drawer panel — bottom sheet on mobile */}
         <div
-          className={`absolute right-0 top-0 bottom-0 w-[340px] max-w-[85vw] paper-bg border-l border-border shadow-2xl overflow-y-auto overscroll-contain transition-transform duration-300 ease-out ${
-            mobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'
+          className={`absolute left-0 right-0 bottom-0 max-h-[80dvh] bg-surface border-t border-border shadow-2xl overflow-hidden transition-transform duration-300 ease-out ${
+            mobileDrawerOpen ? 'translate-y-0' : 'translate-y-full'
           }`}
         >
-          {/* Sticky header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 paper-bg border-b border-border">
-            <h2 className="text-base font-semibold text-foreground">Notebook</h2>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface">
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">Notebook</span>
+              <span className="text-sm font-semibold text-foreground">Quick controls</span>
+            </div>
             <button
               onClick={() => setMobileDrawerOpen(false)}
               className="p-2 -mr-2 rounded-xl text-foreground-muted hover:text-foreground hover:bg-background-muted transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -1195,12 +1247,11 @@ export default function EditorPage() {
             </button>
           </div>
 
-          {/* Drawer content — all sidebar panels */}
-          <div className="p-4 space-y-4 pb-8">
-            {notebookCard}
-            {pagesPanel}
-            {navCard}
-            {toolsPanel}
+          {/* Drawer content — mobile-optimized panels */}
+          <div className="p-3 space-y-3 pb-5 overflow-y-auto max-h-[calc(80dvh-3.5rem)]">
+            {mobileTitleCard}
+            {mobileNavCard}
+            {mobileToolsPanel}
           </div>
         </div>
       </div>
