@@ -99,7 +99,7 @@
   --font-mono: var(--font-geist-mono);
 
   /* Custom breakpoints */
-  --breakpoint-desktop: 1200px;
+  --breakpoint-desktop: 75rem;
 }
 
 /* 🪶 Base Styles */

@@ -3,14 +3,14 @@
 import { navItems } from "./navConfig";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Logout01Icon, Menu01Icon, Cancel01Icon, DashboardSpeed01Icon, Notification03Icon, Bookmark01Icon, Search01Icon } from "hugeicons-react";
+import { Logout01Icon, Menu01Icon, Cancel01Icon } from "hugeicons-react";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from '@/hook/useAuthActions';
-import { NotebookIcon, FlashcardIcon, ExamIcon } from '@/component/icons';
+import { NotebookIcon, FlashcardIcon, ExamIcon, DashboardIcon, SavedIcon, CommunityIcon, NotificationIcon } from '@/component/icons';
 
 const getNavIcon = (href: string) => {
   switch (href) {
-    case '/dashboard': return <DashboardSpeed01Icon className="w-6 h-6" />;
+    case '/dashboard': return <DashboardIcon className="w-6 h-6" />;
     case '/library': return <NotebookIcon className="w-6 h-6" />;
     case '/flashcards': return <FlashcardIcon className="w-6 h-6" />;
     case '/exams': return <ExamIcon className="w-6 h-6" />;
@@ -25,8 +25,8 @@ export default function Navbar() {
   const notificationRef = useRef<HTMLDivElement | null>(null);
 
   const secondaryItems = [
-    { name: 'Saved Materials', href: '/saved', icon: <Bookmark01Icon className="w-6 h-6" /> },
-    { name: 'Community', href: '/community', icon: <Search01Icon className="w-6 h-6" /> },
+    { name: 'Saved Materials', href: '/saved', icon: <SavedIcon className="w-6 h-6" /> },
+    { name: 'Community', href: '/community', icon: <CommunityIcon className="w-6 h-6" /> },
   ];
   const notifications = [] as { id: string; title: string; detail: string }[];
 
@@ -120,7 +120,7 @@ export default function Navbar() {
                   : 'text-foreground-muted border-transparent hover:bg-background-muted hover:text-foreground hover:border-border'
               }`}
             >
-              <Notification03Icon className="w-6 h-6" />
+              <NotificationIcon className="w-6 h-6" />
               Notifications
             </button>
 
@@ -242,7 +242,7 @@ export default function Navbar() {
                     : 'text-foreground-muted border-transparent hover:bg-background-muted hover:text-foreground hover:border-border'
                 }`}
               >
-                <Notification03Icon className="w-5 h-5" />
+                <NotificationIcon className="w-5 h-5" />
                 Notifications
               </button>
 

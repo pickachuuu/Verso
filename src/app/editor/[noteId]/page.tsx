@@ -1009,26 +1009,26 @@ export default function EditorPage() {
   // Render
   // ========================================
   return (
-    <div className="min-h-screen flex flex-col paper-bg text-foreground">
+    <div className="min-h-[100dvh] flex flex-col paper-bg text-foreground">
       {/* Main content area — extra bottom padding on mobile for the fixed bottom bar */}
-      <div className={`flex-1 relative px-3 sm:px-4 py-5 flex flex-col max-w-none mx-auto w-full ${showControls ? 'pb-24 desktop:pb-5' : ''}`}>
+      <div className={`flex-1 relative px-3 sm:px-4 py-4 sm:py-5 flex flex-col max-w-none mx-auto w-full ${showControls ? 'pb-24 desktop:pb-5' : ''}`}>
         <div className="flex-1 flex items-start justify-center">
           <div
-            className={`w-full max-w-[1920px] grid gap-6 justify-items-center items-start ${showControls ? 'desktop:grid-cols-[minmax(280px,420px)_minmax(0,58rem)_minmax(280px,420px)]' : 'grid-cols-1'}`}
+            className={`w-full max-w-[1920px] grid gap-4 sm:gap-6 justify-items-center items-start ${showControls ? 'desktop:grid-cols-[minmax(280px,420px)_minmax(0,58rem)_minmax(280px,420px)]' : 'grid-cols-1'}`}
           >
 
-          {/* Left sidebar — hidden below 1440px, visible as column on desktop */}
+          {/* Left sidebar — hidden below desktop breakpoint, visible as column on desktop */}
           {showControls && (
-            <aside className="hidden desktop:block space-y-4 desktop:sticky desktop:top-6 self-start relative z-[60] pt-6">
+            <aside className="hidden desktop:block space-y-4 desktop:sticky desktop:top-6 self-start relative z-[60] pt-4 sm:pt-6">
               {leftRail}
             </aside>
           )}
 
           {/* Notebook — always visible, full width on mobile/tablet */}
-          <div className="flex flex-col pt-6 w-full">
+          <div className="flex flex-col pt-4 sm:pt-6 w-full">
             <div
               ref={notebookContainerRef}
-              className="relative w-full flex-1 min-h-[640px] flex items-start justify-center"
+              className="relative w-full flex-1 min-h-[520px] sm:min-h-[640px] max-h-[calc(100dvh-9rem)] sm:max-h-none flex items-start justify-center"
             >
               <div
                 className="relative"
@@ -1086,9 +1086,9 @@ export default function EditorPage() {
             </div>
           </div>
 
-          {/* Right sidebar — hidden below 1440px, visible as column on desktop */}
+          {/* Right sidebar — hidden below desktop breakpoint, visible as column on desktop */}
           {showControls && (
-            <aside className="hidden desktop:block space-y-4 desktop:sticky desktop:top-6 self-start pt-6">
+            <aside className="hidden desktop:block space-y-4 desktop:sticky desktop:top-6 self-start pt-4 sm:pt-6">
               {rightRail}
             </aside>
           )}
@@ -1096,7 +1096,7 @@ export default function EditorPage() {
         </div>
       </div>
 
-      {/* ====== Mobile / Tablet Bottom Bar (< 1440px) ====== */}
+      {/* ====== Mobile / Tablet Bottom Bar (< desktop breakpoint) ====== */}
       {showControls && (
         <div
           className="fixed bottom-0 left-0 right-0 z-50 desktop:hidden"
@@ -1162,7 +1162,7 @@ export default function EditorPage() {
         </div>
       )}
 
-      {/* ====== Mobile / Tablet Slide-out Drawer (< 1440px) ====== */}
+      {/* ====== Mobile / Tablet Slide-out Drawer (< desktop breakpoint) ====== */}
       <div
         className={`fixed inset-0 z-[70] desktop:hidden transition-[visibility] duration-300 ${
           mobileDrawerOpen ? 'visible' : 'invisible'
