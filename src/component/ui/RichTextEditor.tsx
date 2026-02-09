@@ -145,6 +145,7 @@ interface VerticalEditorToolbarProps {
   theme: 'light' | 'dark';
   onAIAction?: (action: string) => void;
   aiLoading?: string | null;
+  compact?: boolean;
 }
 
 function VerticalToolbarButton({
@@ -153,6 +154,7 @@ function VerticalToolbarButton({
   disabled,
   title,
   theme,
+  compact,
   children
 }: {
   onClick: () => void;
@@ -160,9 +162,11 @@ function VerticalToolbarButton({
   disabled?: boolean;
   title: string;
   theme: 'light' | 'dark';
+  compact?: boolean;
   children: React.ReactNode;
 }) {
   const isDark = theme === 'dark';
+  const sizeClass = compact ? 'h-8 rounded-lg' : 'h-9 rounded-xl';
 
   return (
     <button
@@ -171,7 +175,7 @@ function VerticalToolbarButton({
       disabled={disabled}
       title={title}
       className={`
-        w-full h-9 rounded-xl flex items-center justify-center transition-all
+        w-full ${sizeClass} flex items-center justify-center transition-all
         disabled:opacity-30 disabled:cursor-not-allowed
         ${isActive
           ? isDark
@@ -206,12 +210,13 @@ function VerticalToolbarDivider({ theme }: { theme: 'light' | 'dark' }) {
   );
 }
 
-export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: VerticalEditorToolbarProps) {
+export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading, compact = false }: VerticalEditorToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textColorRef = useRef<HTMLDivElement>(null);
   const highlightColorRef = useRef<HTMLDivElement>(null);
   const [showTextColors, setShowTextColors] = useState(false);
   const [showHighlightColors, setShowHighlightColors] = useState(false);
+  const isCompact = compact;
 
   // Whether the editor is available and ready for commands
   const canEdit = !!editor && !editor.isDestroyed;
@@ -276,7 +281,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
   const isDark = theme === 'dark';
 
   return (
-    <div className={`flex flex-col gap-3 ${!canEdit ? 'opacity-40 pointer-events-none' : ''}`}>
+    <div className={`flex flex-col ${isCompact ? 'gap-2' : 'gap-3'} ${!canEdit ? 'opacity-40 pointer-events-none' : ''}`}>
       {/* Hidden file input for image upload */}
       <input
         type="file"
@@ -287,12 +292,13 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
       />
 
       {/* Undo/Redo row */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className={`grid grid-cols-2 ${isCompact ? 'gap-1.5' : 'gap-2'}`}>
         <VerticalToolbarButton
           onClick={() => editor?.chain().focus().undo().run()}
           disabled={!canEdit || !(editor?.can().undo() ?? false)}
           title="Undo"
           theme={theme}
+          compact={isCompact}
         >
           <ArrowTurnBackwardIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -301,6 +307,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
           disabled={!canEdit || !(editor?.can().redo() ?? false)}
           title="Redo"
           theme={theme}
+          compact={isCompact}
         >
           <ArrowTurnForwardIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -309,13 +316,14 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
       <VerticalToolbarDivider theme={theme} />
 
       {/* Text Formatting - 3 columns */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className={`grid ${isCompact ? 'grid-cols-4 gap-1.5' : 'grid-cols-3 gap-2'}`}>
         <VerticalToolbarButton
           onClick={() => editor?.chain().focus().toggleBold().run()}
           isActive={canEdit && (editor?.isActive('bold') ?? false)}
           disabled={!canEdit}
           title="Bold"
           theme={theme}
+          compact={isCompact}
         >
           <TextBoldIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -325,6 +333,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
           disabled={!canEdit}
           title="Italic"
           theme={theme}
+          compact={isCompact}
         >
           <TextItalicIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -334,6 +343,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
           disabled={!canEdit}
           title="Underline"
           theme={theme}
+          compact={isCompact}
         >
           <TextUnderlineIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -343,6 +353,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
           disabled={!canEdit}
           title="Strikethrough"
           theme={theme}
+          compact={isCompact}
         >
           <TextStrikethroughIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -351,7 +362,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
       <VerticalToolbarDivider theme={theme} />
 
       {/* Color Options */}
-      <div className="space-y-2">
+      <div className={isCompact ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
         {/* Text Color Picker */}
         <div className="relative" ref={textColorRef}>
           <button
@@ -364,7 +375,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
             disabled={!canEdit}
             title="Text Color"
             className={`
-              w-full h-9 rounded-xl flex items-center justify-center gap-2 transition-all text-xs font-medium
+              w-full ${isCompact ? 'h-8' : 'h-9'} rounded-xl flex items-center justify-center gap-2 transition-all text-xs font-medium
               disabled:opacity-30 disabled:cursor-not-allowed
               ${isDark
                 ? 'bg-gray-800/80 hover:bg-gray-700/80 text-gray-300 border border-gray-700/50'
@@ -373,7 +384,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
             `}
           >
             <TextColorIcon className="w-4 h-4" />
-            <span>Text Color</span>
+            <span>{isCompact ? 'Color' : 'Text Color'}</span>
             <div
               className="w-3 h-3 rounded-full border border-gray-400/50"
               style={{ backgroundColor: (canEdit && editor?.getAttributes('textStyle')?.color) || (isDark ? '#e5e7eb' : '#374151') }}
@@ -428,7 +439,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
             disabled={!canEdit}
             title="Highlight Color"
             className={`
-              w-full h-9 rounded-xl flex items-center justify-center gap-2 transition-all text-xs font-medium
+              w-full ${isCompact ? 'h-8' : 'h-9'} rounded-xl flex items-center justify-center gap-2 transition-all text-xs font-medium
               disabled:opacity-30 disabled:cursor-not-allowed
               ${canEdit && editor?.isActive('highlight')
                 ? isDark
@@ -485,13 +496,14 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
       <VerticalToolbarDivider theme={theme} />
 
       {/* Headings - 3 columns */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className={`grid grid-cols-3 ${isCompact ? 'gap-1.5' : 'gap-2'}`}>
         <VerticalToolbarButton
           onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
           isActive={canEdit && (editor?.isActive('heading', { level: 1 }) ?? false)}
           disabled={!canEdit}
           title="Heading 1"
           theme={theme}
+          compact={isCompact}
         >
           <Heading01Icon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -501,6 +513,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
           disabled={!canEdit}
           title="Heading 2"
           theme={theme}
+          compact={isCompact}
         >
           <Heading02Icon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -510,6 +523,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
           disabled={!canEdit}
           title="Heading 3"
           theme={theme}
+          compact={isCompact}
         >
           <Heading03Icon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -518,13 +532,14 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
       <VerticalToolbarDivider theme={theme} />
 
       {/* Lists & Blocks - 2 columns */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className={`grid ${isCompact ? 'grid-cols-3 gap-1.5' : 'grid-cols-2 gap-2'}`}>
         <VerticalToolbarButton
           onClick={() => editor?.chain().focus().toggleBulletList().run()}
           isActive={canEdit && (editor?.isActive('bulletList') ?? false)}
           disabled={!canEdit}
           title="Bullet List"
           theme={theme}
+          compact={isCompact}
         >
           <ListViewIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -534,6 +549,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
           disabled={!canEdit}
           title="Numbered List"
           theme={theme}
+          compact={isCompact}
         >
           <LeftToRightListNumberIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -543,6 +559,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
           disabled={!canEdit}
           title="Quote"
           theme={theme}
+          compact={isCompact}
         >
           <QuoteDownIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -552,6 +569,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
           disabled={!canEdit}
           title="Code Block"
           theme={theme}
+          compact={isCompact}
         >
           <SourceCodeIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -561,6 +579,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
           disabled={!canEdit}
           title="Insert Polaroid"
           theme={theme}
+          compact={isCompact}
         >
           <Image01Icon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -569,13 +588,14 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
       <VerticalToolbarDivider theme={theme} />
 
       {/* Text Alignment - 3 columns */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className={`grid grid-cols-3 ${isCompact ? 'gap-1.5' : 'gap-2'}`}>
         <VerticalToolbarButton
           onClick={() => editor?.chain().focus().setTextAlign('left').run()}
           isActive={canEdit && (editor?.isActive({ textAlign: 'left' }) ?? false)}
           disabled={!canEdit}
           title="Align Left"
           theme={theme}
+          compact={isCompact}
         >
           <TextAlignLeftIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -585,6 +605,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
           disabled={!canEdit}
           title="Align Center"
           theme={theme}
+          compact={isCompact}
         >
           <TextAlignCenterIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -594,6 +615,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
           disabled={!canEdit}
           title="Align Right"
           theme={theme}
+          compact={isCompact}
         >
           <TextAlignRightIcon className="w-4 h-4" />
         </VerticalToolbarButton>
@@ -612,14 +634,14 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-2">
+          <div className={`grid ${isCompact ? 'grid-cols-2 gap-2' : 'grid-cols-1 gap-2'}`}>
             <button
               type="button"
               onClick={() => onAIAction('continue_writing')}
               disabled={!canEdit || aiLoading === 'continue_writing'}
               title="AI continues writing from cursor position"
               className={`
-                w-full h-9 rounded-xl flex items-center justify-center gap-2 transition-all text-xs font-medium
+                w-full ${isCompact ? 'h-8 text-[11px]' : 'h-9 text-xs'} rounded-xl flex items-center justify-center gap-2 transition-all font-medium
                 disabled:opacity-30 disabled:cursor-not-allowed
                 ${isDark
                   ? 'bg-blue-900/30 hover:bg-blue-800/40 text-blue-300 border border-blue-700/30'
@@ -635,7 +657,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
               ) : (
                 <PencilEdit02Icon className="w-3.5 h-3.5" />
               )}
-              <span>Continue Writing</span>
+              <span>{isCompact ? 'Continue' : 'Continue Writing'}</span>
             </button>
 
             <button
@@ -644,7 +666,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
               disabled={!canEdit || aiLoading === 'generate_outline'}
               title="Generate heading structure for this page"
               className={`
-                w-full h-9 rounded-xl flex items-center justify-center gap-2 transition-all text-xs font-medium
+                w-full ${isCompact ? 'h-8 text-[11px]' : 'h-9 text-xs'} rounded-xl flex items-center justify-center gap-2 transition-all font-medium
                 disabled:opacity-30 disabled:cursor-not-allowed
                 ${isDark
                   ? 'bg-blue-900/30 hover:bg-blue-800/40 text-blue-300 border border-blue-700/30'
@@ -669,7 +691,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
               disabled={!canEdit || aiLoading === 'summarize_page'}
               title="Summarize the entire page"
               className={`
-                w-full h-9 rounded-xl flex items-center justify-center gap-2 transition-all text-xs font-medium
+                w-full ${isCompact ? 'h-8 text-[11px]' : 'h-9 text-xs'} rounded-xl flex items-center justify-center gap-2 transition-all font-medium
                 disabled:opacity-30 disabled:cursor-not-allowed
                 ${isDark
                   ? 'bg-blue-900/30 hover:bg-blue-800/40 text-blue-300 border border-blue-700/30'
@@ -685,7 +707,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
               ) : (
                 <SummationCircleIcon className="w-3.5 h-3.5" />
               )}
-              <span>Summarize</span>
+              <span>{isCompact ? 'Summary' : 'Summarize'}</span>
             </button>
 
             <button
@@ -694,7 +716,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
               disabled={!canEdit || aiLoading === 'generate_flashcards'}
               title="Generate flashcards from page content"
               className={`
-                w-full h-9 rounded-xl flex items-center justify-center gap-2 transition-all text-xs font-medium
+                w-full ${isCompact ? 'h-8 text-[11px]' : 'h-9 text-xs'} rounded-xl flex items-center justify-center gap-2 transition-all font-medium
                 disabled:opacity-30 disabled:cursor-not-allowed
                 ${isDark
                   ? 'bg-orange-900/30 hover:bg-orange-800/40 text-orange-300 border border-orange-700/30'
@@ -710,7 +732,7 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading }: 
               ) : (
                 <FlashIcon className="w-3.5 h-3.5" />
               )}
-              <span>Flashcards</span>
+              <span>{isCompact ? 'Cards' : 'Flashcards'}</span>
             </button>
           </div>
         </>

@@ -1076,7 +1076,7 @@ export default function EditorPage() {
         )}
       </div>
       <div className="pr-1">
-        <VerticalEditorToolbar editor={editor} theme={toolbarTheme} onAIAction={handleAIAction} aiLoading={aiLoading} />
+        <VerticalEditorToolbar editor={editor} theme={toolbarTheme} onAIAction={handleAIAction} aiLoading={aiLoading} compact />
       </div>
     </ClayCard>
   ) : null;
@@ -1192,7 +1192,7 @@ export default function EditorPage() {
 
           {/* Right sidebar — hidden below desktop breakpoint, visible as column on desktop */}
           {showControls && (
-            <aside className="hidden min-[75rem]:block space-y-4 min-[75rem]:sticky min-[75rem]:top-6 self-start pt-4 sm:pt-6">
+            <aside className="hidden min-[75rem]:block space-y-4 min-[75rem]:sticky min-[75rem]:top-6 self-start relative z-[60] pt-4 sm:pt-6">
               {rightRail}
             </aside>
           )}
