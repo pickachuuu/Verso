@@ -691,7 +691,26 @@ function FlashcardsSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="h-[72px] rounded-2xl bg-background-muted border border-border/50 animate-pulse" />
+        <ClayCard key={i} variant="default" padding="none" className="rounded-2xl overflow-hidden animate-pulse">
+          <div className="flex items-stretch">
+            <div className="w-1 bg-background-muted" />
+            <div className="flex items-center gap-4 p-3 pr-5 flex-1">
+              <div className="w-14 h-12 bg-background-muted rounded-lg" />
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className="h-4 w-2/3 bg-background-muted rounded" />
+                <div className="h-3 w-1/2 bg-background-muted/80 rounded" />
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="h-2.5 w-20 bg-background-muted/70 rounded" />
+                  <div className="h-2.5 w-16 bg-background-muted/70 rounded" />
+                </div>
+              </div>
+              <div className="hidden sm:flex items-center gap-2">
+                <div className="h-8 w-8 bg-background-muted rounded-lg" />
+                <div className="h-8 w-8 bg-background-muted rounded-lg" />
+              </div>
+            </div>
+          </div>
+        </ClayCard>
       ))}
     </div>
   );
