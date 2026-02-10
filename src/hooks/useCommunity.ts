@@ -18,12 +18,48 @@ export interface CommunityItem {
   href: string;
 }
 
+type PublicNoteRow = {
+  id: string;
+  title: string | null;
+  content: string | null;
+  tags: string[] | null;
+  user_id: string | null;
+  updated_at: string | null;
+  created_at: string | null;
+};
+
+type PublicFlashcardSetRow = {
+  id: string;
+  title: string | null;
+  description: string | null;
+  total_cards: number | null;
+  user_id: string | null;
+  updated_at: string | null;
+  created_at: string | null;
+};
+
+type PublicExamSetRow = {
+  id: string;
+  title: string | null;
+  description: string | null;
+  total_questions: number | null;
+  difficulty: 'easy' | 'medium' | 'hard' | 'mixed' | null;
+  user_id: string | null;
+  updated_at: string | null;
+  created_at: string | null;
+};
+
+type ProfileRow = {
+  id: string;
+  full_name: string | null;
+};
+
 export const communityKeys = {
   all: ['community'] as const,
   items: () => [...communityKeys.all, 'items'] as const,
 };
 
-function timeAgo(dateString?: string): string {
+function timeAgo(dateString?: string | null): string {
   if (!dateString) return 'recently';
   const date = new Date(dateString);
   const now = new Date();
@@ -90,9 +126,9 @@ async function fetchCommunityItems(): Promise<CommunityItem[]> {
     throw examsResult.error;
   }
 
-  const notes = notesResult.data || [];
-  const flashcardSets = flashcardsResult.data || [];
-  const exams = examsResult.data || [];
+  const notes = (notesResult.data || []) as PublicNoteRow[];
+  const flashcardSets = (flashcardsResult.data || []) as PublicFlashcardSetRow[];
+  const exams = (examsResult.data || []) as PublicExamSetRow[];
 
   const userIds = Array.from(new Set([
     ...notes.map((note) => note.user_id),
@@ -110,7 +146,8 @@ async function fetchCommunityItems(): Promise<CommunityItem[]> {
     if (profilesError) {
       console.warn('Unable to load profile names for community items:', profilesError);
     } else {
-      (profiles || []).forEach((profile) => {
+      const profileRows = (profiles || []) as ProfileRow[];
+      profileRows.forEach((profile) => {
         if (profile.full_name) {
           authorMap.set(profile.id, profile.full_name);
         }
@@ -129,7 +166,7 @@ async function fetchCommunityItems(): Promise<CommunityItem[]> {
         title: note.title || 'Untitled Note',
         summary,
         tags: note.tags || [],
-        author: authorMap.get(note.user_id) || 'Community member',
+        author: (note.user_id ? authorMap.get(note.user_id) : undefined) || 'Community member',
         updatedAt: timeAgo(updatedAtRaw),
         href: `/public/notes/${note.id}`,
         updatedAtRaw,
@@ -146,7 +183,7 @@ async function fetchCommunityItems(): Promise<CommunityItem[]> {
         title: set.title || 'Flashcard Set',
         summary,
         tags: [],
-        author: authorMap.get(set.user_id) || 'Community member',
+        author: (set.user_id ? authorMap.get(set.user_id) : undefined) || 'Community member',
         updatedAt: timeAgo(updatedAtRaw),
         href: `/public/flashcards/${set.id}`,
         updatedAtRaw,
@@ -163,7 +200,7 @@ async function fetchCommunityItems(): Promise<CommunityItem[]> {
         title: exam.title || 'Exam',
         summary,
         tags: exam.difficulty ? [exam.difficulty] : [],
-        author: authorMap.get(exam.user_id) || 'Community member',
+        author: (exam.user_id ? authorMap.get(exam.user_id) : undefined) || 'Community member',
         updatedAt: timeAgo(updatedAtRaw),
         href: `/public/exams/${exam.id}`,
         updatedAtRaw,
@@ -172,7 +209,11 @@ async function fetchCommunityItems(): Promise<CommunityItem[]> {
   ];
 
   return communityItems
-    .sort((a, b) => new Date(b.updatedAtRaw).getTime() - new Date(a.updatedAtRaw).getTime())
+    .sort((a, b) => {
+      const bTime = b.updatedAtRaw ? new Date(b.updatedAtRaw).getTime() : 0;
+      const aTime = a.updatedAtRaw ? new Date(a.updatedAtRaw).getTime() : 0;
+      return bTime - aTime;
+    })
     .map(({ updatedAtRaw, ...item }) => item);
 }
 

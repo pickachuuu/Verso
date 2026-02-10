@@ -8,7 +8,7 @@ import Card from '@/component/ui/Card';
 import Button from '@/component/ui/Button';
 import SaveMaterialModal from '@/component/features/modal/SaveMaterialModal';
 import { useCopyPublicExam, useSaveReference } from '@/hooks/useSavedMaterials';
-import { ArrowLeft01Icon, Bookmark01Icon, Play01Icon } from 'hugeicons-react';
+import { ArrowLeft01Icon, Bookmark01Icon, PlayIcon } from 'hugeicons-react';
 
 const supabase = createClient();
 
@@ -171,7 +171,7 @@ export default function PublicExamPage() {
           </Button>
           <Link href={`/exam/${exam.id}`}>
             <Button size="sm">
-              <Play01Icon className="w-4 h-4 mr-2" />
+              <PlayIcon className="w-4 h-4 mr-2" />
               Start Attempt
             </Button>
           </Link>

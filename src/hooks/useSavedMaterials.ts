@@ -32,12 +32,76 @@ export interface SavedMaterialItem {
   href: string;
 }
 
+type SavedItemRow = {
+  item_id: string;
+  item_type: SavedMaterialType;
+  created_at: string | null;
+};
+
+type PublicNoteRow = {
+  id: string;
+  title: string | null;
+  content: string | null;
+  tags: string[] | null;
+  user_id: string | null;
+  updated_at: string | null;
+  created_at: string | null;
+};
+
+type PublicFlashcardSetRow = {
+  id: string;
+  title: string | null;
+  description: string | null;
+  total_cards: number | null;
+  user_id: string | null;
+  updated_at: string | null;
+  created_at: string | null;
+};
+
+type PublicExamSetRow = {
+  id: string;
+  title: string | null;
+  description: string | null;
+  total_questions: number | null;
+  difficulty: 'easy' | 'medium' | 'hard' | 'mixed' | null;
+  user_id: string | null;
+  updated_at: string | null;
+  created_at: string | null;
+};
+
+type ProfileRow = {
+  id: string;
+  full_name: string | null;
+};
+
+type NotePageRow = {
+  title: string | null;
+  content: string | null;
+  page_order: number | null;
+};
+
+type FlashcardRow = {
+  question: string;
+  answer: string;
+  difficulty_level: FlashcardInsert['difficulty_level'];
+  position: number | null;
+};
+
+type ExamQuestionRow = {
+  question_type: ExamQuestionInsert['question_type'];
+  question: string;
+  correct_answer: string | null;
+  options: string[] | null;
+  points: number;
+  position: number | null;
+};
+
 export const savedKeys = {
   all: ['saved-materials'] as const,
   list: () => [...savedKeys.all, 'list'] as const,
 };
 
-function timeAgo(dateString?: string): string {
+function timeAgo(dateString?: string | null): string {
   if (!dateString) return 'recently';
   const date = new Date(dateString);
   const now = new Date();
@@ -80,12 +144,12 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
     throw savedError;
   }
 
-  const savedItems = savedRows || [];
+  const savedItems = (savedRows || []) as SavedItemRow[];
   if (savedItems.length === 0) return [];
 
-  const noteIds = savedItems.filter((s) => s.item_type === 'note').map((s) => s.item_id);
-  const flashcardIds = savedItems.filter((s) => s.item_type === 'flashcard').map((s) => s.item_id);
-  const examIds = savedItems.filter((s) => s.item_type === 'exam').map((s) => s.item_id);
+  const noteIds = savedItems.filter((item) => item.item_type === 'note').map((item) => item.item_id);
+  const flashcardIds = savedItems.filter((item) => item.item_type === 'flashcard').map((item) => item.item_id);
+  const examIds = savedItems.filter((item) => item.item_type === 'exam').map((item) => item.item_id);
 
   const [notesResult, flashcardsResult, examsResult] = await Promise.all([
     noteIds.length > 0
@@ -112,15 +176,15 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
     throw examsResult.error;
   }
 
-  const notes = notesResult.data || [];
-  const flashcardSets = flashcardsResult.data || [];
-  const exams = examsResult.data || [];
+  const notes = (notesResult.data || []) as PublicNoteRow[];
+  const flashcardSets = (flashcardsResult.data || []) as PublicFlashcardSetRow[];
+  const exams = (examsResult.data || []) as PublicExamSetRow[];
 
   const userIds = Array.from(new Set([
     ...notes.map((note) => note.user_id),
     ...flashcardSets.map((set) => set.user_id),
     ...exams.map((exam) => exam.user_id),
-  ])).filter(Boolean);
+  ])).filter((id): id is string => Boolean(id));
 
   const authorMap = new Map<string, string>();
   if (userIds.length > 0) {
@@ -132,7 +196,8 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
     if (profilesError) {
       console.warn('Unable to load profile names for saved materials:', profilesError);
     } else {
-      (profiles || []).forEach((profile) => {
+      const profileRows = (profiles || []) as ProfileRow[];
+      profileRows.forEach((profile) => {
         if (profile.full_name) {
           authorMap.set(profile.id, profile.full_name);
         }
@@ -142,14 +207,14 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
 
   const savedAtMap = new Map<string, string>();
   savedItems.forEach((item) => {
-    savedAtMap.set(`${item.item_type}:${item.item_id}`, item.created_at);
+    savedAtMap.set(`${item.item_type}:${item.item_id}`, item.created_at || '');
   });
 
   const combinedItems = [
     ...notes.map((note) => {
       const text = stripHtml(note.content || '');
       const summary = text ? truncateText(text) : 'No preview available yet.';
-      const updatedAtRaw = note.updated_at || note.created_at;
+      const updatedAtRaw = note.updated_at || note.created_at || '';
       const savedAt = savedAtMap.get(`note:${note.id}`) || updatedAtRaw;
       return {
         id: note.id,
@@ -157,7 +222,7 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
         title: note.title || 'Untitled Note',
         summary,
         tags: note.tags || [],
-        author: authorMap.get(note.user_id) || 'Community member',
+        author: (note.user_id ? authorMap.get(note.user_id) : undefined) || 'Community member',
         updatedAt: timeAgo(updatedAtRaw),
         savedAt,
         savedAtLabel: timeAgo(savedAt),
@@ -169,7 +234,7 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
       const summary = set.description?.trim()
         ? set.description.trim()
         : `${set.total_cards || 0} cards to study.`;
-      const updatedAtRaw = set.updated_at || set.created_at;
+      const updatedAtRaw = set.updated_at || set.created_at || '';
       const savedAt = savedAtMap.get(`flashcard:${set.id}`) || updatedAtRaw;
       return {
         id: set.id,
@@ -177,7 +242,7 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
         title: set.title || 'Flashcard Set',
         summary,
         tags: [],
-        author: authorMap.get(set.user_id) || 'Community member',
+        author: (set.user_id ? authorMap.get(set.user_id) : undefined) || 'Community member',
         updatedAt: timeAgo(updatedAtRaw),
         savedAt,
         savedAtLabel: timeAgo(savedAt),
@@ -189,7 +254,7 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
       const summary = exam.description?.trim()
         ? exam.description.trim()
         : `${exam.total_questions || 0} questions (${exam.difficulty || 'mixed'}).`;
-      const updatedAtRaw = exam.updated_at || exam.created_at;
+      const updatedAtRaw = exam.updated_at || exam.created_at || '';
       const savedAt = savedAtMap.get(`exam:${exam.id}`) || updatedAtRaw;
       return {
         id: exam.id,
@@ -197,7 +262,7 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
         title: exam.title || 'Exam',
         summary,
         tags: exam.difficulty ? [exam.difficulty] : [],
-        author: authorMap.get(exam.user_id) || 'Community member',
+        author: (exam.user_id ? authorMap.get(exam.user_id) : undefined) || 'Community member',
         updatedAt: timeAgo(updatedAtRaw),
         savedAt,
         savedAtLabel: timeAgo(savedAt),
@@ -208,7 +273,11 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
   ];
 
   return combinedItems
-    .sort((a, b) => new Date(b.savedAtRaw).getTime() - new Date(a.savedAtRaw).getTime())
+    .sort((a, b) => {
+      const bTime = b.savedAtRaw ? new Date(b.savedAtRaw).getTime() : 0;
+      const aTime = a.savedAtRaw ? new Date(a.savedAtRaw).getTime() : 0;
+      return bTime - aTime;
+    })
     .map(({ savedAtRaw, ...item }) => item);
 }
 
@@ -309,8 +378,9 @@ async function copyPublicNote(noteId: string): Promise<{ id: string; slug: strin
     console.error('Error fetching note pages:', pagesError);
   }
 
-  if (pages && pages.length > 0) {
-    const pageInserts = pages.map((page) => ({
+  const pageRows = (pages || []) as NotePageRow[];
+  if (pageRows.length > 0) {
+    const pageInserts = pageRows.map((page) => ({
       note_id: createdNote.id,
       title: page.title || 'Untitled Page',
       content: page.content || '',
@@ -377,7 +447,8 @@ async function copyPublicFlashcardSet(setId: string): Promise<{ id: string }> {
     throw createError || new Error('Failed to create flashcard set');
   }
 
-  const cardInserts: FlashcardInsert[] = (cards || []).map((card, index) => ({
+  const cardRows = (cards || []) as FlashcardRow[];
+  const cardInserts: FlashcardInsert[] = cardRows.map((card, index) => ({
     set_id: createdSet.id,
     question: card.question,
     answer: card.answer,
@@ -428,6 +499,7 @@ async function copyPublicExam(examId: string): Promise<{ id: string }> {
   }
 
   const newTitle = `${examData.title || 'Exam'} (copy)`;
+  const questionRows = (questions || []) as ExamQuestionRow[];
   const examInsert: ExamSetInsert = {
     user_id: session.user.id,
     title: newTitle,
@@ -437,7 +509,7 @@ async function copyPublicExam(examId: string): Promise<{ id: string }> {
     include_multiple_choice: examData.include_multiple_choice,
     include_identification: examData.include_identification,
     include_essay: examData.include_essay,
-    total_questions: questions?.length || 0,
+    total_questions: questionRows.length,
     is_public: false,
   };
 
@@ -452,11 +524,11 @@ async function copyPublicExam(examId: string): Promise<{ id: string }> {
     throw createError || new Error('Failed to create exam copy');
   }
 
-  const questionInserts: ExamQuestionInsert[] = (questions || []).map((question, index) => ({
+  const questionInserts: ExamQuestionInsert[] = questionRows.map((question, index) => ({
     exam_id: createdExam.id,
     question_type: question.question_type,
     question: question.question,
-    correct_answer: question.correct_answer,
+    correct_answer: question.correct_answer ?? '',
     options: question.options || null,
     points: question.points,
     position: question.position ?? index,
