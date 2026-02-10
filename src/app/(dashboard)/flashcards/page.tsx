@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { ClayCard, ClayBadge } from '@/component/ui/Clay';
+import MobileBottomSheet from '@/component/ui/MobileBottomSheet';
 import {
   RefreshIcon,
   Share01Icon,
@@ -50,6 +51,7 @@ export default function FlashcardDashboardPage() {
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [searchQuery, setSearchQuery] = useState('');
   const [masteryFilter, setMasteryFilter] = useState<MasteryFilter>('all');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // TanStack Query hooks
   const { data: flashcardSets = [], isLoading } = useFlashcardSets();
@@ -109,6 +111,7 @@ export default function FlashcardDashboardPage() {
   const masteredSets = flashcardSets.filter((set) => set.total_cards > 0 && set.mastered_cards === set.total_cards).length;
   const sortLabel = sortBy === 'recent' ? 'Most recent' : sortBy === 'alphabetical' ? 'A–Z' : 'Oldest';
   const masteryLabel = masteryFilter === 'all' ? 'All' : masteryFilter === 'learning' ? 'Learning' : 'Mastered';
+  const activeFilters = Number(masteryFilter !== 'all');
 
   const handleCardClick = useCallback((set: FlashcardSet) => {
     setSelectedSet(set);
@@ -274,6 +277,38 @@ export default function FlashcardDashboardPage() {
         <div className="grid gap-6 lg:grid-cols-12">
           {/* Main content */}
           <div className="order-2 lg:order-1 lg:col-span-8 space-y-4">
+          {/* Mobile controls */}
+          <div className="lg:hidden space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl bg-surface border border-border">
+                <Search01Icon className="w-4 h-4 text-foreground-muted" />
+                <input
+                  type="text"
+                  placeholder="Search flashcard sets..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent border-none focus:outline-none text-sm text-foreground placeholder:text-foreground-muted"
+                />
+              </div>
+              <button
+                onClick={() => setMobileFiltersOpen(true)}
+                className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-colors"
+              >
+                <FilterIcon className="w-4 h-4 text-foreground-muted" />
+                Filters
+                {activeFilters > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-background-muted text-foreground">
+                    {activeFilters}
+                  </span>
+                )}
+              </button>
+            </div>
+            <div className="flex items-center justify-between text-xs text-foreground-muted">
+              <span>Showing {processedSets.length} set{processedSets.length !== 1 ? 's' : ''}</span>
+              <span>{masteryLabel} · {sortLabel}</span>
+            </div>
+          </div>
+
             {isLoading ? (
               <FlashcardsSkeleton />
             ) : processedSets.length === 0 ? (
@@ -317,7 +352,7 @@ export default function FlashcardDashboardPage() {
           </div>
 
           {/* Sidebar controls */}
-          <div className="order-1 lg:order-2 lg:col-span-4 space-y-4">
+          <div className="order-1 lg:order-2 lg:col-span-4 space-y-4 hidden lg:block">
             <ClayCard variant="default" padding="md" className="rounded-2xl">
               <div className="flex items-center gap-2">
                 <Search01Icon className="w-5 h-5 text-foreground-muted" />
@@ -440,6 +475,133 @@ export default function FlashcardDashboardPage() {
           </div>
         </div>
       </div>
+
+      <MobileBottomSheet
+        open={mobileFiltersOpen}
+        onClose={() => setMobileFiltersOpen(false)}
+        title="Filters"
+        description="Refine your flashcards"
+        footer={(
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setMasteryFilter('all');
+                setSortBy('recent');
+              }}
+              className="flex-1 px-3 py-2 rounded-xl border border-border bg-surface text-sm font-semibold text-foreground-muted hover:text-foreground hover:bg-background-muted transition-all"
+            >
+              Reset
+            </button>
+            <button
+              onClick={() => setMobileFiltersOpen(false)}
+              className="flex-1 px-3 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all"
+            >
+              Done
+            </button>
+          </div>
+        )}
+      >
+        <div className="space-y-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+              <FilterIcon className="w-4 h-4" />
+              Mastery
+            </div>
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setMasteryFilter('all')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                  masteryFilter === 'all'
+                    ? 'bg-background-muted text-foreground border border-border'
+                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setMasteryFilter('learning')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all inline-flex items-center gap-1 ${
+                  masteryFilter === 'learning'
+                    ? 'bg-background-muted text-foreground border border-border'
+                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                }`}
+              >
+                <Loading01Icon className="w-3 h-3" />
+                Learning
+              </button>
+              <button
+                onClick={() => setMasteryFilter('mastered')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all inline-flex items-center gap-1 ${
+                  masteryFilter === 'mastered'
+                    ? 'bg-background-muted text-foreground border border-border'
+                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                }`}
+              >
+                <CheckmarkCircle01Icon className="w-3 h-3" />
+                Mastered
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+              <SortingAZ01Icon className="w-4 h-4" />
+              Sort
+            </div>
+            <div className="mt-2 flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
+              <button
+                onClick={() => setSortBy('recent')}
+                className={`p-2 rounded-md transition-all ${
+                  sortBy === 'recent'
+                    ? 'bg-surface text-primary shadow-sm'
+                    : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title="Sort by recent"
+              >
+                <Clock01Icon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setSortBy('alphabetical')}
+                className={`p-2 rounded-md transition-all ${
+                  sortBy === 'alphabetical'
+                    ? 'bg-surface text-primary shadow-sm'
+                    : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title="Sort alphabetically"
+              >
+                <SortingAZ01Icon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setSortBy('oldest')}
+                className={`p-2 rounded-md transition-all ${
+                  sortBy === 'oldest'
+                    ? 'bg-surface text-primary shadow-sm'
+                    : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title="Sort by oldest"
+              >
+                <Calendar03Icon className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-background-muted p-3 text-xs text-foreground-muted">
+            <div className="flex items-center justify-between">
+              <span>Sets</span>
+              <span className="font-semibold text-foreground">{totalSets}</span>
+            </div>
+            <div className="flex items-center justify-between mt-1">
+              <span>Cards</span>
+              <span className="font-semibold text-foreground">{totalCards}</span>
+            </div>
+            <div className="flex items-center justify-between mt-1">
+              <span>Mastered</span>
+              <span className="font-semibold text-foreground">{masteredSets}</span>
+            </div>
+            <div className="mt-2 text-[11px]">{masteryLabel} · {sortLabel}</div>
+          </div>
+        </div>
+      </MobileBottomSheet>
 
       <ReforgeModal
         isOpen={isReforgeModalOpen}

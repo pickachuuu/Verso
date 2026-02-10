@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ClayCard, ClayBadge } from '@/component/ui/Clay';
+import MobileBottomSheet from '@/component/ui/MobileBottomSheet';
 import { ExamGenerationResponse } from '@/lib/gemini';
 import CreateExamModal from '@/component/features/modal/CreateExamModal';
 import ConfirmDeleteModal from '@/component/features/modal/ConfirmDeleteModal';
@@ -46,6 +47,7 @@ export default function ExamsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>('all');
   const [questionTypeFilter, setQuestionTypeFilter] = useState<QuestionTypeFilter>('all');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // TanStack Query hooks
   const { data: exams = [], isLoading } = useExams();
@@ -106,6 +108,7 @@ export default function ExamsPage() {
   const sortLabel = sortBy === 'recent' ? 'Most recent' : sortBy === 'alphabetical' ? 'A–Z' : 'Oldest';
   const difficultyLabel = difficultyFilter === 'all' ? 'All' : difficultyFilter;
   const questionTypeLabel = questionTypeFilter === 'all' ? 'All types' : questionTypeFilter.toUpperCase();
+  const activeFilters = Number(difficultyFilter !== 'all') + Number(questionTypeFilter !== 'all');
 
   const handleExamGenerated = useCallback(async (
     examResponse: ExamGenerationResponse,
@@ -193,6 +196,38 @@ export default function ExamsPage() {
 
       <div className="grid gap-6 lg:grid-cols-12">
         <div className="order-2 lg:order-1 lg:col-span-8 space-y-4">
+          {/* Mobile controls */}
+          <div className="lg:hidden space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl bg-surface border border-border">
+                <Search01Icon className="w-4 h-4 text-foreground-muted" />
+                <input
+                  type="text"
+                  placeholder="Search exams..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent border-none focus:outline-none text-sm text-foreground placeholder:text-foreground-muted"
+                />
+              </div>
+              <button
+                onClick={() => setMobileFiltersOpen(true)}
+                className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-colors"
+              >
+                <FilterIcon className="w-4 h-4 text-foreground-muted" />
+                Filters
+                {activeFilters > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-background-muted text-foreground">
+                    {activeFilters}
+                  </span>
+                )}
+              </button>
+            </div>
+            <div className="flex items-center justify-between text-xs text-foreground-muted">
+              <span>Showing {processedExams.length} exam{processedExams.length !== 1 ? 's' : ''}</span>
+              <span>{difficultyLabel} · {questionTypeLabel}</span>
+            </div>
+          </div>
+
           {isLoading ? (
             <ExamsSkeleton viewMode={viewMode} />
           ) : processedExams.length === 0 ? (
@@ -246,7 +281,7 @@ export default function ExamsPage() {
           )}
         </div>
 
-        <div className="order-1 lg:order-2 lg:col-span-4 space-y-4">
+        <div className="order-1 lg:order-2 lg:col-span-4 space-y-4 hidden lg:block">
           <ClayCard variant="default" padding="md" className="rounded-2xl">
             <div className="flex items-center gap-2">
               <Search01Icon className="w-5 h-5 text-foreground-muted" />
@@ -452,6 +487,218 @@ export default function ExamsPage() {
           </ClayCard>
         </div>
       </div>
+
+      <MobileBottomSheet
+        open={mobileFiltersOpen}
+        onClose={() => setMobileFiltersOpen(false)}
+        title="Filters"
+        description="Refine your exams"
+        footer={(
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setDifficultyFilter('all');
+                setQuestionTypeFilter('all');
+                setSortBy('recent');
+              }}
+              className="flex-1 px-3 py-2 rounded-xl border border-border bg-surface text-sm font-semibold text-foreground-muted hover:text-foreground hover:bg-background-muted transition-all"
+            >
+              Reset
+            </button>
+            <button
+              onClick={() => setMobileFiltersOpen(false)}
+              className="flex-1 px-3 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all"
+            >
+              Done
+            </button>
+          </div>
+        )}
+      >
+        <div className="space-y-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+              <FilterIcon className="w-4 h-4" />
+              Difficulty
+            </div>
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setDifficultyFilter('all')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                  difficultyFilter === 'all'
+                    ? 'bg-background-muted text-foreground border border-border'
+                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setDifficultyFilter('easy')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                  difficultyFilter === 'easy'
+                    ? 'bg-background-muted text-emerald-700 border border-emerald-200'
+                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                }`}
+              >
+                Easy
+              </button>
+              <button
+                onClick={() => setDifficultyFilter('medium')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                  difficultyFilter === 'medium'
+                    ? 'bg-background-muted text-amber-700 border border-amber-200'
+                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                }`}
+              >
+                Medium
+              </button>
+              <button
+                onClick={() => setDifficultyFilter('hard')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                  difficultyFilter === 'hard'
+                    ? 'bg-background-muted text-red-700 border border-red-200'
+                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                }`}
+              >
+                Hard
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+              <Target01Icon className="w-4 h-4" />
+              Question types
+            </div>
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setQuestionTypeFilter('all')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                  questionTypeFilter === 'all'
+                    ? 'bg-background-muted text-foreground border border-border'
+                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setQuestionTypeFilter('mc')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                  questionTypeFilter === 'mc'
+                    ? 'bg-background-muted text-blue-700 border border-blue-200'
+                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                }`}
+              >
+                MC
+              </button>
+              <button
+                onClick={() => setQuestionTypeFilter('id')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                  questionTypeFilter === 'id'
+                    ? 'bg-background-muted text-green-700 border border-green-200'
+                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                }`}
+              >
+                ID
+              </button>
+              <button
+                onClick={() => setQuestionTypeFilter('essay')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                  questionTypeFilter === 'essay'
+                    ? 'bg-background-muted text-primary-dark border border-primary/20'
+                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                }`}
+              >
+                Essay
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+              <SortingAZ01Icon className="w-4 h-4" />
+              Sort
+            </div>
+            <div className="mt-2 flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
+              <button
+                onClick={() => setSortBy('recent')}
+                className={`p-2 rounded-md transition-all ${
+                  sortBy === 'recent'
+                    ? 'bg-surface text-primary shadow-sm'
+                    : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title="Sort by recent"
+              >
+                <Clock01Icon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setSortBy('alphabetical')}
+                className={`p-2 rounded-md transition-all ${
+                  sortBy === 'alphabetical'
+                    ? 'bg-surface text-primary shadow-sm'
+                    : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title="Sort alphabetically"
+              >
+                <SortingAZ01Icon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setSortBy('oldest')}
+                className={`p-2 rounded-md transition-all ${
+                  sortBy === 'oldest'
+                    ? 'bg-surface text-primary shadow-sm'
+                    : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title="Sort by oldest"
+              >
+                <Calendar03Icon className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+              <GridViewIcon className="w-4 h-4" />
+              View
+            </div>
+            <div className="mt-2 flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-md transition-all ${
+                  viewMode === 'grid'
+                    ? 'bg-surface text-primary shadow-sm'
+                    : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title="Grid view"
+              >
+                <GridViewIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-md transition-all ${
+                  viewMode === 'list'
+                    ? 'bg-surface text-primary shadow-sm'
+                    : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title="List view"
+              >
+                <Menu01Icon className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-background-muted p-3 text-xs text-foreground-muted">
+            <div className="flex items-center justify-between">
+              <span>Exams</span>
+              <span className="font-semibold text-foreground">{totalExams}</span>
+            </div>
+            <div className="flex items-center justify-between mt-1">
+              <span>Questions</span>
+              <span className="font-semibold text-foreground">{totalQuestions}</span>
+            </div>
+            <div className="mt-2 text-[11px]">{difficultyLabel} · {questionTypeLabel} · {sortLabel}</div>
+          </div>
+        </div>
+      </MobileBottomSheet>
 
       {/* Create Exam Modal */}
       <CreateExamModal

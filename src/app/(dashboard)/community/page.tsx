@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ClayBadge, ClayCard } from '@/component/ui/Clay';
+import MobileBottomSheet from '@/component/ui/MobileBottomSheet';
 import { FilterIcon, Search01Icon, SparklesIcon } from 'hugeicons-react';
 import { ExamIcon, FlashcardIcon, NotebookIcon } from '@/component/icons';
 import { useCommunityItems, CommunityType, CommunityItem } from '@/hooks/useCommunity';
@@ -39,6 +40,7 @@ const TYPE_META = {
 export default function CommunityPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<CommunityType | 'all'>('all');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const { data: communityItems = [], isLoading, isError } = useCommunityItems();
 
   const filteredItems = useMemo(() => {
@@ -76,6 +78,7 @@ export default function CommunityPage() {
     flashcard: stats.flashcards,
     exam: stats.exams
   };
+  const activeFilters = Number(selectedType !== 'all');
 
   const trendingTags = useMemo(() => {
     const tagCounts = new Map<string, number>();
@@ -137,6 +140,38 @@ export default function CommunityPage() {
 
       <div className="grid gap-6 lg:grid-cols-12">
         <div className="order-2 lg:order-1 lg:col-span-8 space-y-4">
+          {/* Mobile controls */}
+          <div className="lg:hidden space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl bg-surface border border-border">
+                <Search01Icon className="w-4 h-4 text-foreground-muted" />
+                <input
+                  type="text"
+                  placeholder="Search community materials..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent border-none focus:outline-none text-sm text-foreground placeholder:text-foreground-muted"
+                />
+              </div>
+              <button
+                onClick={() => setMobileFiltersOpen(true)}
+                className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-colors"
+              >
+                <FilterIcon className="w-4 h-4 text-foreground-muted" />
+                Filters
+                {activeFilters > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-background-muted text-foreground">
+                    {activeFilters}
+                  </span>
+                )}
+              </button>
+            </div>
+            <div className="flex items-center justify-between text-xs text-foreground-muted">
+              <span>Showing {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''}</span>
+              <span>{selectedType === 'all' ? 'All types' : selectedType}</span>
+            </div>
+          </div>
+
           <ClayCard variant="default" padding="lg" className="rounded-3xl">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -246,7 +281,7 @@ export default function CommunityPage() {
           </ClayCard>
         </div>
 
-        <div className="order-1 lg:order-2 lg:col-span-4 space-y-4">
+        <div className="order-1 lg:order-2 lg:col-span-4 space-y-4 hidden lg:block">
           <ClayCard variant="default" padding="md" className="rounded-2xl">
             <div className="flex items-center gap-2">
               <Search01Icon className="w-5 h-5 text-foreground-muted" />
@@ -334,6 +369,101 @@ export default function CommunityPage() {
           </ClayCard>
         </div>
       </div>
+
+      <MobileBottomSheet
+        open={mobileFiltersOpen}
+        onClose={() => setMobileFiltersOpen(false)}
+        title="Filters"
+        description="Refine community results"
+        footer={(
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSelectedType('all')}
+              className="flex-1 px-3 py-2 rounded-xl border border-border bg-surface text-sm font-semibold text-foreground-muted hover:text-foreground hover:bg-background-muted transition-all"
+            >
+              Reset
+            </button>
+            <button
+              onClick={() => setMobileFiltersOpen(false)}
+              className="flex-1 px-3 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all"
+            >
+              Done
+            </button>
+          </div>
+        )}
+      >
+        <div className="space-y-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+              <FilterIcon className="w-4 h-4" />
+              Type
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {FILTER_OPTIONS.map((option) => {
+                const isActive = selectedType === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => setSelectedType(option.id)}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
+                      isActive
+                        ? 'bg-background-muted text-foreground border-border'
+                        : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
+                    }`}
+                  >
+                    {option.label}
+                    <span className="ml-2 text-[10px] text-foreground-muted">
+                      {typeCounts[option.id]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
+              Trending topics
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {trendingTags.length === 0 ? (
+                <span className="text-xs text-foreground-muted">No topics yet</span>
+              ) : (
+                trendingTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => setSearchQuery(tag)}
+                    className="px-3 py-1.5 rounded-full bg-surface border border-border text-[11px] font-semibold text-foreground-muted hover:text-foreground hover:shadow-sm transition-all"
+                  >
+                    #{tag}
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-background-muted p-3 text-xs text-foreground-muted">
+            <div className="flex items-center justify-between">
+              <span>Shared</span>
+              <span className="font-semibold text-foreground">{stats.total}</span>
+            </div>
+            <div className="mt-2 grid grid-cols-3 gap-2 text-center text-[10px]">
+              <div className="rounded-xl border border-border bg-surface px-2 py-2">
+                <p className="text-sm font-semibold text-foreground">{stats.notes}</p>
+                <p className="text-[10px] text-foreground-muted">Notes</p>
+              </div>
+              <div className="rounded-xl border border-border bg-surface px-2 py-2">
+                <p className="text-sm font-semibold text-foreground">{stats.flashcards}</p>
+                <p className="text-[10px] text-foreground-muted">Flashcards</p>
+              </div>
+              <div className="rounded-xl border border-border bg-surface px-2 py-2">
+                <p className="text-sm font-semibold text-foreground">{stats.exams}</p>
+                <p className="text-[10px] text-foreground-muted">Exams</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </MobileBottomSheet>
     </div>
   );
 }
