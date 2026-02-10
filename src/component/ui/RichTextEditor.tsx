@@ -1021,6 +1021,7 @@ interface RichTextEditorProps {
   autoFocus?: boolean;
   fullscreen?: boolean;
   hideToolbar?: boolean;
+  readOnly?: boolean;
   onEditorReady?: (editor: Editor) => void;
   onGenerateFlashcards?: (text: string) => void;
 }
@@ -1034,6 +1035,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
   autoFocus = false,
   fullscreen = false,
   hideToolbar = false,
+  readOnly = false,
   onEditorReady,
   onGenerateFlashcards,
 }, ref) {
@@ -1061,13 +1063,15 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     ],
     content,
     immediatelyRender: false,
-    autofocus: autoFocus ? 'end' : false,
+    autofocus: !readOnly && autoFocus ? 'end' : false,
+    editable: !readOnly,
     editorProps: {
       attributes: {
         class: `tiptap-editor prose prose-sm sm:prose lg:prose-lg max-w-none focus:outline-none prose-headings:mt-6 prose-headings:mb-3 prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0 ${editorClassName}`,
       },
     },
     onUpdate: ({ editor }) => {
+      if (readOnly) return;
       onChange(editor.getHTML());
     },
   });
@@ -1102,6 +1106,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
   // Keyboard shortcut for underline (not included by default)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (readOnly) return;
       if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
         e.preventDefault();
         editor?.chain().focus().toggleUnderline().run();
@@ -1215,7 +1220,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
               }}
             >
               <EditorContent editor={editor} />
-              {editor && (
+              {editor && !readOnly && (
                 <AISelectionBubble
                   editor={editor}
                   onGenerateFlashcards={onGenerateFlashcards}
@@ -1234,7 +1239,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       {!hideToolbar && <EditorToolbar editor={editor} />}
       <div className="tiptap-editor-wrapper">
         <EditorContent editor={editor} />
-        {editor && (
+        {editor && !readOnly && (
           <AISelectionBubble
             editor={editor}
             onGenerateFlashcards={onGenerateFlashcards}

@@ -341,6 +341,24 @@ async function deleteExam(examId: string): Promise<void> {
   }
 }
 
+async function toggleExamPublicStatus({ examId, isPublic }: { examId: string; isPublic: boolean }): Promise<void> {
+  const session = await getSession();
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated');
+  }
+
+  const { error } = await supabase
+    .from('exam_sets')
+    .update({ is_public: isPublic })
+    .eq('id', examId)
+    .eq('user_id', session.user.id);
+
+  if (error) {
+    console.error('Error updating exam public status:', error);
+    throw error;
+  }
+}
+
 async function startExamAttempt(examId: string): Promise<string> {
   const session = await getSession();
   if (!session?.user?.id) {
@@ -703,6 +721,18 @@ export function useDeleteExam() {
   return useMutation({
     mutationFn: deleteExam,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: examKeys.lists() });
+    },
+  });
+}
+
+export function useToggleExamPublicStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: toggleExamPublicStatus,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: examKeys.detail(variables.examId) });
       queryClient.invalidateQueries({ queryKey: examKeys.lists() });
     },
   });

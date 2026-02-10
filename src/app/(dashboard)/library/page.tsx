@@ -10,6 +10,7 @@ import {
   Search01Icon,
   FilterIcon,
   SparklesIcon,
+  Share01Icon,
   Clock01Icon,
   SortingAZ01Icon,
   Calendar03Icon
@@ -22,7 +23,7 @@ import ConfirmDeleteModal from '@/component/features/modal/ConfirmDeleteModal';
 import { ExamGenerationResponse, GeminiResponse } from '@/lib/gemini';
 
 // TanStack Query hooks
-import { useUserNotes, useDeleteNote, Note } from '@/hooks/useNotes';
+import { useUserNotes, useDeleteNote, useToggleNotePublicStatus, Note } from '@/hooks/useNotes';
 import { useSaveGeneratedFlashcards } from '@/hooks/useFlashcards';
 import { useCreateExam } from '@/hooks/useExams';
 
@@ -35,6 +36,7 @@ export default function LibraryPage() {
   // TanStack Query for data fetching
   const { data: notes = [], isLoading, error, refetch } = useUserNotes();
   const deleteNoteMutation = useDeleteNote();
+  const togglePublicMutation = useToggleNotePublicStatus();
 
   // UI State
   const [sortBy, setSortBy] = useState<SortOption>('recent');
@@ -50,6 +52,7 @@ export default function LibraryPage() {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const [shareLinkCopied, setShareLinkCopied] = useState<string | null>(null);
 
   // Filter and sort notes
   const processedNotes = useMemo(() => {
@@ -108,6 +111,29 @@ export default function LibraryPage() {
       return;
     }
     setIsExamModalOpen(true);
+  };
+
+  const handleCopyShareLink = async (note: Note, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!note.is_public) {
+      try {
+        await togglePublicMutation.mutateAsync({ noteId: note.id, isPublic: true });
+      } catch (error) {
+        console.error('Error making note public:', error);
+        return;
+      }
+    }
+
+    const shareUrl = `${window.location.origin}/public/notes/${note.id}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareLinkCopied(note.id);
+      setTimeout(() => setShareLinkCopied(null), 2000);
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+    }
   };
 
   const handleDeleteNote = (note: Note) => {
@@ -319,6 +345,8 @@ export default function LibraryPage() {
                       note={note}
                       onGenerate={() => handleGenerateMaterials(note)}
                       onDelete={() => handleDeleteNote(note)}
+                      onShare={(e) => handleCopyShareLink(note, e)}
+                      shareLinkCopied={shareLinkCopied === note.id}
                     />
                   ))}
                 </div>
@@ -661,10 +689,14 @@ function NotebookListItem({
   note,
   onGenerate,
   onDelete,
+  onShare,
+  shareLinkCopied,
 }: {
   note: Note;
   onGenerate: () => void;
   onDelete: () => void;
+  onShare: (e: React.MouseEvent) => void;
+  shareLinkCopied: boolean;
 }) {
   const color = (note.cover_color as NotebookColorKey) || 'royal';
   const colorTheme = NOTEBOOK_COLORS[color];
@@ -771,9 +803,16 @@ function NotebookListItem({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                {note.title || 'Untitled Notebook'}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                  {note.title || 'Untitled Notebook'}
+                </h3>
+                {note.is_public && (
+                  <span className="text-[10px] font-medium uppercase tracking-wide text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">
+                    Public
+                  </span>
+                )}
+              </div>
               {/* Content preview */}
               {preview && (
                 <p className="text-xs text-foreground-muted/70 truncate mt-0.5">{preview}</p>
@@ -812,6 +851,21 @@ function NotebookListItem({
 
             {/* Actions */}
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <button
+                className={`p-2 rounded-lg transition-colors ${
+                  shareLinkCopied
+                    ? 'bg-emerald-500/10 text-emerald-500'
+                    : 'bg-primary/10 text-primary hover:bg-primary/20'
+                }`}
+                title={shareLinkCopied ? 'Copied!' : 'Share'}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onShare(e);
+                }}
+              >
+                <Share01Icon className="w-4 h-4" />
+              </button>
               <button
                 onClick={(e) => {
                   e.preventDefault();

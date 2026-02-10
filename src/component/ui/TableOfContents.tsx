@@ -21,6 +21,7 @@ export interface TableOfContentsProps {
   theme: 'light' | 'dark';
   /** When true, shows skeleton placeholders instead of the empty state */
   isLoading?: boolean;
+  readOnly?: boolean;
 }
 
 /**
@@ -34,6 +35,7 @@ export default function TableOfContents({
   onDeletePage,
   theme,
   isLoading = false,
+  readOnly = false,
 }: TableOfContentsProps) {
   const isDark = theme === 'dark';
 
@@ -96,8 +98,10 @@ export default function TableOfContents({
         ) : pages.length === 0 ? (
           <div className="toc-page__empty">
             <File01Icon className="w-12 h-12 opacity-30" />
-            <p>No pages yet</p>
-            <p className="text-sm opacity-60">Click the button below to add your first page</p>
+            <p>No pages available</p>
+            {!readOnly && (
+              <p className="text-sm opacity-60">Click the button below to add your first page</p>
+            )}
           </div>
         ) : (
           <ul className="toc-page__list">
@@ -112,7 +116,7 @@ export default function TableOfContents({
                   <span className="toc-page__dots" />
                   <span className="toc-page__page-indicator">Page {index + 1}</span>
                 </button>
-                {onDeletePage && pages.length > 1 && (
+                {!readOnly && onDeletePage && pages.length > 1 && (
                   <button
                     className="toc-page__delete"
                     onClick={(e) => {
@@ -132,10 +136,12 @@ export default function TableOfContents({
 
       {/* Add page button */}
       <div className="toc-page__footer">
-        <button className="toc-page__add-button" onClick={onAddPage} disabled={isLoading}>
-          <Add01Icon className="w-5 h-5" />
-          <span>Add New Page</span>
-        </button>
+        {!readOnly && (
+          <button className="toc-page__add-button" onClick={onAddPage} disabled={isLoading}>
+            <Add01Icon className="w-5 h-5" />
+            <span>Add New Page</span>
+          </button>
+        )}
 
         <div className="toc-page__page-count">
           {isLoading ? '\u00A0' : `${pages.length} ${pages.length === 1 ? 'page' : 'pages'}`}

@@ -8,6 +8,7 @@ interface NotebookPageProps {
   theme: 'light' | 'dark';
   autoFocus?: boolean;
   onEditorReady?: (editor: Editor) => void;
+  readOnly?: boolean;
 }
 
 /**
@@ -20,11 +21,13 @@ export default function NotebookPage({
   theme,
   autoFocus = true,
   onEditorReady,
+  readOnly = false,
 }: NotebookPageProps) {
   const isDark = theme === 'dark';
   const editorBg = isDark ? '#1e1e2e' : '#fffef8';
   const lineColor = isDark ? 'rgba(157, 123, 224, 0.15)' : 'rgba(95, 108, 175, 0.12)';
   const marginColor = isDark ? 'rgba(180, 100, 100, 0.2)' : 'rgba(220, 80, 80, 0.25)';
+  const handleChange = readOnly ? () => {} : onChange;
 
   return (
     <div
@@ -59,14 +62,15 @@ export default function NotebookPage({
       <div className="relative h-full notebook-editor-wrapper">
         <RichTextEditor
           content={content}
-          onChange={onChange}
+          onChange={handleChange}
           placeholder="Start writing... Use Heading 1 (H1) for the page title"
           className="h-full"
           editorClassName="notebook-editor-content"
-          autoFocus={autoFocus}
+          autoFocus={readOnly ? false : autoFocus}
           fullscreen={false}
           hideToolbar={true}
           onEditorReady={onEditorReady}
+          readOnly={readOnly}
         />
       </div>
     </div>

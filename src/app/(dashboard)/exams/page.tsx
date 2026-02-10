@@ -11,6 +11,7 @@ import {
   useExams,
   useCreateExam,
   useDeleteExam,
+  useToggleExamPublicStatus,
   ExamListItem
 } from '@/hooks/useExams';
 import {
@@ -18,6 +19,7 @@ import {
   Clock01Icon,
   Target01Icon,
   Delete01Icon,
+  Share01Icon,
   ArrowRight01Icon,
   Search01Icon,
   FilterIcon,
@@ -40,6 +42,7 @@ export default function ExamsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [examToDelete, setExamToDelete] = useState<ExamListItem | null>(null);
+  const [shareLinkCopied, setShareLinkCopied] = useState<string | null>(null);
 
   // Filter/Search state
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -53,6 +56,7 @@ export default function ExamsPage() {
   const { data: exams = [], isLoading } = useExams();
   const createExamMutation = useCreateExam();
   const deleteExamMutation = useDeleteExam();
+  const togglePublicMutation = useToggleExamPublicStatus();
 
   const isSaving = createExamMutation.isPending;
   const isDeleting = deleteExamMutation.isPending;
@@ -169,6 +173,28 @@ export default function ExamsPage() {
     setIsDeleteModalOpen(true);
   }, []);
 
+  const handleCopyShareLink = useCallback(async (exam: ExamListItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!exam.is_public) {
+      try {
+        await togglePublicMutation.mutateAsync({ examId: exam.id, isPublic: true });
+      } catch (error) {
+        console.error('Error making exam public:', error);
+        return;
+      }
+    }
+
+    const shareUrl = `${window.location.origin}/public/exams/${exam.id}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareLinkCopied(exam.id);
+      setTimeout(() => setShareLinkCopied(null), 2000);
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+    }
+  }, [togglePublicMutation]);
+
   const handleConfirmDelete = useCallback(async () => {
     if (!examToDelete) return;
 
@@ -262,6 +288,8 @@ export default function ExamsPage() {
                       exam={exam}
                       onTakeExam={() => handleTakeExam(exam.id)}
                       onDelete={() => handleDeleteClick(exam)}
+                      onShare={(e) => handleCopyShareLink(exam, e)}
+                      shareLinkCopied={shareLinkCopied === exam.id}
                     />
                   ))}
                 </div>
@@ -273,6 +301,8 @@ export default function ExamsPage() {
                       exam={exam}
                       onTakeExam={() => handleTakeExam(exam.id)}
                       onDelete={() => handleDeleteClick(exam)}
+                      onShare={(e) => handleCopyShareLink(exam, e)}
+                      shareLinkCopied={shareLinkCopied === exam.id}
                     />
                   ))}
                 </div>
@@ -996,11 +1026,15 @@ function MiniExamDocument({ difficulty }: { difficulty: string }) {
 function ExamGridItem({
   exam,
   onTakeExam,
-  onDelete
+  onDelete,
+  onShare,
+  shareLinkCopied
 }: {
   exam: ExamListItem;
   onTakeExam: () => void;
   onDelete: () => void;
+  onShare: (e: React.MouseEvent) => void;
+  shareLinkCopied: boolean;
 }) {
   const scoreColor = exam.best_score !== null
     ? exam.best_score >= 80 ? 'text-emerald-600' : exam.best_score >= 50 ? 'text-amber-600' : 'text-red-500'
@@ -1038,9 +1072,16 @@ function ExamGridItem({
           <div className="flex items-start gap-3 mb-3">
             <MiniExamDocument difficulty={exam.difficulty} />
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-[15px] text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
-                {exam.title}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-[15px] text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                  {exam.title}
+                </h3>
+                {exam.is_public && (
+                  <span className="text-[10px] font-medium uppercase tracking-wide text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">
+                    Public
+                  </span>
+                )}
+              </div>
               {/* Source note */}
               {exam.notes && (
                 <p className="text-[10px] text-foreground-muted/70 truncate mt-0.5">
@@ -1127,6 +1168,20 @@ function ExamGridItem({
 
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <button
+                className={`p-1.5 rounded-md transition-colors ${
+                  shareLinkCopied
+                    ? 'text-emerald-500 bg-emerald-500/10'
+                    : 'text-primary bg-primary/10 hover:bg-primary/20'
+                }`}
+                title={shareLinkCopied ? 'Copied!' : 'Share'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShare(e);
+                }}
+              >
+                <Share01Icon className="w-3.5 h-3.5" />
+              </button>
+              <button
                 className="p-1.5 rounded-md text-foreground-muted hover:text-red-500 hover:bg-red-500/10 transition-colors"
                 title="Delete exam"
                 onClick={(e) => {
@@ -1153,11 +1208,15 @@ function ExamGridItem({
 function ExamListItemComponent({
   exam,
   onTakeExam,
-  onDelete
+  onDelete,
+  onShare,
+  shareLinkCopied
 }: {
   exam: ExamListItem;
   onTakeExam: () => void;
   onDelete: () => void;
+  onShare: (e: React.MouseEvent) => void;
+  shareLinkCopied: boolean;
 }) {
   const scorePercent = exam.best_score ?? 0;
 
@@ -1220,6 +1279,11 @@ function ExamListItemComponent({
                 )}>
                   {exam.difficulty}
                 </span>
+                {exam.is_public && (
+                  <span className="text-[10px] font-medium uppercase tracking-wide text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">
+                    Public
+                  </span>
+                )}
               </div>
               {/* Source note */}
               {exam.notes && (
@@ -1288,6 +1352,20 @@ function ExamListItemComponent({
 
             {/* Actions - appear on hover */}
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <button
+                className={`p-2 rounded-lg transition-colors ${
+                  shareLinkCopied
+                    ? 'bg-emerald-500/10 text-emerald-500'
+                    : 'bg-primary/10 text-primary hover:bg-primary/20'
+                }`}
+                title={shareLinkCopied ? 'Copied!' : 'Share'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShare(e);
+                }}
+              >
+                <Share01Icon className="w-4 h-4" />
+              </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();

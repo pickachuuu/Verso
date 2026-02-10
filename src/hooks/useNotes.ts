@@ -18,6 +18,7 @@ export interface Note {
   cover_color: string;
   slug: string | null;
   user_id: string;
+  is_public: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -220,6 +221,19 @@ async function deleteNote(id: string): Promise<void> {
   if (error) throw error;
 }
 
+async function toggleNotePublicStatus({ noteId, isPublic }: { noteId: string; isPublic: boolean }): Promise<void> {
+  const session = await getSession();
+  if (!session?.user?.id) throw new Error('Not authenticated');
+
+  const { error } = await supabase
+    .from('notes')
+    .update({ is_public: isPublic })
+    .eq('id', noteId)
+    .eq('user_id', session.user.id);
+
+  if (error) throw error;
+}
+
 // Page mutations
 interface CreatePageParams {
   noteId: string;
@@ -351,6 +365,18 @@ export function useDeleteNote() {
   return useMutation({
     mutationFn: deleteNote,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
+    },
+  });
+}
+
+export function useToggleNotePublicStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: toggleNotePublicStatus,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: noteKeys.detail(variables.noteId) });
       queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
     },
   });

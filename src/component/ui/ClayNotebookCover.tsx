@@ -86,6 +86,7 @@ interface ClayNotebookCoverEditorProps extends ClayNotebookCoverBaseProps {
   onTitleChange: (title: string) => void;
   onOpen: () => void;
   onColorChange?: (color: NotebookColorKey) => void;
+  readOnly?: boolean;
 }
 
 // Card mode props - for displaying notebooks in a grid
@@ -131,11 +132,13 @@ function EditorCover({
   color = 'royal',
   colorTheme,
   theme = 'light',
+  readOnly = false,
 }: EditorCoverInternalProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (readOnly) return;
     if (e.key === 'Enter' && title.trim()) {
       onOpen();
     }
@@ -253,19 +256,23 @@ function EditorCover({
                 <input
                   type="text"
                   value={title}
-                  onChange={(e) => onTitleChange(e.target.value)}
+                  onChange={(e) => {
+                    if (readOnly) return;
+                    onTitleChange(e.target.value);
+                  }}
                   onKeyDown={handleKeyDown}
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
                   onClick={(e) => e.stopPropagation()}
                   placeholder="Untitled Notebook"
                   className="clay-notebook-cover__input"
-                  autoFocus
+                  autoFocus={!readOnly}
+                  readOnly={readOnly}
                 />
               </div>
 
               {/* Color picker toggle */}
-              {onColorChange && (
+              {!readOnly && onColorChange && (
                 <div className="clay-notebook-cover__color-picker-container">
                   <button
                     type="button"
