@@ -109,7 +109,7 @@ export default function CommunityPage() {
                 </ClayBadge>
               </div>
               <p className="text-foreground-muted mt-1">
-                Search shared notes, flashcards, and exams from other learners.
+                Search shared notes, flashcards, and exams from the community.
               </p>
             </div>
           </div>

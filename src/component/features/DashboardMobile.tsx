@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { format } from 'date-fns';
 import { ClayBadge, ClayCard } from '@/component/ui/Clay';
 import type { UserProfile } from '@/hooks/useAuth';
@@ -9,7 +10,6 @@ import {
   ArrowRight01Icon,
   Calendar03Icon,
   Clock01Icon,
-  DashboardSpeed01Icon,
   FireIcon,
   PencilEdit01Icon,
   PlayIcon,
@@ -63,7 +63,14 @@ function MobileHeader({ user }: DashboardMobileProps) {
     <ClayCard variant="elevated" padding="sm" className="rounded-2xl">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <DashboardSpeed01Icon className="w-8 h-8 text-primary" />
+          <Image
+            src="/brand/verso-mark.png"
+            alt="Verso logo"
+            width={40}
+            height={40}
+            className="w-10 h-10"
+            priority
+          />
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-widest text-foreground-muted">{greeting}</p>
             <h1 className="text-base font-semibold text-foreground truncate">

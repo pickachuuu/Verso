@@ -83,9 +83,6 @@ function truncateText(text: string, maxLength = 140): string {
 }
 
 async function fetchCommunityItems(): Promise<CommunityItem[]> {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const userId = sessionData?.session?.user?.id ?? null;
-
   const notesQuery = supabase
     .from('notes')
     .select('id, title, content, tags, user_id, updated_at, created_at')
@@ -100,12 +97,6 @@ async function fetchCommunityItems(): Promise<CommunityItem[]> {
     .from('exam_sets')
     .select('id, title, description, total_questions, difficulty, user_id, updated_at, created_at')
     .eq('is_public', true);
-
-  if (userId) {
-    notesQuery.neq('user_id', userId);
-    flashcardsQuery.neq('user_id', userId);
-    examsQuery.neq('user_id', userId);
-  }
 
   const [notesResult, flashcardsResult, examsResult] = await Promise.all([
     notesQuery,

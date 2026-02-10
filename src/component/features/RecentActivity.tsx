@@ -128,14 +128,6 @@ export default function RecentActivity() {
 
   return (
     <ClayCard variant="elevated" padding="none" className="rounded-3xl overflow-hidden">
-      {/* Decorative top: subtle ruled-line accent */}
-      <div
-        className="h-2 opacity-[0.15]"
-        style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, var(--pencil) 3px, var(--pencil) 4px)',
-        }}
-      />
-
       <div className="p-6 md:p-8">
         <div className="flex items-center justify-between mb-6">
           <div>

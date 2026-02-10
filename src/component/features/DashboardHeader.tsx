@@ -1,8 +1,9 @@
 'use client';
 
 import { format } from 'date-fns';
+import Image from 'next/image';
 import { ClayCard, ClayBadge } from '@/component/ui/Clay';
-import { Calendar03Icon, DashboardSpeed01Icon } from 'hugeicons-react';
+import { Calendar03Icon } from 'hugeicons-react';
 import type { UserProfile } from '@/hooks/useAuth';
 
 export default function DashboardHeader({ user }: { user?: UserProfile | null }) {
@@ -23,7 +24,14 @@ export default function DashboardHeader({ user }: { user?: UserProfile | null })
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         {/* Title area */}
         <div className="flex items-start gap-3">
-          <DashboardSpeed01Icon className="w-12 h-12 text-primary" />
+          <Image
+            src="/brand/verso-mark.png"
+            alt="Verso logo"
+            width={48}
+            height={48}
+            className="w-12 h-12"
+            priority
+          />
           <div>
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
