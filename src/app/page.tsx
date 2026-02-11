@@ -432,7 +432,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="py-8 px-4 sm:px-6 lg:px-8 border-t border-border">
+      <footer className="py-8 px-4 sm:px-6 lg:px-8 bg-foreground">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 group">
             <Image
@@ -440,13 +440,13 @@ export default function LandingPage() {
               alt="Verso logo"
               width={32}
               height={32}
-              className="w-8 h-8 group-hover:scale-105 transition-transform"
+              className="w-8 h-8 brightness-0 invert group-hover:scale-105 transition-transform"
             />
-            <span className="text-xl font-bold text-foreground group-hover:text-accent transition-colors">
+            <span className="text-xl font-bold text-background group-hover:text-accent-muted transition-colors">
               Verso
             </span>
           </Link>
-          <p className="text-foreground-muted text-sm">© 2025 Verso. AI-Powered Study Assistant.</p>
+          <p className="text-background/60 text-sm">© {new Date().getFullYear()} Verso. AI-Powered Study Assistant.</p>
         </div>
       </footer>
     </div>
