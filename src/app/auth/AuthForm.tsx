@@ -13,7 +13,9 @@ import {
   CheckmarkCircle02Icon,
   AiChat02Icon,
   Target01Icon,
+  ArrowLeft01Icon,
 } from 'hugeicons-react';
+import Link from 'next/link';
 import { handleGithubLogin, handleGoogleLogin } from '@/hook/useAuthActions';
 
 /* Scattered background doodles — study-themed icons like notebook margin sketches */
@@ -59,6 +61,15 @@ export default function AuthForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center paper-bg px-4 py-8 relative overflow-hidden">
+      {/* Back to landing */}
+      <Link
+        href="/"
+        className="absolute top-6 left-6 z-20 clay-button-secondary flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all active:translate-y-0.5"
+      >
+        <ArrowLeft01Icon className="w-4 h-4" />
+        Back
+      </Link>
+
       {/* Notebook ruled lines */}
       <div
         className="pointer-events-none absolute inset-0 z-0"
