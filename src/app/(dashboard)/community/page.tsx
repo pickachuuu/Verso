@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ClayBadge, ClayCard } from '@/component/ui/Clay';
 import MobileBottomSheet from '@/component/ui/MobileBottomSheet';
 import { FilterIcon, Search01Icon, SparklesIcon } from 'hugeicons-react';
@@ -211,9 +212,13 @@ export default function CommunityPage() {
               </div>
             ) : filteredItems.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-20 h-20 rounded-2xl bg-background-muted border border-border flex items-center justify-center mx-auto mb-5">
-                  <CommunityIcon className="w-9 h-9 text-foreground-muted" />
-                </div>
+                <Image
+                  src="/brand/verso-thinking-clean.svg"
+                  alt="Verso mascot thinking"
+                  width={100}
+                  height={100}
+                  className="mx-auto mb-5 drop-shadow-sm"
+                />
                 <h3 className="text-lg font-semibold text-foreground mb-2">No matches yet</h3>
                 <p className="text-sm text-foreground-muted mb-5">
                   Try another keyword or switch resource types.

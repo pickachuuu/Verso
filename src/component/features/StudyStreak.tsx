@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { ClayCard } from '@/component/ui/Clay';
 import { useStudyStreak, useWeeklyActivity } from '@/hooks/useDashboard';
 import { FireIcon, Target01Icon } from 'hugeicons-react';
@@ -129,9 +130,18 @@ export default function StudyStreak() {
           </p>
         )}
         {currentStreak === 0 && (
-          <p className="mt-4 text-xs text-foreground-muted">
-            Start studying to begin your streak!
-          </p>
+          <div className="mt-4 flex flex-col items-center gap-2">
+            <Image
+              src="/brand/verso-thinking-clean.svg"
+              alt="Verso mascot thinking"
+              width={40}
+              height={40}
+              className="drop-shadow-sm"
+            />
+            <p className="text-xs text-foreground-muted">
+              Start studying to begin your streak!
+            </p>
+          </div>
         )}
       </div>
     </ClayCard>

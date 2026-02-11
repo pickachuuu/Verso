@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ClayCard, ClayBadge } from '@/component/ui/Clay';
 import MobileBottomSheet from '@/component/ui/MobileBottomSheet';
 import { NotebookColorKey, NOTEBOOK_COLORS } from '@/component/ui/ClayNotebookCover';
@@ -908,9 +909,13 @@ function EmptyState({
   return (
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
       <div className="text-center py-16">
-        <div className="w-28 h-28 mx-auto mb-8 rounded-3xl bg-background-muted border border-border flex items-center justify-center">
-          <NotebookIcon className="w-14 h-14 text-primary" />
-        </div>
+        <Image
+          src="/brand/verso-writing-notes-clean.svg"
+          alt="Verso mascot writing notes"
+          width={140}
+          height={140}
+          className="mx-auto mb-8 drop-shadow-sm"
+        />
 
         {hasFilters ? (
           <>

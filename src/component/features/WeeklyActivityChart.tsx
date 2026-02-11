@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { ClayCard } from '@/component/ui/Clay';
 import { useWeeklyActivity } from '@/hooks/useDashboard';
 import { Activity03Icon, Clock01Icon } from 'hugeicons-react';
@@ -79,9 +80,13 @@ export default function WeeklyActivityChart() {
         {/* Empty state overlay when no activity */}
         {totalCards === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-            <div className="p-3 rounded-2xl bg-background-muted border border-border mb-3">
-              <Activity03Icon className="w-6 h-6 text-primary/50" />
-            </div>
+            <Image
+              src="/brand/verso-writing-notes-clean.svg"
+              alt="Verso mascot"
+              width={64}
+              height={64}
+              className="mb-3 drop-shadow-sm"
+            />
             <p className="text-sm font-medium text-foreground-muted">No activity this week</p>
             <p className="text-xs text-foreground-muted/70 mt-1">Study some cards to see your chart fill up!</p>
           </div>

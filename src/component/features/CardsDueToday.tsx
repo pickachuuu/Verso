@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { ClayCard } from '@/component/ui/Clay';
 import { useCardsDue } from '@/hooks/useDashboard';
 import { Clock01Icon, AlertCircleIcon, ArrowRight01Icon, Notification03Icon } from 'hugeicons-react';
@@ -106,6 +107,13 @@ export default function CardsDueToday() {
           </Link>
         ) : (
           <div className="p-3 rounded-xl bg-surface-elevated/80 border border-border/40 text-center">
+            <Image
+              src="/brand/verso-happy-clean.svg"
+              alt="Verso mascot celebrating"
+              width={44}
+              height={44}
+              className="mx-auto mb-1.5 drop-shadow-sm"
+            />
             <p className="text-primary-light font-semibold text-sm">All caught up!</p>
             <p className="text-[10px] text-foreground-muted mt-0.5">No cards due for review</p>
           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ClayCard } from '@/component/ui/Clay';
 import { FlashcardIcon } from '@/component/icons';
@@ -235,9 +236,13 @@ export default function StudyPage() {
 
         <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
           <div className="text-center py-8">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-background-muted border border-border flex items-center justify-center">
-              <CheckmarkCircle01Icon className="w-10 h-10 text-primary" />
-            </div>
+            <Image
+              src="/brand/verso-happy-clean.svg"
+              alt="Verso mascot celebrating"
+              width={100}
+              height={100}
+              className="mx-auto mb-6 drop-shadow-sm"
+            />
             <h2 className="text-3xl font-bold text-foreground mb-2">All Caught Up!</h2>
             <p className="text-foreground-muted mb-8 max-w-md mx-auto">
               No cards are due for review in <span className="text-foreground font-medium">{setTitle}</span>. Check back later or browse your cards.
@@ -283,9 +288,13 @@ export default function StudyPage() {
 
         <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
           <div className="text-center py-8">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-background-muted border border-border flex items-center justify-center">
-              <Award01Icon className="w-10 h-10 text-primary" />
-            </div>
+            <Image
+              src="/brand/verso-happy-clean.svg"
+              alt="Verso mascot celebrating"
+              width={100}
+              height={100}
+              className="mx-auto mb-6 drop-shadow-sm"
+            />
             <h2 className="text-3xl font-bold text-foreground mb-2">Session Complete!</h2>
             <p className="text-foreground-muted mb-8">
               You&apos;ve reviewed all due cards in{' '}

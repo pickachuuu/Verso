@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { ClayBadge, ClayButton, ClayCard } from '@/component/ui/Clay';
 import MobileBottomSheet from '@/component/ui/MobileBottomSheet';
@@ -185,9 +186,13 @@ export default function SavedMaterialsPage() {
               </div>
             ) : filteredItems.length === 0 ? (
               <div className="text-center py-10">
-                <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-background-muted border border-border flex items-center justify-center">
-                  <SavedIcon className="w-10 h-10 text-primary" />
-                </div>
+                <Image
+                  src="/brand/verso-happy-clean.svg"
+                  alt="Verso mascot"
+                  width={120}
+                  height={120}
+                  className="mx-auto mb-6 drop-shadow-sm"
+                />
                 <h2 className="text-xl font-semibold text-foreground mb-2">No saved materials yet</h2>
                 <p className="text-sm text-foreground-muted mb-6 max-w-md mx-auto">
                   Save items from the Community or public previews to pin them here for quick access.

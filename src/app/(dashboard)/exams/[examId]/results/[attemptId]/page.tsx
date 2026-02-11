@@ -1,6 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
 import { ClayCard, ClayButton, ClayBadge } from "@/component/ui/Clay";
 import { useExamActions, AttemptWithResponses } from "@/hook/useExamActions";
@@ -178,7 +179,13 @@ export default function ExamResultsPage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <Award01Icon className={`w-8 h-8 ${getScoreColor(results.percentage)}`} />
+                <Image
+                  src="/brand/verso-happy-clean.svg"
+                  alt="Verso mascot"
+                  width={40}
+                  height={40}
+                  className="drop-shadow-sm"
+                />
                 <span className="text-xl font-medium text-foreground">{getGradeLabel(results.percentage)}</span>
               </div>
               <div className={`text-5xl font-bold mb-2 ${getScoreColor(results.percentage)}`}>

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { ClayCard, ClayBadge } from '@/component/ui/Clay';
 import { File01Icon, Clock01Icon, ArrowRight01Icon } from 'hugeicons-react';
 import { NotebookIcon, FlashcardIcon, ExamIcon } from '@/component/icons';
@@ -83,9 +84,13 @@ function ActivityItemSkeleton({ isLast }: { isLast: boolean }) {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-10 text-center">
-      <div className="p-4 rounded-2xl bg-background-muted border border-border mb-4 shadow-inner">
-        <Clock01Icon className="w-8 h-8 text-foreground-muted" />
-      </div>
+      <Image
+        src="/brand/verso-thinking-clean.svg"
+        alt="Verso mascot"
+        width={72}
+        height={72}
+        className="mb-4 drop-shadow-sm"
+      />
       <h4 className="font-semibold text-foreground text-sm mb-1">No recent activity</h4>
       <p className="text-xs text-foreground-muted max-w-[220px]">
         Start creating notes or flashcards to see your activity here
