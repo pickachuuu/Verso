@@ -1119,7 +1119,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         }
 
         void fileToDataUrl(imageFile).then((src) => {
-          if (!editor?.isDestroyed) {
+          if (editor && !editor.isDestroyed) {
             editor.chain().focus().setPolaroidImage({ src, alt: imageFile.name || 'Pasted image' }).run();
           }
         });
