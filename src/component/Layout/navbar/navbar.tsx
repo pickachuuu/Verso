@@ -11,6 +11,9 @@ import { signOut } from '@/hook/useAuthActions';
 import { useUserProfile } from '@/hooks/useAuth';
 import { NotebookIcon, FlashcardIcon, ExamIcon, DashboardIcon, SavedIcon, CommunityIcon, NotificationIcon } from '@/component/icons';
 import { useCardsDue, useClearNotifications, useNotificationDismissals, useStudyStreak } from '@/hooks';
+import Modal from '@/component/ui/Modal';
+import Card from '@/component/ui/Card';
+import Button from '@/component/ui/Button';
 
 const getNavIcon = (href: string) => {
   switch (href) {
@@ -28,6 +31,8 @@ export default function Navbar() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement | null>(null);
   const { data: userProfile } = useUserProfile();
+  const [isSignOutOpen, setIsSignOutOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const avatarLabelSource = (userProfile?.full_name || userProfile?.email || '').trim();
   const avatarFallback = (() => {
@@ -89,6 +94,24 @@ export default function Navbar() {
   const handleClearNotifications = () => {
     if (!hasNotifications || clearNotifications.isPending) return;
     clearNotifications.mutate(notifications.map((note) => note.id));
+  };
+
+  const handleOpenSignOut = () => setIsSignOutOpen(true);
+  const handleCloseSignOut = () => {
+    if (!isSigningOut) {
+      setIsSignOutOpen(false);
+    }
+  };
+
+  const handleConfirmSignOut = async () => {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Sign out error:', error);
+      setIsSigningOut(false);
+    }
   };
 
   useEffect(() => {
@@ -237,7 +260,7 @@ export default function Navbar() {
         <div className="px-3 pb-6 mt-auto">
           <div className="h-px mx-3 mb-4 bg-gradient-to-r from-transparent via-border to-transparent" />
           <button
-            onClick={signOut}
+            onClick={handleOpenSignOut}
             className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-foreground-muted hover:text-error hover:bg-error/10"
           >
             <span className="flex items-center gap-3">
@@ -396,6 +419,39 @@ export default function Navbar() {
         )}
         </AnimatePresence>
       </div>
+
+      <Modal isOpen={isSignOutOpen} onClose={handleCloseSignOut}>
+        <Card className="w-full max-w-md">
+          <Card.Header className="text-center">
+            <div className="mx-auto mb-4 w-12 h-12 bg-background-muted rounded-full flex items-center justify-center border border-border">
+              <Logout01Icon className="w-6 h-6 text-foreground-muted" />
+            </div>
+            <Card.Title className="text-lg font-semibold">Sign out</Card.Title>
+            <Card.Description className="text-foreground-muted">
+              Are you sure you want to sign out?
+            </Card.Description>
+          </Card.Header>
+
+          <Card.Footer className="flex space-x-2">
+            <Button
+              variant="outline"
+              onClick={handleCloseSignOut}
+              disabled={isSigningOut}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmSignOut}
+              disabled={isSigningOut}
+              className="flex-1"
+            >
+              {isSigningOut ? 'Signing out...' : 'Sign out'}
+            </Button>
+          </Card.Footer>
+        </Card>
+      </Modal>
     </>
   );
 }
