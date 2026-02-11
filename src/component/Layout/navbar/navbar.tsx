@@ -144,19 +144,16 @@ export default function Navbar() {
       {/* ═══════════════ Desktop Sidebar ═══════════════ */}
       <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-60 z-50 flex-col bg-surface border-r border-border shadow-[4px_0_24px_rgba(60,50,40,0.08)]">
         {/* Logo */}
-        <div className="px-5 pt-6 pb-8">
-          <Link href="/dashboard" className="flex items-center gap-3 group">
+        <div className="px-5 pt-6 pb-8 flex justify-center">
+          <Link href="/dashboard" className="group">
             <Image
               src="/brand/verso-mark.png"
               alt="Verso logo"
-              width={48}
-              height={48}
-              className="w-12 h-12 shrink-0 group-hover:scale-105 transition-transform"
+              width={56}
+              height={56}
+              className="w-14 h-14 shrink-0 group-hover:scale-105 transition-transform"
               priority
             />
-            <span className="text-xl font-bold text-foreground group-hover:text-foreground transition-colors tracking-tight">
-              Verso
-            </span>
           </Link>
         </div>
 
