@@ -96,7 +96,11 @@ export default function Navbar() {
     clearNotifications.mutate(notifications.map((note) => note.id));
   };
 
-  const handleOpenSignOut = () => setIsSignOutOpen(true);
+  const handleOpenSignOut = () => {
+    setNotificationsOpen(false);
+    setMobileMenuOpen(false);
+    setIsSignOutOpen(true);
+  };
   const handleCloseSignOut = () => {
     if (!isSigningOut) {
       setIsSignOutOpen(false);
@@ -414,6 +418,15 @@ export default function Navbar() {
                   )}
                 </div>
               )}
+              <div className="my-2 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+              <button
+                type="button"
+                onClick={handleOpenSignOut}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all border text-foreground-muted border-transparent hover:bg-background-muted hover:text-error hover:border-border"
+              >
+                <Logout01Icon className="w-5 h-5" />
+                Sign Out
+              </button>
             </div>
           </motion.div>
         )}
