@@ -65,19 +65,31 @@ export default function LandingPage() {
 
       <main className="flex-1 pt-16">
         {/* ===== HERO ===== */}
-        <section className="relative overflow-hidden">
+        <section className="relative overflow-hidden bg-foreground/[0.03]">
+          {/* Animated gradient blobs — richer tones */}
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute -top-32 -left-32 h-[420px] w-[420px] rounded-full bg-accent/20 blur-[100px]" />
-            <div className="absolute -bottom-40 -right-20 h-[480px] w-[480px] rounded-full bg-primary/20 blur-[120px]" />
-            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 h-[300px] w-[600px] rounded-full bg-accent/8 blur-[80px]" />
-            <div className="absolute top-0 right-1/4 h-[200px] w-[200px] rounded-full bg-primary/10 blur-[60px]" />
+            <div className="absolute -top-24 -left-24 h-[500px] w-[500px] rounded-full bg-accent/35 blur-[120px] animate-[hero-blob-1_18s_ease-in-out_infinite]" />
+            <div className="absolute -bottom-32 -right-16 h-[550px] w-[550px] rounded-full bg-primary/30 blur-[140px] animate-[hero-blob-2_22s_ease-in-out_infinite]" />
+            <div className="absolute top-1/4 left-1/3 h-[350px] w-[500px] rounded-full bg-accent/20 blur-[100px] animate-[hero-blob-3_15s_ease-in-out_infinite]" />
+            <div className="absolute bottom-1/4 right-1/3 h-[280px] w-[280px] rounded-full bg-primary/25 blur-[80px] animate-[hero-blob-2_20s_ease-in-out_infinite_reverse]" />
           </div>
 
+          {/* Drifting grid overlay */}
           <div
-            className="absolute inset-0 pointer-events-none opacity-[0.03]"
+            className="absolute inset-0 pointer-events-none opacity-[0.06] animate-[hero-grid-drift_25s_linear_infinite]"
             style={{
-              backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
-              backgroundSize: '32px 32px',
+              backgroundImage:
+                'linear-gradient(90deg, currentColor 1px, transparent 1px), linear-gradient(180deg, currentColor 1px, transparent 1px)',
+              backgroundSize: '48px 48px',
+            }}
+          />
+
+          {/* Diagonal accent stripes */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-[0.04] animate-[hero-stripe-drift_35s_linear_infinite]"
+            style={{
+              backgroundImage:
+                'repeating-linear-gradient(45deg, transparent, transparent 24px, currentColor 24px, currentColor 25px)',
             }}
           />
 
@@ -94,7 +106,7 @@ export default function LandingPage() {
                   variants={fadeUp}
                   transition={{ duration: 0.6 }}
                 >
-                  Study smarter with <span className="text-accent">Verso</span>
+                  Turn your notes into <span className="text-accent">mastery</span>
                 </motion.h1>
 
                 <motion.p
@@ -102,7 +114,7 @@ export default function LandingPage() {
                   variants={fadeUp}
                   transition={{ duration: 0.6 }}
                 >
-                  Draft notes, generate flashcards, and practice with mock exams in one flow.
+                  Write notes, generate flashcards, and practice with mock exams — all in one flow.
                 </motion.p>
 
                 <motion.div
@@ -123,9 +135,10 @@ export default function LandingPage() {
                 transition={{ duration: 0.7, delay: 0.2 }}
               >
                 <div className="pointer-events-none absolute inset-0">
-                  <div className="absolute top-10 left-10 h-24 w-24 rounded-full bg-accent/10 blur-2xl animate-pulse [animation-duration:4s]" />
-                  <div className="absolute bottom-16 right-8 h-20 w-20 rounded-full bg-primary/12 blur-2xl animate-pulse [animation-duration:5s] [animation-delay:1s]" />
-                  <div className="absolute top-1/3 right-1/4 h-16 w-16 rounded-full bg-accent/8 blur-xl animate-pulse [animation-duration:6s] [animation-delay:2s]" />
+                  <div className="absolute top-6 left-6 h-32 w-32 rounded-full bg-accent/15 blur-3xl animate-[hero-blob-1_12s_ease-in-out_infinite]" />
+                  <div className="absolute bottom-10 right-4 h-28 w-28 rounded-full bg-primary/18 blur-3xl animate-[hero-blob-2_10s_ease-in-out_infinite]" />
+                  <div className="absolute top-1/3 right-1/5 h-20 w-20 rounded-full bg-accent/12 blur-2xl animate-[hero-blob-3_8s_ease-in-out_infinite]" />
+                  <div className="absolute bottom-1/3 left-1/4 h-24 w-24 rounded-full bg-primary/10 blur-2xl animate-[hero-blob-1_14s_ease-in-out_infinite_reverse]" />
                 </div>
                 <Image
                   src="/brand/verso-happy-clean.png"
