@@ -43,9 +43,31 @@ const cinzel = Cinzel({
 });
 
 // Metadata
+const ogImage =
+  "https://pub-5d0fe94a3da5458ca88e4e79220a6798.r2.dev/Verso/ChatGPT%20Image%20Feb%2012%2C%202026%2C%2012_39_09%20AM.png";
+
 export const metadata: Metadata = {
   title: "Verso - Smart Learning Platform",
   description: "Organize your learning with notes and flashcards",
+  openGraph: {
+    title: "Verso - Smart Learning Platform",
+    description: "Organize your learning with notes and flashcards",
+    images: [
+      {
+        url: ogImage,
+        width: 1200,
+        height: 630,
+        alt: "Verso - Smart Learning Platform",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Verso - Smart Learning Platform",
+    description: "Organize your learning with notes and flashcards",
+    images: [ogImage],
+  },
 };
 
 // Root Layout
