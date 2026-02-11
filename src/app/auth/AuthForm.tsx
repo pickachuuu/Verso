@@ -94,9 +94,9 @@ export default function AuthForm() {
 
       {/* Card */}
       <div className="clay-card-elevated paper-texture border border-dashed border-pencil/40 rounded-3xl w-full max-w-6xl overflow-hidden relative z-10">
-        <div className="flex flex-col md:flex-row md:min-h-[600px]">
+        <div className="flex flex-col md:flex-row">
           {/* Form side */}
-          <div className="flex-1 px-8 py-10 sm:px-14 sm:py-14 flex flex-col justify-center md:max-w-xl">
+          <div className="md:w-[55%] shrink-0 px-8 py-10 sm:px-14 sm:py-14 flex flex-col justify-center">
             {/* Brand */}
             <div className="flex items-center gap-4 mb-10">
               <Image
@@ -162,14 +162,14 @@ export default function AuthForm() {
             </p>
           </div>
 
-          {/* Image side — stacks on top on small screens, sits beside on md+ */}
-          <div className="relative w-full h-48 sm:h-64 md:h-auto md:w-[45%] md:min-h-[600px] order-first md:order-last">
+          {/* Image side — stacks on top on small screens, fills remaining width on md+ */}
+          <div className="relative w-full h-48 sm:h-64 md:h-auto md:flex-1 order-first md:order-last">
             <Image
               src="https://pub-5d0fe94a3da5458ca88e4e79220a6798.r2.dev/Verso/9b1afcb0-846d-45ea-b422-25cf1f9af990.png"
               alt="Focused study workspace"
               fill
               sizes="(min-width: 768px) 45vw, 100vw"
-              className="object-cover md:rounded-none rounded-b-none"
+              className="object-cover"
               priority
             />
           </div>
