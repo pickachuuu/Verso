@@ -1,11 +1,13 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ClayButton } from '@/component/ui/Clay';
 import { motion } from 'framer-motion';
 import { PencilEdit01Icon, TextIcon, CheckmarkCircle01Icon, FireIcon, LeftToRightListNumberIcon, Tag01Icon } from 'hugeicons-react';
 import { NotebookIcon, FlashcardIcon, ExamIcon } from '@/component/icons';
+import { createClient } from '@/utils/supabase/client';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
@@ -33,6 +35,15 @@ const staggerItem = {
 };
 
 export default function LandingPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session?.user);
+    });
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/40">
@@ -52,12 +63,20 @@ export default function LandingPage() {
               </span>
             </Link>
             <div className="flex items-center gap-2 sm:gap-3">
-              <Link href="/auth" className="hidden sm:block">
-                <ClayButton variant="ghost" size="sm">Sign In</ClayButton>
-              </Link>
-              <Link href="/auth">
-                <ClayButton variant="primary" size="sm">Get Started</ClayButton>
-              </Link>
+              {isLoggedIn ? (
+                <Link href="/dashboard">
+                  <ClayButton variant="primary" size="sm">Dashboard</ClayButton>
+                </Link>
+              ) : (
+                <>
+                  <Link href="/auth" className="hidden sm:block">
+                    <ClayButton variant="ghost" size="sm">Sign In</ClayButton>
+                  </Link>
+                  <Link href="/auth">
+                    <ClayButton variant="primary" size="sm">Get Started</ClayButton>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -123,8 +142,10 @@ export default function LandingPage() {
                   variants={fadeUp}
                   transition={{ duration: 0.6 }}
                 >
-                  <Link href="/auth">
-                    <ClayButton variant="primary" size="lg">Start Studying</ClayButton>
+                  <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
+                    <ClayButton variant="primary" size="lg">
+                      {isLoggedIn ? 'Go to Dashboard' : 'Start Studying'}
+                    </ClayButton>
                   </Link>
                 </motion.div>
               </motion.div>
