@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useUserNotes, Note, fetchNotePagesContent } from '@/hooks/useNotes';
 import { GeminiResponse } from '@/lib/gemini';
@@ -15,9 +15,14 @@ import {
   Settings02Icon,
   File01Icon,
   CheckmarkCircle01Icon,
-  Loading01Icon
+  Loading01Icon,
+  Search01Icon,
+  Clock01Icon,
+  SortingAZ01Icon,
+  Calendar03Icon,
 } from 'hugeicons-react';
 import { NotebookIcon } from '@/component/icons';
+import { NOTEBOOK_COLORS, NotebookColorKey } from '@/component/ui/ClayNotebookCover';
 import { clsx } from 'clsx';
 
 // ============================================
@@ -138,49 +143,59 @@ function NoteCard({
   isSelected: boolean;
   onToggle: () => void;
 }) {
+  const colorKey = (note.cover_color || 'royal') as NotebookColorKey;
+  const color = NOTEBOOK_COLORS[colorKey] ?? NOTEBOOK_COLORS.royal;
+
   return (
     <button
       type="button"
       onClick={onToggle}
       className={clsx(
-        'w-full text-left p-4 rounded-2xl transition-all duration-200 border-2',
+        'w-full text-left rounded-2xl transition-all duration-200 border-2 overflow-hidden',
         isSelected
           ? 'clay-note-selected border-accent bg-accent/5'
           : 'clay-note-unselected border-transparent hover:border-border'
       )}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-stretch">
+        {/* Color strip */}
         <div
-          className={clsx(
-            'w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200',
-            isSelected ? 'bg-accent text-white' : 'bg-surface text-foreground-muted'
-          )}
-        >
-          {isSelected ? (
-            <Tick01Icon className="w-4 h-4" />
-          ) : (
-            <File01Icon className="w-3 h-3" />
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-foreground truncate">
-            {note.title || 'Untitled Note'}
-          </h4>
-          {note.tags && note.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {note.tags.slice(0, 3).map((tag) => (
-                <span
-                  key={tag}
-                  className="text-xs px-2 py-0.5 rounded-full bg-surface text-foreground-muted"
-                >
-                  {tag}
-                </span>
-              ))}
-              {note.tags.length > 3 && (
-                <span className="text-xs text-foreground-muted">+{note.tags.length - 3}</span>
-              )}
-            </div>
-          )}
+          className="w-1.5 shrink-0 rounded-l-xl"
+          style={{ background: color.primary }}
+        />
+        <div className="flex items-start gap-3 p-4 flex-1 min-w-0">
+          <div
+            className={clsx(
+              'w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200',
+              isSelected ? 'bg-accent text-white' : 'bg-surface text-foreground-muted'
+            )}
+          >
+            {isSelected ? (
+              <Tick01Icon className="w-4 h-4" />
+            ) : (
+              <File01Icon className="w-3 h-3" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-medium text-foreground truncate">
+              {note.title || 'Untitled Note'}
+            </h4>
+            {note.tags && note.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {note.tags.slice(0, 3).map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-xs px-2 py-0.5 rounded-full bg-surface text-foreground-muted"
+                  >
+                    {tag}
+                  </span>
+                ))}
+                {note.tags.length > 3 && (
+                  <span className="text-xs text-foreground-muted">+{note.tags.length - 3}</span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </button>
@@ -204,6 +219,36 @@ export default function ForgeFlashcardsModal({
   const [generatedFlashcards, setGeneratedFlashcards] = useState<GeminiResponse | null>(null);
 
   const { data: notes = [], isLoading: notesLoading } = useUserNotes();
+
+  // Note filter/sort state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedColor, setSelectedColor] = useState<NotebookColorKey | 'all'>('all');
+  const [sortBy, setSortBy] = useState<'recent' | 'alphabetical' | 'oldest'>('recent');
+
+  const filteredNotes = useMemo(() => {
+    let filtered = [...notes];
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (n) => n.title?.toLowerCase().includes(q) || n.tags?.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    if (selectedColor !== 'all') {
+      filtered = filtered.filter((n) => (n.cover_color || 'royal') === selectedColor);
+    }
+    switch (sortBy) {
+      case 'alphabetical':
+        filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+        break;
+      case 'oldest':
+        filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
+      case 'recent':
+      default:
+        filtered.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+    }
+    return filtered;
+  }, [notes, searchQuery, selectedColor, sortBy]);
 
   const {
     control,
@@ -231,6 +276,9 @@ export default function ForgeFlashcardsModal({
       setCurrentStep(1);
       setError(null);
       setGeneratedFlashcards(null);
+      setSearchQuery('');
+      setSelectedColor('all');
+      setSortBy('recent');
     }
   }, [isOpen, reset, initialSelectedNoteIds]);
 
@@ -361,7 +409,7 @@ export default function ForgeFlashcardsModal({
           <div className="px-6 py-4 overflow-y-auto flex-1 min-h-0">
             {/* Step 1: Select Notes */}
             {currentStep === 1 && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-foreground">
                     Select notes to forge flashcards from
@@ -370,6 +418,74 @@ export default function ForgeFlashcardsModal({
                     {selectedNotes.length} selected
                   </ClayBadge>
                 </div>
+
+                {/* Compact filter bar */}
+                {notes.length > 0 && !notesLoading && (
+                  <div className="space-y-2">
+                    {/* Search */}
+                    <div className="relative">
+                      <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+                      <input
+                        type="text"
+                        placeholder="Search notes..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-border bg-surface text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+                      />
+                    </div>
+                    {/* Color filter + Sort */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <button
+                          onClick={() => setSelectedColor('all')}
+                          className={clsx(
+                            'px-2 py-1 rounded-md text-xs font-medium transition-all border',
+                            selectedColor === 'all'
+                              ? 'bg-background-muted text-foreground border-border'
+                              : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
+                          )}
+                        >
+                          All
+                        </button>
+                        {(Object.keys(NOTEBOOK_COLORS) as NotebookColorKey[]).map((color) => (
+                          <button
+                            key={color}
+                            onClick={() => setSelectedColor(color)}
+                            className={clsx(
+                              'w-5 h-5 rounded-md transition-all border',
+                              selectedColor === color
+                                ? 'border-pencil/60 ring-1.5 ring-offset-1 ring-foreground/20 scale-110'
+                                : 'border-transparent hover:scale-110'
+                            )}
+                            style={{ background: NOTEBOOK_COLORS[color].primary }}
+                            title={NOTEBOOK_COLORS[color].name}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-background-muted border border-border shrink-0">
+                        {([
+                          { key: 'recent' as const, icon: Clock01Icon, title: 'Recent' },
+                          { key: 'alphabetical' as const, icon: SortingAZ01Icon, title: 'A–Z' },
+                          { key: 'oldest' as const, icon: Calendar03Icon, title: 'Oldest' },
+                        ]).map(({ key, icon: Icon, title }) => (
+                          <button
+                            key={key}
+                            onClick={() => setSortBy(key)}
+                            title={title}
+                            className={clsx(
+                              'p-1.5 rounded-md transition-all',
+                              sortBy === key
+                                ? 'bg-background text-foreground shadow-sm'
+                                : 'text-foreground-muted hover:text-foreground'
+                            )}
+                          >
+                            <Icon className="w-3.5 h-3.5" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {notesLoading ? (
                   <div className="flex items-center justify-center py-12">
@@ -382,9 +498,13 @@ export default function ForgeFlashcardsModal({
                     </div>
                     <p className="text-foreground-muted">No notes found. Create some notes first!</p>
                   </div>
+                ) : filteredNotes.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-foreground-muted">No notes match your filters.</p>
+                  </div>
                 ) : (
                   <div className="grid gap-2">
-                    {notes.map((note) => (
+                    {filteredNotes.map((note) => (
                       <NoteCard
                         key={note.id}
                         note={note}
@@ -538,7 +658,6 @@ export default function ForgeFlashcardsModal({
                       onClick={handleGenerate}
                       className="px-8"
                     >
-                      <SparklesIcon className="w-5 h-5 mr-2" />
                       Generate Flashcards
                     </ClayButton>
                   </div>
@@ -622,7 +741,6 @@ export default function ForgeFlashcardsModal({
                   onClick={handleBack}
                   disabled={isGenerating || saving}
                 >
-                  <ArrowLeft01Icon className="w-4 h-4 mr-2" />
                   Back
                 </ClayButton>
               )}
