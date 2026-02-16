@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, ReactNode, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useCallback, ReactNode, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
@@ -69,18 +69,24 @@ export default function EditorPage() {
   // Track if we've initialized this session
   const initializedRef = useRef<string | null>(null);
 
-  // Notebook scaling – keeps a fixed number of grid lines on every screen size
-  const notebookContainerRef = useRef<HTMLDivElement>(null);
-  const rawScale = useNotebookScale(notebookContainerRef);
+  // Detect small screens for mobile-specific layout adjustments.
+  // useLayoutEffect runs synchronously before the browser paints, preventing
+  // a flash of the wrong scale (minScale 0.6) on mobile before isSmallScreen is set.
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const media = window.matchMedia('(max-width: 640px)');
     const update = () => setIsSmallScreen(media.matches);
     update();
     media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, []);
+
+  // Notebook scaling – keeps a fixed number of grid lines on every screen size.
+  // On mobile, scale by width only so the notebook fills the screen width
+  // and the page scrolls vertically instead of squishing the notebook.
+  const notebookContainerRef = useRef<HTMLDivElement>(null);
+  const rawScale = useNotebookScale(notebookContainerRef, { widthOnly: isSmallScreen });
 
   // Clamp scale only on larger screens; on mobile use raw scale to avoid horizontal scrolling.
   const minScale = isSmallScreen ? 0 : 0.6;
@@ -587,7 +593,7 @@ export default function EditorPage() {
 
   useAutoPageBreak({
     editor,
-    enabled: currentView === 'page',
+    enabled: currentView === 'page' && !isSmallScreen,
     onOverflow: handleAutoPageBreak,
   });
 
