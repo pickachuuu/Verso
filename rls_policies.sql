@@ -43,13 +43,13 @@ CREATE POLICY "Users can update own flashcard sets" ON public.flashcard_sets
 CREATE POLICY "Users can delete own flashcard sets" ON public.flashcard_sets
     FOR DELETE USING (auth.uid() = user_id);
 
--- Flashcards policies
+-- Flashcards policies (join on flashcards.set_id → flashcard_sets.id)
 CREATE POLICY "Users can view own flashcards" ON public.flashcards
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM public.flashcard_sets
-            WHERE id = flashcard_sets.id
-            AND user_id = auth.uid()
+            WHERE flashcard_sets.id = flashcards.set_id
+            AND flashcard_sets.user_id = auth.uid()
         )
     );
 
@@ -57,8 +57,8 @@ CREATE POLICY "Users can insert own flashcards" ON public.flashcards
     FOR INSERT WITH CHECK (
         EXISTS (
             SELECT 1 FROM public.flashcard_sets
-            WHERE id = flashcard_sets.id
-            AND user_id = auth.uid()
+            WHERE flashcard_sets.id = flashcards.set_id
+            AND flashcard_sets.user_id = auth.uid()
         )
     );
 
@@ -66,8 +66,8 @@ CREATE POLICY "Users can update own flashcards" ON public.flashcards
     FOR UPDATE USING (
         EXISTS (
             SELECT 1 FROM public.flashcard_sets
-            WHERE id = flashcard_sets.id
-            AND user_id = auth.uid()
+            WHERE flashcard_sets.id = flashcards.set_id
+            AND flashcard_sets.user_id = auth.uid()
         )
     );
 
@@ -75,8 +75,8 @@ CREATE POLICY "Users can delete own flashcards" ON public.flashcards
     FOR DELETE USING (
         EXISTS (
             SELECT 1 FROM public.flashcard_sets
-            WHERE id = flashcard_sets.id
-            AND user_id = auth.uid()
+            WHERE flashcard_sets.id = flashcards.set_id
+            AND flashcard_sets.user_id = auth.uid()
         )
     );
 
