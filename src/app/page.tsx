@@ -39,9 +39,11 @@ export default function LandingPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session?.user);
-    });
+    supabase.auth.getSession().then(
+      (result: { data: { session: { user: unknown } | null } }) => {
+        setIsLoggedIn(!!result.data.session?.user);
+      },
+    );
   }, []);
 
   return (
