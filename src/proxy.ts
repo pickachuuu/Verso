@@ -3,10 +3,17 @@ import { NextRequest } from 'next/server'
 
 export const config = {
   matcher: [
-    // Protect dashboard routes only - landing page and auth are public
     '/dashboard/:path*',
-    '/notes/:path*',
+    '/library/:path*',
+    '/community/:path*',
+    '/saved/:path*',
+    '/exams/:path*',
+    '/exam/:path*',
+    '/editor/:path*',
     '/flashcards/:path*',
+    '/notes/:path*',
+    '/markdown-test/:path*',
+    '/api/ai/:path*',
   ],
 }
 
