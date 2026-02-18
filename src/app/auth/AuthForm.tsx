@@ -162,11 +162,7 @@ export default function AuthForm() {
 
             {/* Terms */}
             <p className="text-xs text-foreground-muted leading-relaxed">
-              By continuing, you agree to our{' '}
-              <span className="underline underline-offset-2 cursor-pointer hover:text-foreground transition-colors">Terms</span>
-              {' '}and{' '}
-              <span className="underline underline-offset-2 cursor-pointer hover:text-foreground transition-colors">Privacy Policy</span>.
-              {' '}&middot;{' '}Secure OAuth, no passwords stored.
+              Secure OAuth, no passwords stored.
             </p>
           </div>
 
