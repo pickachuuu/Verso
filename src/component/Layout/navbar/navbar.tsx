@@ -7,13 +7,10 @@ import Image from "next/image";
 import { Logout01Icon, Menu01Icon, Cancel01Icon } from "hugeicons-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { signOut } from '@/hook/useAuthActions';
 import { useUserProfile } from '@/hooks/useAuth';
 import { NotebookIcon, FlashcardIcon, ExamIcon, DashboardIcon, SavedIcon, CommunityIcon, NotificationIcon } from '@/component/icons';
 import { useCardsDue, useClearNotifications, useNotificationDismissals, useStudyStreak } from '@/hooks';
-import Modal from '@/component/ui/Modal';
-import Card from '@/component/ui/Card';
-import Button from '@/component/ui/Button';
+import SignOutModal from '@/component/ui/SignOutModal';
 
 const getNavIcon = (href: string) => {
   switch (href) {
@@ -32,7 +29,6 @@ export default function Navbar() {
   const notificationRef = useRef<HTMLDivElement | null>(null);
   const { data: userProfile } = useUserProfile();
   const [isSignOutOpen, setIsSignOutOpen] = useState(false);
-  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const avatarLabelSource = (userProfile?.full_name || userProfile?.email || '').trim();
   const avatarFallback = (() => {
@@ -101,22 +97,7 @@ export default function Navbar() {
     setMobileMenuOpen(false);
     setIsSignOutOpen(true);
   };
-  const handleCloseSignOut = () => {
-    if (!isSigningOut) {
-      setIsSignOutOpen(false);
-    }
-  };
-
-  const handleConfirmSignOut = async () => {
-    if (isSigningOut) return;
-    setIsSigningOut(true);
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Sign out error:', error);
-      setIsSigningOut(false);
-    }
-  };
+  const handleCloseSignOut = () => setIsSignOutOpen(false);
 
   useEffect(() => {
     if (!mobileMenuOpen) {
@@ -430,38 +411,7 @@ export default function Navbar() {
         </AnimatePresence>
       </div>
 
-      <Modal isOpen={isSignOutOpen} onClose={handleCloseSignOut}>
-        <Card className="w-full max-w-md">
-          <Card.Header className="text-center">
-            <div className="mx-auto mb-4 w-12 h-12 bg-background-muted rounded-full flex items-center justify-center border border-border">
-              <Logout01Icon className="w-6 h-6 text-foreground-muted" />
-            </div>
-            <Card.Title className="text-lg font-semibold">Sign out</Card.Title>
-            <Card.Description className="text-foreground-muted">
-              Are you sure you want to sign out?
-            </Card.Description>
-          </Card.Header>
-
-          <Card.Footer className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={handleCloseSignOut}
-              disabled={isSigningOut}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmSignOut}
-              disabled={isSigningOut}
-              className="flex-1"
-            >
-              {isSigningOut ? 'Signing out...' : 'Sign out'}
-            </Button>
-          </Card.Footer>
-        </Card>
-      </Modal>
+      <SignOutModal isOpen={isSignOutOpen} onClose={handleCloseSignOut} />
     </>
   );
 }
