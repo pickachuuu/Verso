@@ -1134,44 +1134,61 @@ export default function EditorPage() {
       <div className={`flex-1 relative px-3 sm:px-4 py-4 sm:py-5 flex flex-col max-w-none mx-auto w-full ${showControls ? 'pb-6 min-[75rem]:pb-5' : ''}`}>
         {showTopToolbar && (
           <div className="sticky top-0 z-[70] -mx-3 sm:-mx-4 -mt-4 sm:-mt-5 mb-3">
-            <EditorToolbar editor={editor} fullscreen leadingSlot={backButton} />
-            <div className="flex flex-wrap items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-surface/95 backdrop-blur border-b border-border shadow-sm">
-              <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-foreground-muted">
-                <GoogleGeminiIcon className="w-3.5 h-3.5 text-blue-500" />
-                AI Assist
+            {/* Back button bar — always visible when not on cover */}
+            {!editor && (
+              <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-surface/95 backdrop-blur border-b border-border shadow-sm">
+                {backButton}
+                <Link
+                  href="/dashboard"
+                  className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl border border-border bg-surface hover:bg-background-muted transition-all flex items-center justify-center shadow-sm text-foreground-muted"
+                  title="Dashboard"
+                >
+                  <Home01Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                </Link>
               </div>
-              {aiButtons.map((action) => {
-                const Icon = action.icon;
-                const isLoading = aiLoading === action.id;
-                const toneClasses = action.tone === 'orange'
-                  ? 'bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-200'
-                  : 'bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-200';
-                return (
-                  <button
-                    key={action.id}
-                    type="button"
-                    onClick={() => handleAIAction(action.id)}
-                    disabled={!editor || Boolean(aiLoading)}
-                    title={action.title}
-                    className={`
-                      inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] sm:text-xs sm:px-3 sm:py-1.5 sm:rounded-xl font-semibold transition-all
-                      disabled:opacity-40 disabled:cursor-not-allowed
-                      ${toneClasses}
-                    `}
-                  >
-                    {isLoading ? (
-                      <Loading03Icon className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Icon className="w-3.5 h-3.5" />
-                    )}
-                    <span>{action.label}</span>
-                  </button>
-                );
-              })}
-              {aiLoading && (
-                <span className="text-[11px] text-foreground-muted">Running…</span>
-              )}
-            </div>
+            )}
+            {/* Formatting toolbar — only when editing a page */}
+            {editor && <EditorToolbar editor={editor} fullscreen leadingSlot={backButton} />}
+            {/* AI Assist bar — only when editing a page */}
+            {editor && (
+              <div className="flex flex-wrap items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-surface/95 backdrop-blur border-b border-border shadow-sm">
+                <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-foreground-muted">
+                  <GoogleGeminiIcon className="w-3.5 h-3.5 text-blue-500" />
+                  AI Assist
+                </div>
+                {aiButtons.map((action) => {
+                  const Icon = action.icon;
+                  const isLoading = aiLoading === action.id;
+                  const toneClasses = action.tone === 'orange'
+                    ? 'bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-200'
+                    : 'bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-200';
+                  return (
+                    <button
+                      key={action.id}
+                      type="button"
+                      onClick={() => handleAIAction(action.id)}
+                      disabled={!editor || Boolean(aiLoading)}
+                      title={action.title}
+                      className={`
+                        inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] sm:text-xs sm:px-3 sm:py-1.5 sm:rounded-xl font-semibold transition-all
+                        disabled:opacity-40 disabled:cursor-not-allowed
+                        ${toneClasses}
+                      `}
+                    >
+                      {isLoading ? (
+                        <Loading03Icon className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Icon className="w-3.5 h-3.5" />
+                      )}
+                      <span>{action.label}</span>
+                    </button>
+                  );
+                })}
+                {aiLoading && (
+                  <span className="text-[11px] text-foreground-muted">Running…</span>
+                )}
+              </div>
+            )}
           </div>
         )}
         <div className="flex-1 flex items-start justify-start">
