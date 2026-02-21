@@ -20,7 +20,7 @@ import {
 // This tells the AI exactly which HTML tags TipTap understands,
 // so the AI can "use the toolbar" by outputting the right HTML.
 export const TIPTAP_FORMATTING_GUIDE = `
-You MUST return your response as rich HTML. You have access to the following formatting tools — use them liberally to make the output clear, scannable, and visually structured for a student's notebook:
+You MUST return your response as rich HTML. You have access to the following formatting tools — use them to make the output clear, scannable, and visually structured for a student's notebook:
 
 STRUCTURE:
 - <h2>...</h2> and <h3>...</h3> for section headings
@@ -28,7 +28,7 @@ STRUCTURE:
 - <ul><li>...</li></ul> for bullet lists
 - <ol><li>...</li></ol> for numbered lists
 - <blockquote><p>...</p></blockquote> for callouts or quotes
-- <hr> for horizontal dividers
+- <hr> for horizontal dividers (use VERY sparingly — at most once)
 
 TEXT FORMATTING:
 - <strong>...</strong> for bold (key terms, definitions)
@@ -54,7 +54,16 @@ CODE:
 - <code>...</code> for inline code
 - <pre><code>...</code></pre> for code blocks
 
-RULES:
+CRITICAL SPACE-SAVING RULES (YOU MUST FOLLOW THESE):
+- NEVER output empty paragraphs like <p></p> or <p><br></p> or <p>&nbsp;</p>.
+- NEVER add blank lines or spacing between elements — go directly from one element to the next.
+- NEVER use multiple <hr> tags. Use at most ONE <hr> in the entire response, and only when absolutely necessary.
+- NEVER use <br> tags for spacing. Each paragraph must contain actual content.
+- Keep paragraphs SHORT and DENSE — prefer bullet lists over long paragraphs.
+- Combine related points into single list items instead of spreading them across many items.
+- Use FEWER headings — only use <h2> for major sections, <h3> sparingly. Not every point needs its own heading.
+- When using lists, keep them tight with no extra wrapper elements or spacing.
+- Aim for MAXIMUM information density — the content goes into a notebook with limited page space.
 - Return ONLY valid HTML, no markdown, no wrapping code blocks, no backticks.
 - Use formatting purposefully — highlight key terms, bold definitions, use lists for steps.
 - Make content look like a well-formatted notebook page a student would be proud of.
@@ -175,11 +184,21 @@ export default function AISelectionBubble({ editor, onGenerateFlashcards }: AISe
           return;
         }
 
-        // Strip markdown code fences if the AI wrapped it
-        const cleanResult = result
+        // Strip markdown code fences and clean up excessive spacing
+        let cleanResult = result
           .replace(/^```html?\s*\n?/i, '')
           .replace(/\n?```\s*$/i, '')
           .trim();
+
+        // Strip empty paragraphs
+        cleanResult = cleanResult.replace(/<p>\s*(<br\s*\/?>|\&nbsp;)?\s*<\/p>/gi, '');
+        // Strip standalone <br> tags between block elements
+        cleanResult = cleanResult.replace(/(<\/(?:p|h[1-6]|ul|ol|li|blockquote|pre|hr|div)>)\s*(?:<br\s*\/?\s*>\s*)+\s*(<(?:p|h[1-6]|ul|ol|li|blockquote|pre|hr|div)[\s>])/gi, '$1$2');
+        // Collapse multiple consecutive <hr>
+        cleanResult = cleanResult.replace(/(<hr\s*\/?\s*>\s*){2,}/gi, '<hr>');
+        // Collapse extra whitespace between tags
+        cleanResult = cleanResult.replace(/>\s{2,}</g, '><');
+        cleanResult = cleanResult.trim();
 
         if (config.mode === 'replace') {
           // Replace selected text with AI-formatted HTML

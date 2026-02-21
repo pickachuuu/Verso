@@ -232,8 +232,8 @@ export default function EditorPage() {
         <ClayNotebookCover
           mode="editor"
           title={title}
-          onTitleChange={() => {}}
-          onOpen={() => {}}
+          onTitleChange={() => { }}
+          onOpen={() => { }}
           color={coverColor}
           theme={theme}
         />
@@ -243,9 +243,9 @@ export default function EditorPage() {
         <TableOfContents
           notebookTitle={title}
           pages={pages}
-          onPageClick={() => {}}
-          onAddPage={() => {}}
-          onDeletePage={() => {}}
+          onPageClick={() => { }}
+          onAddPage={() => { }}
+          onDeletePage={() => { }}
           theme={theme}
         />
       );
@@ -253,7 +253,7 @@ export default function EditorPage() {
       previousContentRef.current = (
         <NotebookPage
           content={currentPageContent}
-          onChange={() => {}}
+          onChange={() => { }}
           theme={theme}
         />
       );
@@ -307,13 +307,35 @@ export default function EditorPage() {
     try {
       let result = '';
 
-      const cleanAIResult = (raw: string) =>
-        raw.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+      const cleanAIResult = (raw: string) => {
+        let html = raw
+          .replace(/^```html?\s*\n?/i, '')
+          .replace(/\n?```\s*$/i, '')
+          .trim();
+
+        // Strip empty paragraphs: <p></p>, <p><br></p>, <p>&nbsp;</p>, <p> </p>
+        html = html.replace(/<p>\s*(<br\s*\/?>|\&nbsp;)?\s*<\/p>/gi, '');
+
+        // Strip standalone <br> tags used as spacing between block elements
+        html = html.replace(/(<\/(?:p|h[1-6]|ul|ol|li|blockquote|pre|hr|div)>)\s*(?:<br\s*\/?\s*>\s*)+\s*(<(?:p|h[1-6]|ul|ol|li|blockquote|pre|hr|div)[\s>])/gi, '$1$2');
+
+        // Collapse multiple consecutive <hr> into a single one
+        html = html.replace(/(<hr\s*\/?\s*>\s*){2,}/gi, '<hr>');
+
+        // Remove leading/trailing <hr>
+        html = html.replace(/^\s*<hr\s*\/?\s*>\s*/i, '');
+        html = html.replace(/\s*<hr\s*\/?\s*>\s*$/i, '');
+
+        // Collapse multiple newlines/whitespace between tags
+        html = html.replace(/>\s{2,}</g, '><');
+
+        return html.trim();
+      };
 
       switch (action) {
         case 'continue_writing': {
           result = await callAI(
-            `You are a helpful writing assistant. Continue writing from where the user left off. Match the tone, style, and topic of the existing content. Write 2-3 paragraphs of continuation.\n\n${TIPTAP_FORMATTING_GUIDE}`,
+            `You are a helpful writing assistant. Continue writing from where the user left off. Match the tone, style, and topic of the existing content. Write 1-2 short, dense paragraphs of continuation. Do NOT add unnecessary spacing or empty lines.\n\n${TIPTAP_FORMATTING_GUIDE}`,
             textContent || 'This is an empty page. Write an engaging opening paragraph on a general study topic.'
           );
           editor.chain().focus('end').insertContent(cleanAIResult(result)).run();
@@ -321,7 +343,7 @@ export default function EditorPage() {
         }
         case 'generate_outline': {
           result = await callAI(
-            `You are a study assistant. Based on the following content, generate a structured outline. Use <h2> for main sections and <h3> for subsections. Include brief placeholder text under each heading to guide the student.\n\n${TIPTAP_FORMATTING_GUIDE}`,
+            `You are a study assistant. Based on the following content, generate a compact structured outline. Use <h2> for main sections only, and a brief bullet list under each. Do NOT include placeholder text or filler — just the outline structure. Keep it tight and concise.\n\n${TIPTAP_FORMATTING_GUIDE}`,
             textContent || 'Generate a general study outline for a student notebook page.'
           );
           editor.chain().focus('end').insertContent(cleanAIResult(result)).run();
@@ -329,7 +351,7 @@ export default function EditorPage() {
         }
         case 'summarize_page': {
           result = await callAI(
-            `You are a study assistant. Summarize the following note content into a concise, well-structured summary. Use bullet points for key ideas, highlight important terms, and use headings to organize.\n\n${TIPTAP_FORMATTING_GUIDE}`,
+            `You are a study assistant. Summarize the following note content into a brief, tight summary. Use a compact bullet list for key ideas and bold important terms. Avoid excessive headings — use at most one heading. Keep it as short as possible while retaining all key information.\n\n${TIPTAP_FORMATTING_GUIDE}`,
             textContent
           );
           editor.chain().focus('end').insertContent(`<hr>${cleanAIResult(result)}`).run();
@@ -779,11 +801,10 @@ export default function EditorPage() {
               <button
                 key={page.id}
                 onClick={() => handlePageClick(index)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border text-left transition-all ${
-                  isActive
-                    ? 'bg-background-muted border-pencil/40 text-foreground'
-                    : 'bg-surface border-border text-foreground-muted hover:text-foreground hover:bg-background-muted'
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border text-left transition-all ${isActive
+                  ? 'bg-background-muted border-pencil/40 text-foreground'
+                  : 'bg-surface border-border text-foreground-muted hover:text-foreground hover:bg-background-muted'
+                  }`}
               >
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-xl text-xs font-semibold bg-background-muted border border-border text-foreground-muted">
                   {index + 1}
@@ -830,81 +851,81 @@ export default function EditorPage() {
   );
   const notebookCard = (
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
-        <div className="flex items-start gap-3">
-          <div className="p-2.5 rounded-2xl bg-background-muted border border-border">
-            <NotebookIcon className="w-5 h-5 text-primary" />
+      <div className="flex items-start gap-3">
+        <div className="p-2.5 rounded-2xl bg-background-muted border border-border">
+          <NotebookIcon className="w-5 h-5 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold uppercase tracking-wide text-foreground-muted">Notebook</p>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Untitled notebook"
+            className="w-full mt-1 text-lg font-semibold bg-transparent border-none focus:outline-none placeholder:text-foreground-muted text-foreground"
+          />
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-foreground-muted">
+          <Tag01Icon className="w-4 h-4" />
+          Tags
+        </div>
+        {tags.length > 0 ? (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-background-muted border border-border text-foreground-muted"
+              >
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  className="rounded transition-colors hover:text-foreground"
+                >
+                  <Cancel01Icon className="w-3 h-3" />
+                </button>
+              </span>
+            ))}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold uppercase tracking-wide text-foreground-muted">Notebook</p>
+        ) : (
+          <p className="mt-2 text-sm text-foreground-muted">
+            Add tags to keep your notebook organized.
+          </p>
+        )}
+        <div className="mt-2">
+          {showTagInput ? (
             <input
               type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Untitled notebook"
-              className="w-full mt-1 text-lg font-semibold bg-transparent border-none focus:outline-none placeholder:text-foreground-muted text-foreground"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              onBlur={() => {
+                if (tagInput.trim()) handleAddTag();
+                setTimeout(() => setShowTagInput(false), 150);
+              }}
+              placeholder="Add tag..."
+              className="w-full px-3 py-2.5 rounded-xl text-sm bg-surface border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground placeholder:text-foreground-muted"
+              autoFocus
             />
-          </div>
-        </div>
-
-        <div className="mt-4">
-          <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-foreground-muted">
-            <Tag01Icon className="w-4 h-4" />
-            Tags
-          </div>
-          {tags.length > 0 ? (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-background-muted border border-border text-foreground-muted"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="rounded transition-colors hover:text-foreground"
-                  >
-                    <Cancel01Icon className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
           ) : (
-            <p className="mt-2 text-sm text-foreground-muted">
-              Add tags to keep your notebook organized.
-            </p>
+            <button
+              type="button"
+              onClick={() => setShowTagInput(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-border bg-surface text-foreground-muted hover:text-foreground hover:bg-background-muted transition-all"
+            >
+              <Tag01Icon className="w-4 h-4" />
+              Add tag
+            </button>
           )}
-          <div className="mt-2">
-            {showTagInput ? (
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={handleTagKeyDown}
-                onBlur={() => {
-                  if (tagInput.trim()) handleAddTag();
-                  setTimeout(() => setShowTagInput(false), 150);
-                }}
-                placeholder="Add tag..."
-                className="w-full px-3 py-2.5 rounded-xl text-sm bg-surface border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground placeholder:text-foreground-muted"
-                autoFocus
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowTagInput(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-border bg-surface text-foreground-muted hover:text-foreground hover:bg-background-muted transition-all"
-              >
-                <Tag01Icon className="w-4 h-4" />
-                Add tag
-              </button>
-            )}
-          </div>
         </div>
+      </div>
 
-        <div className="mt-4 flex items-center gap-2 text-sm font-semibold">
-          {saveStatusIndicator}
-        </div>
+      <div className="mt-4 flex items-center gap-2 text-sm font-semibold">
+        {saveStatusIndicator}
+      </div>
     </ClayCard>
   );
   const mobileTitleCard = (
@@ -931,88 +952,88 @@ export default function EditorPage() {
   );
   const navCard = (
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
-        <div className="flex items-center justify-between">
-          {currentView === 'page' ? (
-            <button
-              onClick={handleBackToContents}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-border bg-surface hover:bg-background-muted transition-all"
-            >
-              <Menu01Icon className="w-4 h-4 text-foreground-muted" />
-              Contents
-            </button>
-          ) : (
-            <Link
-              href="/library"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-border bg-surface hover:bg-background-muted transition-all"
-            >
-              <ArrowLeft02Icon className="w-4 h-4 text-foreground-muted" />
-              Library
-            </Link>
-          )}
-
+      <div className="flex items-center justify-between">
+        {currentView === 'page' ? (
+          <button
+            onClick={handleBackToContents}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-border bg-surface hover:bg-background-muted transition-all"
+          >
+            <Menu01Icon className="w-4 h-4 text-foreground-muted" />
+            Contents
+          </button>
+        ) : (
           <Link
-            href="/dashboard"
-            className="h-10 w-10 rounded-2xl border border-border bg-surface hover:bg-background-muted transition-all flex items-center justify-center"
-            title="Dashboard"
+            href="/library"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-border bg-surface hover:bg-background-muted transition-all"
           >
-            <Home01Icon className="w-4 h-4 text-foreground-muted" />
+            <ArrowLeft02Icon className="w-4 h-4 text-foreground-muted" />
+            Library
           </Link>
-        </div>
+        )}
 
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-foreground-muted">
-            <Menu01Icon className="w-4 h-4" />
-            Navigation
-          </div>
-          <span className="text-sm font-semibold text-foreground-muted">
-            {currentView === 'toc'
-              ? `${pages.length} pages`
-              : `Page ${(currentPageIndex ?? 0) + 1} / ${pages.length}`}
+        <Link
+          href="/dashboard"
+          className="h-10 w-10 rounded-2xl border border-border bg-surface hover:bg-background-muted transition-all flex items-center justify-center"
+          title="Dashboard"
+        >
+          <Home01Icon className="w-4 h-4 text-foreground-muted" />
+        </Link>
+      </div>
+
+      <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-foreground-muted">
+          <Menu01Icon className="w-4 h-4" />
+          Navigation
+        </div>
+        <span className="text-sm font-semibold text-foreground-muted">
+          {currentView === 'toc'
+            ? `${pages.length} pages`
+            : `Page ${(currentPageIndex ?? 0) + 1} / ${pages.length}`}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mt-3">
+        <button
+          onClick={handlePrevPage}
+          disabled={currentView === 'toc'}
+          className="px-4 py-2.5 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span className="inline-flex items-center gap-1.5 justify-center">
+            <ArrowLeft01Icon className="w-4 h-4" />
+            Prev
           </span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 mt-3">
-          <button
-            onClick={handlePrevPage}
-            disabled={currentView === 'toc'}
-            className="px-4 py-2.5 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <span className="inline-flex items-center gap-1.5 justify-center">
-              <ArrowLeft01Icon className="w-4 h-4" />
-              Prev
-            </span>
-          </button>
-          <button
-            onClick={handleNextPage}
-            disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
-            className="px-4 py-2.5 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <span className="inline-flex items-center gap-1.5 justify-center">
-              <ArrowRight01Icon className="w-4 h-4" />
-              {currentView === 'toc' ? 'Open First' : 'Next'}
-            </span>
-          </button>
-          <button
-            onClick={handleFirstPage}
-            disabled={currentView === 'toc'}
-            className="px-4 py-2.5 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <span className="inline-flex items-center gap-1.5 justify-center">
-              <ArrowDownLeft01Icon className="w-4 h-4" />
-              Contents
-            </span>
-          </button>
-          <button
-            onClick={handleLastPage}
-            disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
-            className="px-4 py-2.5 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <span className="inline-flex items-center gap-1.5 justify-center">
-              <ArrowUpRight01Icon className="w-4 h-4" />
-              Last
-            </span>
-          </button>
-        </div>
+        </button>
+        <button
+          onClick={handleNextPage}
+          disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
+          className="px-4 py-2.5 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span className="inline-flex items-center gap-1.5 justify-center">
+            <ArrowRight01Icon className="w-4 h-4" />
+            {currentView === 'toc' ? 'Open First' : 'Next'}
+          </span>
+        </button>
+        <button
+          onClick={handleFirstPage}
+          disabled={currentView === 'toc'}
+          className="px-4 py-2.5 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span className="inline-flex items-center gap-1.5 justify-center">
+            <ArrowDownLeft01Icon className="w-4 h-4" />
+            Contents
+          </span>
+        </button>
+        <button
+          onClick={handleLastPage}
+          disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
+          className="px-4 py-2.5 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span className="inline-flex items-center gap-1.5 justify-center">
+            <ArrowUpRight01Icon className="w-4 h-4" />
+            Last
+          </span>
+        </button>
+      </div>
     </ClayCard>
   );
   const mobileNavCard = (
@@ -1193,85 +1214,83 @@ export default function EditorPage() {
         )}
         <div className="flex-1 flex items-start justify-start">
           <div
-            className={`w-full max-w-[1920px] grid gap-4 sm:gap-6 items-start ${
-              showControls
-                ? 'justify-items-start grid-cols-1 min-[75rem]:grid-cols-[minmax(240px,360px)_minmax(0,1fr)]'
-                : 'justify-items-center grid-cols-1'
-            }`}
+            className={`w-full max-w-[1920px] grid gap-4 sm:gap-6 items-start ${showControls
+              ? 'justify-items-start grid-cols-1 min-[75rem]:grid-cols-[minmax(240px,360px)_minmax(0,1fr)]'
+              : 'justify-items-center grid-cols-1'
+              }`}
           >
 
-          {/* Left sidebar — hidden below desktop breakpoint, visible as column on desktop */}
-          {showControls && (
-            <aside className="hidden min-[75rem]:block w-full space-y-4 min-[75rem]:sticky min-[75rem]:top-6 self-start relative z-[60] pt-4 sm:pt-6">
-              {leftRail}
-            </aside>
-          )}
+            {/* Left sidebar — hidden below desktop breakpoint, visible as column on desktop */}
+            {showControls && (
+              <aside className="hidden min-[75rem]:block w-full space-y-4 min-[75rem]:sticky min-[75rem]:top-6 self-start relative z-[60] pt-4 sm:pt-6">
+                {leftRail}
+              </aside>
+            )}
 
-          {/* Notebook — always visible, full width on mobile/tablet */}
-          <div className="flex flex-col pt-4 sm:pt-6 w-full">
-            <div
-              ref={notebookContainerRef}
-              className={`relative w-full flex-1 min-h-[520px] sm:min-h-[640px] max-h-[calc(100dvh-9rem)] sm:max-h-none flex items-start ${
-                isScaleClamped ? 'justify-start overflow-auto' : 'justify-center'
-              }`}
-            >
+            {/* Notebook — always visible, full width on mobile/tablet */}
+            <div className="flex flex-col pt-4 sm:pt-6 w-full">
               <div
-                className="relative"
-                style={{
-                  width: NOTEBOOK_WIDTH * scale,
-                  height: NOTEBOOK_HEIGHT * scale,
-                }}
+                ref={notebookContainerRef}
+                className={`relative w-full flex-1 min-h-[520px] sm:min-h-[640px] max-h-[calc(100dvh-9rem)] sm:max-h-none flex items-start ${isScaleClamped ? 'justify-start overflow-auto' : 'justify-center'
+                  }`}
               >
                 <div
                   className="relative"
                   style={{
-                    width: NOTEBOOK_WIDTH,
-                    height: NOTEBOOK_HEIGHT,
-                    transform: `scale(${scale})`,
-                    transformOrigin: 'top left',
+                    width: NOTEBOOK_WIDTH * scale,
+                    height: NOTEBOOK_HEIGHT * scale,
                   }}
                 >
-                  {/* Page stack effect */}
-                  {currentView === 'page' && pages.length > 1 && (
-                    <>
-                      {[...Array(Math.min(pages.length - 1, 4))].map((_, i) => (
-                        <div
-                          key={i}
-                          className="absolute rounded-[18px]"
-                          style={{
-                            top: `${(i + 1) * 3}px`,
-                            right: `${-(i + 1) * 3}px`,
-                            bottom: `${-(i + 1) * 3}px`,
-                            left: `${(i + 1) * 3}px`,
-                            background: `linear-gradient(135deg, rgba(255, 249, 241, 0.98) 0%, rgba(244, 235, 223, 0.98) 100%)`,
-                            boxShadow: `0 ${2 + i}px ${6 + i * 2}px rgba(60,50,40,${0.18 - i * 0.02})`,
-                            border: '1px solid rgba(60, 50, 40, 0.08)',
-                            zIndex: -i - 1,
-                          }}
-                        />
-                      ))}
-                    </>
-                  )}
+                  <div
+                    className="relative"
+                    style={{
+                      width: NOTEBOOK_WIDTH,
+                      height: NOTEBOOK_HEIGHT,
+                      transform: `scale(${scale})`,
+                      transformOrigin: 'top left',
+                    }}
+                  >
+                    {/* Page stack effect */}
+                    {currentView === 'page' && pages.length > 1 && (
+                      <>
+                        {[...Array(Math.min(pages.length - 1, 4))].map((_, i) => (
+                          <div
+                            key={i}
+                            className="absolute rounded-[18px]"
+                            style={{
+                              top: `${(i + 1) * 3}px`,
+                              right: `${-(i + 1) * 3}px`,
+                              bottom: `${-(i + 1) * 3}px`,
+                              left: `${(i + 1) * 3}px`,
+                              background: `linear-gradient(135deg, rgba(255, 249, 241, 0.98) 0%, rgba(244, 235, 223, 0.98) 100%)`,
+                              boxShadow: `0 ${2 + i}px ${6 + i * 2}px rgba(60,50,40,${0.18 - i * 0.02})`,
+                              border: '1px solid rgba(60, 50, 40, 0.08)',
+                              zIndex: -i - 1,
+                            }}
+                          />
+                        ))}
+                      </>
+                    )}
 
-                  {/* Main notebook */}
-                  <div className="relative h-full rounded-[22px] shadow-[0_18px_48px_rgba(60,50,40,0.2)]">
-                    <PageFlipContainer
-                      currentView={currentView}
-                      currentPageIndex={currentPageIndex}
-                      totalPages={pages.length}
-                      cover={coverComponent}
-                      toc={tocComponent}
-                      pageContent={pageComponent}
-                      previousContent={getPreviousContentComponent()}
-                      theme={theme}
-                    />
+                    {/* Main notebook */}
+                    <div className="relative h-full rounded-[22px] shadow-[0_18px_48px_rgba(60,50,40,0.2)]">
+                      <PageFlipContainer
+                        currentView={currentView}
+                        currentPageIndex={currentPageIndex}
+                        totalPages={pages.length}
+                        cover={coverComponent}
+                        toc={tocComponent}
+                        pageContent={pageComponent}
+                        previousContent={getPreviousContentComponent()}
+                        theme={theme}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Right sidebar — hidden below desktop breakpoint, visible as column on desktop */}
+            {/* Right sidebar — hidden below desktop breakpoint, visible as column on desktop */}
           </div>
         </div>
       </div>
@@ -1290,24 +1309,21 @@ export default function EditorPage() {
 
       {/* ====== Mobile / Tablet Slide-out Drawer (< desktop breakpoint) ====== */}
       <div
-        className={`fixed inset-0 z-[70] min-[75rem]:hidden transition-[visibility] duration-300 ${
-          mobileDrawerOpen ? 'visible' : 'invisible'
-        }`}
+        className={`fixed inset-0 z-[70] min-[75rem]:hidden transition-[visibility] duration-300 ${mobileDrawerOpen ? 'visible' : 'invisible'
+          }`}
       >
         {/* Backdrop */}
         <div
-          className={`absolute inset-0 bg-black/25 backdrop-blur-[2px] transition-opacity duration-300 ${
-            mobileDrawerOpen ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`absolute inset-0 bg-black/25 backdrop-blur-[2px] transition-opacity duration-300 ${mobileDrawerOpen ? 'opacity-100' : 'opacity-0'
+            }`}
           onClick={() => setMobileDrawerOpen(false)}
           aria-hidden="true"
         />
 
         {/* Drawer panel — bottom sheet on mobile */}
         <div
-          className={`absolute left-0 right-0 bottom-0 max-h-[80dvh] bg-surface border-t border-border shadow-2xl overflow-hidden transition-transform duration-300 ease-out ${
-            mobileDrawerOpen ? 'translate-y-0' : 'translate-y-full'
-          }`}
+          className={`absolute left-0 right-0 bottom-0 max-h-[80dvh] bg-surface border-t border-border shadow-2xl overflow-hidden transition-transform duration-300 ease-out ${mobileDrawerOpen ? 'translate-y-0' : 'translate-y-full'
+            }`}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface">
             <div className="flex flex-col">
