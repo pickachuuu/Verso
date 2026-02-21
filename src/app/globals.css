@@ -353,11 +353,12 @@ body {
 
 .clay-button-secondary {
   background: var(--surface);
-  color: var(--foreground);
+  color: var(--primary);
+  border: 1px solid var(--border);
   box-shadow:
-    0 2px 0 rgba(60, 50, 40, 0.08),
-    0 6px 10px var(--paper-shadow-soft);
-  border: 1.5px solid var(--pencil);
+    inset 0 2px 4px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 4px rgba(43, 93, 139, 0.12),
+    0 2px 4px var(--paper-shadow-soft);
   transition: all 0.2s ease;
 }
 
@@ -366,12 +367,13 @@ body {
 }
 
 .clay-button-secondary:hover {
-  background: var(--background-muted);
+  background: var(--primary-muted);
+  color: var(--primary-dark);
   box-shadow:
-    0 3px 0 rgba(60, 50, 40, 0.1),
-    0 10px 16px var(--paper-shadow);
+    inset 0 2px 4px rgba(255, 255, 255, 1),
+    inset 0 -2px 4px rgba(43, 93, 139, 0.2),
+    0 4px 8px var(--paper-shadow);
   transform: translateY(-1px);
-  color: var(--foreground);
 }
 
 .clay-button-secondary:hover svg {
@@ -379,11 +381,14 @@ body {
 }
 
 .clay-button-ghost {
-  background: transparent;
+  background: var(--surface);
   color: var(--foreground-muted);
-  box-shadow: none;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
+  border: 1px solid var(--border-light);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 4px rgba(60, 50, 40, 0.05),
+    0 2px 4px var(--paper-shadow-soft);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .clay-button-ghost svg {
@@ -391,9 +396,14 @@ body {
 }
 
 .clay-button-ghost:hover {
-  background: var(--background-muted);
-  border-color: var(--border);
+  background: var(--surface);
   color: var(--foreground);
+  border-color: var(--border);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 1),
+    inset 0 -2px 4px rgba(60, 50, 40, 0.08),
+    0 4px 8px var(--paper-shadow);
+  transform: translateY(-1px);
 }
 
 .clay-button-ghost:hover svg {
