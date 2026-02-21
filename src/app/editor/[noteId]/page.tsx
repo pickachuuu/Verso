@@ -57,6 +57,61 @@ import {
   noteKeys,
 } from '@/hooks/useNotes';
 
+const ROMAN_NUMERALS = [
+  { value: 10, symbol: 'X' },
+  { value: 9, symbol: 'IX' },
+  { value: 5, symbol: 'V' },
+  { value: 4, symbol: 'IV' },
+  { value: 1, symbol: 'I' },
+];
+
+function toRoman(num: number): string {
+  let result = '';
+  for (const { value, symbol } of ROMAN_NUMERALS) {
+    while (num >= value) {
+      result += symbol;
+      num -= value;
+    }
+  }
+  return result;
+}
+
+function fromRoman(roman: string): number {
+  let result = 0;
+  let s = roman;
+  for (const { value, symbol } of ROMAN_NUMERALS) {
+    while (s.startsWith(symbol)) {
+      result += value;
+      s = s.slice(symbol.length);
+    }
+  }
+  return result;
+}
+
+/**
+ * Generates the next title with a Roman numeral suffix.
+ * Example: "Programming" -> "Programming II"
+ *          "Programming II" -> "Programming III"
+ */
+function getNextContinuationTitle(currentTitle: string): string {
+  // Regex to match a trailing space followed by a Roman numeral (I, V, X)
+  const romanMatch = currentTitle.match(/(.*)\s([IVX]+)$/i);
+
+  if (romanMatch) {
+    const baseTitle = romanMatch[1];
+    const currentRoman = romanMatch[2].toUpperCase();
+    const currentNumber = fromRoman(currentRoman);
+
+    // If it's a valid Roman numeral, increment it
+    if (currentNumber > 0) {
+      return `${baseTitle} ${toRoman(currentNumber + 1)}`;
+    }
+  }
+
+  // No Roman numeral found, start with II
+  return `${currentTitle} II`;
+}
+
 export default function EditorPage() {
   const params = useParams();
   const router = useRouter();
