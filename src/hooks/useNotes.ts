@@ -464,7 +464,27 @@ export async function fetchNotePagesContent(
 export function extractH1Title(htmlContent: string): string {
   const match = htmlContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
   if (match) {
-    return match[1].replace(/<[^>]*>/g, '').trim() || 'Untitled Page';
+    // Strip inner HTML tags, then decode common HTML entities
+    const raw = match[1].replace(/<[^>]*>/g, '').trim();
+    if (!raw) return 'Untitled Page';
+    return decodeHTMLEntities(raw);
   }
   return 'Untitled Page';
+}
+
+/**
+ * Decode common HTML entities that appear in TipTap content.
+ * Handles named entities (&amp; &lt; &gt; &quot; &apos; &nbsp;)
+ * as well as numeric (&#38;) and hex (&#x26;) character references.
+ */
+function decodeHTMLEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(Number(dec)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
 }

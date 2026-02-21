@@ -583,11 +583,13 @@ export default function EditorPage() {
     // 1. Update the current page to only the fitting content
     setCurrentPageContent(trimmedHTML);
 
+    // Get the current page's title for continuation naming
+    const currentTitle = extractH1Title(trimmedHTML);
+
     if (currentPageIndex !== null && pages[currentPageIndex]) {
       const page = pages[currentPageIndex];
-      const pageTitle = extractH1Title(trimmedHTML);
       try {
-        await savePageMutation.mutateAsync({ pageId: page.id, title: pageTitle, content: trimmedHTML });
+        await savePageMutation.mutateAsync({ pageId: page.id, title: currentTitle, content: trimmedHTML });
         setLastSavedContent(trimmedHTML);
       } catch (error) {
         console.error('Auto page-break: error saving trimmed page', error);
@@ -598,15 +600,26 @@ export default function EditorPage() {
     try {
       const pageId = await createPageMutation.mutateAsync({ noteId });
       if (pageId) {
-        const overflowTitle = extractH1Title(overflowHTML);
-        await savePageMutation.mutateAsync({ pageId, title: overflowTitle, content: overflowHTML });
+        // Determine the overflow page title:
+        // If the overflow itself has an <h1>, use that; otherwise derive from
+        // the current page's title with a Roman numeral continuation suffix.
+        let overflowTitle = extractH1Title(overflowHTML);
+        let finalOverflowHTML = overflowHTML;
+
+        if (overflowTitle === 'Untitled Page' && currentTitle !== 'Untitled Page') {
+          overflowTitle = getNextContinuationTitle(currentTitle);
+          // Prepend an <h1> with the continuation title so it appears in the editor
+          finalOverflowHTML = `<h1>${overflowTitle}</h1>${overflowHTML}`;
+        }
+
+        await savePageMutation.mutateAsync({ pageId, title: overflowTitle, content: finalOverflowHTML });
         const updatedPages = (await refetchPages()).data || [];
         const newPageIndex = updatedPages.length - 1;
 
         // 3. Navigate to the new page
         setCurrentPageIndex(newPageIndex);
-        setCurrentPageContent(overflowHTML);
-        setLastSavedContent(overflowHTML);
+        setCurrentPageContent(finalOverflowHTML);
+        setLastSavedContent(finalOverflowHTML);
       }
     } catch (error) {
       console.error('Auto page-break: error creating overflow page', error);
