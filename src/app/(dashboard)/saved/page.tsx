@@ -8,6 +8,7 @@ import MobileBottomSheet from '@/component/ui/MobileBottomSheet';
 import { FilterIcon, Search01Icon } from 'hugeicons-react';
 import { NotebookIcon, FlashcardIcon, ExamIcon, SavedIcon } from '@/component/icons';
 import { SavedMaterialType, useRemoveReference, useSavedMaterials } from '@/hooks/useSavedMaterials';
+import { MaterialCard } from '@/component/ui/MaterialCard';
 
 const FILTER_OPTIONS: { id: SavedMaterialType | 'all'; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -211,59 +212,25 @@ export default function SavedMaterialsPage() {
             ) : (
               <div className="space-y-3 mt-5">
                 {filteredItems.map((item) => {
-                  const meta = TYPE_META[item.type];
-                  const Icon = meta.icon;
                   const removingKey = `${item.type}-${item.id}`;
 
                   return (
-                    <div
+                    <MaterialCard
                       key={`${item.type}-${item.id}`}
-                      className="rounded-2xl border border-border bg-surface hover:shadow-sm transition-all"
-                    >
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-4 py-4">
-                        <Link href={item.href} className="flex items-start gap-3 flex-1">
-                          <div className="p-2.5 rounded-xl bg-background-muted border border-border">
-                            <Icon className={`w-5 h-5 ${meta.tint}`} />
-                          </div>
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
-                              <ClayBadge variant={meta.badge} className="px-2.5 py-1 text-[11px]">
-                                {meta.label}
-                              </ClayBadge>
-                            </div>
-                            <p className="text-sm text-foreground-muted mt-1">{item.summary}</p>
-                            <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-foreground-muted">
-                              <span>By {item.author}</span>
-                              <span className="h-1 w-1 rounded-full bg-border" />
-                              <span>Updated {item.updatedAt}</span>
-                              <span className="h-1 w-1 rounded-full bg-border" />
-                              <span>Saved {item.savedAtLabel}</span>
-                            </div>
-                          </div>
-                        </Link>
-                        <div className="flex flex-wrap items-center gap-2">
-                          {item.tags.map((tag) => (
-                            <span
-                              key={`${item.id}-${tag}`}
-                              className="px-2.5 py-1 rounded-full bg-background-muted border border-border text-[11px] text-foreground-muted"
-                            >
-                              #{tag}
-                            </span>
-                          ))}
-                          <ClayButton
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemove(item.type, item.id)}
-                            disabled={removingId === removingKey || removeReferenceMutation.isPending}
-                            className="flex items-center gap-2 text-xs"
-                          >
-                            <SavedIcon className="w-4 h-4" />
-                            {removingId === removingKey ? 'Removing' : 'Unsave'}
-                          </ClayButton>
-                        </div>
-                      </div>
-                    </div>
+                      item={item}
+                      actionSlot={
+                        <ClayButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemove(item.type, item.id)}
+                          disabled={removingId === removingKey || removeReferenceMutation.isPending}
+                          className="flex items-center gap-2 text-xs"
+                        >
+                          <SavedIcon className="w-4 h-4" />
+                          {removingId === removingKey ? 'Removing' : 'Unsave'}
+                        </ClayButton>
+                      }
+                    />
                   );
                 })}
               </div>
@@ -298,11 +265,10 @@ export default function SavedMaterialsPage() {
                     <button
                       key={option.id}
                       onClick={() => setSelectedType(option.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-                        isActive
-                          ? 'bg-background-muted text-foreground border-border'
-                          : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
-                      }`}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${isActive
+                        ? 'bg-background-muted text-foreground border-border'
+                        : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
+                        }`}
                     >
                       {option.label}
                       <span className="ml-2 text-[10px] text-foreground-muted">
@@ -352,11 +318,10 @@ export default function SavedMaterialsPage() {
                   <button
                     key={option.id}
                     onClick={() => setSelectedType(option.id)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
-                      isActive
-                        ? 'bg-background-muted text-foreground border-border'
-                        : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${isActive
+                      ? 'bg-background-muted text-foreground border-border'
+                      : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
+                      }`}
                   >
                     {option.label}
                     <span className="ml-2 text-[10px] text-foreground-muted">

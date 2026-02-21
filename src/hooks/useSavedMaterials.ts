@@ -26,10 +26,12 @@ export interface SavedMaterialItem {
   summary: string;
   tags: string[];
   author: string;
+  authorAvatarUrl?: string;
   updatedAt: string;
   savedAt: string;
   savedAtLabel: string;
   href: string;
+  savedAtRaw?: string;
 }
 
 type SavedItemRow = {
@@ -72,6 +74,7 @@ type PublicExamSetRow = {
 type ProfileRow = {
   id: string;
   full_name: string | null;
+  avatar_url: string | null;
 };
 
 type NotePageRow = {
@@ -187,10 +190,11 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
   ])).filter((id): id is string => Boolean(id));
 
   const authorMap = new Map<string, string>();
+  const avatarMap = new Map<string, string>();
   if (userIds.length > 0) {
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, full_name')
+      .select('id, full_name, avatar_url')
       .in('id', userIds);
 
     if (profilesError) {
@@ -200,6 +204,9 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
       profileRows.forEach((profile) => {
         if (profile.full_name) {
           authorMap.set(profile.id, profile.full_name);
+        }
+        if (profile.avatar_url) {
+          avatarMap.set(profile.id, profile.avatar_url);
         }
       });
     }
@@ -223,6 +230,7 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
         summary,
         tags: note.tags || [],
         author: (note.user_id ? authorMap.get(note.user_id) : undefined) || 'Community member',
+        authorAvatarUrl: note.user_id ? avatarMap.get(note.user_id) : undefined,
         updatedAt: timeAgo(updatedAtRaw),
         savedAt,
         savedAtLabel: timeAgo(savedAt),
@@ -243,6 +251,7 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
         summary,
         tags: [],
         author: (set.user_id ? authorMap.get(set.user_id) : undefined) || 'Community member',
+        authorAvatarUrl: set.user_id ? avatarMap.get(set.user_id) : undefined,
         updatedAt: timeAgo(updatedAtRaw),
         savedAt,
         savedAtLabel: timeAgo(savedAt),
@@ -263,6 +272,7 @@ async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
         summary,
         tags: exam.difficulty ? [exam.difficulty] : [],
         author: (exam.user_id ? authorMap.get(exam.user_id) : undefined) || 'Community member',
+        authorAvatarUrl: exam.user_id ? avatarMap.get(exam.user_id) : undefined,
         updatedAt: timeAgo(updatedAtRaw),
         savedAt,
         savedAtLabel: timeAgo(savedAt),

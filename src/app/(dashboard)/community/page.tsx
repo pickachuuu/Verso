@@ -7,7 +7,8 @@ import { ClayBadge, ClayCard } from '@/component/ui/Clay';
 import MobileBottomSheet from '@/component/ui/MobileBottomSheet';
 import { FilterIcon, Search01Icon, SparklesIcon } from 'hugeicons-react';
 import { CommunityIcon, ExamIcon, FlashcardIcon, NotebookIcon } from '@/component/icons';
-import { useCommunityItems, CommunityType, CommunityItem } from '@/hooks/useCommunity';
+import { useCommunityItems, CommunityType } from '@/hooks/useCommunity';
+import { MaterialCard } from '@/component/ui/MaterialCard';
 
 
 const FILTER_OPTIONS: { id: CommunityType | 'all'; label: string }[] = [
@@ -235,72 +236,13 @@ export default function CommunityPage() {
               </div>
             ) : (
               <div className="space-y-3 mt-5">
-                {filteredItems.map((item) => {
-                  const meta = TYPE_META[item.type];
-                  const Icon = meta.icon;
-                  const authorInitials = item.author
-                    .split(/\s+/)
-                    .filter(Boolean)
-                    .slice(0, 2)
-                    .map((part) => part[0])
-                    .join('')
-                    .toUpperCase() || 'U';
-
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      className="block rounded-2xl border border-border bg-surface hover:shadow-sm transition-all"
-                    >
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-4 py-4">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2.5 rounded-xl bg-background-muted border border-border">
-                            <Icon className={`w-5 h-5 ${meta.tint}`} />
-                          </div>
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
-                              <ClayBadge variant={meta.badge} className="px-2.5 py-1 text-[11px]">
-                                {meta.label}
-                              </ClayBadge>
-                            </div>
-                            <p className="text-sm text-foreground-muted mt-1">{item.summary}</p>
-                            <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-foreground-muted">
-                              <div className="flex items-center gap-2">
-                                <span className="h-6 w-6 rounded-full overflow-hidden border border-border bg-background-muted flex items-center justify-center text-[10px] font-semibold text-foreground">
-                                  {item.authorAvatarUrl ? (
-                                    <img
-                                      src={item.authorAvatarUrl}
-                                      alt={item.author ? `${item.author} avatar` : 'User avatar'}
-                                      className="h-full w-full object-cover"
-                                      loading="lazy"
-                                      referrerPolicy="no-referrer"
-                                    />
-                                  ) : (
-                                    <span>{authorInitials}</span>
-                                  )}
-                                </span>
-                                <span>By {item.author}</span>
-                              </div>
-                              <span className="h-1 w-1 rounded-full bg-border" />
-                              <span>Updated {item.updatedAt}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          {item.tags.map((tag) => (
-                            <span
-                              key={`${item.id}-${tag}`}
-                              className="px-2.5 py-1 rounded-full bg-background-muted border border-border text-[11px] text-foreground-muted"
-                            >
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
+                {filteredItems.map((item) => (
+                  <MaterialCard
+                    key={`${item.type}-${item.id}`}
+                    item={{ ...item, authorAvatarUrl: item.authorAvatarUrl || undefined }}
+                    wrapInLink={true}
+                  />
+                ))}
               </div>
             )}
           </ClayCard>
@@ -333,11 +275,10 @@ export default function CommunityPage() {
                     <button
                       key={option.id}
                       onClick={() => setSelectedType(option.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-                        isActive
-                          ? 'bg-background-muted text-foreground border-border'
-                          : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
-                      }`}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${isActive
+                        ? 'bg-background-muted text-foreground border-border'
+                        : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
+                        }`}
                     >
                       {option.label}
                       <span className="ml-2 text-[10px] text-foreground-muted">
@@ -430,11 +371,10 @@ export default function CommunityPage() {
                   <button
                     key={option.id}
                     onClick={() => setSelectedType(option.id)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
-                      isActive
-                        ? 'bg-background-muted text-foreground border-border'
-                        : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${isActive
+                      ? 'bg-background-muted text-foreground border-border'
+                      : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
+                      }`}
                   >
                     {option.label}
                     <span className="ml-2 text-[10px] text-foreground-muted">
