@@ -30,8 +30,6 @@ import {
   ArrowTurnBackwardIcon,
   ArrowTurnForwardIcon,
   MinusSignIcon,
-  Sun01Icon,
-  Moon01Icon,
   Image01Icon,
   TextColorIcon,
   GoogleGeminiIcon,
@@ -1023,21 +1021,6 @@ export function EditorToolbar({ editor, fullscreen, leadingSlot }: EditorToolbar
         <TextAlignRightIcon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
       </ToolbarButton>
 
-      <ToolbarDivider />
-
-      {/* Theme Toggle */}
-      {mounted && (
-        <ToolbarButton
-          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-          title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-        >
-          {theme === "light" ? (
-            <Sun01Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-          ) : (
-            <Moon01Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-          )}
-        </ToolbarButton>
-      )}
     </div>
   );
 }

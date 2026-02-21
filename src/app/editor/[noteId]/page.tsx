@@ -1248,9 +1248,10 @@ export default function EditorPage() {
                 {aiButtons.map((action) => {
                   const Icon = action.icon;
                   const isLoading = aiLoading === action.id;
+                  // Use paper-themed claymorphism with subtle ink (primary) and terracotta (secondary) tints
                   const toneClasses = action.tone === 'orange'
-                    ? 'bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-200'
-                    : 'bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-200';
+                    ? 'bg-surface text-[var(--secondary)] border border-[var(--border)] shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-2px_4px_rgba(199,123,75,0.15),0_2px_4px_var(--paper-shadow-soft)] hover:shadow-[inset_0_2px_4px_rgba(255,255,255,1),inset_0_-2px_4px_rgba(199,123,75,0.25),0_4px_8px_var(--paper-shadow)] hover:-translate-y-[1px] hover:bg-[var(--secondary-muted)] hover:text-[var(--foreground)]'
+                    : 'bg-surface text-[var(--primary)] border border-[var(--border)] shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-2px_4px_rgba(43,93,139,0.15),0_2px_4px_var(--paper-shadow-soft)] hover:shadow-[inset_0_2px_4px_rgba(255,255,255,1),inset_0_-2px_4px_rgba(43,93,139,0.25),0_4px_8px_var(--paper-shadow)] hover:-translate-y-[1px] hover:bg-[var(--primary-muted)] hover:text-[var(--foreground)]';
                   return (
                     <button
                       key={action.id}
