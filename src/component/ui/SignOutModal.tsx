@@ -58,9 +58,13 @@ export default function SignOutModal({ isOpen, onClose }: SignOutModalProps) {
             variant="destructive"
             onClick={handleConfirm}
             disabled={isSigningOut}
-            className="flex-1"
+            className="flex-1 min-w-[100px]"
           >
-            {isSigningOut ? 'Signing out...' : 'Sign out'}
+            {isSigningOut ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              'Sign out'
+            )}
           </Button>
         </Card.Footer>
       </Card>
