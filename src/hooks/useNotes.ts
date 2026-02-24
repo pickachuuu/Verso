@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/utils/supabase/client';
 import { generateUniqueSlug } from '@/lib/slug';
 import { NotebookColorKey } from '@/component/ui/ClayNotebookCover';
+import { db, type LocalNote, type LocalNotePage } from '@/lib/db';
 
 const supabase = createClient();
 
@@ -59,71 +60,107 @@ async function fetchUserNotes(): Promise<Note[]> {
   const session = await getSession();
   if (!session?.user?.id) return [];
 
-  const { data, error } = await supabase
-    .from('notes')
-    .select('*')
-    .eq('user_id', session.user.id)
-    .order('updated_at', { ascending: false });
+  // 1. Fetch from Supabase (if online)
+  try {
+    const { data, error } = await supabase
+      .from('notes')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('updated_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching notes:', error);
-    throw error;
+    if (!error && data) {
+      await db.transaction('rw', db.notes, async () => {
+        for (const note of data) {
+          const existing = await db.notes.get(note.id);
+          // Only overwrite if it wasn't recently locally changed (pending sync)
+          if (!existing || existing.sync_status === 'synced' || existing.updated_at < note.updated_at) {
+            await db.notes.put({ ...note, sync_status: 'synced' });
+          }
+        }
+      });
+    }
+  } catch (error) {
+    console.log('Offline: Falling back to local notes');
   }
 
-  // Filter out orphaned/empty notes (failed creations that never got a title or content)
-  return (data || []).filter(
+  // 2. Fetch from Dexie
+  const localNotes = await db.notes
+    .where('user_id').equals(session.user.id)
+    .reverse()
+    .sortBy('updated_at');
+
+  return (localNotes || []).filter(
     (note) =>
       (note.title && note.title.trim() !== '') ||
       (note.content && note.content.trim() !== '') ||
       (Array.isArray(note.tags) && note.tags.length > 0)
-  );
+  ) as Note[];
 }
 
 async function fetchNoteBySlug(slug: string): Promise<Note | null> {
   const session = await getSession();
   if (!session?.user?.id) return null;
 
-  // First try to find by slug
-  const { data, error } = await supabase
-    .from('notes')
-    .select('*')
-    .eq('user_id', session.user.id)
-    .eq('slug', slug)
-    .single();
-
-  if (error || !data) {
-    // Fallback: try to find by ID (for backwards compatibility)
-    const { data: dataById, error: errorById } = await supabase
+  try {
+    const { data, error } = await supabase
       .from('notes')
       .select('*')
       .eq('user_id', session.user.id)
-      .eq('id', slug)
+      .eq('slug', slug)
       .single();
 
-    if (errorById) {
-      console.error('Note not found by slug or ID:', slug);
-      return null;
+    if (!error && data) {
+      await db.notes.put({ ...data, sync_status: 'synced' });
+    } else {
+      const { data: dataById, error: errorById } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('id', slug)
+        .single();
+      if (!errorById && dataById) {
+        await db.notes.put({ ...dataById, sync_status: 'synced' });
+      }
     }
-
-    return dataById;
+  } catch (error) {
+    console.log('Offline: Falling back to local note by slug');
   }
 
-  return data;
+  let localNote = await db.notes.where('slug').equals(slug).first();
+  if (!localNote) {
+    localNote = await db.notes.get(slug);
+  }
+
+  return (localNote as Note) || null;
 }
 
 async function fetchNotePages(noteId: string): Promise<NotePage[]> {
-  const { data, error } = await supabase
-    .from('note_pages')
-    .select('*')
-    .eq('note_id', noteId)
-    .order('page_order', { ascending: true });
+  try {
+    const { data, error } = await supabase
+      .from('note_pages')
+      .select('*')
+      .eq('note_id', noteId)
+      .order('page_order', { ascending: true });
 
-  if (error) {
-    console.error('Error fetching pages:', error);
-    throw error;
+    if (!error && data) {
+      await db.transaction('rw', db.notePages, async () => {
+        for (const page of data) {
+          const existing = await db.notePages.get(page.id);
+          if (!existing || existing.sync_status === 'synced' || existing.updated_at < page.updated_at) {
+            await db.notePages.put({ ...page, sync_status: 'synced' });
+          }
+        }
+      });
+    }
+  } catch (error) {
+    console.log('Offline: Falling back to local pages');
   }
 
-  return data || [];
+  const localPages = await db.notePages
+    .where('note_id').equals(noteId)
+    .sortBy('page_order');
+
+  return localPages as NotePage[];
 }
 
 // ============================================
@@ -141,32 +178,42 @@ async function createNote({ title, coverColor = 'royal' }: CreateNoteParams): Pr
   const session = await getSession();
   if (!session?.user?.id) throw new Error('Not authenticated');
 
-  // Insert with title + slug in one step so we never leave an empty row behind
-  const { data, error } = await supabase
-    .from('notes')
-    .insert([{
+  const newId = crypto.randomUUID();
+  const slug = generateUniqueSlug(title, newId);
+  const now = new Date().toISOString();
+
+  const localNote: LocalNote = {
+    id: newId,
+    title: title.trim(),
+    content: '',
+    tags: [],
+    cover_color: coverColor,
+    slug,
+    user_id: session.user.id,
+    is_public: false,
+    created_at: now,
+    updated_at: now,
+    sync_status: 'pending'
+  };
+
+  await db.notes.put(localNote);
+
+  try {
+    await supabase.from('notes').insert([{
+      id: newId,
       title: title.trim(),
       content: '',
       tags: [],
       cover_color: coverColor,
       user_id: session.user.id,
-      slug: null, // placeholder — updated below
-    }])
-    .select('id')
-    .single();
+      slug: slug,
+    }]);
+    await db.notes.update(newId, { sync_status: 'synced' });
+  } catch (error) {
+    console.log("Offline mode: Note creation will sync later", error);
+  }
 
-  if (error) throw error;
-
-  // Generate slug using the note ID and update the row
-  const slug = generateUniqueSlug(title, data.id);
-  const { error: slugError } = await supabase
-    .from('notes')
-    .update({ slug, updated_at: new Date().toISOString() })
-    .eq('id', data.id);
-
-  if (slugError) throw slugError;
-
-  return { id: data.id, slug };
+  return { id: newId, slug };
 }
 
 interface SaveNoteParams {
@@ -184,6 +231,7 @@ async function saveNote({ id, title, content = '', tags, coverColor }: SaveNoteP
   if (!session?.user?.id) throw new Error('Not authenticated');
 
   const slug = generateUniqueSlug(title, id);
+  const updated_at = new Date().toISOString();
 
   const updateData: Record<string, unknown> = {
     title,
@@ -191,20 +239,34 @@ async function saveNote({ id, title, content = '', tags, coverColor }: SaveNoteP
     tags,
     slug,
     user_id: session.user.id,
-    updated_at: new Date().toISOString(),
+    updated_at,
   };
 
   if (coverColor) {
     updateData.cover_color = coverColor;
   }
 
-  const { error } = await supabase
-    .from('notes')
-    .update(updateData)
-    .eq('id', id)
-    .eq('user_id', session.user.id);
+  const existingNote = await db.notes.get(id);
+  if (existingNote) {
+    await db.notes.update(id, { ...updateData, sync_status: 'pending' });
+  } else {
+    await db.notes.put({ ...existingNote, ...updateData, id, sync_status: 'pending' } as LocalNote);
+  }
 
-  if (error) throw error;
+  try {
+    const { error } = await supabase
+      .from('notes')
+      .update(updateData)
+      .eq('id', id)
+      .eq('user_id', session.user.id);
+
+    if (!error) {
+      await db.notes.update(id, { sync_status: 'synced' });
+    }
+  } catch (error) {
+    console.log("Offline mode: Note update will sync later");
+  }
+
   return slug;
 }
 
@@ -212,26 +274,36 @@ async function deleteNote(id: string): Promise<void> {
   const session = await getSession();
   if (!session?.user?.id) throw new Error('Not authenticated');
 
-  const { error } = await supabase
-    .from('notes')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', session.user.id);
+  await db.notes.delete(id);
 
-  if (error) throw error;
+  try {
+    await supabase
+      .from('notes')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', session.user.id);
+  } catch (error) {
+    console.log("Offline mode: Note delete will sync later");
+  }
 }
 
 async function toggleNotePublicStatus({ noteId, isPublic }: { noteId: string; isPublic: boolean }): Promise<void> {
   const session = await getSession();
   if (!session?.user?.id) throw new Error('Not authenticated');
 
-  const { error } = await supabase
-    .from('notes')
-    .update({ is_public: isPublic })
-    .eq('id', noteId)
-    .eq('user_id', session.user.id);
+  await db.notes.update(noteId, { is_public: isPublic, sync_status: 'pending' });
 
-  if (error) throw error;
+  try {
+    await supabase
+      .from('notes')
+      .update({ is_public: isPublic })
+      .eq('id', noteId)
+      .eq('user_id', session.user.id);
+
+    await db.notes.update(noteId, { sync_status: 'synced' });
+  } catch (error) {
+    console.log("Offline mode: Access change will sync later");
+  }
 }
 
 // Page mutations
@@ -246,31 +318,48 @@ async function createPage({ noteId, pageOrder }: CreatePageParams): Promise<stri
 
   let order = pageOrder;
   if (order === undefined) {
-    const { data: existingPages } = await supabase
-      .from('note_pages')
-      .select('page_order')
-      .eq('note_id', noteId)
-      .order('page_order', { ascending: false })
-      .limit(1);
+    const existingPages = await db.notePages
+      .where('note_id').equals(noteId)
+      .sortBy('page_order');
 
     order = existingPages && existingPages.length > 0
-      ? existingPages[0].page_order + 1
+      ? existingPages[existingPages.length - 1].page_order + 1
       : 0;
   }
 
-  const { data, error } = await supabase
-    .from('note_pages')
-    .insert([{
-      note_id: noteId,
-      title: 'Untitled Page',
-      content: '',
-      page_order: order,
-    }])
-    .select('id')
-    .single();
+  const pageId = crypto.randomUUID();
+  const now = new Date().toISOString();
 
-  if (error) throw error;
-  return data.id;
+  await db.notePages.put({
+    id: pageId,
+    note_id: noteId,
+    title: 'Untitled Page',
+    content: '',
+    page_order: order,
+    created_at: now,
+    updated_at: now,
+    sync_status: 'pending'
+  });
+
+  try {
+    const { error } = await supabase
+      .from('note_pages')
+      .insert([{
+        id: pageId,
+        note_id: noteId,
+        title: 'Untitled Page',
+        content: '',
+        page_order: order,
+      }]);
+
+    if (!error) {
+      await db.notePages.update(pageId, { sync_status: 'synced' });
+    }
+  } catch (error) {
+    console.log("Offline mode: Page creation will sync later");
+  }
+
+  return pageId;
 }
 
 interface SavePageParams {
@@ -280,28 +369,47 @@ interface SavePageParams {
 }
 
 async function savePage({ pageId, title, content }: SavePageParams): Promise<void> {
-  const updateData: { title?: string; content?: string; updated_at: string } = {
+  const updateData: { title?: string; content?: string; updated_at: string; sync_status: string } = {
     updated_at: new Date().toISOString(),
+    sync_status: 'pending'
   };
 
   if (title !== undefined) updateData.title = title;
   if (content !== undefined) updateData.content = content;
 
-  const { error } = await supabase
-    .from('note_pages')
-    .update(updateData)
-    .eq('id', pageId);
+  const existingPage = await db.notePages.get(pageId);
+  if (existingPage) {
+    await db.notePages.update(pageId, updateData);
+  }
 
-  if (error) throw error;
+  try {
+    const payload = { ...updateData };
+    delete payload.sync_status;
+
+    const { error } = await supabase
+      .from('note_pages')
+      .update(payload)
+      .eq('id', pageId);
+
+    if (!error) {
+      await db.notePages.update(pageId, { sync_status: 'synced' });
+    }
+  } catch (error) {
+    console.log("Offline mode: Page save will sync later");
+  }
 }
 
 async function deletePage(pageId: string): Promise<void> {
-  const { error } = await supabase
-    .from('note_pages')
-    .delete()
-    .eq('id', pageId);
+  await db.notePages.delete(pageId);
 
-  if (error) throw error;
+  try {
+    await supabase
+      .from('note_pages')
+      .delete()
+      .eq('id', pageId);
+  } catch (error) {
+    console.log("Offline mode: Page delete will sync later");
+  }
 }
 
 // ============================================
@@ -431,15 +539,24 @@ export async function fetchNotePagesContent(
 ): Promise<Map<string, string>> {
   if (noteIds.length === 0) return new Map();
 
-  const { data, error } = await supabase
-    .from('note_pages')
-    .select('note_id, title, content, page_order')
-    .in('note_id', noteIds)
-    .order('page_order', { ascending: true });
+  let data = null;
 
-  if (error) {
-    console.error('Error fetching note pages for content:', error);
-    return new Map();
+  try {
+    const res = await supabase
+      .from('note_pages')
+      .select('note_id, title, content, page_order')
+      .in('note_id', noteIds)
+      .order('page_order', { ascending: true });
+
+    data = res.data;
+  } catch (error) {
+    console.log("Offline mode: fetchNotePagesContent fallback");
+  }
+
+  if (!data) {
+    data = await db.notePages
+      .where('note_id').anyOf(noteIds)
+      .sortBy('page_order') as any;
   }
 
   const contentMap = new Map<string, string>();
@@ -488,3 +605,4 @@ function decodeHTMLEntities(text: string): string {
     .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(Number(dec)))
     .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
 }
+
