@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 import AuthForm from './AuthForm';
 
 export default async function AuthPage() {
@@ -10,5 +11,9 @@ export default async function AuthPage() {
     redirect('/dashboard');
   }
 
-  return <AuthForm />;
+  return (
+    <Suspense fallback={<div className="min-h-screen paper-bg" />}>
+      <AuthForm />
+    </Suspense>
+  );
 }
