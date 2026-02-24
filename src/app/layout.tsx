@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Just_Another_Hand, Varela_Round, Cinzel } from "next/font/google";
 import { Cormorant_Garamond } from "next/font/google";
 import { QueryProvider } from "@/lib/queryClient";
+import PWAInstallToast from "@/component/ui/PWAInstallToast";
 import "./globals.css";
 
 // Font declarations
@@ -49,6 +50,15 @@ const ogImage =
 export const metadata: Metadata = {
   title: "Verso - Smart Learning Platform",
   description: "Organize your learning with notes and flashcards",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Verso",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     title: "Verso - Smart Learning Platform",
     description: "Organize your learning with notes and flashcards",
@@ -83,6 +93,7 @@ export default function RootLayout({
       >
         <QueryProvider>
           {children}
+          <PWAInstallToast />
         </QueryProvider>
       </body>
     </html>
