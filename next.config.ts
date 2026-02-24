@@ -47,6 +47,11 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Increase static generation timeout for complex pages
+  staticPageGenerationTimeout: 120,
+  experimental: {
+    cpus: 4,
+  },
 };
 
 export default withPWA(nextConfig);
