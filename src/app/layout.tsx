@@ -1,11 +1,10 @@
 // app/layout.tsx or app/layout.ts (Next.js App Router)
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Just_Another_Hand, Varela_Round, Cinzel } from "next/font/google";
 import { Cormorant_Garamond } from "next/font/google";
 import { QueryProvider } from "@/lib/queryClient";
 import PWAInstallToast from "@/component/ui/PWAInstallToast";
-import SyncStatus from "@/component/ui/SyncStatus";
 import "./globals.css";
 
 // Font declarations
@@ -81,6 +80,13 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 // Root Layout
 export default function RootLayout({
   children,
@@ -95,7 +101,6 @@ export default function RootLayout({
         <QueryProvider>
           {children}
           <PWAInstallToast />
-          <SyncStatus />
         </QueryProvider>
       </body>
     </html>

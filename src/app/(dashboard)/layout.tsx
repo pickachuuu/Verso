@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "@/component/Layout/navbar/navbar";
+import SyncStatus from "@/component/ui/SyncStatus";
 
 export default function DashboardLayout({ children }: Readonly<{
   children: React.ReactNode;
@@ -22,6 +23,8 @@ export default function DashboardLayout({ children }: Readonly<{
           {children}
         </div>
       </main>
+      <SyncStatus />
     </div>
   );
 }
+
