@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "@/component/Layout/navbar/navbar";
-import SyncStatus from "@/component/ui/SyncStatus";
 
 export default function DashboardLayout({ children }: Readonly<{
   children: React.ReactNode;
@@ -16,14 +15,13 @@ export default function DashboardLayout({ children }: Readonly<{
   }, [pathname]);
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen w-full overflow-x-hidden">
       <Navbar />
-      <main className="flex-1 md:ml-60 paper-bg pt-16 md:pt-0">
-        <div className="px-2 sm:px-4 lg:px-6 py-6 max-w-7xl mx-auto">
+      <main className="flex-1 md:ml-60 paper-bg pt-16 md:pt-0 min-w-0">
+        <div className="px-2 sm:px-4 lg:px-6 py-6 max-w-7xl mx-auto w-full">
           {children}
         </div>
       </main>
-      <SyncStatus />
     </div>
   );
 }

@@ -261,15 +261,13 @@ export default function FlashcardDashboardPage() {
         {/* Success/Error Message */}
         {saveSuccess && (
           <div
-            className={`px-4 py-3 rounded-xl border-2 transition-all ${
-              saveSuccess.includes('Error')
-                ? 'border-red-200 bg-red-50'
-                : 'border-green-200 bg-green-50'
-            }`}
+            className={`px-4 py-3 rounded-xl border-2 transition-all ${saveSuccess.includes('Error')
+              ? 'border-red-200 bg-red-50'
+              : 'border-green-200 bg-green-50'
+              }`}
           >
-            <p className={`text-sm font-semibold ${
-              saveSuccess.includes('Error') ? 'text-red-600' : 'text-green-600'
-            }`}>
+            <p className={`text-sm font-semibold ${saveSuccess.includes('Error') ? 'text-red-600' : 'text-green-600'
+              }`}>
               {saveSuccess}
             </p>
           </div>
@@ -278,37 +276,37 @@ export default function FlashcardDashboardPage() {
         <div className="grid gap-6 lg:grid-cols-12">
           {/* Main content */}
           <div className="order-2 lg:order-1 lg:col-span-8 space-y-4">
-          {/* Mobile controls */}
-          <div className="lg:hidden space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl bg-surface border border-border">
-                <Search01Icon className="w-4 h-4 text-foreground-muted" />
-                <input
-                  type="text"
-                  placeholder="Search flashcard sets..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent border-none focus:outline-none text-sm text-foreground placeholder:text-foreground-muted"
-                />
+            {/* Mobile controls */}
+            <div className="lg:hidden space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl bg-surface border border-border">
+                  <Search01Icon className="w-4 h-4 text-foreground-muted" />
+                  <input
+                    type="text"
+                    placeholder="Search flashcard sets..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-transparent border-none focus:outline-none text-sm text-foreground placeholder:text-foreground-muted"
+                  />
+                </div>
+                <button
+                  onClick={() => setMobileFiltersOpen(true)}
+                  className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-colors"
+                >
+                  <FilterIcon className="w-4 h-4 text-foreground-muted" />
+                  Filters
+                  {activeFilters > 0 && (
+                    <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-background-muted text-foreground">
+                      {activeFilters}
+                    </span>
+                  )}
+                </button>
               </div>
-              <button
-                onClick={() => setMobileFiltersOpen(true)}
-                className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-colors"
-              >
-                <FilterIcon className="w-4 h-4 text-foreground-muted" />
-                Filters
-                {activeFilters > 0 && (
-                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-background-muted text-foreground">
-                    {activeFilters}
-                  </span>
-                )}
-              </button>
+              <div className="flex items-center justify-between text-xs text-foreground-muted">
+                <span>Showing {processedSets.length} set{processedSets.length !== 1 ? 's' : ''}</span>
+                <span>{masteryLabel} · {sortLabel}</span>
+              </div>
             </div>
-            <div className="flex items-center justify-between text-xs text-foreground-muted">
-              <span>Showing {processedSets.length} set{processedSets.length !== 1 ? 's' : ''}</span>
-              <span>{masteryLabel} · {sortLabel}</span>
-            </div>
-          </div>
 
             {isLoading ? (
               <FlashcardsSkeleton />
@@ -324,8 +322,8 @@ export default function FlashcardDashboardPage() {
               />
             ) : (
               <>
-                {/* Results count */}
-                <div className="flex items-center justify-between">
+                {/* Results count - hidden on mobile as redundant */}
+                <div className="hidden lg:flex items-center justify-between">
                   <p className="text-sm text-foreground-muted">
                     Showing <span className="font-semibold text-foreground">{processedSets.length}</span> set{processedSets.length !== 1 ? 's' : ''}
                     {(searchQuery || masteryFilter !== 'all') && (
@@ -377,32 +375,29 @@ export default function FlashcardDashboardPage() {
                   <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
                     <button
                       onClick={() => setMasteryFilter('all')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                        masteryFilter === 'all'
-                          ? 'bg-surface text-foreground shadow-sm'
-                          : 'text-foreground-muted hover:text-foreground'
-                      }`}
+                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${masteryFilter === 'all'
+                        ? 'bg-surface text-foreground shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                        }`}
                     >
                       All
                     </button>
                     <button
                       onClick={() => setMasteryFilter('learning')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${
-                        masteryFilter === 'learning'
-                          ? 'bg-surface text-foreground shadow-sm'
-                          : 'text-foreground-muted hover:text-foreground'
-                      }`}
+                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${masteryFilter === 'learning'
+                        ? 'bg-surface text-foreground shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                        }`}
                     >
                       <Loading01Icon className="w-3 h-3" />
                       Learning
                     </button>
                     <button
                       onClick={() => setMasteryFilter('mastered')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${
-                        masteryFilter === 'mastered'
-                          ? 'bg-surface text-foreground shadow-sm'
-                          : 'text-foreground-muted hover:text-foreground'
-                      }`}
+                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${masteryFilter === 'mastered'
+                        ? 'bg-surface text-foreground shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                        }`}
                     >
                       <CheckmarkCircle01Icon className="w-3 h-3" />
                       Mastered
@@ -418,33 +413,30 @@ export default function FlashcardDashboardPage() {
                   <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
                     <button
                       onClick={() => setSortBy('recent')}
-                      className={`p-2 rounded-md transition-all ${
-                        sortBy === 'recent'
-                          ? 'bg-surface text-primary shadow-sm'
-                          : 'text-foreground-muted hover:text-foreground'
-                      }`}
+                      className={`p-2 rounded-md transition-all ${sortBy === 'recent'
+                        ? 'bg-surface text-primary shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                        }`}
                       title="Sort by recent"
                     >
                       <Clock01Icon className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setSortBy('alphabetical')}
-                      className={`p-2 rounded-md transition-all ${
-                        sortBy === 'alphabetical'
-                          ? 'bg-surface text-primary shadow-sm'
-                          : 'text-foreground-muted hover:text-foreground'
-                      }`}
+                      className={`p-2 rounded-md transition-all ${sortBy === 'alphabetical'
+                        ? 'bg-surface text-primary shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                        }`}
                       title="Sort alphabetically"
                     >
                       <SortingAZ01Icon className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setSortBy('oldest')}
-                      className={`p-2 rounded-md transition-all ${
-                        sortBy === 'oldest'
-                          ? 'bg-surface text-primary shadow-sm'
-                          : 'text-foreground-muted hover:text-foreground'
-                      }`}
+                      className={`p-2 rounded-md transition-all ${sortBy === 'oldest'
+                        ? 'bg-surface text-primary shadow-sm'
+                        : 'text-foreground-muted hover:text-foreground'
+                        }`}
                       title="Sort by oldest"
                     >
                       <Calendar03Icon className="w-4 h-4" />
@@ -511,32 +503,29 @@ export default function FlashcardDashboardPage() {
             <div className="mt-2 flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setMasteryFilter('all')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  masteryFilter === 'all'
-                    ? 'bg-background-muted text-foreground border border-border'
-                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                }`}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${masteryFilter === 'all'
+                  ? 'bg-background-muted text-foreground border border-border'
+                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                  }`}
               >
                 All
               </button>
               <button
                 onClick={() => setMasteryFilter('learning')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all inline-flex items-center gap-1 ${
-                  masteryFilter === 'learning'
-                    ? 'bg-background-muted text-foreground border border-border'
-                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                }`}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all inline-flex items-center gap-1 ${masteryFilter === 'learning'
+                  ? 'bg-background-muted text-foreground border border-border'
+                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                  }`}
               >
                 <Loading01Icon className="w-3 h-3" />
                 Learning
               </button>
               <button
                 onClick={() => setMasteryFilter('mastered')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all inline-flex items-center gap-1 ${
-                  masteryFilter === 'mastered'
-                    ? 'bg-background-muted text-foreground border border-border'
-                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                }`}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all inline-flex items-center gap-1 ${masteryFilter === 'mastered'
+                  ? 'bg-background-muted text-foreground border border-border'
+                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                  }`}
               >
                 <CheckmarkCircle01Icon className="w-3 h-3" />
                 Mastered
@@ -552,33 +541,30 @@ export default function FlashcardDashboardPage() {
             <div className="mt-2 flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
               <button
                 onClick={() => setSortBy('recent')}
-                className={`p-2 rounded-md transition-all ${
-                  sortBy === 'recent'
-                    ? 'bg-surface text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
+                className={`p-2 rounded-md transition-all ${sortBy === 'recent'
+                  ? 'bg-surface text-primary shadow-sm'
+                  : 'text-foreground-muted hover:text-foreground'
+                  }`}
                 title="Sort by recent"
               >
                 <Clock01Icon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setSortBy('alphabetical')}
-                className={`p-2 rounded-md transition-all ${
-                  sortBy === 'alphabetical'
-                    ? 'bg-surface text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
+                className={`p-2 rounded-md transition-all ${sortBy === 'alphabetical'
+                  ? 'bg-surface text-primary shadow-sm'
+                  : 'text-foreground-muted hover:text-foreground'
+                  }`}
                 title="Sort alphabetically"
               >
                 <SortingAZ01Icon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setSortBy('oldest')}
-                className={`p-2 rounded-md transition-all ${
-                  sortBy === 'oldest'
-                    ? 'bg-surface text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
+                className={`p-2 rounded-md transition-all ${sortBy === 'oldest'
+                  ? 'bg-surface text-primary shadow-sm'
+                  : 'text-foreground-muted hover:text-foreground'
+                  }`}
                 title="Sort by oldest"
               >
                 <Calendar03Icon className="w-4 h-4" />
@@ -656,31 +642,36 @@ function FlashcardsHeader({
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         {/* Title area */}
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 min-w-0">
           <FlashcardIcon className="w-12 h-12 text-primary shrink-0" />
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground truncate">
                 Flashcards
               </h1>
-              <ClayBadge variant="accent" className="text-xs px-2 py-1">
-                <SparklesIcon className="w-3 h-3" />
-                {totalSets} sets &middot; {totalCards} cards
-              </ClayBadge>
+              <div className="flex shrink-0">
+                <ClayBadge variant="accent" className="text-[10px] sm:text-xs px-2 py-1">
+                  <SparklesIcon className="w-3 h-3" />
+                  {totalSets} sets &middot; {totalCards} cards
+                </ClayBadge>
+              </div>
             </div>
-            <p className="text-foreground-muted">
+            <p className="text-sm sm:text-base text-foreground-muted truncate">
               Study with AI-generated interactive flashcards
             </p>
           </div>
         </div>
 
         {/* CTA */}
-        <HeroActionButton
-          icon={<FlashcardAddIcon className="w-5 h-5" />}
-          onClick={onCreateNew}
-        >
-          Forge Flashcards
-        </HeroActionButton>
+        <div className="shrink-0">
+          <HeroActionButton
+            icon={<FlashcardAddIcon className="w-5 h-5" />}
+            onClick={onCreateNew}
+            className="w-full sm:w-auto justify-center"
+          >
+            Forge Flashcards
+          </HeroActionButton>
+        </div>
       </div>
     </ClayCard>
   );
@@ -849,88 +840,92 @@ function FlashcardListItem({
             }}
           />
 
-          <div className="flex items-center gap-4 p-3 pr-5 flex-1 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-4 p-2 sm:p-3 pr-3 sm:pr-5 flex-1 min-w-0">
             {/* 3D mini flashcard stack */}
-            <div className="relative flex-shrink-0" style={{ width: 56, height: 44 }}>
-              {/* Bottom card (3rd in stack) — offset right + down */}
-              <div
-                className="absolute rounded-[6px]"
-                style={{
-                  top: 4,
-                  left: 4,
-                  right: 0,
-                  bottom: 0,
-                  background: 'linear-gradient(135deg, #d1d5db, #c4c8cd)',
-                  boxShadow: '1px 1px 2px rgba(0,0,0,0.10)',
-                }}
-              />
-              {/* Middle card (2nd in stack) */}
-              <div
-                className="absolute rounded-[6px]"
-                style={{
-                  top: 2,
-                  left: 2,
-                  right: 2,
-                  bottom: 2,
-                  background: 'linear-gradient(135deg, #e2e5ea, #d5d8dd)',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
-                }}
-              />
-              {/* Front card — main colored card */}
-              <div
-                className="absolute rounded-[6px] overflow-hidden"
-                style={{
-                  top: 0,
-                  left: 0,
-                  right: 4,
-                  bottom: 4,
-                  background: `linear-gradient(145deg, ${accentColorLight} 0%, ${accentColor} 60%, ${accentColor} 100%)`,
-                  boxShadow: `2px 3px 6px ${accentShadow}`,
-                }}
-              >
-                {/* Glossy highlight */}
+            <div className="shrink-0 w-11 sm:w-14">
+              <div className="relative flex-shrink-0 scale-75 sm:scale-100 origin-left" style={{ width: 56, height: 44 }}>
+                {/* Bottom card (3rd in stack) — offset right + down */}
                 <div
-                  className="absolute pointer-events-none"
+                  className="absolute rounded-[6px]"
                   style={{
-                    top: '-15%',
-                    left: '5%',
-                    right: '35%',
-                    bottom: '55%',
-                    background: 'linear-gradient(160deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
-                    borderRadius: '50%',
-                    filter: 'blur(1px)',
+                    top: 4,
+                    left: 4,
+                    right: 0,
+                    bottom: 0,
+                    background: 'linear-gradient(135deg, #d1d5db, #c4c8cd)',
+                    boxShadow: '1px 1px 2px rgba(0,0,0,0.10)',
                   }}
                 />
-                {/* Divider line (Q/A split) */}
+                {/* Middle card (2nd in stack) */}
                 <div
-                  className="absolute left-[15%] right-[15%]"
+                  className="absolute rounded-[6px]"
                   style={{
-                    top: '50%',
-                    height: 1,
-                    background: 'rgba(255,255,255,0.3)',
+                    top: 2,
+                    left: 2,
+                    right: 2,
+                    bottom: 2,
+                    background: 'linear-gradient(135deg, #e2e5ea, #d5d8dd)',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
                   }}
                 />
-                {/* Lightning bolt icon */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <SparklesIcon className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.35)' }} />
+                {/* Front card — main colored card */}
+                <div
+                  className="absolute rounded-[6px] overflow-hidden"
+                  style={{
+                    top: 0,
+                    left: 0,
+                    right: 4,
+                    bottom: 4,
+                    background: `linear-gradient(145deg, ${accentColorLight} 0%, ${accentColor} 60%, ${accentColor} 100%)`,
+                    boxShadow: `2px 3px 6px ${accentShadow}`,
+                  }}
+                >
+                  {/* Glossy highlight */}
+                  <div
+                    className="absolute pointer-events-none"
+                    style={{
+                      top: '-15%',
+                      left: '5%',
+                      right: '35%',
+                      bottom: '55%',
+                      background: 'linear-gradient(160deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
+                      borderRadius: '50%',
+                      filter: 'blur(1px)',
+                    }}
+                  />
+                  {/* Divider line (Q/A split) */}
+                  <div
+                    className="absolute left-[15%] right-[15%]"
+                    style={{
+                      top: '50%',
+                      height: 1,
+                      background: 'rgba(255,255,255,0.3)',
+                    }}
+                  />
+                  {/* Lightning bolt icon */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <SparklesIcon className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.35)' }} />
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors flex-1 min-w-[120px]">
                   {set.title}
                 </h3>
-                {set.is_public && (
-                  <span className="text-[10px] font-medium uppercase tracking-wide text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">
-                    Public
+                <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+                  {set.is_public && (
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                      Public
+                    </span>
+                  )}
+                  <span className={`inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0 ${masteryLabel.className}`}>
+                    {masteryLabel.text}
                   </span>
-                )}
-                <span className={`hidden sm:inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0 ${masteryLabel.className}`}>
-                  {masteryLabel.text}
-                </span>
+                </div>
               </div>
               {/* Source note */}
               {sourceNote && (
@@ -938,7 +933,7 @@ function FlashcardListItem({
                   From: {sourceNote.title}
                 </p>
               )}
-              <div className="flex items-center gap-3 mt-1">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                 <span className="text-xs text-foreground-muted flex items-center gap-1">
                   <Clock01Icon className="w-3 h-3" />
                   {formatDate(set.updated_at || set.created_at)}
@@ -952,28 +947,26 @@ function FlashcardListItem({
                   </span>
                 )}
                 {/* Mini progress bar */}
-                <div className="hidden sm:flex items-center gap-1.5">
-                  <div className="w-20 bg-surface rounded-full h-1.5 overflow-hidden">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <div className="w-16 sm:w-20 bg-surface rounded-full h-1.5 overflow-hidden shrink-0">
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        isMastered ? 'bg-emerald-400' : progress >= 50 ? 'bg-amber-400' : 'bg-primary/70'
-                      }`}
+                      className={`h-full rounded-full transition-all duration-500 ${isMastered ? 'bg-emerald-400' : progress >= 50 ? 'bg-amber-400' : 'bg-primary/70'
+                        }`}
                       style={{ width: `${progress}%` }}
                     />
                   </div>
-                  <span className={`text-[10px] font-bold ${isMastered ? 'text-emerald-600' : 'text-foreground-muted'}`}>{progress}%</span>
+                  <span className={`text-[10px] font-bold shrink-0 ${isMastered ? 'text-emerald-600' : 'text-foreground-muted'}`}>{progress}%</span>
                 </div>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+            {/* Actions (hidden on mobile) */}
+            <div className="hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
               <button
-                className={`p-2 rounded-lg transition-colors ${
-                  shareLinkCopied
-                    ? 'bg-emerald-500/10 text-emerald-500'
-                    : 'bg-primary/10 text-primary hover:bg-primary/20'
-                }`}
+                className={`p-2 rounded-lg transition-colors ${shareLinkCopied
+                  ? 'bg-emerald-500/10 text-emerald-500'
+                  : 'bg-primary/10 text-primary hover:bg-primary/20'
+                  }`}
                 title={shareLinkCopied ? 'Copied!' : 'Share'}
                 onClick={(e) => {
                   e.stopPropagation();

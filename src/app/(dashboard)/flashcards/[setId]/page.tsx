@@ -132,7 +132,7 @@ export default function FlashcardBrowsePage() {
   return (
     <div className="max-w-5xl mx-auto py-8 space-y-6">
       <ClayCard variant="elevated" padding="md" className="rounded-3xl">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => router.push('/flashcards')}
@@ -142,7 +142,7 @@ export default function FlashcardBrowsePage() {
               <ArrowLeft01Icon className="w-4 h-4 text-foreground-muted" />
             </button>
             <div className="min-w-0">
-              <h1 className="text-xl font-bold text-foreground truncate">
+              <h1 className="text-xl font-bold text-foreground break-words overflow-hidden">
                 {studyData.set.title || 'Flashcards'}
               </h1>
               <p className="text-xs text-foreground-muted mt-0.5">
@@ -153,7 +153,7 @@ export default function FlashcardBrowsePage() {
 
           <button
             onClick={() => router.push(`/flashcards/${setId}/study`)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-primary text-white hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-primary text-white hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 shrink-0"
           >
             <BookOpen01Icon className="w-4 h-4" />
             Study Due Cards
@@ -217,7 +217,7 @@ export default function FlashcardBrowsePage() {
             </div>
             <div className="h-1.5 rounded-full bg-background-muted overflow-hidden border border-border/20">
               <div
-            className="h-full rounded-full bg-primary/70 transition-all duration-500"
+                className="h-full rounded-full bg-primary/70 transition-all duration-500"
                 style={{ width: `${progress.percentage}%` }}
               />
             </div>
@@ -291,11 +291,10 @@ function StatusPill({
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-        active
-          ? 'bg-surface-elevated text-foreground shadow-sm border border-border/60'
-          : 'text-foreground-muted hover:text-foreground border border-transparent'
-      }`}
+      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${active
+        ? 'bg-surface-elevated text-foreground shadow-sm border border-border/60'
+        : 'text-foreground-muted hover:text-foreground border border-transparent'
+        }`}
     >
       <span className={active && color ? color : ''}>{label}</span>
       <span className="ml-1.5 opacity-60">{count}</span>
@@ -329,8 +328,8 @@ function BrowseCard({
     card.difficulty_level === 1
       ? 'text-emerald-500'
       : card.difficulty_level === 3
-      ? 'text-red-500'
-      : 'text-amber-500';
+        ? 'text-red-500'
+        : 'text-amber-500';
 
   return (
     <ClayCard variant="default" padding="none" className="rounded-2xl overflow-hidden">
@@ -360,9 +359,8 @@ function BrowseCard({
 
         {/* Expand chevron */}
         <ArrowDown01Icon
-          className={`w-4 h-4 text-foreground-muted transition-transform flex-shrink-0 ${
-            isExpanded ? 'rotate-180' : ''
-          }`}
+          className={`w-4 h-4 text-foreground-muted transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''
+            }`}
         />
       </button>
 

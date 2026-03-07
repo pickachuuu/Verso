@@ -159,7 +159,7 @@ export default function PublicExamPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <Link href="/community" className="flex items-center gap-2 text-foreground-muted hover:text-foreground transition-colors">
           <ArrowLeft01Icon className="w-4 h-4" />
           <span className="text-sm font-medium">Community</span>
@@ -172,7 +172,8 @@ export default function PublicExamPage() {
           <Link href={`/exam/${exam.id}`}>
             <Button size="sm">
               <PlayIcon className="w-4 h-4 mr-2" />
-              Start Attempt
+              <span className="hidden sm:inline">Start Attempt</span>
+              <span className="sm:hidden">Start</span>
             </Button>
           </Link>
         </div>
@@ -180,7 +181,7 @@ export default function PublicExamPage() {
 
       <Card variant="elevated" className="space-y-3">
         <Card.Header>
-          <h1 className="text-2xl font-bold text-foreground">{exam.title || 'Exam'}</h1>
+          <h1 className="text-2xl font-bold text-foreground break-words">{exam.title || 'Exam'}</h1>
           {exam.description && (
             <p className="text-sm text-foreground-muted">{exam.description}</p>
           )}

@@ -270,8 +270,8 @@ export default function ExamsPage() {
             />
           ) : (
             <>
-              {/* Results count */}
-              <div className="flex items-center justify-between">
+              {/* Results count - hidden on mobile as it is redundant */}
+              <div className="hidden lg:flex items-center justify-between">
                 <p className="text-sm text-foreground-muted">
                   Showing <span className="font-semibold text-foreground">{processedExams.length}</span> exam{processedExams.length !== 1 ? 's' : ''}
                   {(searchQuery || difficultyFilter !== 'all' || questionTypeFilter !== 'all') && (
@@ -336,41 +336,37 @@ export default function ExamsPage() {
                 <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border flex-wrap">
                   <button
                     onClick={() => setDifficultyFilter('all')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      difficultyFilter === 'all'
-                        ? 'bg-surface text-foreground shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${difficultyFilter === 'all'
+                      ? 'bg-surface text-foreground shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                   >
                     All
                   </button>
                   <button
                     onClick={() => setDifficultyFilter('easy')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      difficultyFilter === 'easy'
-                        ? 'bg-background-muted text-emerald-700 border border-emerald-200 shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${difficultyFilter === 'easy'
+                      ? 'bg-background-muted text-emerald-700 border border-emerald-200 shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                   >
                     Easy
                   </button>
                   <button
                     onClick={() => setDifficultyFilter('medium')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      difficultyFilter === 'medium'
-                        ? 'bg-background-muted text-amber-700 border border-amber-200 shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${difficultyFilter === 'medium'
+                      ? 'bg-background-muted text-amber-700 border border-amber-200 shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                   >
                     Medium
                   </button>
                   <button
                     onClick={() => setDifficultyFilter('hard')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      difficultyFilter === 'hard'
-                        ? 'bg-background-muted text-red-700 border border-red-200 shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${difficultyFilter === 'hard'
+                      ? 'bg-background-muted text-red-700 border border-red-200 shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                   >
                     Hard
                   </button>
@@ -385,41 +381,37 @@ export default function ExamsPage() {
                 <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border flex-wrap">
                   <button
                     onClick={() => setQuestionTypeFilter('all')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      questionTypeFilter === 'all'
-                        ? 'bg-surface text-foreground shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${questionTypeFilter === 'all'
+                      ? 'bg-surface text-foreground shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                   >
                     All Types
                   </button>
                   <button
                     onClick={() => setQuestionTypeFilter('mc')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      questionTypeFilter === 'mc'
-                        ? 'bg-background-muted text-blue-700 border border-blue-200 shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${questionTypeFilter === 'mc'
+                      ? 'bg-background-muted text-blue-700 border border-blue-200 shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                   >
                     MC
                   </button>
                   <button
                     onClick={() => setQuestionTypeFilter('id')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      questionTypeFilter === 'id'
-                        ? 'bg-background-muted text-green-700 border border-green-200 shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${questionTypeFilter === 'id'
+                      ? 'bg-background-muted text-green-700 border border-green-200 shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                   >
                     ID
                   </button>
                   <button
                     onClick={() => setQuestionTypeFilter('essay')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      questionTypeFilter === 'essay'
-                        ? 'bg-background-muted text-primary-dark border border-primary/20 shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${questionTypeFilter === 'essay'
+                      ? 'bg-background-muted text-primary-dark border border-primary/20 shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                   >
                     Essay
                   </button>
@@ -434,33 +426,30 @@ export default function ExamsPage() {
                 <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
                   <button
                     onClick={() => setSortBy('recent')}
-                    className={`p-2 rounded-md transition-all ${
-                      sortBy === 'recent'
-                        ? 'bg-surface text-primary shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`p-2 rounded-md transition-all ${sortBy === 'recent'
+                      ? 'bg-surface text-primary shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                     title="Sort by recent"
                   >
                     <Clock01Icon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setSortBy('alphabetical')}
-                    className={`p-2 rounded-md transition-all ${
-                      sortBy === 'alphabetical'
-                        ? 'bg-surface text-primary shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`p-2 rounded-md transition-all ${sortBy === 'alphabetical'
+                      ? 'bg-surface text-primary shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                     title="Sort alphabetically"
                   >
                     <SortingAZ01Icon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setSortBy('oldest')}
-                    className={`p-2 rounded-md transition-all ${
-                      sortBy === 'oldest'
-                        ? 'bg-surface text-primary shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`p-2 rounded-md transition-all ${sortBy === 'oldest'
+                      ? 'bg-surface text-primary shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                     title="Sort by oldest"
                   >
                     <Calendar03Icon className="w-4 h-4" />
@@ -476,22 +465,20 @@ export default function ExamsPage() {
                 <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded-md transition-all ${
-                      viewMode === 'grid'
-                        ? 'bg-surface text-primary shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`p-2 rounded-md transition-all ${viewMode === 'grid'
+                      ? 'bg-surface text-primary shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                     title="Grid view"
                   >
                     <GridViewIcon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-2 rounded-md transition-all ${
-                      viewMode === 'list'
-                        ? 'bg-surface text-primary shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                    }`}
+                    className={`p-2 rounded-md transition-all ${viewMode === 'list'
+                      ? 'bg-surface text-primary shadow-sm'
+                      : 'text-foreground-muted hover:text-foreground'
+                      }`}
                     title="List view"
                   >
                     <Menu01Icon className="w-4 h-4" />
@@ -554,41 +541,37 @@ export default function ExamsPage() {
             <div className="mt-2 flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setDifficultyFilter('all')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  difficultyFilter === 'all'
-                    ? 'bg-background-muted text-foreground border border-border'
-                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                }`}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${difficultyFilter === 'all'
+                  ? 'bg-background-muted text-foreground border border-border'
+                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                  }`}
               >
                 All
               </button>
               <button
                 onClick={() => setDifficultyFilter('easy')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  difficultyFilter === 'easy'
-                    ? 'bg-background-muted text-emerald-700 border border-emerald-200'
-                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                }`}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${difficultyFilter === 'easy'
+                  ? 'bg-background-muted text-emerald-700 border border-emerald-200'
+                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                  }`}
               >
                 Easy
               </button>
               <button
                 onClick={() => setDifficultyFilter('medium')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  difficultyFilter === 'medium'
-                    ? 'bg-background-muted text-amber-700 border border-amber-200'
-                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                }`}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${difficultyFilter === 'medium'
+                  ? 'bg-background-muted text-amber-700 border border-amber-200'
+                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                  }`}
               >
                 Medium
               </button>
               <button
                 onClick={() => setDifficultyFilter('hard')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  difficultyFilter === 'hard'
-                    ? 'bg-background-muted text-red-700 border border-red-200'
-                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                }`}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${difficultyFilter === 'hard'
+                  ? 'bg-background-muted text-red-700 border border-red-200'
+                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                  }`}
               >
                 Hard
               </button>
@@ -603,41 +586,37 @@ export default function ExamsPage() {
             <div className="mt-2 flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setQuestionTypeFilter('all')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  questionTypeFilter === 'all'
-                    ? 'bg-background-muted text-foreground border border-border'
-                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                }`}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${questionTypeFilter === 'all'
+                  ? 'bg-background-muted text-foreground border border-border'
+                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                  }`}
               >
                 All
               </button>
               <button
                 onClick={() => setQuestionTypeFilter('mc')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  questionTypeFilter === 'mc'
-                    ? 'bg-background-muted text-blue-700 border border-blue-200'
-                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                }`}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${questionTypeFilter === 'mc'
+                  ? 'bg-background-muted text-blue-700 border border-blue-200'
+                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                  }`}
               >
                 MC
               </button>
               <button
                 onClick={() => setQuestionTypeFilter('id')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  questionTypeFilter === 'id'
-                    ? 'bg-background-muted text-green-700 border border-green-200'
-                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                }`}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${questionTypeFilter === 'id'
+                  ? 'bg-background-muted text-green-700 border border-green-200'
+                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                  }`}
               >
                 ID
               </button>
               <button
                 onClick={() => setQuestionTypeFilter('essay')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  questionTypeFilter === 'essay'
-                    ? 'bg-background-muted text-primary-dark border border-primary/20'
-                    : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                }`}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${questionTypeFilter === 'essay'
+                  ? 'bg-background-muted text-primary-dark border border-primary/20'
+                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+                  }`}
               >
                 Essay
               </button>
@@ -652,33 +631,30 @@ export default function ExamsPage() {
             <div className="mt-2 flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
               <button
                 onClick={() => setSortBy('recent')}
-                className={`p-2 rounded-md transition-all ${
-                  sortBy === 'recent'
-                    ? 'bg-surface text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
+                className={`p-2 rounded-md transition-all ${sortBy === 'recent'
+                  ? 'bg-surface text-primary shadow-sm'
+                  : 'text-foreground-muted hover:text-foreground'
+                  }`}
                 title="Sort by recent"
               >
                 <Clock01Icon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setSortBy('alphabetical')}
-                className={`p-2 rounded-md transition-all ${
-                  sortBy === 'alphabetical'
-                    ? 'bg-surface text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
+                className={`p-2 rounded-md transition-all ${sortBy === 'alphabetical'
+                  ? 'bg-surface text-primary shadow-sm'
+                  : 'text-foreground-muted hover:text-foreground'
+                  }`}
                 title="Sort alphabetically"
               >
                 <SortingAZ01Icon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setSortBy('oldest')}
-                className={`p-2 rounded-md transition-all ${
-                  sortBy === 'oldest'
-                    ? 'bg-surface text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
+                className={`p-2 rounded-md transition-all ${sortBy === 'oldest'
+                  ? 'bg-surface text-primary shadow-sm'
+                  : 'text-foreground-muted hover:text-foreground'
+                  }`}
                 title="Sort by oldest"
               >
                 <Calendar03Icon className="w-4 h-4" />
@@ -694,22 +670,20 @@ export default function ExamsPage() {
             <div className="mt-2 flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-md transition-all ${
-                  viewMode === 'grid'
-                    ? 'bg-surface text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
+                className={`p-2 rounded-md transition-all ${viewMode === 'grid'
+                  ? 'bg-surface text-primary shadow-sm'
+                  : 'text-foreground-muted hover:text-foreground'
+                  }`}
                 title="Grid view"
               >
                 <GridViewIcon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md transition-all ${
-                  viewMode === 'list'
-                    ? 'bg-surface text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
+                className={`p-2 rounded-md transition-all ${viewMode === 'list'
+                  ? 'bg-surface text-primary shadow-sm'
+                  : 'text-foreground-muted hover:text-foreground'
+                  }`}
                 title="List view"
               >
                 <Menu01Icon className="w-4 h-4" />
@@ -774,31 +748,36 @@ function ExamsHeader({
     <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         {/* Title area */}
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 min-w-0">
           <ExamIcon className="w-12 h-12 text-primary shrink-0" />
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground truncate">
                 Exams
               </h1>
-              <ClayBadge variant="accent" className="text-xs px-2 py-1">
-                <SparklesIcon className="w-3 h-3" />
-                {totalExams} exams &middot; {totalQuestions} questions
-              </ClayBadge>
+              <div className="flex shrink-0">
+                <ClayBadge variant="accent" className="text-[10px] sm:text-xs px-2 py-1">
+                  <SparklesIcon className="w-3 h-3" />
+                  {totalExams} exams &middot; {totalQuestions} questions
+                </ClayBadge>
+              </div>
             </div>
-            <p className="text-foreground-muted">
+            <p className="text-sm sm:text-base text-foreground-muted truncate">
               Test your knowledge with AI-generated practice exams
             </p>
           </div>
         </div>
 
         {/* CTA */}
-        <HeroActionButton
-          icon={<ExamAddIcon className="w-5 h-5" />}
-          onClick={onCreateNew}
-        >
-          Create Exam
-        </HeroActionButton>
+        <div className="shrink-0">
+          <HeroActionButton
+            icon={<ExamAddIcon className="w-5 h-5" />}
+            onClick={onCreateNew}
+            className="w-full sm:w-auto justify-center"
+          >
+            Create Exam
+          </HeroActionButton>
+        </div>
       </div>
     </ClayCard>
   );
@@ -958,18 +937,18 @@ function EmptyState({
 function MiniExamDocument({ difficulty }: { difficulty: string }) {
   const accentColor =
     difficulty === 'easy' ? '#22c55e' :
-    difficulty === 'medium' ? '#f59e0b' :
-    difficulty === 'hard' ? '#ef4444' :
-    '#6366f1'; // mixed
+      difficulty === 'medium' ? '#f59e0b' :
+        difficulty === 'hard' ? '#ef4444' :
+          '#6366f1'; // mixed
 
   const accentLight =
     difficulty === 'easy' ? '#4ade80' :
-    difficulty === 'medium' ? '#fbbf24' :
-    difficulty === 'hard' ? '#f87171' :
-    '#818cf8';
+      difficulty === 'medium' ? '#fbbf24' :
+        difficulty === 'hard' ? '#f87171' :
+          '#818cf8';
 
   return (
-    <div className="relative flex-shrink-0" style={{ width: 54, height: 62 }}>
+    <div className="relative flex-shrink-0 scale-75 sm:scale-100 origin-left" style={{ width: 54, height: 62 }}>
       {/* Page stack shadow layers */}
       <div
         className="absolute rounded-[5px]"
@@ -1173,11 +1152,10 @@ function ExamGridItem({
 
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <button
-                className={`p-1.5 rounded-md transition-colors ${
-                  shareLinkCopied
-                    ? 'text-emerald-500 bg-emerald-500/10'
-                    : 'text-primary bg-primary/10 hover:bg-primary/20'
-                }`}
+                className={`p-1.5 rounded-md transition-colors ${shareLinkCopied
+                  ? 'text-emerald-500 bg-emerald-500/10'
+                  : 'text-primary bg-primary/10 hover:bg-primary/20'
+                  }`}
                 title={shareLinkCopied ? 'Copied!' : 'Share'}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1228,9 +1206,9 @@ function ExamListItemComponent({
   // Difficulty accent color
   const difficultyAccent =
     exam.difficulty === 'easy' ? { from: '#4ade80', to: '#22c55e' } :
-    exam.difficulty === 'medium' ? { from: '#fbbf24', to: '#f59e0b' } :
-    exam.difficulty === 'hard' ? { from: '#f87171', to: '#ef4444' } :
-    { from: '#818cf8', to: '#6366f1' };
+      exam.difficulty === 'medium' ? { from: '#fbbf24', to: '#f59e0b' } :
+        exam.difficulty === 'hard' ? { from: '#f87171', to: '#ef4444' } :
+          { from: '#818cf8', to: '#6366f1' };
 
   // Encouraging message for scores
   const getScoreMessage = (score: number) => {
@@ -1263,32 +1241,36 @@ function ExamListItemComponent({
             style={{ background: `linear-gradient(180deg, ${difficultyAccent.from}, ${difficultyAccent.to})` }}
           />
 
-          <div className="flex items-center gap-4 p-3 pr-5 flex-1 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-4 p-2 sm:p-3 pr-3 sm:pr-5 flex-1 min-w-0">
             {/* 3D mini exam document */}
-            <MiniExamDocument difficulty={exam.difficulty} />
+            <div className="shrink-0 w-10 sm:w-[54px]">
+              <MiniExamDocument difficulty={exam.difficulty} />
+            </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors flex-1 min-w-[120px]">
                   {exam.title}
                 </h3>
-                <span className={clsx(
-                  'text-[10px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded shrink-0',
-                  {
-                    'text-emerald-700 bg-emerald-50': exam.difficulty === 'easy',
-                    'text-amber-700 bg-amber-50': exam.difficulty === 'medium',
-                    'text-red-600 bg-red-50': exam.difficulty === 'hard',
-                    'text-primary bg-primary/5': exam.difficulty === 'mixed',
-                  }
-                )}>
-                  {exam.difficulty}
-                </span>
-                {exam.is_public && (
-                  <span className="text-[10px] font-medium uppercase tracking-wide text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">
-                    Public
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className={clsx(
+                    'text-[10px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded',
+                    {
+                      'text-emerald-700 bg-emerald-50': exam.difficulty === 'easy',
+                      'text-amber-700 bg-amber-50': exam.difficulty === 'medium',
+                      'text-red-600 bg-red-50': exam.difficulty === 'hard',
+                      'text-primary bg-primary/5': exam.difficulty === 'mixed',
+                    }
+                  )}>
+                    {exam.difficulty}
                   </span>
-                )}
+                  {exam.is_public && (
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                      Public
+                    </span>
+                  )}
+                </div>
               </div>
               {/* Source note */}
               {exam.notes && (
@@ -1296,7 +1278,7 @@ function ExamListItemComponent({
                   From: {exam.notes.title}
                 </p>
               )}
-              <div className="flex items-center gap-3 mt-1">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                 <span className="text-xs text-foreground-muted flex items-center gap-1">
                   <Clock01Icon className="w-3 h-3" />
                   {formatDate(exam.created_at)}
@@ -1314,8 +1296,8 @@ function ExamListItemComponent({
                 </span>
                 {/* Best score with encouraging message */}
                 {exam.best_score !== null && (
-                  <div className="hidden sm:flex items-center gap-1.5">
-                    <div className="w-20 bg-surface rounded-full h-1.5 overflow-hidden">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="w-16 sm:w-20 bg-surface rounded-full h-1.5 overflow-hidden shrink-0">
                       <div
                         className={clsx('h-full rounded-full transition-all duration-500', {
                           'bg-emerald-400': exam.best_score >= 80,
@@ -1325,14 +1307,14 @@ function ExamListItemComponent({
                         style={{ width: `${scorePercent}%` }}
                       />
                     </div>
-                    <span className={clsx('text-[10px] font-bold', {
+                    <span className={clsx('text-[10px] font-bold shrink-0', {
                       'text-emerald-600': exam.best_score >= 80,
                       'text-amber-600': exam.best_score >= 50 && exam.best_score < 80,
                       'text-red-500': exam.best_score < 50,
                     })}>
                       {exam.best_score}%
                     </span>
-                    <span className="text-[10px] text-foreground-muted hidden lg:inline">
+                    <span className="text-[10px] text-foreground-muted hidden lg:inline truncate">
                       {getScoreMessage(exam.best_score)}
                     </span>
                   </div>
@@ -1341,7 +1323,7 @@ function ExamListItemComponent({
                   <span className="hidden sm:inline text-[10px] text-foreground-muted italic">Not attempted</span>
                 )}
                 {/* Question type badges */}
-                <div className="hidden md:flex items-center gap-1">
+                <div className="flex items-center gap-1 mt-0.5 sm:mt-0">
                   {exam.include_multiple_choice && (
                     <span className="text-[10px] font-medium text-foreground-muted bg-surface px-1.5 py-0.5 rounded">MC</span>
                   )}
@@ -1355,14 +1337,13 @@ function ExamListItemComponent({
               </div>
             </div>
 
-            {/* Actions - appear on hover */}
-            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+            {/* Actions - appear on hover (hidden on mobile) */}
+            <div className="hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
               <button
-                className={`p-2 rounded-lg transition-colors ${
-                  shareLinkCopied
-                    ? 'bg-emerald-500/10 text-emerald-500'
-                    : 'bg-primary/10 text-primary hover:bg-primary/20'
-                }`}
+                className={`p-2 rounded-lg transition-colors ${shareLinkCopied
+                  ? 'bg-emerald-500/10 text-emerald-500'
+                  : 'bg-primary/10 text-primary hover:bg-primary/20'
+                  }`}
                 title={shareLinkCopied ? 'Copied!' : 'Share'}
                 onClick={(e) => {
                   e.stopPropagation();

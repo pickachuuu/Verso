@@ -267,15 +267,13 @@ export default function LibraryPage() {
         {/* Success/Error Message */}
         {saveSuccess && (
           <div
-            className={`px-4 py-3 rounded-xl border-2 transition-all ${
-              saveSuccess.includes('Error')
+            className={`px-4 py-3 rounded-xl border-2 transition-all ${saveSuccess.includes('Error')
                 ? 'border-red-200 bg-red-50'
                 : 'border-green-200 bg-green-50'
-            }`}
+              }`}
           >
-            <p className={`text-sm font-semibold ${
-              saveSuccess.includes('Error') ? 'text-red-600' : 'text-green-600'
-            }`}>
+            <p className={`text-sm font-semibold ${saveSuccess.includes('Error') ? 'text-red-600' : 'text-green-600'
+              }`}>
               {saveSuccess}
             </p>
           </div>
@@ -284,37 +282,37 @@ export default function LibraryPage() {
         <div className="grid gap-6 lg:grid-cols-12">
           {/* Main content */}
           <div className="order-2 lg:order-1 lg:col-span-8 space-y-4">
-          {/* Mobile controls */}
-          <div className="lg:hidden space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl bg-surface border border-border">
-                <Search01Icon className="w-4 h-4 text-foreground-muted" />
-                <input
-                  type="text"
-                  placeholder="Search notebooks..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent border-none focus:outline-none text-sm text-foreground placeholder:text-foreground-muted"
-                />
+            {/* Mobile controls */}
+            <div className="lg:hidden space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl bg-surface border border-border">
+                  <Search01Icon className="w-4 h-4 text-foreground-muted" />
+                  <input
+                    type="text"
+                    placeholder="Search notebooks..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-transparent border-none focus:outline-none text-sm text-foreground placeholder:text-foreground-muted"
+                  />
+                </div>
+                <button
+                  onClick={() => setMobileFiltersOpen(true)}
+                  className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-colors"
+                >
+                  <FilterIcon className="w-4 h-4 text-foreground-muted" />
+                  Filters
+                  {activeFilters > 0 && (
+                    <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-background-muted text-foreground">
+                      {activeFilters}
+                    </span>
+                  )}
+                </button>
               </div>
-              <button
-                onClick={() => setMobileFiltersOpen(true)}
-                className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-colors"
-              >
-                <FilterIcon className="w-4 h-4 text-foreground-muted" />
-                Filters
-                {activeFilters > 0 && (
-                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-background-muted text-foreground">
-                    {activeFilters}
-                  </span>
-                )}
-              </button>
+              <div className="flex items-center justify-between text-xs text-foreground-muted">
+                <span>Showing {processedNotes.length} notebook{processedNotes.length !== 1 ? 's' : ''}</span>
+                <span>{colorLabel} · {sortLabel}</span>
+              </div>
             </div>
-            <div className="flex items-center justify-between text-xs text-foreground-muted">
-              <span>Showing {processedNotes.length} notebook{processedNotes.length !== 1 ? 's' : ''}</span>
-              <span>{colorLabel} · {sortLabel}</span>
-            </div>
-          </div>
 
             {isLoading ? (
               <NotebooksSkeleton />
@@ -380,11 +378,10 @@ export default function LibraryPage() {
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <button
                       onClick={() => setSelectedColor('all')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
-                        selectedColor === 'all'
+                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${selectedColor === 'all'
                           ? 'bg-background-muted text-foreground border-border'
                           : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
-                      }`}
+                        }`}
                     >
                       All
                     </button>
@@ -392,9 +389,8 @@ export default function LibraryPage() {
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}
-                        className={`w-7 h-7 rounded-md transition-all border ${
-                          selectedColor === color ? 'border-pencil/60 ring-2 ring-offset-1 ring-foreground/20 scale-105' : 'border-transparent hover:scale-105'
-                        }`}
+                        className={`w-7 h-7 rounded-md transition-all border ${selectedColor === color ? 'border-pencil/60 ring-2 ring-offset-1 ring-foreground/20 scale-105' : 'border-transparent hover:scale-105'
+                          }`}
                         style={{ background: NOTEBOOK_COLORS[color].primary }}
                         title={NOTEBOOK_COLORS[color].name}
                       />
@@ -410,33 +406,30 @@ export default function LibraryPage() {
                   <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
                     <button
                       onClick={() => setSortBy('recent')}
-                      className={`p-2 rounded-md transition-all ${
-                        sortBy === 'recent'
+                      className={`p-2 rounded-md transition-all ${sortBy === 'recent'
                           ? 'bg-surface text-primary shadow-sm'
                           : 'text-foreground-muted hover:text-foreground'
-                      }`}
+                        }`}
                       title="Sort by recent"
                     >
                       <Clock01Icon className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setSortBy('alphabetical')}
-                      className={`p-2 rounded-md transition-all ${
-                        sortBy === 'alphabetical'
+                      className={`p-2 rounded-md transition-all ${sortBy === 'alphabetical'
                           ? 'bg-surface text-primary shadow-sm'
                           : 'text-foreground-muted hover:text-foreground'
-                      }`}
+                        }`}
                       title="Sort alphabetically"
                     >
                       <SortingAZ01Icon className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setSortBy('oldest')}
-                      className={`p-2 rounded-md transition-all ${
-                        sortBy === 'oldest'
+                      className={`p-2 rounded-md transition-all ${sortBy === 'oldest'
                           ? 'bg-surface text-primary shadow-sm'
                           : 'text-foreground-muted hover:text-foreground'
-                      }`}
+                        }`}
                       title="Sort by oldest"
                     >
                       <Calendar03Icon className="w-4 h-4" />
@@ -499,11 +492,10 @@ export default function LibraryPage() {
             <div className="mt-2 flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setSelectedColor('all')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${
-                  selectedColor === 'all'
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${selectedColor === 'all'
                     ? 'bg-background-muted text-foreground border-border'
                     : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
-                }`}
+                  }`}
               >
                 All
               </button>
@@ -511,9 +503,8 @@ export default function LibraryPage() {
                 <button
                   key={color}
                   onClick={() => setSelectedColor(color)}
-                  className={`w-7 h-7 rounded-md transition-all border ${
-                    selectedColor === color ? 'border-pencil/60 ring-2 ring-offset-1 ring-foreground/20 scale-105' : 'border-transparent hover:scale-105'
-                  }`}
+                  className={`w-7 h-7 rounded-md transition-all border ${selectedColor === color ? 'border-pencil/60 ring-2 ring-offset-1 ring-foreground/20 scale-105' : 'border-transparent hover:scale-105'
+                    }`}
                   style={{ background: NOTEBOOK_COLORS[color].primary }}
                   title={NOTEBOOK_COLORS[color].name}
                 />
@@ -529,33 +520,30 @@ export default function LibraryPage() {
             <div className="mt-2 flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
               <button
                 onClick={() => setSortBy('recent')}
-                className={`p-2 rounded-md transition-all ${
-                  sortBy === 'recent'
+                className={`p-2 rounded-md transition-all ${sortBy === 'recent'
                     ? 'bg-surface text-primary shadow-sm'
                     : 'text-foreground-muted hover:text-foreground'
-                }`}
+                  }`}
                 title="Sort by recent"
               >
                 <Clock01Icon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setSortBy('alphabetical')}
-                className={`p-2 rounded-md transition-all ${
-                  sortBy === 'alphabetical'
+                className={`p-2 rounded-md transition-all ${sortBy === 'alphabetical'
                     ? 'bg-surface text-primary shadow-sm'
                     : 'text-foreground-muted hover:text-foreground'
-                }`}
+                  }`}
                 title="Sort alphabetically"
               >
                 <SortingAZ01Icon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setSortBy('oldest')}
-                className={`p-2 rounded-md transition-all ${
-                  sortBy === 'oldest'
+                className={`p-2 rounded-md transition-all ${sortBy === 'oldest'
                     ? 'bg-surface text-primary shadow-sm'
                     : 'text-foreground-muted hover:text-foreground'
-                }`}
+                  }`}
                 title="Sort by oldest"
               >
                 <Calendar03Icon className="w-4 h-4" />
@@ -805,7 +793,7 @@ function NotebookListItem({
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                <h3 className="font-semibold text-foreground break-words overflow-hidden group-hover:text-primary transition-colors">
                   {note.title || 'Untitled Notebook'}
                 </h3>
                 {note.is_public && (
@@ -853,11 +841,10 @@ function NotebookListItem({
             {/* Actions */}
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
               <button
-                className={`p-2 rounded-lg transition-colors ${
-                  shareLinkCopied
+                className={`p-2 rounded-lg transition-colors ${shareLinkCopied
                     ? 'bg-emerald-500/10 text-emerald-500'
                     : 'bg-primary/10 text-primary hover:bg-primary/20'
-                }`}
+                  }`}
                 title={shareLinkCopied ? 'Copied!' : 'Share'}
                 onClick={(e) => {
                   e.preventDefault();

@@ -354,7 +354,7 @@ export default function StudyPage() {
       {/* Header */}
       <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0">
             <button
               onClick={handleBackToSet}
               className="p-2.5 rounded-xl bg-background-muted border border-border hover:bg-background-muted/70 transition-all flex-shrink-0"
@@ -362,25 +362,25 @@ export default function StudyPage() {
             >
               <ArrowLeft01Icon className="w-4 h-4 text-foreground-muted" />
             </button>
-            <div className="p-3 rounded-2xl bg-background-muted border border-border">
+            <div className="p-3 rounded-2xl bg-background-muted border border-border shrink-0 hidden sm:block">
               <FlashcardIcon className="w-6 h-6 text-primary" />
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">Study session</p>
-              <h1 className="text-xl md:text-2xl font-bold text-foreground">{setTitle}</h1>
-              <p className="text-sm text-foreground-muted mt-1">
-                Card {currentIndex + 1} of {dueCards.length} due
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-foreground-muted">Study session</p>
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate" title={setTitle}>{setTitle}</h1>
+              <p className="text-xs sm:text-sm text-foreground-muted mt-0.5 sm:mt-1">
+                Card {currentIndex + 1} of {dueCards.length}
               </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-background-muted border border-border text-foreground">
+            <span className="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-background-muted border border-border text-foreground">
               Study Mode
             </span>
-            <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-background-muted border border-border text-foreground-muted">
+            <span className="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-background-muted border border-border text-foreground-muted">
               Due {dueCards.length}
             </span>
-            <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-background-muted border border-border text-foreground-muted">
+            <span className="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-background-muted border border-border text-foreground-muted">
               Accuracy {liveAccuracyLabel}
             </span>
           </div>
@@ -390,8 +390,21 @@ export default function StudyPage() {
       {/* Study stage */}
       {currentCard && (
         <ClayCard variant="default" padding="none" className="rounded-[32px] overflow-hidden">
+          {/* Mobile-only compact progress bar */}
+          <div className="lg:hidden border-b border-border/60 p-4">
+            <div className="flex items-center justify-between text-xs text-foreground-muted mb-2">
+              <span>{reviewedCount} reviewed</span>
+              <span>{remainingCount} left · {liveAccuracyLabel} accuracy</span>
+            </div>
+            <div className="h-2 rounded-full bg-background-muted overflow-hidden border border-border/30">
+              <div
+                className="h-full rounded-full bg-primary/70 transition-all duration-500"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
           <div className="grid lg:grid-cols-[240px_1fr]">
-            <aside className="bg-background-muted/60 border-r border-border/60 p-6 flex flex-col gap-6">
+            <aside className="hidden lg:flex bg-background-muted/60 border-r border-border/60 p-6 flex-col gap-6">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">Session progress</p>
                 <div className="mt-3">
@@ -494,11 +507,10 @@ export default function StudyPage() {
 
                   {lastReviewResult && (
                     <div
-                      className={`p-4 rounded-xl text-center border ${
-                        lastReviewResult.wasSuccessful
-                          ? 'bg-primary/10 border-primary/20 text-primary'
-                          : 'bg-red-500/10 border-red-500/20 text-red-500'
-                      }`}
+                      className={`p-4 rounded-xl text-center border ${lastReviewResult.wasSuccessful
+                        ? 'bg-primary/10 border-primary/20 text-primary'
+                        : 'bg-red-500/10 border-red-500/20 text-red-500'
+                        }`}
                     >
                       <span className="font-semibold">
                         {lastReviewResult.wasSuccessful ? 'Correct!' : 'Keep practicing!'}

@@ -45,8 +45,8 @@ export default function PublicNotePage() {
   const previousContentRef = useRef<ReactNode>(null);
 
   const notebookContainerRef = useRef<HTMLDivElement>(null);
-  const rawScale = useNotebookScale(notebookContainerRef);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const rawScale = useNotebookScale(notebookContainerRef, { widthOnly: isSmallScreen });
 
   const saveReferenceMutation = useSaveReference();
   const copyNoteMutation = useCopyPublicNote();
@@ -130,8 +130,8 @@ export default function PublicNotePage() {
         <ClayNotebookCover
           mode="editor"
           title={note?.title || 'Untitled Notebook'}
-          onTitleChange={() => {}}
-          onOpen={() => {}}
+          onTitleChange={() => { }}
+          onOpen={() => { }}
           color={coverColor}
           theme={theme}
           readOnly
@@ -145,8 +145,8 @@ export default function PublicNotePage() {
         <TableOfContents
           notebookTitle={note?.title || 'Untitled Notebook'}
           pages={pagesToShow}
-          onPageClick={() => {}}
-          onAddPage={() => {}}
+          onPageClick={() => { }}
+          onAddPage={() => { }}
           theme={theme}
           readOnly
         />
@@ -157,7 +157,7 @@ export default function PublicNotePage() {
     previousContentRef.current = (
       <NotebookPage
         content={currentPageContent}
-        onChange={() => {}}
+        onChange={() => { }}
         theme={theme}
         readOnly
       />
@@ -275,7 +275,7 @@ export default function PublicNotePage() {
     <ClayNotebookCover
       mode="editor"
       title={note.title || 'Untitled Notebook'}
-      onTitleChange={() => {}}
+      onTitleChange={() => { }}
       onOpen={handleOpenContents}
       color={coverColor}
       theme={theme}
@@ -288,7 +288,7 @@ export default function PublicNotePage() {
       notebookTitle={note.title || 'Untitled Notebook'}
       pages={pagesToShow}
       onPageClick={handlePageClick}
-      onAddPage={() => {}}
+      onAddPage={() => { }}
       theme={theme}
       readOnly
     />
@@ -297,7 +297,7 @@ export default function PublicNotePage() {
   const pageComponent = (
     <NotebookPage
       content={currentPageContent}
-      onChange={() => {}}
+      onChange={() => { }}
       theme={theme}
       readOnly
     />
@@ -306,8 +306,8 @@ export default function PublicNotePage() {
   const pageIndicator = currentView === 'page' && currentPageIndex !== null
     ? `Page ${currentPageIndex + 1} of ${pagesToShow.length}`
     : currentView === 'toc'
-    ? 'Table of Contents'
-    : 'Notebook Cover';
+      ? 'Table of Contents'
+      : 'Notebook Cover';
 
   const canGoPrev = currentView !== 'cover';
   const canGoNext = currentView !== 'page'
@@ -357,25 +357,34 @@ export default function PublicNotePage() {
           </div>
         </ClayCard>
 
-        <div ref={notebookContainerRef} className="relative w-full min-h-[70vh] flex justify-center">
+        <div ref={notebookContainerRef} className="relative w-full min-h-[70vh] flex items-start justify-center">
           <div
+            className="relative"
             style={{
-              width: NOTEBOOK_WIDTH,
-              height: NOTEBOOK_HEIGHT,
-              transform: `scale(${scale})`,
-              transformOrigin: 'top left',
+              width: NOTEBOOK_WIDTH * scale,
+              height: NOTEBOOK_HEIGHT * scale,
             }}
           >
-            <PageFlipContainer
-              currentView={currentView}
-              currentPageIndex={currentView === 'page' ? currentPageIndex : null}
-              totalPages={pagesToShow.length}
-              cover={coverComponent}
-              toc={tocComponent}
-              pageContent={pageComponent}
-              previousContent={previousContentRef.current || undefined}
-              theme={theme}
-            />
+            <div
+              className="relative"
+              style={{
+                width: NOTEBOOK_WIDTH,
+                height: NOTEBOOK_HEIGHT,
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left',
+              }}
+            >
+              <PageFlipContainer
+                currentView={currentView}
+                currentPageIndex={currentView === 'page' ? currentPageIndex : null}
+                totalPages={pagesToShow.length}
+                cover={coverComponent}
+                toc={tocComponent}
+                pageContent={pageComponent}
+                previousContent={previousContentRef.current || undefined}
+                theme={theme}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -104,7 +104,7 @@ export default function TakeExamPage() {
     };
 
     loadExam();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [examId]);
 
   // Timer
@@ -226,41 +226,43 @@ export default function TakeExamPage() {
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Fixed Header */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-surface border-border">
-        <div className="flex items-center gap-3 px-4 py-2">
+        <div className="flex items-center gap-1.5 sm:gap-3 px-3 sm:px-4 py-2">
           <Link
             href="/exams"
-            className="p-1.5 rounded transition-colors hover:bg-surface-elevated"
+            className="p-1.5 rounded transition-colors hover:bg-surface-elevated shrink-0"
           >
             <ArrowLeft02Icon className="w-5 h-5 text-foreground-muted" />
           </Link>
 
-          <div className="p-1 rounded bg-amber-100/50">
+          <div className="hidden sm:block p-1 rounded bg-amber-100/50 shrink-0">
             <ExamIcon className="w-4 h-4 text-amber-700" />
           </div>
 
           <div className="flex-1 min-w-0">
-            <span className="text-sm font-medium text-foreground truncate">{exam.title}</span>
+            <h1 className="text-sm font-semibold text-foreground truncate" title={exam.title}>
+              {exam.title}
+            </h1>
           </div>
 
           {timeRemaining !== null && (
-            <div className={`flex items-center gap-1.5 text-sm font-mono ${timeRemaining <= 300 ? 'text-red-600' : 'text-foreground-muted'}`}>
-              <Clock01Icon className="w-4 h-4" />
+            <div className={`flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-mono shrink-0 ${timeRemaining <= 300 ? 'text-red-600' : 'text-foreground-muted'}`}>
+              <Clock01Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{formatTime(timeRemaining)}</span>
             </div>
           )}
 
-          <span className="text-xs text-foreground-muted">{progress.answered}/{progress.total}</span>
+          <span className="text-xs text-foreground-muted shrink-0 hidden sm:inline">{progress.answered}/{progress.total}</span>
 
           <button
             onClick={() => setShowConfirmSubmit(true)}
-            className="px-4 py-1.5 rounded-xl bg-primary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all"
+            className="px-3 sm:px-4 py-1.5 rounded-xl bg-primary text-white text-xs sm:text-sm font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all shrink-0"
           >
             Submit
           </button>
 
           <Link
             href="/dashboard"
-            className="p-1.5 rounded transition-colors hover:bg-surface-elevated"
+            className="p-1.5 rounded transition-colors hover:bg-surface-elevated shrink-0 hidden sm:flex"
           >
             <Home01Icon className="w-5 h-5 text-foreground-muted" />
           </Link>

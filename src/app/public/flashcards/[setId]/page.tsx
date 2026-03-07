@@ -222,7 +222,7 @@ export default function PublicFlashcardSetPage() {
   return (
     <div className="max-w-5xl mx-auto py-8 space-y-6">
       <ClayCard variant="elevated" padding="md" className="rounded-3xl">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/community"
@@ -232,7 +232,7 @@ export default function PublicFlashcardSetPage() {
               <ArrowLeft01Icon className="w-4 h-4 text-foreground-muted" />
             </Link>
             <div className="min-w-0">
-              <h1 className="text-xl font-bold text-foreground truncate">
+              <h1 className="text-xl font-bold text-foreground break-words overflow-hidden">
                 {set.title || 'Flashcards'}
               </h1>
               <p className="text-xs text-foreground-muted mt-0.5">
@@ -241,7 +241,7 @@ export default function PublicFlashcardSetPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               onClick={() => setIsSaveModalOpen(true)}
               variant="outline"
@@ -258,7 +258,8 @@ export default function PublicFlashcardSetPage() {
               className="shrink-0"
             >
               <Share01Icon className="w-4 h-4 mr-2" />
-              Copy Link
+              <span className="hidden sm:inline">Copy Link</span>
+              <span className="sm:hidden">Share</span>
             </Button>
           </div>
         </div>
@@ -356,8 +357,8 @@ function BrowseCard({
     card.difficulty_level === 1
       ? 'text-emerald-500'
       : card.difficulty_level === 3
-      ? 'text-red-500'
-      : 'text-amber-500';
+        ? 'text-red-500'
+        : 'text-amber-500';
 
   return (
     <ClayCard variant="default" padding="none" className="rounded-2xl overflow-hidden">
@@ -379,9 +380,8 @@ function BrowseCard({
           {statusStyle.label}
         </span>
         <ArrowDown01Icon
-          className={`w-4 h-4 text-foreground-muted transition-transform flex-shrink-0 ${
-            isExpanded ? 'rotate-180' : ''
-          }`}
+          className={`w-4 h-4 text-foreground-muted transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''
+            }`}
         />
       </button>
 

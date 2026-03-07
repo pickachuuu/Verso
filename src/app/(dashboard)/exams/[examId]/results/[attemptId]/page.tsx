@@ -151,25 +151,26 @@ export default function ExamResultsPage() {
     <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
         <ClayCard variant="elevated" padding="md" className="rounded-3xl">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/exams')}
-                className="p-2 rounded-xl bg-background-muted border border-border hover:bg-background-muted/70 transition-colors"
+                className="p-2 rounded-xl bg-background-muted border border-border hover:bg-background-muted/70 transition-colors shrink-0"
               >
                 <ArrowLeft01Icon className="w-5 h-5" />
               </button>
-              <div>
-                <h1 className="font-semibold text-foreground">{results.exam.title}</h1>
+              <div className="min-w-0">
+                <h1 className="font-semibold text-foreground truncate">{results.exam.title}</h1>
                 <p className="text-sm text-foreground-muted">Exam Results</p>
               </div>
             </div>
             <ClayButton
               variant="secondary"
               onClick={() => router.push(`/exams/${examId}`)}
+              className="shrink-0 self-start sm:self-auto"
             >
               <RotateClockwiseIcon className="w-4 h-4 mr-2" />
-              Retake Exam
+              Retake
             </ClayButton>
           </div>
         </ClayCard>
@@ -435,7 +436,7 @@ export default function ExamResultsPage() {
         </div>
 
         {/* Action buttons */}
-        <div className="flex justify-center gap-4 mt-8 pb-8">
+        <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-8 pb-8">
           <ClayButton
             variant="secondary"
             size="lg"
