@@ -242,7 +242,7 @@ export default function LandingPage() {
         </section>
 
         {/* ===== FLASHCARDS ===== */}
-        <section className="relative border-t border-border/60 bg-background-muted/60 overflow-x-clip">
+        <section className="relative bg-background-muted/60 overflow-x-clip">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -top-24 left-10 h-52 w-52 rounded-full bg-accent/12 blur-3xl" />
             <div className="absolute -bottom-20 right-8 h-60 w-60 rounded-full bg-primary/12 blur-3xl" />
@@ -415,7 +415,7 @@ export default function LandingPage() {
         </section>
 
         {/* ===== MOCK EXAMS ===== */}
-        <section className="relative border-t border-border/60 bg-background overflow-x-hidden overflow-y-visible">
+        <section className="relative bg-background overflow-x-hidden overflow-y-visible">
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div className="absolute -top-24 left-1/3 h-52 w-52 rounded-full bg-primary/8 blur-3xl" />
             <div className="absolute -bottom-20 right-1/4 h-60 w-60 rounded-full bg-accent/8 blur-3xl" />
