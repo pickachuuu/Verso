@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { PencilEdit01Icon, TextIcon, CheckmarkCircle01Icon, FireIcon, LeftToRightListNumberIcon, Tag01Icon } from 'hugeicons-react';
 import { NotebookIcon, FlashcardIcon, ExamIcon } from '@/component/icons';
 import { createClient } from '@/utils/supabase/client';
+import LandingNavbar from '@/component/Layout/navbar/LandingNavbar';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
@@ -48,32 +49,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-primary-dark/10 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-14 sm:h-16 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 sm:gap-3 group text-white">
-              <Image
-                src="/brand/verso-mark.png"
-                alt="Verso logo"
-                width={40}
-                height={40}
-                className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 group-hover:scale-105 transition-transform brightness-0 invert"
-                priority
-              />
-              <span className="text-lg sm:text-xl font-bold group-hover:text-blue-200 transition-colors">
-                Verso
-              </span>
-            </Link>
-            <div className="flex items-center gap-3">
-              <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
-                <ClayButton variant="secondary" size="sm">
-                  {isLoggedIn ? 'Dashboard' : 'Get Started'}
-                </ClayButton>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <LandingNavbar />
 
       <main className="flex-1">
         {/* ===== HERO ===== */}
@@ -171,7 +147,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.6 }}
               >
                 <Image
-                  src="/brand/earth-science-preview.png"
+                  src="/brand/notes-preview.png"
                   alt="Earth science notes preview"
                   width={991}
                   height={768}
@@ -204,13 +180,13 @@ export default function LandingPage() {
                   className="pointer-events-none absolute -top-[5.75rem] -right-10 lg:-top-[6.75rem] lg:-right-12 z-0 hidden lg:block w-[220px] lg:w-[265px] h-auto -rotate-6 opacity-95 drop-shadow-[0_18px_28px_rgba(0,0,0,0.24)]"
                 />
                 <motion.div className="relative mb-4 lg:pr-40" variants={fadeUp} transition={{ duration: 0.5 }}>
-                  <h2 className="relative z-10 max-w-xl text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-tight">
+                  <h2 className="relative z-10 max-w-xl text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-tight">
                     AI-Assisted <span className="text-accent">Note Writing</span>
                   </h2>
                 </motion.div>
 
                 <motion.p
-                  className="relative z-10 max-w-lg text-sm sm:text-lg text-foreground-muted leading-relaxed"
+                  className="relative z-10 max-w-lg text-base sm:text-xl text-foreground-muted leading-relaxed"
                   variants={fadeUp}
                   transition={{ duration: 0.5 }}
                 >
@@ -230,8 +206,8 @@ export default function LandingPage() {
                     <motion.div key={item.title} className="flex items-start gap-3" variants={staggerItem} transition={{ duration: 0.4 }}>
                       <item.icon className="w-5 h-5 text-accent shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-sm sm:text-base font-semibold text-foreground">{item.title}</p>
-                        <p className="text-sm text-foreground-muted leading-relaxed">{item.desc}</p>
+                        <p className="text-base font-semibold text-foreground">{item.title}</p>
+                        <p className="text-base text-foreground-muted leading-relaxed">{item.desc}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -268,14 +244,14 @@ export default function LandingPage() {
                   />
                 </motion.div>
                 <motion.h2
-                  className="text-2xl sm:text-4xl font-black tracking-tight text-foreground leading-tight"
+                  className="text-3xl sm:text-4xl font-black tracking-tight text-foreground leading-tight"
                   variants={fadeUp}
                   transition={{ duration: 0.5 }}
                 >
                   AI-Powered <span className="text-accent">Flashcards</span>
                 </motion.h2>
                 <motion.p
-                  className="max-w-lg text-sm sm:text-lg text-foreground-muted leading-relaxed"
+                  className="max-w-lg text-base sm:text-xl text-foreground-muted leading-relaxed"
                   variants={fadeUp}
                   transition={{ duration: 0.5 }}
                 >
@@ -321,9 +297,9 @@ export default function LandingPage() {
                     <div className="pb-4">
                       <div className="flex items-center gap-2 mb-0.5">
                         <item.icon className="w-4 h-4 text-accent" />
-                        <p className="text-sm sm:text-base font-semibold text-foreground">{item.label}</p>
+                        <p className="text-base font-semibold text-foreground">{item.label}</p>
                       </div>
-                      <p className="text-sm text-foreground-muted leading-relaxed">{item.desc}</p>
+                      <p className="text-base text-foreground-muted leading-relaxed">{item.desc}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -386,7 +362,7 @@ export default function LandingPage() {
                           <item.icon className="w-4 h-4 text-accent" />
                           <p className="text-base font-semibold text-foreground">{item.label}</p>
                         </div>
-                        <p className="text-sm text-foreground-muted leading-relaxed">{item.desc}</p>
+                        <p className="text-base text-foreground-muted leading-relaxed">{item.desc}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -489,14 +465,14 @@ export default function LandingPage() {
                   />
                 </motion.div>
                 <motion.h2
-                  className="text-2xl sm:text-4xl font-black tracking-tight text-foreground leading-tight"
+                  className="text-3xl sm:text-4xl font-black tracking-tight text-foreground leading-tight"
                   variants={fadeUp}
                   transition={{ duration: 0.5 }}
                 >
                   AI-Generated <span className="text-accent">Mock Exams</span>
                 </motion.h2>
                 <motion.p
-                  className="max-w-lg text-sm sm:text-lg text-foreground-muted leading-relaxed"
+                  className="max-w-lg text-base sm:text-xl text-foreground-muted leading-relaxed"
                   variants={fadeUp}
                   transition={{ duration: 0.5 }}
                 >
@@ -549,8 +525,8 @@ export default function LandingPage() {
                   <motion.div key={item.title} className="flex items-start gap-4" variants={staggerItem} transition={{ duration: 0.4 }}>
                     <item.icon className="w-6 h-6 text-accent shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm sm:text-base font-semibold text-foreground mb-0.5">{item.title}</p>
-                      <p className="text-sm text-foreground-muted leading-relaxed">{item.desc}</p>
+                      <p className="text-base font-semibold text-foreground mb-0.5">{item.title}</p>
+                      <p className="text-base text-foreground-muted leading-relaxed">{item.desc}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -612,7 +588,7 @@ export default function LandingPage() {
                       <motion.div key={item.title} className="flex flex-col items-center text-center" variants={staggerItem} transition={{ duration: 0.4 }}>
                         <item.icon className="w-7 h-7 text-accent mb-3" />
                         <p className="text-base font-semibold text-foreground mb-1">{item.title}</p>
-                        <p className="text-sm text-foreground-muted leading-relaxed max-w-[220px]">{item.desc}</p>
+                        <p className="text-base text-foreground-muted leading-relaxed max-w-[220px]">{item.desc}</p>
                       </motion.div>
                     ))}
                   </motion.div>
@@ -651,6 +627,105 @@ export default function LandingPage() {
 
           </div>
         </section>
+
+        {/* ===== COMMUNITY ===== */}
+        <section className="relative bg-background-muted/40 overflow-hidden border-y border-border/40">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-accent/5 blur-[120px]" />
+          </div>
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 md:py-32">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.3 }}
+                variants={staggerContainer}
+                className="space-y-6 text-center lg:text-left"
+              >
+                {/* Mobile mascot — centered above title */}
+                <motion.div className="lg:hidden flex justify-center mb-2" variants={fadeUp} transition={{ duration: 0.5 }}>
+                  <Image
+                    src="/brand/community.svg"
+                    alt="Community mascot"
+                    width={160}
+                    height={160}
+                    className="w-[130px] sm:w-[160px] h-auto drop-shadow-[0_12px_20px_rgba(0,0,0,0.18)]"
+                  />
+                </motion.div>
+
+                <div className="relative lg:pr-72">
+                  {/* Desktop mascot — absolute top-right of the text block */}
+                  <Image
+                    src="/brand/community.svg"
+                    alt="Community mascot"
+                    width={300}
+                    height={300}
+                    className="pointer-events-none absolute -top-[7rem] -right-10 lg:-top-[8rem] lg:-right-16 z-0 hidden lg:block w-[240px] lg:w-[300px] h-auto opacity-95 drop-shadow-[0_18px_28px_rgba(0,0,0,0.24)] animate-float-slow"
+                  />
+                  <motion.h2
+                    className="relative z-10 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-tight"
+                    variants={fadeUp}
+                  >
+                    A Global Library of <span className="text-accent text-glow-sm">Knowledge</span>
+                  </motion.h2>
+                </div>
+
+                <motion.p
+                  className="max-w-xl mx-auto lg:mx-0 text-base sm:text-xl text-foreground-muted leading-relaxed"
+                  variants={fadeUp}
+                >
+                  Don't start from scratch. Access a growing library of notes, flashcards, and exams shared by students worldwide. Download, remix, and master any subject in seconds.
+                </motion.p>
+
+                <motion.div
+                  className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 pt-4"
+                  variants={staggerContainer}
+                >
+                  {[
+                    { label: 'Notes', desc: 'Detailed summaries', icon: NotebookIcon },
+                    { label: 'Flashcards', desc: 'Active recall decks', icon: FlashcardIcon },
+                    { label: 'Mock Exams', desc: 'Practice tests', icon: ExamIcon },
+                  ].map((item) => (
+                    <motion.div
+                      key={item.label}
+                      className="p-4 rounded-2xl bg-white/50 border border-border/50 backdrop-blur-sm shadow-sm"
+                      variants={staggerItem}
+                    >
+                      <item.icon className="w-6 h-6 text-accent mb-2 mx-auto lg:mx-0" />
+                      <p className="font-bold text-foreground text-base">{item.label}</p>
+                      <p className="text-sm text-foreground-muted">{item.desc}</p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                <motion.div variants={fadeUp} className="pt-4">
+                  <Link href="/community">
+                    <ClayButton variant="primary" size="lg" className="shadow-lg shadow-accent/20">
+                      Explore the Library
+                    </ClayButton>
+                  </Link>
+                </motion.div>
+              </motion.div>
+
+              <motion.div
+                className="relative flex justify-center lg:justify-end"
+                initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+                whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.8, type: "spring", bounce: 0.3 }}
+              >
+                <Image
+                  src="/brand/community-preview.png"
+                  alt="Verso Community Library Preview"
+                  width={1000}
+                  height={800}
+                  className="w-full max-w-[540px] h-auto rounded-2xl border border-border/70 ring-1 ring-black/5 shadow-[0_30px_65px_-24px_rgba(15,23,42,0.48)] drop-shadow-[0_16px_22px_rgba(0,0,0,0.2)]"
+                />
+              </motion.div>
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer className="py-8 px-4 sm:px-6 lg:px-8 bg-foreground">
@@ -670,6 +745,6 @@ export default function LandingPage() {
           <p className="text-background/60 text-sm">© {new Date().getFullYear()} Verso. AI-Powered Study Assistant.</p>
         </div>
       </footer>
-    </div>
+    </div >
   );
 }

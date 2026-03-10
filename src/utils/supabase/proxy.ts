@@ -6,9 +6,9 @@ import { NextResponse, type NextRequest } from 'next/server'
  * Used in Next.js 16+ proxy.ts for route protection.
  */
 export async function updateSession(
-    request: NextRequest,
-    supabaseUrl: string,
-    supabaseKey: string
+  request: NextRequest,
+  supabaseUrl: string,
+  supabaseKey: string
 ) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -47,7 +47,12 @@ export async function updateSession(
       error,
     } = await supabase.auth.getUser()
 
-    if (error) {
+    const isPublicRoute =
+      request.nextUrl.pathname.startsWith('/community') ||
+      request.nextUrl.pathname.startsWith('/public') ||
+      request.nextUrl.pathname === '/';
+
+    if (error && !isPublicRoute) {
       if (request.nextUrl.pathname !== '/auth') {
         const url = request.nextUrl.clone();
         url.pathname = '/auth';
@@ -57,6 +62,7 @@ export async function updateSession(
 
     if (
       !user &&
+      !isPublicRoute &&
       request.nextUrl.pathname !== '/auth'
     ) {
       const url = request.nextUrl.clone();
