@@ -9,6 +9,7 @@ import { FilterIcon, Search01Icon, SparklesIcon } from 'hugeicons-react';
 import { CommunityIcon, ExamIcon, FlashcardIcon, NotebookIcon } from '@/component/icons';
 import { useCommunityItems, CommunityType } from '@/hooks/useCommunity';
 import { MaterialCard } from '@/component/ui/MaterialCard';
+import { useUserProfile } from '@/hooks/useAuth';
 
 
 const FILTER_OPTIONS: { id: CommunityType | 'all'; label: string }[] = [
@@ -44,6 +45,8 @@ export default function CommunityPage() {
   const [selectedType, setSelectedType] = useState<CommunityType | 'all'>('all');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const { data: communityItems = [], isLoading, isError } = useCommunityItems();
+  const { data: userProfile } = useUserProfile();
+  const isLoggedIn = !!userProfile;
 
   const filteredItems = useMemo(() => {
     let filtered = [...communityItems];
@@ -116,24 +119,35 @@ export default function CommunityPage() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/library"
-              className="px-4 py-2 rounded-xl bg-surface border border-border text-sm font-semibold text-foreground hover:shadow-md transition-all"
-            >
-              My Library
-            </Link>
-            <Link
-              href="/flashcards"
-              className="px-4 py-2 rounded-xl bg-surface border border-border text-sm font-semibold text-foreground hover:shadow-md transition-all"
-            >
-              My Flashcards
-            </Link>
-            <Link
-              href="/exams"
-              className="px-4 py-2 rounded-xl bg-surface border border-border text-sm font-semibold text-foreground hover:shadow-md transition-all"
-            >
-              My Exams
-            </Link>
+            {isLoggedIn ? (
+              <>
+                <Link
+                  href="/library"
+                  className="px-4 py-2 rounded-xl bg-surface border border-border text-sm font-semibold text-foreground hover:shadow-md transition-all"
+                >
+                  My Library
+                </Link>
+                <Link
+                  href="/flashcards"
+                  className="px-4 py-2 rounded-xl bg-surface border border-border text-sm font-semibold text-foreground hover:shadow-md transition-all"
+                >
+                  My Flashcards
+                </Link>
+                <Link
+                  href="/exams"
+                  className="px-4 py-2 rounded-xl bg-surface border border-border text-sm font-semibold text-foreground hover:shadow-md transition-all"
+                >
+                  My Exams
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/auth"
+                className="px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all"
+              >
+                Sign up to share
+              </Link>
+            )}
           </div>
         </div>
       </ClayCard>
