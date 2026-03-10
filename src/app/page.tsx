@@ -48,127 +48,114 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/40">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-primary-dark/10 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-14 sm:h-16 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 group text-white">
               <Image
                 src="/brand/verso-mark.png"
                 alt="Verso logo"
                 width={40}
                 height={40}
-                className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 group-hover:scale-105 transition-transform"
+                className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 group-hover:scale-105 transition-transform brightness-0 invert"
                 priority
               />
-              <span className="text-lg sm:text-xl font-bold text-foreground group-hover:text-accent transition-colors">
+              <span className="text-lg sm:text-xl font-bold group-hover:text-blue-200 transition-colors">
                 Verso
               </span>
             </Link>
-            <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
-              <ClayButton variant="primary" size="sm">
-                {isLoggedIn ? 'Dashboard' : 'Get Started'}
-              </ClayButton>
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
+                <ClayButton variant="secondary" size="sm">
+                  {isLoggedIn ? 'Dashboard' : 'Get Started'}
+                </ClayButton>
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
 
-      <main className="flex-1 pt-14 sm:pt-16">
+      <main className="flex-1">
         {/* ===== HERO ===== */}
-        <section className="relative overflow-hidden bg-foreground/[0.03]">
-          {/* Animated gradient blobs — richer tones */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute -top-24 -left-24 h-[500px] w-[500px] rounded-full bg-accent/35 blur-[120px] animate-[hero-blob-1_18s_ease-in-out_infinite]" />
-            <div className="absolute -bottom-32 -right-16 h-[550px] w-[550px] rounded-full bg-primary/30 blur-[140px] animate-[hero-blob-2_22s_ease-in-out_infinite]" />
-            <div className="absolute top-1/4 left-1/3 h-[350px] w-[500px] rounded-full bg-accent/20 blur-[100px] animate-[hero-blob-3_15s_ease-in-out_infinite]" />
-            <div className="absolute bottom-1/4 right-1/3 h-[280px] w-[280px] rounded-full bg-primary/25 blur-[80px] animate-[hero-blob-2_20s_ease-in-out_infinite_reverse]" />
+        <section className="relative overflow-hidden bg-primary-dark text-white">
+          {/* Refined Academic Mesh Background */}
+          <div className="absolute inset-0 pointer-events-none opacity-40">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,var(--primary-light),transparent)]" />
+            <div
+              className="absolute inset-0 animate-[hero-grid-drift_40s_linear_infinite]"
+              style={{
+                backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
+                backgroundSize: '40px 40px'
+              }}
+            />
           </div>
 
-          {/* Drifting grid overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none opacity-[0.06] animate-[hero-grid-drift_25s_linear_infinite]"
-            style={{
-              backgroundImage:
-                'linear-gradient(90deg, currentColor 1px, transparent 1px), linear-gradient(180deg, currentColor 1px, transparent 1px)',
-              backgroundSize: '48px 48px',
-            }}
-          />
-
-          {/* Diagonal accent stripes */}
-          <div
-            className="absolute inset-0 pointer-events-none opacity-[0.04] animate-[hero-stripe-drift_35s_linear_infinite]"
-            style={{
-              backgroundImage:
-                'repeating-linear-gradient(45deg, transparent, transparent 24px, currentColor 24px, currentColor 25px)',
-            }}
-          />
-
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-28">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 lg:gap-12 items-center">
-              {/* Text — appears second on mobile (below mascot), first on desktop */}
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 md:py-40">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Text Side */}
               <motion.div
-                className="space-y-5 sm:space-y-6 text-center lg:text-left order-2 lg:order-1"
+                className="space-y-8 text-center lg:text-left order-2 lg:order-1"
                 initial="hidden"
                 animate="visible"
                 variants={staggerContainer}
               >
-                <motion.h1
-                  className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground leading-[1.08]"
-                  variants={fadeUp}
-                  transition={{ duration: 0.6 }}
-                >
-                  Turn your notes into <span className="text-accent">mastery</span>
-                </motion.h1>
+                <motion.div className="space-y-4" variants={fadeUp}>
 
-                <motion.p
-                  className="max-w-xl mx-auto lg:mx-0 text-sm sm:text-lg text-foreground-muted leading-relaxed"
-                  variants={fadeUp}
-                  transition={{ duration: 0.6 }}
-                >
-                  Write notes, generate flashcards, and practice with mock exams — all in one flow.
-                </motion.p>
+                  <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08]">
+                    Turn your notes into <br />
+                    <span className="text-blue-200">mastery</span>
+                  </h1>
+
+                  <p className="max-w-xl mx-auto lg:mx-0 text-base sm:text-xl text-blue-100/90 leading-relaxed font-medium">
+                    Write notes, generate flashcards, and practice with mock exams — all in one flow.
+                  </p>
+                </motion.div>
 
                 <motion.div
-                  className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1 sm:pt-2"
+                  className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4"
                   variants={fadeUp}
-                  transition={{ duration: 0.6 }}
                 >
                   <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
-                    <ClayButton variant="primary" size="lg">
+                    <ClayButton variant="secondary" size="lg" className="shadow-2xl shadow-primary-dark/50">
                       {isLoggedIn ? 'Go to Dashboard' : 'Start Studying'}
                     </ClayButton>
                   </Link>
                 </motion.div>
               </motion.div>
 
-              {/* Mascot — appears first on mobile (above text), second on desktop */}
+              {/* Mascot Side */}
               <motion.div
-                className="relative min-h-[200px] sm:min-h-[320px] md:min-h-[440px] flex items-center justify-center order-1 lg:order-2"
-                initial={{ opacity: 0, scale: 0.85 }}
+                className="relative flex items-center justify-center order-1 lg:order-2"
+                initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
+                transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
               >
-                <div className="pointer-events-none absolute inset-0 hidden sm:block">
-                  <div className="absolute top-6 left-6 h-32 w-32 rounded-full bg-accent/15 blur-3xl animate-[hero-blob-1_12s_ease-in-out_infinite]" />
-                  <div className="absolute bottom-10 right-4 h-28 w-28 rounded-full bg-primary/18 blur-3xl animate-[hero-blob-2_10s_ease-in-out_infinite]" />
-                  <div className="absolute top-1/3 right-1/5 h-20 w-20 rounded-full bg-accent/12 blur-2xl animate-[hero-blob-3_8s_ease-in-out_infinite]" />
-                  <div className="absolute bottom-1/3 left-1/4 h-24 w-24 rounded-full bg-primary/10 blur-2xl animate-[hero-blob-1_14s_ease-in-out_infinite_reverse]" />
+                {/* Modern Backdrop for Mascot */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-primary-light/20 blur-[100px] rounded-full animate-pulse" />
+                  <div className="absolute w-[250px] h-[250px] sm:w-[400px] sm:h-[400px] border border-white/5 rounded-full scale-150 animate-[spin_60s_linear_infinite]" />
+                  <div className="absolute w-[200px] h-[200px] sm:w-[350px] sm:h-[350px] border border-dashed border-white/10 rounded-full scale-125 animate-[spin_40s_linear_infinite_reverse]" />
                 </div>
+
                 <Image
                   src="/brand/verso-happy-clean.png"
                   alt="Verso mascot"
-                  width={520}
-                  height={520}
-                  className="relative z-10 w-[180px] sm:w-[300px] md:w-[420px] lg:w-[460px] h-auto animate-bounce [animation-duration:1.4s]"
+                  width={580}
+                  height={580}
+                  className="relative z-10 w-[220px] sm:w-[380px] md:w-[480px] lg:w-[540px] h-auto drop-shadow-[0_25px_50px_rgba(0,0,0,0.3)] animate-bounce [animation-duration:1.4s]"
                   priority
                 />
               </motion.div>
             </div>
           </div>
+
+          {/* Elegant transition wave to the next section */}
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-background [clip-path:polygon(0_100%,100%_100%,100%_0,50%_100%,0_0)] opacity-100" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-background/50 [clip-path:polygon(0_100%,100%_100%,100%_20%,50%_100%,0_20%)]" />
         </section>
 
         {/* ===== NOTE WRITING ===== */}
-        <section className="relative border-t border-border/60 bg-background overflow-x-clip">
+        <section className="relative bg-background overflow-x-clip">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -top-24 left-10 h-52 w-52 rounded-full bg-accent/8 blur-3xl" />
             <div className="absolute -bottom-20 right-8 h-60 w-60 rounded-full bg-primary/8 blur-3xl" />
