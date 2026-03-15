@@ -22,9 +22,11 @@ export default function CommunityClientLayout({
         return (
             <div className="flex min-h-screen w-full overflow-x-hidden">
                 <Navbar />
-                <main className="flex-1 md:ml-60 paper-bg pt-16 md:pt-0 min-w-0">
-                    <div className="px-2 sm:px-4 lg:px-6 py-6 max-w-7xl mx-auto w-full">
-                        {children}
+                <main className="flex-1 md:ml-60 min-h-screen pt-16 md:pt-0 min-w-0">
+                    <div className="dashboard-grid-bg min-h-screen">
+                        <div className="relative z-10 px-2 sm:px-4 lg:px-6 py-6 max-w-7xl mx-auto w-full">
+                            {children}
+                        </div>
                     </div>
                 </main>
             </div>
@@ -32,10 +34,10 @@ export default function CommunityClientLayout({
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen min-w-0">
             <LandingNavbar variant="normal" />
-            <main className="pt-20 pb-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <main className="dashboard-grid-bg min-h-screen pt-20 pb-12">
+                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {children}
                 </div>
             </main>
