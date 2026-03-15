@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ClayButton } from '@/component/ui/Clay';
 import { createClient } from '@/utils/supabase/client';
 
 export default function LandingNavbar({ variant = 'hero' }: { variant?: 'hero' | 'normal' }) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const isHero = variant === 'hero';
+    const pathname = usePathname();
+    const isCommunityPage = pathname === '/community';
 
     useEffect(() => {
         const supabase = createClient();
@@ -40,13 +43,15 @@ export default function LandingNavbar({ variant = 'hero' }: { variant?: 'hero' |
                         </span>
                     </Link>
                     <div className="flex items-center gap-3">
-                        <Link
-                            href="/community"
-                            className={`text-sm font-medium transition-colors mr-2 ${isHero ? 'text-white/80 hover:text-white' : 'text-foreground-muted hover:text-foreground'
-                                }`}
-                        >
-                            Explore
-                        </Link>
+                        {!isCommunityPage && (
+                            <Link
+                                href="/community"
+                                className={`text-sm font-medium transition-colors mr-2 ${isHero ? 'text-white/80 hover:text-white' : 'text-foreground-muted hover:text-foreground'
+                                    }`}
+                            >
+                                Explore
+                            </Link>
+                        )}
                         <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
                             <ClayButton variant={isHero ? "secondary" : "primary"} size="sm">
                                 {isLoggedIn ? 'Dashboard' : 'Get Started'}
