@@ -649,12 +649,6 @@ function FlashcardsHeader({
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground truncate">
                 Flashcards
               </h1>
-              <div className="flex shrink-0">
-                <ClayBadge variant="accent" className="text-[10px] sm:text-xs px-2 py-1">
-                  <SparklesIcon className="w-3 h-3" />
-                  {totalSets} sets &middot; {totalCards} cards
-                </ClayBadge>
-              </div>
             </div>
             <p className="text-sm sm:text-base text-foreground-muted truncate">
               Study with AI-generated interactive flashcards

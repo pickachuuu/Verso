@@ -109,17 +109,6 @@ export default function SavedMaterialsPage() {
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-foreground-muted">
-            <span className="px-3 py-1.5 rounded-full bg-background-muted border border-border">
-              Notes {stats.notes}
-            </span>
-            <span className="px-3 py-1.5 rounded-full bg-background-muted border border-border">
-              Flashcards {stats.flashcards}
-            </span>
-            <span className="px-3 py-1.5 rounded-full bg-background-muted border border-border">
-              Exams {stats.exams}
-            </span>
-          </div>
         </div>
       </ClayCard>
 

@@ -108,10 +108,6 @@ export default function CommunityPage() {
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">Community</h1>
-                <ClayBadge variant="accent" className="px-3 py-1.5 text-xs">
-                  <SparklesIcon className="w-3.5 h-3.5" />
-                  Shared
-                </ClayBadge>
               </div>
               <p className="text-foreground-muted mt-1">
                 Search shared notes, flashcards, and exams from the community.
@@ -193,17 +189,6 @@ export default function CommunityPage() {
                 <p className="text-sm text-foreground-muted">
                   Showing {filteredItems.length} of {stats.total} shared materials
                 </p>
-              </div>
-              <div className="flex items-center gap-2 text-xs font-semibold text-foreground-muted">
-                <span className="px-3 py-1.5 rounded-full bg-background-muted border border-border">
-                  Notes {stats.notes}
-                </span>
-                <span className="px-3 py-1.5 rounded-full bg-background-muted border border-border">
-                  Flashcards {stats.flashcards}
-                </span>
-                <span className="px-3 py-1.5 rounded-full bg-background-muted border border-border">
-                  Exams {stats.exams}
-                </span>
               </div>
             </div>
 

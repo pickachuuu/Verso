@@ -626,10 +626,6 @@ function LibraryHeader({ totalNotes }: { totalNotes: number }) {
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                 Your Library
               </h1>
-              <ClayBadge variant="accent" className="text-xs px-2 py-1">
-                <SparklesIcon className="w-3 h-3" />
-                {totalNotes} notebooks
-              </ClayBadge>
             </div>
             <p className="text-foreground-muted">
               Your personal collection of study notebooks and knowledge
