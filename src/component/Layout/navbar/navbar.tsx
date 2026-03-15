@@ -265,49 +265,49 @@ export default function Navbar() {
         </div>
       </aside>
 
-      {/* ═══════════════ Mobile Navigation (Dock + Floaties) ═══════════════ */}
+      {/* ═══════════════ Mobile Navigation (Premium Island Dock) ═══════════════ */}
       <div className="md:hidden">
-        {/* Top Floating Actions */}
-        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-4 pointer-events-none">
+        {/* Top Floating Actions - Refined */}
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-5 pointer-events-none">
           <div className="pointer-events-auto">
             <Link 
               href="/dashboard" 
-              className="group p-2.5 rounded-2xl bg-surface/80 backdrop-blur-md border border-border shadow-[0_4px_12px_rgba(60,50,40,0.08)] flex items-center transition-transform active:scale-95"
+              className="group p-2.5 rounded-[1.25rem] bg-surface/80 backdrop-blur-xl border border-border/50 shadow-[0_8px_20px_rgba(60,50,40,0.12)] flex items-center transition-all active:scale-95 hover:bg-surface"
             >
               <Image
                 src="/brand/verso-mark.png"
                 alt="Verso"
-                width={28}
-                height={28}
-                className="w-7 h-7"
+                width={26}
+                height={26}
+                className="w-6.5 h-6.5"
                 priority
               />
             </Link>
           </div>
           
-          <div className="flex items-center gap-2.5 pointer-events-auto" ref={notificationRef}>
+          <div className="flex items-center gap-3 pointer-events-auto" ref={notificationRef}>
             <button
               type="button"
               onClick={() => setNotificationsOpen(!notificationsOpen)}
-              className={`p-2.5 rounded-2xl bg-surface/80 backdrop-blur-md border transition-all duration-300 shadow-[0_4px_12px_rgba(60,50,40,0.08)] relative active:scale-95 ${
-                notificationsOpen ? "border-pencil/40 text-primary" : "border-border text-foreground-muted"
+              className={`p-2.5 rounded-[1.25rem] bg-surface/80 backdrop-blur-xl border transition-all duration-300 shadow-[0_8px_20px_rgba(60,50,40,0.12)] relative active:scale-95 ${
+                notificationsOpen ? "border-primary/40 text-primary ring-4 ring-primary/5" : "border-border/50 text-foreground-muted hover:bg-surface"
               }`}
             >
               <NotificationIcon className="w-6 h-6" />
               {hasNotifications && (
-                <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-secondary rounded-full border-2 border-surface animate-pulse" />
+                <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-secondary rounded-full border-2 border-surface shadow-[0_0_8px_rgba(199,123,75,0.4)] animate-pulse" />
               )}
             </button>
 
             <button
               onClick={handleOpenSignOut}
-              className="h-11 w-11 rounded-2xl bg-surface/80 backdrop-blur-md border border-border shadow-[0_4px_12px_rgba(60,50,40,0.08)] overflow-hidden flex items-center justify-center p-0.5 active:scale-95 transition-transform"
+              className="h-11 w-11 rounded-[1.25rem] bg-surface/80 backdrop-blur-xl border border-border/50 shadow-[0_8px_20px_rgba(60,50,40,0.12)] overflow-hidden flex items-center justify-center p-0.5 active:scale-95 transition-all hover:bg-surface"
             >
               {userProfile?.avatar_url ? (
                 <img
                   src={userProfile.avatar_url}
                   alt="Avatar"
-                  className="h-full w-full object-cover rounded-xl"
+                  className="h-full w-full object-cover rounded-[0.9rem]"
                   referrerPolicy="no-referrer"
                 />
               ) : (
@@ -317,20 +317,20 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Notification Overlay (Mobile) */}
+        {/* Notification Overlay (Refined Mobile View) */}
         <AnimatePresence>
           {notificationsOpen && (
             <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              initial={{ opacity: 0, y: 15, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="fixed top-20 right-4 left-4 z-[60]"
+              exit={{ opacity: 0, y: 15, scale: 0.96 }}
+              className="fixed top-24 right-4 left-4 z-[60]"
             >
-              <div className="rounded-[2rem] bg-surface/95 backdrop-blur-xl border border-pencil/30 shadow-2xl p-5 overflow-hidden">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base font-bold text-foreground">Notifications</h3>
+              <div className="rounded-[2.5rem] bg-surface/98 backdrop-blur-2xl border border-pencil/20 shadow-[0_30px_70px_rgba(60,50,40,0.3)] p-6 overflow-hidden">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-lg font-bold text-foreground">Notifications</h3>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-medium text-foreground-muted bg-background-muted px-2 py-1 rounded-lg">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-foreground-muted bg-background-muted px-2.5 py-1.5 rounded-xl border border-border/50">
                       {notificationStatusLabel}
                     </span>
                     {hasNotifications && (
@@ -338,7 +338,7 @@ export default function Navbar() {
                         type="button"
                         onClick={handleClearNotifications}
                         disabled={clearNotifications.isPending}
-                        className="text-xs font-bold text-primary hover:text-primary-dark transition-colors"
+                        className="text-xs font-bold text-primary hover:text-primary-dark transition-colors px-2 py-1"
                       >
                         Clear
                       </button>
@@ -346,23 +346,23 @@ export default function Navbar() {
                   </div>
                 </div>
 
-                <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1 custom-scrollbar">
+                <div className="max-h-[55vh] overflow-y-auto space-y-3.5 pr-1 custom-scrollbar">
                   {isLoadingNotifications ? (
-                    <div className="py-8 text-center bg-background-muted/50 rounded-2xl border border-dashed border-border">
-                      <p className="text-sm text-foreground-muted">Syncing...</p>
+                    <div className="py-12 text-center bg-background-muted/40 rounded-3xl border border-dashed border-border/60">
+                      <p className="text-sm text-foreground-muted font-medium animate-pulse">Checking for updates...</p>
                     </div>
                   ) : !hasNotifications ? (
-                    <div className="py-10 text-center flex flex-col items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-background-muted flex items-center justify-center">
-                        <NotificationIcon className="w-6 h-6 text-foreground-muted opacity-40" />
+                    <div className="py-14 text-center flex flex-col items-center gap-4">
+                      <div className="w-16 h-16 rounded-3xl bg-background-muted flex items-center justify-center shadow-inner">
+                        <NotificationIcon className="w-8 h-8 text-foreground-muted opacity-30" />
                       </div>
-                      <p className="text-sm text-foreground-muted font-medium">All caught up!</p>
+                      <p className="text-sm text-foreground-muted font-bold">You&apos;re all caught up!</p>
                     </div>
                   ) : (
                     notifications.map((note) => (
-                      <div key={note.id} className="group relative p-4 rounded-2xl border border-border bg-background-muted/40 hover:bg-background-muted active:scale-[0.98] transition-all">
+                      <div key={note.id} className="group relative p-4 rounded-2xl border border-border/60 bg-background-muted/30 hover:bg-background-muted/60 active:scale-[0.98] transition-all">
                         <p className="text-sm font-bold text-foreground mb-1">{note.title}</p>
-                        <p className="text-xs text-foreground-muted leading-relaxed">{note.detail}</p>
+                        <p className="text-xs text-foreground-muted leading-relaxed opacity-80">{note.detail}</p>
                       </div>
                     ))
                   )}
@@ -372,20 +372,29 @@ export default function Navbar() {
           )}
         </AnimatePresence>
 
-        {/* Mobile Dock (Bottom) */}
-        <div className="fixed bottom-6 left-0 right-0 z-50 px-5 flex justify-center pointer-events-none">
-          <div className="pointer-events-auto bg-surface/90 backdrop-blur-xl border border-border rounded-[2.5rem] shadow-[0_12px_40px_rgba(60,50,40,0.18)] p-2.5 flex items-center justify-around gap-1 w-full max-w-md">
+        {/* Mobile Dock (Bottom Centerpiece) */}
+        <div className="fixed bottom-4 left-0 right-0 z-50 px-4 flex justify-center pointer-events-none">
+          <div className="pointer-events-auto bg-surface/90 backdrop-blur-2xl border border-border/50 rounded-[2.5rem] shadow-[0_20px_50px_rgba(60,50,40,0.2)] p-2 flex items-stretch h-[4.75rem] w-full max-w-[440px]">
             {[...navItems, ...secondaryItems].map((item) => {
               const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+              
+              const shortName = 
+                item.name === 'Dashboard' ? 'Home' : 
+                item.name === 'Library' ? 'Lib' : 
+                item.name === 'Flashcards' ? 'Cards' : 
+                item.name === 'Exams' ? 'Exams' : 
+                item.name === 'Saved Materials' ? 'Saved' : 
+                item.name === 'Community' ? 'Comm' : item.name;
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative p-3 rounded-[1.25rem] transition-all duration-300 flex items-center justify-center group ${
-                    isActive ? "text-primary scale-110" : "text-foreground-muted hover:text-foreground active:scale-90"
+                  className={`relative flex-1 flex flex-col items-center justify-center gap-1 rounded-[1.75rem] transition-all duration-300 active:scale-95 ${
+                    isActive ? "bg-primary/5 text-primary" : "text-foreground-muted hover:text-foreground"
                   }`}
                 >
-                  <div className={`transition-transform duration-300 ${isActive ? "drop-shadow-[0_0_8px_rgba(43,93,139,0.3)]" : ""}`}>
+                  <div className={`transition-all duration-400 ${isActive ? "scale-110 drop-shadow-[0_0_10px_rgba(43,93,139,0.25)]" : "opacity-70"}`}>
                     {item.href === '/dashboard' ? <DashboardIcon className="w-6 h-6" /> :
                      item.href === '/library' ? <NotebookIcon className="w-6 h-6" /> :
                      item.href === '/flashcards' ? <FlashcardIcon className="w-6 h-6" /> :
@@ -394,27 +403,19 @@ export default function Navbar() {
                      item.href === '/community' ? <CommunityIcon className="w-6 h-6" /> : null}
                   </div>
                   
+                  <span className={`text-[9px] font-black uppercase tracking-[0.05em] transition-all duration-300 ${
+                    isActive ? "opacity-100 translate-y-0" : "opacity-40 translate-y-0.5"
+                  }`}>
+                    {shortName}
+                  </span>
+
                   {isActive && (
                     <motion.div
                       layoutId="mobile-dock-dot"
-                      className="absolute -bottom-1.5 w-1.5 h-1.5 rounded-full bg-primary"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      className="absolute bottom-1 w-1 h-1 rounded-full bg-primary"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />
                   )}
-                  
-                  {/* Tooltip-like indicator on active */}
-                  <AnimatePresence>
-                    {isActive && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute -top-10 px-3 py-1 bg-foreground text-surface rounded-full text-[10px] font-bold shadow-lg pointer-events-none whitespace-nowrap"
-                      >
-                        {item.name}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </Link>
               );
             })}
