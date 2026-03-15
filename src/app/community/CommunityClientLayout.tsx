@@ -22,11 +22,9 @@ export default function CommunityClientLayout({
         return (
             <div className="flex min-h-screen w-full overflow-x-hidden">
                 <Navbar />
-                <main className="flex-1 md:ml-60 min-h-screen pt-16 md:pt-0 min-w-0">
-                    <div className="dashboard-grid-bg min-h-screen">
-                        <div className="relative z-10 px-2 sm:px-4 lg:px-6 py-6 max-w-7xl mx-auto w-full">
-                            {children}
-                        </div>
+                <main className="flex-1 md:ml-60 min-h-screen min-w-0 dashboard-grid-bg">
+                    <div className="relative z-10 px-2 sm:px-4 lg:px-6 pt-24 md:pt-6 pb-6 max-w-7xl mx-auto w-full">
+                        {children}
                     </div>
                 </main>
             </div>
