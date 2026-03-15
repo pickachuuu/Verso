@@ -70,15 +70,7 @@ function MobileHeader({ user }: DashboardMobileProps) {
   return (
     <ClayCard variant="elevated" padding="sm" className="rounded-2xl">
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <Image
-            src="/brand/verso-mark.png"
-            alt="Verso logo"
-            width={40}
-            height={40}
-            className="w-10 h-10"
-            priority
-          />
+        <div className="flex items-center gap-3 min-w-0 px-2">
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-widest text-foreground-muted">{greeting}</p>
             <h1 className="text-base font-semibold text-foreground truncate">
