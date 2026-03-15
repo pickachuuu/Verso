@@ -265,150 +265,161 @@ export default function Navbar() {
         </div>
       </aside>
 
-      {/* ═══════════════ Mobile Top Bar ═══════════════ */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50">
-        <div className="px-4 py-3 bg-surface/95 backdrop-blur-md border-b border-border shadow-sm relative z-50">
-          <div className="flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center gap-2.5">
+      {/* ═══════════════ Mobile Navigation (Dock + Floaties) ═══════════════ */}
+      <div className="md:hidden">
+        {/* Top Floating Actions */}
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-4 pointer-events-none">
+          <div className="pointer-events-auto">
+            <Link 
+              href="/dashboard" 
+              className="group p-2.5 rounded-2xl bg-surface/80 backdrop-blur-md border border-border shadow-[0_4px_12px_rgba(60,50,40,0.08)] flex items-center transition-transform active:scale-95"
+            >
               <Image
                 src="/brand/verso-mark.png"
-                alt="Verso logo"
-                width={40}
-                height={40}
-                className="w-10 h-10 shrink-0"
+                alt="Verso"
+                width={28}
+                height={28}
+                className="w-7 h-7"
                 priority
               />
-              <span className="text-lg font-bold text-foreground">Verso</span>
             </Link>
+          </div>
+          
+          <div className="flex items-center gap-2.5 pointer-events-auto" ref={notificationRef}>
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 rounded-xl transition-colors text-foreground-muted hover:text-foreground hover:bg-background-muted"
+              type="button"
+              onClick={() => setNotificationsOpen(!notificationsOpen)}
+              className={`p-2.5 rounded-2xl bg-surface/80 backdrop-blur-md border transition-all duration-300 shadow-[0_4px_12px_rgba(60,50,40,0.08)] relative active:scale-95 ${
+                notificationsOpen ? "border-pencil/40 text-primary" : "border-border text-foreground-muted"
+              }`}
             >
-              {mobileMenuOpen ? <Cancel01Icon className="w-5 h-5" /> : <Menu01Icon className="w-5 h-5" />}
+              <NotificationIcon className="w-6 h-6" />
+              {hasNotifications && (
+                <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-secondary rounded-full border-2 border-surface animate-pulse" />
+              )}
+            </button>
+
+            <button
+              onClick={handleOpenSignOut}
+              className="h-11 w-11 rounded-2xl bg-surface/80 backdrop-blur-md border border-border shadow-[0_4px_12px_rgba(60,50,40,0.08)] overflow-hidden flex items-center justify-center p-0.5 active:scale-95 transition-transform"
+            >
+              {userProfile?.avatar_url ? (
+                <img
+                  src={userProfile.avatar_url}
+                  alt="Avatar"
+                  className="h-full w-full object-cover rounded-xl"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <span className="text-xs font-bold text-foreground">{avatarFallback}</span>
+              )}
             </button>
           </div>
         </div>
 
-        {/* Mobile Dropdown */}
-        <AnimatePresence initial={false}>
-          {mobileMenuOpen && (
+        {/* Notification Overlay (Mobile) */}
+        <AnimatePresence>
+          {notificationsOpen && (
             <motion.div
-              key="mobile-menu"
-              initial={{ height: 0, opacity: 0, y: -8 }}
-              animate={{ height: "auto", opacity: 1, y: 0 }}
-              exit={{ height: 0, opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="px-4 pb-4 bg-surface border-t border-border shadow-md overflow-hidden origin-top relative z-40"
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              className="fixed top-20 right-4 left-4 z-[60]"
             >
-            <nav className="space-y-1 pt-2">
-              {navItems.map((item, index) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={index}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all border ${
-                      isActive
-                        ? 'bg-background-muted text-foreground border-pencil/40 shadow-sm'
-                        : 'text-foreground-muted border-transparent hover:bg-background-muted hover:text-foreground hover:border-border'
-                    }`}
-                  >
-                    {getNavIcon(item.href)}
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            <div className="my-3 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-
-            <div className="space-y-1">
-              {secondaryItems.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all border ${
-                      isActive
-                        ? 'bg-background-muted text-foreground border-pencil/40 shadow-sm'
-                        : 'text-foreground-muted border-transparent hover:bg-background-muted hover:text-foreground hover:border-border'
-                    }`}
-                  >
-                    {item.icon}
-                    {item.name}
-                  </Link>
-                );
-              })}
-
-              <button
-                type="button"
-                onClick={() => setNotificationsOpen((prev) => !prev)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all border ${
-                  notificationsOpen
-                    ? 'bg-background-muted text-foreground border-pencil/40 shadow-sm'
-                    : 'text-foreground-muted border-transparent hover:bg-background-muted hover:text-foreground hover:border-border'
-                }`}
-              >
-                <NotificationIcon className="w-5 h-5" />
-                Notifications
-              </button>
-
-              {notificationsOpen && (
-                <div className="rounded-2xl bg-surface border border-dashed border-pencil/40 shadow-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-foreground">Notifications</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-foreground-muted">
-                        {notificationStatusLabel}
-                      </span>
-                      {hasNotifications && (
-                        <button
-                          type="button"
-                          onClick={handleClearNotifications}
-                          disabled={clearNotifications.isPending}
-                          className="text-[10px] text-foreground-muted hover:text-foreground transition-colors disabled:text-foreground-muted/60 disabled:cursor-not-allowed"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
+              <div className="rounded-[2rem] bg-surface/95 backdrop-blur-xl border border-pencil/30 shadow-2xl p-5 overflow-hidden">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-bold text-foreground">Notifications</h3>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-foreground-muted bg-background-muted px-2 py-1 rounded-lg">
+                      {notificationStatusLabel}
+                    </span>
+                    {hasNotifications && (
+                      <button
+                        type="button"
+                        onClick={handleClearNotifications}
+                        disabled={clearNotifications.isPending}
+                        className="text-xs font-bold text-primary hover:text-primary-dark transition-colors"
+                      >
+                        Clear
+                      </button>
+                    )}
                   </div>
+                </div>
+
+                <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1 custom-scrollbar">
                   {isLoadingNotifications ? (
-                    <div className="text-[11px] text-foreground-muted bg-background-muted border border-border rounded-xl px-3 py-2 text-center">
-                      Checking your notifications...
+                    <div className="py-8 text-center bg-background-muted/50 rounded-2xl border border-dashed border-border">
+                      <p className="text-sm text-foreground-muted">Syncing...</p>
                     </div>
                   ) : !hasNotifications ? (
-                    <div className="text-[11px] text-foreground-muted bg-background-muted border border-border rounded-xl px-3 py-2 text-center">
-                      You&apos;re all caught up.
+                    <div className="py-10 text-center flex flex-col items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-background-muted flex items-center justify-center">
+                        <NotificationIcon className="w-6 h-6 text-foreground-muted opacity-40" />
+                      </div>
+                      <p className="text-sm text-foreground-muted font-medium">All caught up!</p>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      {notifications.map((note) => (
-                        <div key={note.id} className="rounded-xl border border-border bg-background-muted px-3 py-2">
-                          <p className="text-[11px] font-semibold text-foreground">{note.title}</p>
-                          <p className="text-[10px] text-foreground-muted">{note.detail}</p>
-                        </div>
-                      ))}
-                    </div>
+                    notifications.map((note) => (
+                      <div key={note.id} className="group relative p-4 rounded-2xl border border-border bg-background-muted/40 hover:bg-background-muted active:scale-[0.98] transition-all">
+                        <p className="text-sm font-bold text-foreground mb-1">{note.title}</p>
+                        <p className="text-xs text-foreground-muted leading-relaxed">{note.detail}</p>
+                      </div>
+                    ))
                   )}
                 </div>
-              )}
-              <div className="my-2 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-              <button
-                type="button"
-                onClick={handleOpenSignOut}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all border text-foreground-muted border-transparent hover:bg-background-muted hover:text-error hover:border-border"
-              >
-                <Logout01Icon className="w-5 h-5" />
-                Sign Out
-              </button>
-            </div>
-          </motion.div>
-        )}
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
+
+        {/* Mobile Dock (Bottom) */}
+        <div className="fixed bottom-6 left-0 right-0 z-50 px-5 flex justify-center pointer-events-none">
+          <div className="pointer-events-auto bg-surface/90 backdrop-blur-xl border border-border rounded-[2.5rem] shadow-[0_12px_40px_rgba(60,50,40,0.18)] p-2.5 flex items-center justify-around gap-1 w-full max-w-md">
+            {[...navItems, ...secondaryItems].map((item) => {
+              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`relative p-3 rounded-[1.25rem] transition-all duration-300 flex items-center justify-center group ${
+                    isActive ? "text-primary scale-110" : "text-foreground-muted hover:text-foreground active:scale-90"
+                  }`}
+                >
+                  <div className={`transition-transform duration-300 ${isActive ? "drop-shadow-[0_0_8px_rgba(43,93,139,0.3)]" : ""}`}>
+                    {item.href === '/dashboard' ? <DashboardIcon className="w-6 h-6" /> :
+                     item.href === '/library' ? <NotebookIcon className="w-6 h-6" /> :
+                     item.href === '/flashcards' ? <FlashcardIcon className="w-6 h-6" /> :
+                     item.href === '/exams' ? <ExamIcon className="w-6 h-6" /> :
+                     item.href === '/saved' ? <SavedIcon className="w-6 h-6" /> :
+                     item.href === '/community' ? <CommunityIcon className="w-6 h-6" /> : null}
+                  </div>
+                  
+                  {isActive && (
+                    <motion.div
+                      layoutId="mobile-dock-dot"
+                      className="absolute -bottom-1.5 w-1.5 h-1.5 rounded-full bg-primary"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  
+                  {/* Tooltip-like indicator on active */}
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute -top-10 px-3 py-1 bg-foreground text-surface rounded-full text-[10px] font-bold shadow-lg pointer-events-none whitespace-nowrap"
+                      >
+                        {item.name}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       <SignOutModal isOpen={isSignOutOpen} onClose={handleCloseSignOut} />
