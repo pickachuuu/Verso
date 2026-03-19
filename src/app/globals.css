@@ -18,8 +18,7 @@ body {
 }
 
 :root {
-  /* Base tones - Paper canvas */
-  --background: #F8F2E8;
+  /* Base tones 8F2E8;
   /* Warm paper */
   --background-muted: #EFE6D8;
   /* Soft shadow */
@@ -134,6 +133,15 @@ body {
   min-height: 100vh;
 }
 
+/* Scrollbar Hide Utility */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
 /* Dashboard grid + gradient background tuned to Verso palette */
 .dashboard-grid-bg {
   position: relative;
@@ -193,9 +201,11 @@ body::after {
   0% {
     transform: translate3d(0, 0, 0);
   }
+
   50% {
     transform: translate3d(36px, 24px, 0);
   }
+
   100% {
     transform: translate3d(72px, 48px, 0);
   }
@@ -2269,6 +2279,7 @@ body::after {
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -2913,8 +2924,14 @@ body::after {
   line-height: 32px;
   /* Padding top calculated to place baseline on notebook line */
   /* First line is at 55px (24px offset + 31px), baseline needs ~31px padding */
-  padding: 31px 24px 24px 88px;
+  padding: 31px 16px 24px 24px; /* Reduced to maximize mobile space */
   min-height: 100%;
+}
+
+@media (min-width: 640px) {
+  .notebook-editor-wrapper .ProseMirror {
+    padding-left: 88px;
+  }
 }
 
 .notebook-editor-wrapper .ProseMirror p {
@@ -3918,6 +3935,7 @@ body::after {
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   /* Engraved/debossed text effect */

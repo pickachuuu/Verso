@@ -9,6 +9,7 @@ interface NotebookPageProps {
   autoFocus?: boolean;
   onEditorReady?: (editor: Editor) => void;
   readOnly?: boolean;
+  simpleMode?: boolean;
 }
 
 /**
@@ -22,6 +23,7 @@ export default function NotebookPage({
   autoFocus = true,
   onEditorReady,
   readOnly = false,
+  simpleMode = false,
 }: NotebookPageProps) {
   const isDark = theme === 'dark';
   const editorBg = isDark ? '#1e1e2e' : '#fffef8';
@@ -31,32 +33,19 @@ export default function NotebookPage({
 
   return (
     <div
-      className="w-full h-full rounded-lg relative overflow-hidden"
-      style={{ backgroundColor: editorBg }}
+      className="w-full h-full relative overflow-hidden bg-surface"
     >
-      {/* Notebook lines + red margin line — combined as background layers
-          so both sides of the book use the same rendering technique */}
+      {/* Subtle paper texture overlay */}
       <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: [
-            `linear-gradient(180deg, transparent 0%, ${marginColor} 5%, ${marginColor} 95%, transparent 100%)`,
-            `repeating-linear-gradient(0deg, transparent, transparent 31px, ${lineColor} 31px, ${lineColor} 32px)`,
-          ].join(', '),
-          backgroundSize: '2px 100%, 100% 32px',
-          backgroundPosition: '71px 0, 0 23px',
-          backgroundRepeat: 'no-repeat, repeat',
-        }}
-      />
-
-      {/* Paper texture overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.02]"
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E")`,
           mixBlendMode: 'multiply',
         }}
       />
+
+      {/* Very subtle border for the "sheet" effect in larger views if needed, 
+          but usually we want it to feel like the whole surface is the page */}
 
       {/* Editor */}
       <div className="relative h-full notebook-editor-wrapper">

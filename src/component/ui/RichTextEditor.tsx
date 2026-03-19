@@ -120,8 +120,7 @@ function ToolbarButton({ onClick, isActive, disabled, children, title, vertical,
       disabled={disabled}
       title={title}
       className={`
-        p-1 rounded-lg transition-all duration-200
-        sm:p-1.5
+        p-1 sm:p-1.5 rounded-lg transition-all duration-200
         disabled:opacity-30 disabled:cursor-not-allowed
         ${isActive
           ? 'clay-button-secondary'
@@ -851,9 +850,9 @@ export function EditorToolbar({ editor, fullscreen, leadingSlot }: EditorToolbar
   return (
     <div className={`
       clay-toolbar
-      flex flex-wrap items-center gap-0.5 px-3 py-2
+      flex items-center flex-nowrap overflow-x-auto scrollbar-hide
       ${fullscreen ? 'justify-start' : 'justify-center'}
-      gap-0 px-2 py-1.5 sm:gap-0.5 sm:px-3 sm:py-2
+      gap-0.5 sm:gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2
     `}>
       <input
         type="file"
@@ -1253,7 +1252,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
 
             {/* Content area */}
             <div
-              className="relative z-10 pl-24 pr-12 py-8"
+              className="relative z-10 pl-4 sm:pl-24 pr-3 sm:pr-12 py-8"
               style={{
                 color: textColor,
                 lineHeight: '32px',

@@ -22,6 +22,7 @@ export interface TableOfContentsProps {
   /** When true, shows skeleton placeholders instead of the empty state */
   isLoading?: boolean;
   readOnly?: boolean;
+  simpleMode?: boolean;
 }
 
 /**
@@ -36,13 +37,14 @@ export default function TableOfContents({
   theme,
   isLoading = false,
   readOnly = false,
+  simpleMode = false,
 }: TableOfContentsProps) {
   const isDark = theme === 'dark';
 
   return (
     <div className={`toc-page ${isDark ? 'toc-page--dark' : 'toc-page--light'}`}>
       {/* Paper texture */}
-      <div className="toc-page__texture" />
+      {!simpleMode && <div className="toc-page__texture" />}
 
       {/* Header */}
       <div className="toc-page__header">
