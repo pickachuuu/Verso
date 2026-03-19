@@ -32,34 +32,34 @@ export default function SaveMaterialModal({
   const isSaving = savingAction !== null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="w-full max-w-lg">
-      <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
-        <div className="space-y-5">
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-foreground">Save {TYPE_LABELS[itemType]}</h2>
-            <p className="text-sm text-foreground-muted">
-              Choose how you want to keep <span className="font-semibold text-foreground">{title}</span>.
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div className="w-full max-w-lg">
+        <ClayCard variant="elevated" padding="none" className="rounded-[2.5rem] overflow-hidden flex flex-col">
+          <div className="p-8 bg-background-muted/5 border-b border-border/40">
+            <h2 className="text-2xl font-black text-foreground mb-2 tracking-tight">Save {TYPE_LABELS[itemType]}</h2>
+            <p className="text-sm font-medium text-foreground-muted">
+              Choose how you want to keep <span className="font-black text-foreground">{title}</span>.
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="p-6 space-y-3 bg-surface">
             <button
               type="button"
               onClick={onSaveReference}
               disabled={isSaving}
-              className="w-full text-left px-4 py-3 rounded-2xl border border-border bg-surface hover:shadow-sm transition-all disabled:opacity-60"
+              className="w-full text-left p-5 rounded-[1.5rem] border-2 border-border/60 bg-surface hover:bg-background-muted active:scale-[0.98] transition-all disabled:opacity-50"
             >
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-xl bg-background-muted border border-border">
+              <div className="flex items-center gap-4">
+                <div className="p-3.5 rounded-[1rem] bg-background-muted border-2 border-border/60 shrink-0">
                   {savingAction === 'reference' ? (
-                    <Loading01Icon className="w-4 h-4 animate-spin text-primary" />
+                    <Loading01Icon className="w-6 h-6 animate-spin text-primary" />
                   ) : (
-                    <Bookmark01Icon className="w-4 h-4 text-primary" />
+                    <Bookmark01Icon className="w-6 h-6 text-primary" />
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Save as reference</p>
-                  <p className="text-xs text-foreground-muted">
+                  <p className="text-lg font-black text-foreground leading-tight tracking-tight">Save as reference</p>
+                  <p className="text-xs font-semibold text-foreground-muted mt-1 leading-snug">
                     Keeps a bookmark to the original in Saved Materials.
                   </p>
                 </div>
@@ -70,19 +70,19 @@ export default function SaveMaterialModal({
               type="button"
               onClick={onSaveCopy}
               disabled={isSaving}
-              className="w-full text-left px-4 py-3 rounded-2xl border border-border bg-surface hover:shadow-sm transition-all disabled:opacity-60"
+              className="w-full text-left p-5 rounded-[1.5rem] border-2 border-border/60 bg-surface hover:bg-background-muted active:scale-[0.98] transition-all disabled:opacity-50"
             >
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-xl bg-background-muted border border-border">
+              <div className="flex items-center gap-4">
+                <div className="p-3.5 rounded-[1rem] bg-background-muted border-2 border-border/60 shrink-0">
                   {savingAction === 'copy' ? (
-                    <Loading01Icon className="w-4 h-4 animate-spin text-primary" />
+                    <Loading01Icon className="w-6 h-6 animate-spin text-primary" />
                   ) : (
-                    <File01Icon className="w-4 h-4 text-primary" />
+                    <File01Icon className="w-6 h-6 text-primary" />
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Create editable copy</p>
-                  <p className="text-xs text-foreground-muted">
+                  <p className="text-lg font-black text-foreground leading-tight tracking-tight">Create editable copy</p>
+                  <p className="text-xs font-semibold text-foreground-muted mt-1 leading-snug">
                     Adds a personal copy to your Library, Flashcards, or Exams.
                   </p>
                 </div>
@@ -90,20 +90,18 @@ export default function SaveMaterialModal({
             </button>
           </div>
 
-          <div className="flex justify-end">
-            <ClayButton
-              variant="ghost"
-              size="sm"
+          <div className="p-6 pt-2 bg-surface flex justify-end">
+            <button
               onClick={onClose}
               disabled={isSaving}
-              className="flex items-center gap-2"
+              className="px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] sm:text-xs uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center gap-2"
             >
               <Cancel01Icon className="w-4 h-4" />
               Cancel
-            </ClayButton>
+            </button>
           </div>
-        </div>
-      </ClayCard>
+        </ClayCard>
+      </div>
     </Modal>
   );
 }
