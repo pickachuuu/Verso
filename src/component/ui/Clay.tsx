@@ -23,13 +23,15 @@ interface ClayCardProps {
   className?: string;
   variant?: 'default' | 'elevated' | 'pressed' | 'floating' | 'glass';
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  onClick?: () => void;
 }
 
 export function ClayCard({
   children,
   className,
   variant = 'default',
-  padding = 'md'
+  padding = 'md',
+  onClick
 }: ClayCardProps) {
   const paddingClasses = {
     none: '',
@@ -47,12 +49,16 @@ export function ClayCard({
   };
 
   return (
-    <div className={clsx(
-      'rounded-3xl paper-texture border border-dashed border-pencil/40',
-      variantClasses[variant],
-      paddingClasses[padding],
-      className
-    )}>
+    <div 
+      onClick={onClick}
+      className={clsx(
+        'rounded-3xl paper-texture border border-dashed border-pencil/40',
+        variantClasses[variant],
+        paddingClasses[padding],
+        className,
+        onClick && 'cursor-pointer active:scale-[0.98] transition-transform'
+      )}
+    >
       {children}
     </div>
   );
