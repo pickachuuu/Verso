@@ -74,13 +74,22 @@ export default function Modal({
 
   return createPortal(
     <div
-      className={`fixed inset-0 ${nested ? 'z-[120]' : 'z-[100]'} bg-black/40 backdrop-blur-sm`}
-      onClick={onClose}
+      className={`fixed inset-0 ${nested ? 'z-[120]' : 'z-[100]'} bg-black/40 backdrop-blur-sm overflow-y-auto`}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
-      <div className="min-h-full flex items-center justify-center p-4">
+      <div 
+        className="min-h-full flex items-center justify-center p-4"
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+      >
         <div
-          className={className}
-          onClick={(e) => e.stopPropagation()}
+          className={`relative flex w-full justify-center ${className}`}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) onClose();
+          }}
         >
           {children}
         </div>

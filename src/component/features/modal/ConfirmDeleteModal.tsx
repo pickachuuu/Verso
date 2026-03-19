@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Button from '@/component/ui/Button';
-import Card from '@/component/ui/Card';
+import { ClayCard } from '@/component/ui/Clay';
 import Modal from '@/component/ui/Modal';
 import { Delete01Icon } from 'hugeicons-react';
 
@@ -54,70 +53,69 @@ export default function ConfirmDeleteModal({
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
-      <Card className="w-full max-w-md">
-        <Card.Header className="text-center">
-          <div className="mx-auto mb-4 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-            <Delete01Icon className="w-6 h-6 text-red-600" />
-          </div>
-          <Card.Title className="text-lg font-semibold">{title}</Card.Title>
-          <Card.Description className="text-foreground-muted">
-            {description}
-          </Card.Description>
-        </Card.Header>
-
-        <Card.Content className="space-y-4">
-          <div className="p-4 bg-background-muted rounded-lg border border-border">
-            <div className="flex items-center gap-2 mb-2">
-              <Delete01Icon className="w-4 h-4 text-foreground-muted" />
-              <span className="text-sm font-medium text-foreground-muted">
-                {itemType === 'note' ? 'Note' : itemType === 'notebook' ? 'Notebook' : 'Flashcard Set'}
-              </span>
+      <div className="w-full max-w-md">
+        <ClayCard variant="elevated" padding="none" className="rounded-[2.5rem] overflow-hidden flex flex-col">
+          <div className="p-8 text-center bg-background-muted/5 border-b border-border/40">
+            <div className="mx-auto mb-6 w-16 h-16 bg-red-500/10 border-2 border-red-500/20 rounded-full flex items-center justify-center shadow-sm">
+              <Delete01Icon className="w-7 h-7 text-red-600" />
             </div>
-            <p className="text-sm font-medium text-foreground">{itemName}</p>
-          </div>
-
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">
-              This action cannot be undone. The {itemType} and all associated data will be permanently deleted.
+            <h3 className="text-2xl font-black text-foreground mb-2 tracking-tight">{title}</h3>
+            <p className="text-sm text-foreground-muted font-medium">
+              {description}
             </p>
           </div>
 
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
-        </Card.Content>
-
-        <Card.Footer className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-2">
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isDeleting || loading}
-            className="w-full sm:flex-1"
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={handleConfirm}
-            disabled={isDeleting || loading}
-            className="w-full sm:flex-1"
-          >
-            {isDeleting || loading ? (
-              <div className="flex items-center justify-center space-x-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Deleting...</span>
+          <div className="px-6 py-6 space-y-4">
+            <div className="p-5 bg-surface rounded-[1.5rem] border-2 border-border/60 shadow-sm flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-foreground opacity-30" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-foreground-muted">
+                  {itemType === 'note' ? 'NOTE' : itemType === 'notebook' ? 'NOTEBOOK' : 'FLASHCARD SET'}
+                </span>
               </div>
-            ) : (
-              <div className="flex items-center justify-center space-x-2">
-                <Delete01Icon className="w-4 h-4" />
-                <span>Delete {itemType === 'note' ? 'Note' : itemType === 'notebook' ? 'Notebook' : 'Set'}</span>
+              <p className="text-lg font-bold text-foreground mt-1 line-clamp-2 leading-tight">
+                {itemName}
+              </p>
+            </div>
+
+            <div className="p-4 bg-red-500/10 border-2 border-red-500/20 rounded-2xl flex items-start gap-3">
+               <Delete01Icon className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
+               <p className="text-sm font-semibold text-red-700 leading-snug">
+                 This action cannot be undone. The {itemType} and all associated data will be permanently deleted.
+               </p>
+            </div>
+
+            {error && (
+              <div className="p-4 bg-red-500/10 border-2 border-red-500/20 rounded-2xl text-center">
+                <p className="text-xs font-bold text-red-600 uppercase tracking-wide">{error}</p>
               </div>
             )}
-          </Button>
-        </Card.Footer>
-      </Card>
+          </div>
+
+          <div className="p-6 pt-0 flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={handleClose}
+              disabled={isDeleting || loading}
+              className="flex-1 px-4 py-4 rounded-[2rem] font-black tracking-widest text-[11px] sm:text-xs uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center justify-center gap-2"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={isDeleting || loading}
+              className="flex-[2] px-4 py-4 rounded-[2rem] font-black tracking-widest text-[11px] sm:text-xs uppercase bg-red-600 text-white hover:bg-red-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isDeleting || loading ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span>DELETE {itemType === 'note' ? 'NOTE' : itemType === 'notebook' ? 'NOTEBOOK' : 'SET'}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </ClayCard>
+      </div>
     </Modal>
   );
 }

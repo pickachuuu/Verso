@@ -106,33 +106,33 @@ export default function FlashcardSetInfoModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="w-full max-w-lg">
-        <ClayCard variant="elevated" padding="none" className="rounded-3xl overflow-hidden">
+        <ClayCard variant="elevated" padding="none" className="rounded-[2.5rem] overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="relative px-6 pt-6 pb-5">
+          <div className="relative px-8 pt-8 pb-6 bg-background-muted/5 border-b border-border/40">
             {/* Background decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute -top-16 -right-16 w-48 h-48 bg-gradient-to-bl from-primary/15 via-primary/5 to-transparent rounded-full blur-3xl" />
+              <div className="absolute -top-16 -right-16 w-64 h-64 bg-gradient-to-bl from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl" />
             </div>
 
             <div className="relative z-10">
               {/* Close button */}
               <button
                 onClick={onClose}
-                className="absolute top-0 right-0 p-1.5 rounded-lg text-foreground-muted hover:text-foreground hover:bg-surface-elevated/80 transition-all"
+                className="absolute -top-2 -right-2 p-3 rounded-2xl text-foreground-muted hover:text-foreground hover:bg-surface-elevated/80 transition-all font-black"
               >
-                <Cancel01Icon className="w-4 h-4" />
+                <Cancel01Icon className="w-5 h-5" />
               </button>
 
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-2xl bg-gradient-to-br from-primary-muted to-primary-muted/60 shadow-lg shadow-primary/10 flex-shrink-0">
-                  <FlashcardIcon className="w-7 h-7 text-primary" />
+              <div className="flex items-start gap-5">
+                <div className="p-4 rounded-[1.5rem] bg-gradient-to-br from-primary-muted to-primary-muted/60 shadow-[0_4px_20px_rgba(43,93,139,0.2)] flex-shrink-0 border border-primary/20">
+                  <FlashcardIcon className="w-8 h-8 text-primary" />
                 </div>
-                <div className="min-w-0 flex-1 pr-6">
-                  <h2 className="text-xl font-bold text-foreground truncate">
+                <div className="min-w-0 flex-1 pr-10">
+                  <h2 className="text-2xl font-black text-foreground tracking-tight line-clamp-2 leading-tight">
                     {set.title || 'Untitled Set'}
                   </h2>
                   {set.description && (
-                    <p className="text-sm text-foreground-muted mt-1 line-clamp-2">
+                    <p className="text-sm font-medium text-foreground-muted mt-2 line-clamp-2 leading-snug">
                       {set.description}
                     </p>
                   )}
@@ -142,101 +142,101 @@ export default function FlashcardSetInfoModal({
           </div>
 
           {/* Mastery progress bar */}
-          <div className="px-6 pb-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-medium text-foreground-muted">Mastery</span>
-              <span className="text-xs font-bold text-primary-light">{masteryPercentage}%</span>
+          <div className="px-8 py-6 pb-2">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-foreground-muted">MASTERY</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary-light">{masteryPercentage}%</span>
             </div>
-            <div className="h-2 rounded-full bg-surface-elevated overflow-hidden border border-border/20">
+            <div className="h-3 rounded-full bg-surface-elevated overflow-hidden border border-border/40">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-primary-light transition-all duration-500"
+                className="h-full rounded-full bg-gradient-to-r from-primary to-primary-light transition-all duration-700 shadow-[0_0_10px_rgba(43,93,139,0.5)]"
                 style={{ width: `${masteryPercentage}%` }}
               />
             </div>
           </div>
 
           {/* Stats grid */}
-          <div className="px-6 pb-4">
+          <div className="px-8 py-4">
             {isLoading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-16 rounded-xl bg-surface-elevated/60 animate-pulse" />
+                  <div key={i} className="h-20 rounded-[1.5rem] bg-surface-elevated/60 animate-pulse border-2 border-border/40" />
                 ))}
               </div>
             ) : stats ? (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <StatBox
-                  label="New"
+                  label="NEW"
                   value={stats.newCount}
-                  color="text-blue-400"
-                  bgColor="bg-blue-500/10"
-                  borderColor="border-blue-500/15"
+                  color="text-blue-500"
+                  bgColor="bg-blue-500/5"
+                  borderColor="border-blue-500/20"
                 />
                 <StatBox
-                  label="Learning"
+                  label="LEARNING"
                   value={stats.learningCount}
-                  color="text-orange-400"
-                  bgColor="bg-orange-500/10"
-                  borderColor="border-orange-500/15"
+                  color="text-orange-500"
+                  bgColor="bg-orange-500/5"
+                  borderColor="border-orange-500/20"
                 />
                 <StatBox
-                  label="Review"
+                  label="REVIEW"
                   value={stats.reviewCount}
-                  color="text-purple-400"
-                  bgColor="bg-purple-500/10"
-                  borderColor="border-purple-500/15"
+                  color="text-purple-500"
+                  bgColor="bg-purple-500/5"
+                  borderColor="border-purple-500/20"
                 />
                 <StatBox
-                  label="Mastered"
+                  label="MASTERED"
                   value={stats.masteredCount}
-                  color="text-emerald-400"
-                  bgColor="bg-emerald-500/10"
-                  borderColor="border-emerald-500/15"
+                  color="text-emerald-500"
+                  bgColor="bg-emerald-500/5"
+                  borderColor="border-emerald-500/20"
                 />
               </div>
             ) : null}
           </div>
 
           {/* Difficulty breakdown */}
-          <div className="px-6 pb-4">
-            <p className="text-xs font-medium text-foreground-muted mb-2">Difficulty</p>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <DifficultyPill label="Easy" count={difficulty.easy} color="bg-emerald-500" />
-              <DifficultyPill label="Medium" count={difficulty.medium} color="bg-amber-500" />
-              <DifficultyPill label="Hard" count={difficulty.hard} color="bg-red-500" />
+          <div className="px-8 pb-6">
+            <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mb-3">DIFFICULTY</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <DifficultyPill label="EASY" count={difficulty.easy} color="text-emerald-600 bg-emerald-500/10 border-emerald-500/20" />
+              <DifficultyPill label="MEDIUM" count={difficulty.medium} color="text-amber-600 bg-amber-500/10 border-amber-500/20" />
+              <DifficultyPill label="HARD" count={difficulty.hard} color="text-red-600 bg-red-500/10 border-red-500/20" />
             </div>
           </div>
 
           {/* Due cards highlight */}
           {dueNow > 0 && (
-            <div className="mx-6 mb-4 p-3 rounded-xl bg-primary/10 border border-primary/15 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/20 shrink-0">
-                <AlertCircleIcon className="w-4 h-4 text-primary-light" />
+            <div className="mx-8 mb-6 p-4 rounded-[1.5rem] bg-primary/10 border-2 border-primary/20 flex items-center gap-4">
+              <div className="p-2 sm:p-3 rounded-xl bg-primary/20 shrink-0">
+                <AlertCircleIcon className="w-5 h-5 text-primary-light" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate">
-                  {dueNow} card{dueNow !== 1 ? 's' : ''} due for review
+                <p className="text-sm sm:text-base font-black text-foreground tracking-tight leading-snug">
+                  {dueNow} CARD{dueNow !== 1 ? 'S' : ''} DUE FOR REVIEW
                 </p>
-                <p className="text-xs text-foreground-muted truncate">Start a study session to keep up</p>
+                <p className="text-[11px] font-bold text-foreground-muted truncate uppercase tracking-wider mt-0.5">Start a study session to keep up</p>
               </div>
             </div>
           )}
 
           {/* Action buttons */}
-          <div className="px-6 pb-6 flex flex-col sm:flex-row gap-3">
+          <div className="px-8 pb-8 flex flex-col sm:flex-row gap-4 border-t border-border/40 pt-6">
             <button
               onClick={handleBrowse}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl font-semibold text-sm border border-border/60 bg-surface-elevated/50 hover:bg-surface-elevated text-foreground transition-all order-2 sm:order-1"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] sm:text-xs uppercase border-2 border-border/60 hover:bg-background-muted transition-all text-foreground order-2 sm:order-1 active:scale-[0.98]"
             >
               <ViewIcon className="w-4 h-4" />
               Browse Cards
             </button>
             <button
               onClick={handleStudy}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl font-semibold text-sm bg-primary text-white hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 order-1 sm:order-2"
+              className="flex-[2] flex items-center justify-center gap-2 px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] sm:text-xs uppercase border-2 border-transparent bg-primary text-white hover:bg-primary-dark transition-all order-1 sm:order-2 active:scale-[0.98]"
             >
               <BookOpen01Icon className="w-4 h-4" />
-              {dueNow > 0 ? `Study (${dueNow} due)` : 'Study Session'}
+              {dueNow > 0 ? `STUDY (${dueNow} DUE)` : 'STUDY SESSION'}
             </button>
           </div>
         </ClayCard>
@@ -259,9 +259,9 @@ function StatBox({
   borderColor: string;
 }) {
   return (
-    <div className={`p-3 rounded-xl text-center border ${bgColor} ${borderColor}`}>
-      <p className={`text-lg font-bold ${color}`}>{value}</p>
-      <p className="text-[10px] text-foreground-muted mt-0.5">{label}</p>
+    <div className={`p-4 rounded-[1.5rem] flex flex-col items-center justify-center border-2 ${bgColor} ${borderColor}`}>
+      <p className={`text-2xl font-black tracking-tight ${color}`}>{value}</p>
+      <p className="text-[9px] font-black tracking-widest uppercase text-foreground-muted mt-1 opacity-70">{label}</p>
     </div>
   );
 }
@@ -276,10 +276,9 @@ function DifficultyPill({
   color: string;
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <div className={`w-2 h-2 rounded-full ${color}`} />
-      <span className="text-xs text-foreground-muted">
-        {label}: <span className="font-semibold text-foreground">{count}</span>
+    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${color}`}>
+      <span className="text-[10px] font-black tracking-wider">
+        {label} <span className="opacity-60 ml-1 font-bold">{count}</span>
       </span>
     </div>
   );

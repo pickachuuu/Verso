@@ -133,7 +133,7 @@ function StepIndicator({ currentStep, steps }: { currentStep: Step; steps: typeo
               </div>
               <span
                 className={clsx(
-                  'text-sm font-medium hidden sm:block',
+                  'text-[10px] uppercase tracking-widest font-black hidden sm:block',
                   isCurrent && 'text-foreground',
                   isCompleted && 'text-green-600',
                   !isCurrent && !isCompleted && 'text-foreground-muted'
@@ -200,7 +200,7 @@ function NoteCard({
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-foreground truncate">
+            <h4 className="font-black text-foreground truncate text-lg">
               {note.title || 'Untitled Note'}
             </h4>
             {note.tags && note.tags.length > 0 && (
@@ -262,8 +262,8 @@ function QuestionTypeToggle({
             {enabled && <Tick01Icon className="w-4 h-4" />}
           </button>
           <div>
-            <span className="font-medium text-foreground">{label}</span>
-            <p className="text-xs text-foreground-muted">{description}</p>
+            <span className="font-black text-foreground">{label}</span>
+            <p className="text-[10px] font-black tracking-widest uppercase text-foreground-muted mt-1">{description}</p>
           </div>
         </div>
       </div>
@@ -475,17 +475,17 @@ export default function CreateExamModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="clay-modal w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-3xl flex flex-col border border-dashed border-pencil/40">
+      <div className="w-full max-w-2xl max-h-[90vh] bg-surface overflow-hidden rounded-[2.5rem] flex flex-col shadow-2xl ring-1 ring-border/40">
           {/* Header */}
-          <div className="clay-modal-header px-6 py-5 border-b border-border">
+          <div className="px-8 py-6 bg-background-muted/5 border-b border-border/40 shrink-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-secondary to-secondary-light flex items-center justify-center">
-                  <ExamIcon className="w-5 h-5 text-white" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-[1rem] bg-gradient-to-br from-secondary to-secondary-light flex items-center justify-center shadow-lg shadow-secondary/20 border border-secondary/20">
+                  <ExamIcon className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-foreground">Create Exam</h2>
-                  <p className="text-sm text-foreground-muted">Generate an exam from your notes</p>
+                  <h2 className="text-2xl font-black text-foreground tracking-tight">Create Exam</h2>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1">Generate an exam from your notes</p>
                 </div>
               </div>
               <button
@@ -937,45 +937,48 @@ export default function CreateExamModal({
           </div>
 
           {/* Footer */}
-          <div className="clay-modal-footer px-6 py-4 border-t border-border flex items-center justify-between shrink-0">
+          <div className="px-8 py-6 bg-surface border-t border-border/40 flex items-center justify-between shrink-0">
             <div>
               {currentStep > 1 && (
-                <ClayButton
-                  variant="ghost"
+                <button
                   onClick={handleBack}
                   disabled={isGenerating || saving}
+                  className="px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center gap-2"
                 >
-                  <ArrowLeft01Icon className="w-4 h-4 mr-2" />
+                  <ArrowLeft01Icon className="w-4 h-4" />
                   Back
-                </ClayButton>
+                </button>
               )}
             </div>
 
-            <div className="flex gap-2">
-              <ClayButton variant="secondary" onClick={onClose} disabled={isGenerating || saving}>
+            <div className="flex gap-3">
+              <button 
+                onClick={onClose} 
+                disabled={isGenerating || saving}
+                className="px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center gap-2"
+              >
                 Cancel
-              </ClayButton>
+              </button>
 
               {currentStep < 3 && (
-                <ClayButton
-                  variant="primary"
+                <button
                   onClick={handleNext}
                   disabled={
                     (currentStep === 1 && selectedNotes.length === 0) ||
                     (currentStep === 2 && totalQuestions === 0)
                   }
-                  className="bg-secondary hover:bg-secondary/90"
+                  className="px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-secondary text-white hover:bg-secondary/90 transition-all disabled:opacity-50 flex items-center gap-2"
                 >
                   Continue
-                </ClayButton>
+                  <ArrowRight01Icon className="w-4 h-4" />
+                </button>
               )}
 
               {currentStep === 3 && generatedExam && (
-                <ClayButton
-                  variant="primary"
+                <button
                   onClick={handleConfirm}
                   disabled={saving}
-                  className="bg-secondary hover:bg-secondary/90"
+                  className="px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-secondary text-white hover:bg-secondary/90 transition-all disabled:opacity-50 flex items-center gap-2"
                 >
                   {saving ? (
                     <>
@@ -988,7 +991,7 @@ export default function CreateExamModal({
                       Confirm & Save
                     </>
                   )}
-                </ClayButton>
+                </button>
               )}
             </div>
           </div>

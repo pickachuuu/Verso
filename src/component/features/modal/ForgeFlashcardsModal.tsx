@@ -379,22 +379,22 @@ export default function ForgeFlashcardsModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="clay-modal w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden rounded-[2rem] sm:rounded-3xl flex flex-col border border-dashed border-pencil/40">
+      <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] bg-surface overflow-hidden rounded-[2.5rem] flex flex-col shadow-2xl ring-1 ring-border/40">
           {/* Header */}
-          <div className="clay-modal-header px-6 py-5 border-b border-border">
+          <div className="px-8 py-6 bg-background-muted/5 border-b border-border/40 shrink-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shrink-0">
-                  <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-[1rem] bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/20 border border-primary/20 shrink-0">
+                  <SparklesIcon className="w-6 h-6 text-white" />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-lg sm:text-xl font-bold text-foreground truncate">Forge Flashcards</h2>
-                  <p className="text-xs sm:text-sm text-foreground-muted truncate">Create flashcards from your notes</p>
+                  <h2 className="text-2xl font-black text-foreground tracking-tight truncate">Forge Flashcards</h2>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1 truncate">Create flashcards from your notes</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl hover:bg-surface transition-colors"
+                className="p-3 rounded-2xl hover:bg-surface-elevated transition-colors"
               >
                 <Cancel01Icon className="w-5 h-5 text-foreground-muted" />
               </button>
@@ -664,14 +664,14 @@ export default function ForgeFlashcardsModal({
                     <p className="text-foreground-muted mb-6">
                       Ready to forge your flashcards? Click the button below to start!
                     </p>
-                    <ClayButton
-                      variant="primary"
-                      size="lg"
+                    <button
+                      type="button"
                       onClick={handleGenerate}
-                      className="px-8"
+                      className="px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all shadow-sm flex items-center justify-center gap-2 mx-auto"
                     >
+                      <SparklesIcon className="w-4 h-4" />
                       Generate Flashcards
-                    </ClayButton>
+                    </button>
                   </div>
                 )}
 
@@ -745,42 +745,49 @@ export default function ForgeFlashcardsModal({
           </div>
 
           {/* Footer */}
-          <div className="clay-modal-footer px-4 sm:px-6 py-4 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+          <div className="px-8 py-6 bg-surface border-t border-border/40 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
             <div className="flex justify-start order-2 sm:order-1">
               {currentStep > 1 && (
-                <ClayButton
-                  variant="ghost"
+                <button
+                  type="button"
                   onClick={handleBack}
                   disabled={isGenerating || saving}
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center justify-center gap-2"
                 >
+                  <ArrowLeft01Icon className="w-4 h-4" />
                   Back
-                </ClayButton>
+                </button>
               )}
             </div>
 
-            <div className="flex gap-2 order-1 sm:order-2">
-              <ClayButton variant="secondary" onClick={onClose} disabled={isGenerating || saving} className="flex-1 sm:flex-none">
+            <div className="flex gap-3 order-1 sm:order-2">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isGenerating || saving}
+                className="flex-[1] sm:flex-none px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center justify-center gap-2"
+              >
                 Cancel
-              </ClayButton>
+              </button>
 
               {currentStep < 3 && (
-                <ClayButton
-                  variant="primary"
+                <button
+                  type="button"
                   onClick={handleNext}
                   disabled={currentStep === 1 && selectedNotes.length === 0}
-                  className="flex-1 sm:flex-none"
+                  className="flex-[2] sm:flex-none px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
                 >
                   Continue
-                </ClayButton>
+                  <ArrowRight01Icon className="w-4 h-4" />
+                </button>
               )}
 
               {currentStep === 3 && generatedFlashcards && (
-                <ClayButton
-                  variant="primary"
+                <button
+                  type="button"
                   onClick={handleConfirm}
                   disabled={saving}
-                  className="flex-1 sm:flex-none"
+                  className="flex-[2] sm:flex-none px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
                 >
                   {saving ? (
                     <>
@@ -790,10 +797,10 @@ export default function ForgeFlashcardsModal({
                   ) : (
                     <>
                       <Tick01Icon className="w-4 h-4 mr-2" />
-                      Confirm
+                      Confirm & Save
                     </>
                   )}
-                </ClayButton>
+                </button>
               )}
             </div>
           </div>
