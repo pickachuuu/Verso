@@ -3,7 +3,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ClayCard, ClayBadge } from '@/component/ui/Clay';
 import MobileBottomSheet from '@/component/ui/MobileBottomSheet';
 import { NotebookColorKey, NOTEBOOK_COLORS } from '@/component/ui/ClayNotebookCover';
 import CreateNoteButton from '@/component/features/CreateNoteButton';
@@ -16,7 +15,9 @@ import {
   SortingAZ01Icon,
   Calendar03Icon,
   GlobeIcon,
-  LockIcon
+  LockIcon,
+  Delete01Icon,
+  MoreVerticalIcon
 } from 'hugeicons-react';
 import { NotebookIcon } from '@/component/icons';
 import GenerateStudyMaterialModal from '@/component/features/modal/GenerateStudyMaterialModal';
@@ -36,18 +37,15 @@ export default function LibraryPage() {
   const saveFlashcardsMutation = useSaveGeneratedFlashcards();
   const createExamMutation = useCreateExam();
 
-  // TanStack Query for data fetching
   const { data: notes = [], isLoading, error, refetch } = useUserNotes();
   const deleteNoteMutation = useDeleteNote();
   const togglePublicMutation = useToggleNotePublicStatus();
 
-  // UI State
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedColor, setSelectedColor] = useState<NotebookColorKey | 'all'>('all');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // Modal state
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [isForgeModalOpen, setIsForgeModalOpen] = useState(false);
   const [isExamModalOpen, setIsExamModalOpen] = useState(false);
@@ -57,11 +55,8 @@ export default function LibraryPage() {
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [shareLinkCopied, setShareLinkCopied] = useState<string | null>(null);
 
-  // Filter and sort notes
   const processedNotes = useMemo(() => {
     let filtered = [...notes];
-
-    // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -70,13 +65,9 @@ export default function LibraryPage() {
           note.tags?.some((tag) => tag.toLowerCase().includes(query))
       );
     }
-
-    // Color filter
     if (selectedColor !== 'all') {
       filtered = filtered.filter((note) => (note.cover_color || 'royal') === selectedColor);
     }
-
-    // Sort
     switch (sortBy) {
       case 'alphabetical':
         filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
@@ -88,16 +79,10 @@ export default function LibraryPage() {
       default:
         filtered.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
     }
-
     return filtered;
   }, [notes, searchQuery, selectedColor, sortBy]);
 
-  // Stats
-  const totalNotes = notes.filter(
-    (note) =>
-      (note.title && note.title.trim() !== '') ||
-      (note.content && note.content.trim() !== '')
-  ).length;
+  const totalNotes = notes.length;
   const sortLabel = sortBy === 'recent' ? 'Most recent' : sortBy === 'alphabetical' ? 'A–Z' : 'Oldest';
   const colorLabel = selectedColor === 'all' ? 'All colors' : NOTEBOOK_COLORS[selectedColor].name;
   const activeFilters = Number(selectedColor !== 'all');
@@ -109,34 +94,22 @@ export default function LibraryPage() {
 
   const handleSelectMaterial = (type: 'flashcards' | 'exam') => {
     setIsGenerateModalOpen(false);
-    if (type === 'flashcards') {
-      setIsForgeModalOpen(true);
-      return;
-    }
-    setIsExamModalOpen(true);
+    if (type === 'flashcards') setIsForgeModalOpen(true);
+    else setIsExamModalOpen(true);
   };
 
   const handleCopyShareLink = async (note: Note, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
+    e.preventDefault(); e.stopPropagation();
     if (!note.is_public) {
-      try {
-        await togglePublicMutation.mutateAsync({ noteId: note.id, isPublic: true });
-      } catch (error) {
-        console.error('Error making note public:', error);
-        return;
-      }
+      try { await togglePublicMutation.mutateAsync({ noteId: note.id, isPublic: true }); }
+      catch (error) { console.error(error); return; }
     }
-
     const shareUrl = `${window.location.origin}/public/notes/${note.id}`;
     try {
       await navigator.clipboard.writeText(shareUrl);
       setShareLinkCopied(note.id);
       setTimeout(() => setShareLinkCopied(null), 2000);
-    } catch (error) {
-      console.error('Error copying to clipboard:', error);
-    }
+    } catch (error) { console.error(error); }
   };
 
   const handleDeleteNote = (note: Note) => {
@@ -146,14 +119,12 @@ export default function LibraryPage() {
 
   const handleConfirmDelete = async () => {
     if (!selectedNote) return;
-
     try {
       await deleteNoteMutation.mutateAsync(selectedNote.id);
       setSaveSuccess('Notebook deleted successfully!');
       setTimeout(() => setSaveSuccess(null), 3000);
     } catch (err) {
-      console.error('Error deleting notebook:', err);
-      setSaveSuccess('Error deleting notebook. Please try again.');
+      setSaveSuccess('Error deleting notebook.');
       setTimeout(() => setSaveSuccess(null), 3000);
     } finally {
       setIsDeleteModalOpen(false);
@@ -161,26 +132,19 @@ export default function LibraryPage() {
     }
   };
 
-  const handleFlashcardsGenerated = async (
-    geminiResponse: GeminiResponse,
-    noteIds: string[],
-    setTitle: string
-  ) => {
+  const handleFlashcardsGenerated = async (geminiResponse: GeminiResponse, noteIds: string[], setTitle: string) => {
     setSaveSuccess(null);
     try {
       const difficulty = geminiResponse.flashcards[0]?.difficulty || 'medium';
       await saveFlashcardsMutation.mutateAsync({
         noteId: noteIds.length === 1 ? noteIds[0] : undefined,
         noteTitle: setTitle || selectedNote?.title || 'Untitled Note',
-        difficulty,
-        geminiResponse
+        difficulty, geminiResponse
       });
-
       setSaveSuccess(`Successfully saved ${geminiResponse.flashcards.length} flashcards!`);
       setTimeout(() => setSaveSuccess(null), 3000);
     } catch (err) {
-      console.error('Error saving flashcards:', err);
-      setSaveSuccess('Error saving flashcards. Please try again.');
+      setSaveSuccess('Error saving flashcards.');
       setTimeout(() => setSaveSuccess(null), 3000);
     } finally {
       setIsForgeModalOpen(false);
@@ -188,19 +152,7 @@ export default function LibraryPage() {
     }
   };
 
-  const handleExamGenerated = useCallback(async (
-    examResponse: ExamGenerationResponse,
-    noteIds: string[],
-    title: string,
-    config: {
-      difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
-      timeLimitEnabled: boolean;
-      timeLimitMinutes: number;
-      includeMultipleChoice: boolean;
-      includeIdentification: boolean;
-      includeEssay: boolean;
-    }
-  ) => {
+  const handleExamGenerated = useCallback(async (examResponse: ExamGenerationResponse, noteIds: string[], title: string, config: any) => {
     try {
       const seenQuestions = new Set<string>();
       const uniqueQuestions = examResponse.questions.filter((q) => {
@@ -209,7 +161,6 @@ export default function LibraryPage() {
         seenQuestions.add(key);
         return true;
       });
-
       await createExamMutation.mutateAsync({
         noteId: noteIds.length === 1 ? noteIds[0] : null,
         title,
@@ -222,183 +173,175 @@ export default function LibraryPage() {
         },
         questions: uniqueQuestions,
       });
-
       setSaveSuccess('Exam created successfully!');
       setTimeout(() => setSaveSuccess(null), 3000);
       setIsExamModalOpen(false);
       setSelectedNote(null);
     } catch (err) {
-      console.error('Error saving exam:', err);
-      setSaveSuccess('Error saving exam. Please try again.');
+      setSaveSuccess('Error saving exam.');
       setTimeout(() => setSaveSuccess(null), 3000);
     }
   }, [createExamMutation]);
 
-  // Handle auth errors
   if (error) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 pt-12">
         <LibraryHeader totalNotes={0} />
-        <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
-          <div className="text-center py-12">
-            <div className="w-20 h-20 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto mb-6">
-              <NotebookIcon className="w-10 h-10 text-red-500" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">Error loading notebooks</h3>
-            <p className="text-foreground-muted mb-6">
-              There was an error loading your notebooks. Please try again.
-            </p>
-            <button
-              onClick={() => refetch()}
-              className="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all"
-            >
-              Retry
-            </button>
-          </div>
-        </ClayCard>
+        <div className="bg-foreground text-surface rounded-[3rem] p-12 text-center">
+          <h3 className="text-4xl font-black uppercase tracking-tight mb-4">ERROR LOADING</h3>
+          <p className="opacity-70 mb-8 max-w-md mx-auto text-lg leading-relaxed font-bold">
+            There was an error loading your library.
+          </p>
+          <button onClick={() => refetch()} className="px-8 py-5 bg-surface text-foreground rounded-full font-black uppercase tracking-[0.2em] text-[13px] hover:bg-surface-elevated transition-all active:scale-95">
+            RETRY NOW
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="space-y-6">
-        {/* Hero Header */}
+      {/* Container - Extra top padding to clear mobile dock perfectly */}
+      <div className="w-full max-w-7xl mx-auto pt-8 md:pt-4 pb-20 space-y-10 lg:space-y-14 px-2 md:px-0">
+        
+        {/* Massive Hero Header */}
         <LibraryHeader totalNotes={totalNotes} />
 
-        {/* Success/Error Message */}
+        {/* Global Toast */}
         {saveSuccess && (
-          <div
-            className={`px-4 py-3 rounded-xl border-2 transition-all ${saveSuccess.includes('Error')
-                ? 'border-red-200 bg-red-50'
-                : 'border-green-200 bg-green-50'
-              }`}
-          >
-            <p className={`text-sm font-semibold ${saveSuccess.includes('Error') ? 'text-red-600' : 'text-green-600'
-              }`}>
-              {saveSuccess}
-            </p>
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] animate-in fade-in slide-in-from-bottom-4">
+            <div className={`px-8 py-5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.15)] flex items-center gap-4 ${
+              saveSuccess.includes('Error') ? 'bg-[#ff3b30] text-white' : 'bg-foreground text-surface'
+            }`}>
+              <SparklesIcon className="w-6 h-6 flex-shrink-0" />
+              <p className="text-[14px] font-black uppercase tracking-widest">{saveSuccess}</p>
+            </div>
           </div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-12">
-          {/* Main content */}
-          <div className="order-2 lg:order-1 lg:col-span-8 space-y-4">
-            {/* Mobile controls */}
-            <div className="lg:hidden space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl bg-surface border border-border">
-                  <Search01Icon className="w-4 h-4 text-foreground-muted" />
-                  <input
-                    type="text"
-                    placeholder="Search notebooks..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-transparent border-none focus:outline-none text-sm text-foreground placeholder:text-foreground-muted"
-                  />
-                </div>
-                <button
-                  onClick={() => setMobileFiltersOpen(true)}
-                  className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-colors"
-                >
-                  <FilterIcon className="w-4 h-4 text-foreground-muted" />
-                  Filters
-                  {activeFilters > 0 && (
-                    <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-background-muted text-foreground">
-                      {activeFilters}
-                    </span>
-                  )}
-                </button>
+        {/* Layout Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative flex-1">
+          
+          {/* ==============================================
+              MOBILE CONTROLS (Top area on Mobile only)
+          ============================================== */}
+          <div className="lg:hidden col-span-1 flex flex-col gap-6 w-full text-foreground relative z-20">
+            {/* Massive Search & Filter Row */}
+            <div className="flex w-full items-stretch gap-3 h-[4rem]">
+              <div className="flex-1 bg-background-muted rounded-[2rem] flex items-center px-6 gap-4 min-w-0">
+                <Search01Icon className="w-6 h-6 opacity-40 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="SEARCH NOTEBOOKS..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent border-none focus:outline-none text-[13px] font-black uppercase tracking-widest text-foreground placeholder:text-foreground/30 min-w-0"
+                />
               </div>
-              <div className="flex items-center justify-between text-xs text-foreground-muted">
-                <span>Showing {processedNotes.length} notebook{processedNotes.length !== 1 ? 's' : ''}</span>
-                <span>{colorLabel} · {sortLabel}</span>
-              </div>
+              <button
+                onClick={() => setMobileFiltersOpen(true)}
+                className="w-[4rem] h-[4rem] shrink-0 bg-foreground text-surface rounded-[2rem] flex items-center justify-center active:scale-95 transition-transform relative"
+              >
+                <FilterIcon className="w-6 h-6" />
+                {activeFilters > 0 && <span className="absolute top-2 right-2 w-3 h-3 bg-[#ff3b30] rounded-full border-2 border-foreground" />}
+              </button>
             </div>
+            
+            {/* Meta Stats Row */}
+            <div className="flex items-center justify-between px-2 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/50">
+              <span>SHOWING {processedNotes.length} NOTEBOOK{processedNotes.length !== 1 ? 'S' : ''}</span>
+              <span>{colorLabel} / {sortLabel}</span>
+            </div>
+          </div>
 
+          {/* ==============================================
+              NOTEBOOK LIST FEED 
+          ============================================== */}
+          <div className="lg:col-span-8 flex flex-col space-y-6 lg:space-y-8 z-10 w-full relative">
+            
             {isLoading ? (
               <NotebooksSkeleton />
             ) : processedNotes.length === 0 ? (
-              <EmptyState
-                hasFilters={searchQuery.trim() !== '' || selectedColor !== 'all'}
-                onClearFilters={() => {
-                  setSearchQuery('');
-                  setSelectedColor('all');
-                }}
+              <EmptyState 
+                hasFilters={searchQuery.trim() !== '' || selectedColor !== 'all'} 
+                onClearFilters={() => { setSearchQuery(''); setSelectedColor('all'); }} 
               />
             ) : (
-              <>
-                {/* Results count - hidden on mobile to avoid redundancy */}
-                <div className="hidden lg:flex items-center justify-between">
-                  <p className="text-sm text-foreground-muted">
-                    Showing <span className="font-semibold text-foreground">{processedNotes.length}</span> notebook{processedNotes.length !== 1 ? 's' : ''}
-                    {(searchQuery || selectedColor !== 'all') && (
-                      <span> matching your filters</span>
-                    )}
-                  </p>
-                </div>
-
-                {/* Notebooks List */}
-                <div className="space-y-3">
-                  {processedNotes.map((note) => (
-                    <NotebookListItem
-                      key={note.id}
-                      note={note}
-                      onGenerate={() => handleGenerateMaterials(note)}
-                      onDelete={() => handleDeleteNote(note)}
-                      onShare={(e) => handleCopyShareLink(note, e)}
-                      onToggleVisibility={() => {
-                        togglePublicMutation.mutate({ 
-                          noteId: note.id, 
-                          isPublic: !note.is_public 
-                        });
-                      }}
-                      shareLinkCopied={shareLinkCopied === note.id}
-                    />
-                  ))}
-                </div>
-              </>
+              <div className="w-full flex flex-col gap-4">
+                {processedNotes.map((note) => (
+                  <NotebookListItem
+                    key={note.id}
+                    note={note}
+                    onGenerate={() => handleGenerateMaterials(note)}
+                    onDelete={() => handleDeleteNote(note)}
+                    onShare={(e) => handleCopyShareLink(note, e)}
+                    onToggleVisibility={() => togglePublicMutation.mutate({ noteId: note.id, isPublic: !note.is_public })}
+                    shareLinkCopied={shareLinkCopied === note.id}
+                  />
+                ))}
+              </div>
             )}
           </div>
 
-          {/* Sidebar controls */}
-          <div className="order-1 lg:order-2 lg:col-span-4 space-y-4 hidden lg:block">
-            <ClayCard variant="default" padding="md" className="rounded-2xl">
-              <div className="flex items-center gap-2">
-                <Search01Icon className="w-5 h-5 text-foreground-muted" />
-                <input
-                  type="text"
-                  placeholder="Search notebooks..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
-                />
+          {/* ==============================================
+              DESKTOP SIDEBAR (Hidden on Mobile)
+          ============================================== */}
+          <div className="hidden lg:flex flex-col lg:col-span-4 space-y-8 relative z-10 pl-6">
+            <div className="sticky top-24 w-full flex flex-col gap-8">
+              
+              {/* Massive Stats Block (Desktop) */}
+              <div className="w-full bg-foreground text-surface rounded-[3rem] p-8 lg:p-10 flex flex-col gap-6 shadow-2xl shadow-foreground/10">
+                <div className="w-full">
+                  <p className="text-[10px] lg:text-[11px] font-black uppercase tracking-[0.3em] opacity-50 mb-2">TOTAL NOTEBOOKS</p>
+                  <p className="text-5xl lg:text-6xl font-black tracking-tighter leading-none">{totalNotes}</p>
+                </div>
+                <div className="w-full h-1 bg-surface/10 rounded-full" />
+                <div className="w-full">
+                  <p className="text-[10px] lg:text-[11px] font-black uppercase tracking-[0.3em] opacity-50 mb-2">CURRENT VIEW</p>
+                  <p className="text-4xl lg:text-5xl font-black tracking-tighter leading-none">{processedNotes.length}</p>
+                </div>
               </div>
-            </ClayCard>
 
-            <ClayCard variant="default" padding="md" className="rounded-2xl">
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
-                    <FilterIcon className="w-4 h-4" />
-                    Color
+              {/* Search Block (Desktop) */}
+              <div className="w-full bg-background-muted rounded-[2.5rem] p-8 space-y-6">
+                <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-foreground/50">
+                  <Search01Icon className="w-5 h-5" /> SEARCH
+                </div>
+                <div className="flex items-center gap-4 bg-surface rounded-[2rem] px-6 py-5 focus-within:ring-4 focus-within:ring-foreground/10 transition-all border-2 border-transparent focus-within:border-border">
+                  <input
+                    type="text"
+                    placeholder="KEYWORD..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-transparent border-none focus:outline-none text-[14px] font-black uppercase tracking-widest text-foreground placeholder:text-foreground/30 min-w-0"
+                  />
+                </div>
+              </div>
+
+              {/* Filtering Block (Desktop) */}
+              <div className="w-full bg-background-muted rounded-[2.5rem] p-8 space-y-8">
+                {/* Colors */}
+                <div className="w-full">
+                  <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-5">
+                    <FilterIcon className="w-5 h-5" /> COLOR CODE
                   </div>
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                  <div className="flex flex-wrap gap-3">
                     <button
                       onClick={() => setSelectedColor('all')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${selectedColor === 'all'
-                          ? 'bg-background-muted text-foreground border-border'
-                          : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
-                        }`}
+                      className={`px-6 py-4 rounded-[1.5rem] text-[12px] font-black uppercase tracking-widest transition-all ${
+                        selectedColor === 'all' ? 'bg-foreground text-surface shadow-xl' : 'bg-surface text-foreground hover:bg-white border-2 border-transparent'
+                      }`}
                     >
-                      All
+                      ALL
                     </button>
                     {(Object.keys(NOTEBOOK_COLORS) as NotebookColorKey[]).map((color) => (
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}
-                        className={`w-7 h-7 rounded-md transition-all border ${selectedColor === color ? 'border-pencil/60 ring-2 ring-offset-1 ring-foreground/20 scale-105' : 'border-transparent hover:scale-105'
-                          }`}
+                        className={`w-14 h-14 rounded-[1.5rem] transition-all shadow-sm ${
+                          selectedColor === color ? 'ring-4 ring-foreground/20 scale-110 shadow-lg border-2 border-foreground' : 'hover:scale-105 hover:shadow-md border-2 border-transparent'
+                        }`}
                         style={{ background: NOTEBOOK_COLORS[color].primary }}
                         title={NOTEBOOK_COLORS[color].name}
                       />
@@ -406,113 +349,82 @@ export default function LibraryPage() {
                   </div>
                 </div>
 
-                <div>
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
-                    <SortingAZ01Icon className="w-4 h-4" />
-                    Sort
+                {/* Sort */}
+                <div className="w-full">
+                  <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-5">
+                    <SortingAZ01Icon className="w-5 h-5" /> SORT SYSTEM
                   </div>
-                  <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
-                    <button
-                      onClick={() => setSortBy('recent')}
-                      className={`p-2 rounded-md transition-all ${sortBy === 'recent'
-                          ? 'bg-surface text-primary shadow-sm'
-                          : 'text-foreground-muted hover:text-foreground'
+                  <div className="flex flex-col gap-3">
+                    {[
+                      { id: 'recent', label: 'THE MOST RECENT', icon: <Clock01Icon className="w-6 h-6" /> },
+                      { id: 'alphabetical', label: 'ALPHABETICAL', icon: <SortingAZ01Icon className="w-6 h-6" /> },
+                      { id: 'oldest', label: 'OLDEST FIRST', icon: <Calendar03Icon className="w-6 h-6" /> },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setSortBy(opt.id as SortOption)}
+                        className={`flex items-center gap-4 px-6 py-5 rounded-[2rem] transition-all shadow-sm ${
+                          sortBy === opt.id ? 'bg-foreground text-surface shadow-xl scale-[1.02]' : 'bg-surface text-foreground hover:bg-white border-2 border-transparent'
                         }`}
-                      title="Sort by recent"
-                    >
-                      <Clock01Icon className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setSortBy('alphabetical')}
-                      className={`p-2 rounded-md transition-all ${sortBy === 'alphabetical'
-                          ? 'bg-surface text-primary shadow-sm'
-                          : 'text-foreground-muted hover:text-foreground'
-                        }`}
-                      title="Sort alphabetically"
-                    >
-                      <SortingAZ01Icon className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setSortBy('oldest')}
-                      className={`p-2 rounded-md transition-all ${sortBy === 'oldest'
-                          ? 'bg-surface text-primary shadow-sm'
-                          : 'text-foreground-muted hover:text-foreground'
-                        }`}
-                      title="Sort by oldest"
-                    >
-                      <Calendar03Icon className="w-4 h-4" />
-                    </button>
+                      >
+                        {opt.icon}
+                        <span className="text-[13px] font-black uppercase tracking-widest">{opt.label}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
-            </ClayCard>
 
-            <ClayCard variant="default" padding="md" className="rounded-2xl">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-foreground-muted">Total</p>
-                  <p className="text-2xl font-bold text-foreground">{totalNotes}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-foreground-muted">Showing</p>
-                  <p className="text-2xl font-bold text-foreground">{processedNotes.length}</p>
-                </div>
-              </div>
-              <div className="mt-3 text-xs text-foreground-muted">
-                {colorLabel} · {sortLabel}
-              </div>
-            </ClayCard>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* ==============================================
+          MOBILE BOTTOM SHEET FILTERS
+      ============================================== */}
       <MobileBottomSheet
         open={mobileFiltersOpen}
         onClose={() => setMobileFiltersOpen(false)}
-        title="Filters"
-        description="Refine your notebooks"
+        title="REFINE SEARCH"
+        description="FILTER YOUR KNOWLEDGE BASE"
         footer={(
-          <div className="flex items-center gap-2">
+          <div className="flex gap-3 w-full p-2">
             <button
-              onClick={() => {
-                setSelectedColor('all');
-                setSortBy('recent');
-              }}
-              className="flex-1 px-3 py-2 rounded-xl border border-border bg-surface text-sm font-semibold text-foreground-muted hover:text-foreground hover:bg-background-muted transition-all"
+              onClick={() => { setSelectedColor('all'); setSortBy('recent'); }}
+              className="flex-1 py-5 rounded-[2rem] bg-background-muted text-foreground font-black uppercase tracking-[0.2em] text-[13px] hover:bg-border/40 active:scale-95 transition-all"
             >
-              Reset
+              RESET
             </button>
             <button
               onClick={() => setMobileFiltersOpen(false)}
-              className="flex-1 px-3 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all"
+              className="flex-[2] py-5 rounded-[2rem] bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[13px] shadow-[0_8px_30px_rgba(0,0,0,0.2)] active:scale-95 transition-all"
             >
-              Done
+              APPLY FILTERS
             </button>
           </div>
         )}
       >
-        <div className="space-y-4">
+        <div className="space-y-10 pt-4 pb-6 px-1">
+          {/* Colors */}
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
-              <FilterIcon className="w-4 h-4" />
-              Color
-            </div>
-            <div className="mt-2 flex items-center gap-2 flex-wrap">
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-5">NOTEBOOK COLOR</div>
+            <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setSelectedColor('all')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all border ${selectedColor === 'all'
-                    ? 'bg-background-muted text-foreground border-border'
-                    : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
-                  }`}
+                className={`px-6 py-4 rounded-[1.5rem] text-[12px] font-black uppercase tracking-widest transition-all shadow-sm ${
+                  selectedColor === 'all' ? 'bg-foreground text-surface' : 'bg-background-muted text-foreground'
+                }`}
               >
-                All
+                ALL
               </button>
               {(Object.keys(NOTEBOOK_COLORS) as NotebookColorKey[]).map((color) => (
                 <button
                   key={color}
                   onClick={() => setSelectedColor(color)}
-                  className={`w-7 h-7 rounded-md transition-all border ${selectedColor === color ? 'border-pencil/60 ring-2 ring-offset-1 ring-foreground/20 scale-105' : 'border-transparent hover:scale-105'
-                    }`}
+                  className={`w-14 h-14 rounded-[1.5rem] transition-all shadow-sm ${
+                    selectedColor === color ? 'ring-4 ring-foreground/20 scale-110 shadow-lg border-2 border-foreground' : 'border-2 border-transparent'
+                  }`}
                   style={{ background: NOTEBOOK_COLORS[color].primary }}
                   title={NOTEBOOK_COLORS[color].name}
                 />
@@ -520,446 +432,257 @@ export default function LibraryPage() {
             </div>
           </div>
 
+          {/* Sort Menu */}
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
-              <SortingAZ01Icon className="w-4 h-4" />
-              Sort
-            </div>
-            <div className="mt-2 flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
-              <button
-                onClick={() => setSortBy('recent')}
-                className={`p-2 rounded-md transition-all ${sortBy === 'recent'
-                    ? 'bg-surface text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-5">SORT ORDER</div>
+            <div className="flex flex-col gap-3">
+              {[
+                { id: 'recent', label: 'MOST RECENT', icon: <Clock01Icon className="w-6 h-6" /> },
+                { id: 'alphabetical', label: 'ALPHABETICAL (A-Z)', icon: <SortingAZ01Icon className="w-6 h-6" /> },
+                { id: 'oldest', label: 'OLDEST ARCHIVES', icon: <Calendar03Icon className="w-6 h-6" /> },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setSortBy(opt.id as SortOption)}
+                  className={`flex items-center gap-5 px-6 py-5 rounded-[2rem] transition-all shadow-sm ${
+                    sortBy === opt.id ? 'bg-foreground text-surface' : 'bg-background-muted text-foreground'
                   }`}
-                title="Sort by recent"
-              >
-                <Clock01Icon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setSortBy('alphabetical')}
-                className={`p-2 rounded-md transition-all ${sortBy === 'alphabetical'
-                    ? 'bg-surface text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                title="Sort alphabetically"
-              >
-                <SortingAZ01Icon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setSortBy('oldest')}
-                className={`p-2 rounded-md transition-all ${sortBy === 'oldest'
-                    ? 'bg-surface text-primary shadow-sm'
-                    : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                title="Sort by oldest"
-              >
-                <Calendar03Icon className="w-4 h-4" />
-              </button>
+                >
+                  {opt.icon}
+                  <span className="text-[13px] font-black uppercase tracking-widest">{opt.label}</span>
+                </button>
+              ))}
             </div>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-background-muted p-3 text-xs text-foreground-muted">
-            <div className="flex items-center justify-between">
-              <span>Total</span>
-              <span className="font-semibold text-foreground">{totalNotes}</span>
-            </div>
-            <div className="flex items-center justify-between mt-1">
-              <span>Showing</span>
-              <span className="font-semibold text-foreground">{processedNotes.length}</span>
-            </div>
-            <div className="mt-2 text-[11px]">{colorLabel} · {sortLabel}</div>
           </div>
         </div>
       </MobileBottomSheet>
 
-      <GenerateStudyMaterialModal
-        isOpen={isGenerateModalOpen}
-        onClose={() => {
-          setIsGenerateModalOpen(false);
-          setSelectedNote(null);
-        }}
-        onSelect={handleSelectMaterial}
-        noteTitle={selectedNote?.title || 'Untitled Notebook'}
-      />
-
-      <ForgeFlashcardsModal
-        isOpen={isForgeModalOpen}
-        onClose={() => {
-          setIsForgeModalOpen(false);
-          setSelectedNote(null);
-        }}
-        onFlashcardsGenerated={handleFlashcardsGenerated}
-        saving={saveFlashcardsMutation.isPending}
-        initialSelectedNoteIds={selectedNote ? [selectedNote.id] : undefined}
-      />
-
-      <CreateExamModal
-        isOpen={isExamModalOpen}
-        onClose={() => {
-          setIsExamModalOpen(false);
-          setSelectedNote(null);
-        }}
-        onExamGenerated={handleExamGenerated}
-        saving={createExamMutation.isPending}
-        initialSelectedNoteIds={selectedNote ? [selectedNote.id] : undefined}
-      />
-
-      <ConfirmDeleteModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleConfirmDelete}
-        title="Delete Notebook"
-        description="Are you sure you want to delete this notebook? This action cannot be undone."
-        itemName={selectedNote?.title || 'Untitled Notebook'}
-        itemType="notebook"
-      />
+      {/* ==============================================
+          MODALS
+      ============================================== */}
+      <GenerateStudyMaterialModal isOpen={isGenerateModalOpen} onClose={() => { setIsGenerateModalOpen(false); setSelectedNote(null); }} onSelect={handleSelectMaterial} noteTitle={selectedNote?.title || 'Untitled Notebook'} />
+      <ForgeFlashcardsModal isOpen={isForgeModalOpen} onClose={() => { setIsForgeModalOpen(false); setSelectedNote(null); }} onFlashcardsGenerated={handleFlashcardsGenerated} saving={saveFlashcardsMutation.isPending} initialSelectedNoteIds={selectedNote ? [selectedNote.id] : undefined} />
+      <CreateExamModal isOpen={isExamModalOpen} onClose={() => { setIsExamModalOpen(false); setSelectedNote(null); }} onExamGenerated={handleExamGenerated} saving={createExamMutation.isPending} initialSelectedNoteIds={selectedNote ? [selectedNote.id] : undefined} />
+      <ConfirmDeleteModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleConfirmDelete} title="DELETE NOTEBOOK" description="Are you absolutely sure you want to permanently delete this notebook? This action cannot be undone." itemName={selectedNote?.title || 'Untitled Notebook'} itemType="notebook" />
     </>
   );
 }
 
 // ============================================
-// Sub-components
+// Components
 // ============================================
 
 function LibraryHeader({ totalNotes }: { totalNotes: number }) {
   return (
-    <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        {/* Title area */}
-        <div className="flex items-start gap-3">
-          <NotebookIcon className="w-12 h-12 text-primary shrink-0" />
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                Your Library
-              </h1>
-            </div>
-            <p className="text-foreground-muted">
-              Your personal collection of study notebooks and knowledge
-            </p>
-          </div>
+    <div className="w-full flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8 pb-4">
+      <div className="flex flex-col">
+        <div className="flex items-center gap-3 mb-2 md:mb-3">
+          <div className="w-3 h-3 rounded-full bg-primary flex-shrink-0" />
+          <h1 className="text-[11px] md:text-[12px] font-black uppercase tracking-[0.3em] text-foreground/50">YOUR KNOWLEDGE BASE</h1>
         </div>
-
-        {/* CTA */}
-        <CreateNoteButton />
+        <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase text-foreground leading-[0.85] break-words">
+          LIBRARY
+        </h2>
       </div>
-    </ClayCard>
+
+      <div className="flex shrink-0 w-full md:w-auto pb-1 mt-4 md:mt-0">
+        <div className="w-full md:w-auto">
+          <CreateNoteButton />
+        </div>
+      </div>
+    </div>
   );
 }
 
 function NotebooksSkeleton() {
   return (
-    <div className="space-y-3">
+    <div className="w-full flex flex-col gap-4">
       {Array.from({ length: 5 }).map((_, i) => (
-        <ClayCard key={i} variant="default" padding="none" className="rounded-2xl overflow-hidden animate-pulse">
-          <div className="flex items-stretch">
-            <div className="w-1 bg-background-muted" />
-            <div className="flex items-center gap-4 p-3 pr-5 flex-1">
-              <div className="w-12 h-14 bg-background-muted rounded-lg" />
-              <div className="flex-1 min-w-0 space-y-2">
-                <div className="h-4 w-2/3 bg-background-muted rounded" />
-                <div className="h-3 w-1/2 bg-background-muted/80 rounded" />
-                <div className="flex items-center gap-2 pt-1">
-                  <div className="h-2.5 w-20 bg-background-muted/70 rounded" />
-                  <div className="h-2.5 w-12 bg-background-muted/70 rounded" />
-                  <div className="hidden sm:block h-2.5 w-10 bg-background-muted/70 rounded" />
-                </div>
-              </div>
-              <div className="hidden sm:flex items-center gap-2">
-                <div className="h-8 w-8 bg-background-muted rounded-lg" />
-                <div className="h-8 w-8 bg-background-muted rounded-lg" />
-              </div>
+        <div key={i} className="w-full bg-background-muted rounded-[2.5rem] p-6 lg:p-8 animate-pulse flex flex-col sm:flex-row lg:items-center gap-6">
+          <div className="w-full sm:w-20 sm:h-24 h-40 rounded-[1.5rem] bg-black/5 flex-shrink-0" />
+          <div className="flex-1 flex flex-col gap-4">
+            <div className="h-6 w-3/4 bg-black/5 rounded-full" />
+            <div className="flex gap-2">
+              <div className="h-5 w-24 bg-black/5 rounded-full" />
+              <div className="h-5 w-20 bg-black/5 rounded-full" />
             </div>
+            <div className="sm:hidden h-14 w-full bg-black/5 rounded-2xl mt-4" />
           </div>
-        </ClayCard>
+        </div>
       ))}
     </div>
   );
 }
 
 function NotebookListItem({
-  note,
-  onGenerate,
-  onDelete,
-  onShare,
-  onToggleVisibility,
-  shareLinkCopied,
+  note, onGenerate, onDelete, onShare, onToggleVisibility, shareLinkCopied,
 }: {
-  note: Note;
-  onGenerate: () => void;
-  onDelete: () => void;
-  onShare: (e: React.MouseEvent) => void;
-  onToggleVisibility: () => void;
-  shareLinkCopied: boolean;
+  note: Note; onGenerate: () => void; onDelete: () => void; onShare: (e: React.MouseEvent) => void; onToggleVisibility: () => void; shareLinkCopied: boolean;
 }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const color = (note.cover_color as NotebookColorKey) || 'royal';
   const colorTheme = NOTEBOOK_COLORS[color];
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-
+  const formatDate = (date: string) => {
+    const d = new Date(date);
+    const diff = Math.floor((new Date().getTime() - d.getTime()) / 1000);
     if (diff < 60) return 'Just now';
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-    return date.toLocaleDateString();
+    return d.toLocaleDateString();
   };
 
-  // Extract a plain-text preview from HTML content
-  const getContentPreview = (content: string) => {
-    if (!content) return null;
-    const text = content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
-    if (text.length === 0) return null;
-    return text.length > 80 ? text.slice(0, 80) + '...' : text;
-  };
-
-  // Estimate word count from content
-  const getWordCount = (content: string) => {
-    if (!content) return 0;
-    const text = content.replace(/<[^>]*>/g, '').trim();
-    if (text.length === 0) return 0;
-    return text.split(/\s+/).filter(Boolean).length;
-  };
-
-  const preview = getContentPreview(note.content);
-  const wordCount = getWordCount(note.content);
+  const wordCount = (() => {
+    if (!note.content) return 0;
+    const txt = note.content.replace(/<[^>]*>/g, '').trim();
+    return txt.length === 0 ? 0 : txt.split(/\s+/).filter(Boolean).length;
+  })();
 
   return (
-    <Link href={`/editor/${note.slug || note.id}`} className="block group">
-      <ClayCard variant="default" padding="none" className="rounded-2xl overflow-hidden hover:shadow-lg transition-all">
-        <div className="flex items-stretch">
-          {/* Color accent left border */}
-          <div
-            className="w-1 flex-shrink-0 rounded-l-2xl"
-            style={{ background: `linear-gradient(180deg, ${colorTheme.primary}, ${colorTheme.secondary})` }}
-          />
+    <div className={`group relative w-full bg-background-muted rounded-[2rem] lg:rounded-[2.5rem] p-5 lg:p-6 flex flex-col xl:flex-row xl:items-center gap-5 xl:gap-8 transition-all hover:bg-surface-elevated shadow-sm hover:shadow-xl hover:-translate-y-1 ${isMenuOpen ? 'z-50' : 'z-10'}`}>
+      {/* Clickable Overlay */}
+      <Link href={`/editor/${note.slug || note.id}`} className="absolute inset-0 z-0 rounded-[2rem] lg:rounded-[2.5rem]" aria-label={`Open ${note.title}`} />
 
-          <div className="flex items-start sm:items-center gap-3 sm:gap-4 p-3 sm:pr-5 flex-1 min-w-0">
-            {/* 3D mini notebook */}
-            <div className="relative flex-shrink-0 mt-1 sm:mt-0" style={{ width: 54, height: 62 }}>
-              {/* Page edges — thin stack, only visible on right + bottom */}
-              <div
-                className="absolute rounded-[5px]"
-                style={{ top: 3, left: 3, right: 0, bottom: 0, background: '#d8d5d0', boxShadow: '1px 1px 2px rgba(0,0,0,0.12)' }}
-              />
-              <div
-                className="absolute rounded-[5px]"
-                style={{ top: 2, left: 2, right: 1, bottom: 1, background: '#e5e2dd' }}
-              />
-              <div
-                className="absolute rounded-[5px]"
-                style={{ top: 1, left: 1, right: 2, bottom: 2, background: '#eeecea' }}
-              />
-
-              {/* Cover — sits on top */}
-              <div
-                className="absolute rounded-[5px] overflow-hidden"
-                style={{
-                  top: 0,
-                  left: 0,
-                  right: 3,
-                  bottom: 3,
-                  background: `linear-gradient(145deg, ${colorTheme.primary} 0%, ${colorTheme.secondary} 60%, ${colorTheme.primary} 100%)`,
-                  boxShadow: `2px 3px 6px ${colorTheme.shadow}`,
-                }}
-              >
-                {/* Glossy highlight */}
-                <div
-                  className="absolute pointer-events-none"
-                  style={{
-                    top: '-10%',
-                    left: '10%',
-                    right: '30%',
-                    bottom: '50%',
-                    background: 'linear-gradient(160deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
-                    borderRadius: '50%',
-                    filter: 'blur(1px)',
-                  }}
-                />
-                {/* Spine shadow */}
-                <div
-                  className="absolute left-0 top-0 bottom-0 w-[5px]"
-                  style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.25) 0%, transparent 100%)' }}
-                />
-                {/* Elastic band */}
-                <div
-                  className="absolute right-[4px] top-0 bottom-0 w-[2px] rounded-full"
-                  style={{ background: 'rgba(0,0,0,0.25)' }}
-                />
-                {/* Icon */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <NotebookIcon className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.3)' }} />
-                </div>
-              </div>
-            </div>
-
-            {/* Content & Actions Wrapper */}
-            <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-              
-              {/* Content Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start sm:items-center gap-2 flex-wrap sm:flex-nowrap">
-                  <h3 className="font-semibold text-foreground break-words overflow-hidden group-hover:text-primary transition-colors">
-                    {note.title || 'Untitled Notebook'}
-                  </h3>
-                  {note.is_public && (
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onToggleVisibility();
-                      }}
-                      className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 hover:bg-emerald-100 transition-all shrink-0 active:scale-95 shadow-sm mt-0.5 sm:mt-0"
-                      title="Public - click to make private"
-                    >
-                      Public
-                    </button>
-                  )}
-                </div>
-                {/* Content preview */}
-                {preview && (
-                  <p className="text-xs text-foreground-muted/70 truncate mt-0.5">{preview}</p>
-                )}
-                <div className="flex items-center gap-3 mt-1.5 sm:mt-1">
-                  <span className="text-xs text-foreground-muted flex items-center gap-1">
-                    <Clock01Icon className="w-3 h-3" />
-                    {formatDate(note.updated_at)}
-                  </span>
-                  {wordCount > 0 && (
-                    <span className="text-xs text-foreground-muted">
-                      {wordCount.toLocaleString()} words
-                    </span>
-                  )}
-                  {note.tags && note.tags.length > 0 && (
-                    <div className="hidden sm:flex items-center gap-1">
-                      {note.tags.slice(0, 2).map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-0.5 rounded-full text-[10px] font-medium"
-                          style={{
-                            background: `${colorTheme.primary}15`,
-                            color: colorTheme.primary,
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      {note.tags.length > 2 && (
-                        <span className="text-xs text-foreground-muted">+{note.tags.length - 2}</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 lg:opacity-0 lg:group-hover:opacity-100 lg:pointer-events-none lg:group-hover:pointer-events-auto transition-opacity flex-shrink-0 relative z-10">
-                <button
-                  className={`p-2 rounded-lg transition-colors ${shareLinkCopied
-                      ? 'bg-emerald-500/10 text-emerald-500'
-                      : 'bg-primary/10 text-primary hover:bg-primary/20'
-                    }`}
-                  title={shareLinkCopied ? 'Copied!' : 'Share'}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onShare(e);
-                  }}
-                >
-                  <Share01Icon className="w-4 h-4" />
-                </button>
-                <button
-                  className={`p-2 rounded-lg transition-colors ${note.is_public
-                      ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'
-                      : 'bg-primary/10 text-primary hover:bg-primary/20'
-                    }`}
-                  title={note.is_public ? 'Make Private' : 'Make Public'}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onToggleVisibility();
-                  }}
-                >
-                  {note.is_public ? <GlobeIcon className="w-4 h-4" /> : <LockIcon className="w-4 h-4" />}
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onGenerate();
-                  }}
-                  className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                  title="Generate study materials"
-                >
-                  <SparklesIcon className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onDelete();
-                  }}
-                  className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
-                  title="Delete notebook"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
+      {/* Notebook Core Detail (Cover + Info) */}
+      <div className="relative z-10 flex items-start gap-5 lg:gap-6 flex-1 min-w-0 pointer-events-none">
+        
+        {/* Massive flat vertical cover block */}
+        <div 
+          className="w-20 h-28 lg:w-24 lg:h-32 rounded-[1rem] lg:rounded-[1.25rem] flex-shrink-0 flex items-center justify-center shadow-inner overflow-hidden relative"
+          style={{ background: colorTheme.primary }}
+        >
+          {/* subtle pattern inside the cover */}
+          <div className="absolute inset-0 opacity-20 mix-blend-overlay" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '12px 12px' }} />
+          <NotebookIcon className="w-10 h-10 lg:w-12 lg:h-12 opacity-90 text-white relative z-10 drop-shadow-md" />
         </div>
-      </ClayCard>
-    </Link>
+
+        {/* Info Column */}
+        <div className="flex-1 min-w-0 lg:pt-1 flex flex-col justify-center h-full pr-8 lg:pr-10">
+          <h3 className="text-[14px] lg:text-[16px] font-black uppercase tracking-widest text-foreground truncate max-w-[95%] leading-tight mb-2">
+            {note.title || 'UNTITLED NOTEBOOK'}
+          </h3>
+          
+          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[0.75rem] border-2 border-border/80 text-foreground-muted text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] leading-none bg-surface/50 backdrop-blur-sm">
+              <Clock01Icon className="w-3.5 h-3.5 opacity-70" /> {formatDate(note.updated_at)}
+            </span>
+            {wordCount > 0 && (
+              <span className="inline-flex px-3 py-1.5 rounded-[0.75rem] border-2 border-border/80 text-foreground-muted text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] leading-none bg-surface/50 backdrop-blur-sm">
+                {wordCount} W
+              </span>
+            )}
+            {note.is_public && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[0.75rem] bg-[#00c569] text-white text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] leading-none shadow-sm">
+                <GlobeIcon className="w-3.5 h-3.5" /> PUBLIC
+              </div>
+            )}
+          </div>
+          
+          {note.tags && note.tags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 mt-3 border-t-2 border-border/40 pt-2 lg:pt-3">
+              {note.tags.slice(0, 3).map((tag) => (
+                <span key={tag} className="px-3 py-1.5 rounded-[0.5rem] bg-foreground text-surface text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] leading-none whitespace-nowrap shadow-sm">
+                  {tag.length > 15 ? tag.slice(0, 13) + '...' : tag}
+                </span>
+              ))}
+              {note.tags.length > 3 && (
+                <span className="text-[10px] font-black uppercase tracking-widest text-foreground/50 ml-1">+{note.tags.length - 3} MORE</span>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 3-Dot Dropdown Menu for Actions */}
+      <div className="absolute top-4 right-4 lg:top-5 lg:right-5 z-20 pointer-events-auto">
+        <button
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }}
+          className={`p-2.5 rounded-full transition-all shadow-sm ${
+            isMenuOpen ? 'bg-foreground text-surface' : 'bg-surface/80 backdrop-blur-md text-foreground hover:bg-foreground hover:text-surface'
+          }`}
+        >
+          <MoreVerticalIcon className="w-5 h-5" />
+        </button>
+
+        {isMenuOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); }} />
+            <div className="absolute top-full right-0 mt-2 w-[11rem] lg:w-[12rem] bg-surface rounded-[1.25rem] shadow-2xl p-2 flex flex-col gap-1.5 border-2 border-border/20 z-50 origin-top-right animate-in zoom-in-95 duration-100">
+              
+              <button
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] transition-all w-full text-left ${
+                  shareLinkCopied ? 'bg-[#00c569] text-white cursor-default shadow-sm' : 'hover:bg-background-muted text-foreground'
+                }`}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); onShare(e); }}
+              >
+                <Share01Icon className="w-4 h-4 shrink-0" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">{shareLinkCopied ? 'COPIED!' : 'SHARE LINK'}</span>
+              </button>
+
+              <button
+                className="flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] hover:bg-background-muted text-foreground transition-all w-full text-left"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); onToggleVisibility(); }}
+              >
+                {note.is_public ? <GlobeIcon className="w-4 h-4 shrink-0" /> : <LockIcon className="w-4 h-4 shrink-0" />}
+                <span className="text-[10px] font-bold uppercase tracking-widest">{note.is_public ? 'MAKE PRIVATE' : 'MAKE PUBLIC'}</span>
+              </button>
+
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); onGenerate(); }}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] bg-primary text-white hover:bg-[#1a4465] transition-all w-full text-left shadow-sm"
+              >
+                <SparklesIcon className="w-4 h-4 shrink-0" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">GENERATE</span>
+              </button>
+
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); onDelete(); }}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] hover:bg-[#ff3b30]/10 hover:text-[#ff3b30] text-[#ff3b30] transition-all w-full text-left"
+              >
+                <Delete01Icon className="w-4 h-4 shrink-0" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">DELETE</span>
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+    </div>
   );
 }
 
 function EmptyState({
-  hasFilters,
-  onClearFilters
+  hasFilters, onClearFilters
 }: {
-  hasFilters: boolean;
-  onClearFilters: () => void;
+  hasFilters: boolean; onClearFilters: () => void;
 }) {
   return (
-    <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
-      <div className="text-center py-16">
-        <Image
-          src="/brand/verso-empty-clean.svg"
-          alt="Verso mascot — empty state"
-          width={140}
-          height={140}
-          className="mx-auto mb-8 drop-shadow-sm"
-        />
-
-        {hasFilters ? (
-          <>
-            <h3 className="text-2xl font-bold text-foreground mb-3">No matching notebooks</h3>
-            <p className="text-foreground-muted mb-8 max-w-md mx-auto">
-              Try adjusting your search or filters to find what you&apos;re looking for
-            </p>
-            <button
-              onClick={onClearFilters}
-              className="px-6 py-3 rounded-xl bg-surface text-foreground font-semibold border border-border hover:shadow-md transition-all"
-            >
-              Clear filters
-            </button>
-          </>
-        ) : (
-          <>
-            <h3 className="text-2xl font-bold text-foreground mb-3">Start your library</h3>
-            <p className="text-foreground-muted mb-8 max-w-md mx-auto">
-              Create your first notebook to begin organizing your study materials and generating flashcards
-            </p>
-            <CreateNoteButton />
-          </>
-        )}
+    <div className="w-full bg-background-muted rounded-[3.5rem] p-10 lg:p-20 text-center flex flex-col items-center border-[6px] border-surface">
+      <div className="w-48 h-48 mb-10 relative opacity-90 drop-shadow-xl saturate-50">
+        <Image src="/brand/verso-empty-clean.svg" alt="Empty" fill className="object-contain" />
       </div>
-    </ClayCard>
+      {hasFilters ? (
+        <>
+          <h3 className="text-4xl lg:text-5xl font-black uppercase tracking-tighter text-foreground mb-4">NO MATCHES</h3>
+          <p className="opacity-60 mb-10 text-[15px] max-w-md font-bold leading-relaxed uppercase tracking-widest leading-relaxed">
+            NOTHING FOUND FOR YOUR CURRENT SEARCH OR FORMAT FILTERS.
+          </p>
+          <button onClick={onClearFilters} className="px-10 py-5 rounded-full bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[13px] hover:scale-105 transition-all shadow-[0_12px_30px_rgba(0,0,0,0.15)]">
+            CLEAR ALL FILTERS
+          </button>
+        </>
+      ) : (
+        <>
+          <h3 className="text-4xl lg:text-5xl font-black uppercase tracking-tighter text-foreground mb-4">BLANK SLATE</h3>
+          <p className="opacity-60 mb-10 text-[15px] max-w-md font-bold leading-relaxed uppercase tracking-widest leading-relaxed">
+            CREATE YOUR FIRST NOTEBOOK TO BEGIN STORING KNOWLEDGE.
+          </p>
+          <div className="w-full max-w-xs">
+            <CreateNoteButton />
+          </div>
+        </>
+      )}
+    </div>
   );
 }
-
