@@ -737,9 +737,9 @@ function NotebookListItem({
             style={{ background: `linear-gradient(180deg, ${colorTheme.primary}, ${colorTheme.secondary})` }}
           />
 
-          <div className="flex items-center gap-4 p-3 pr-5 flex-1 min-w-0">
+          <div className="flex items-start sm:items-center gap-3 sm:gap-4 p-3 sm:pr-5 flex-1 min-w-0">
             {/* 3D mini notebook */}
-            <div className="relative flex-shrink-0" style={{ width: 54, height: 62 }}>
+            <div className="relative flex-shrink-0 mt-1 sm:mt-0" style={{ width: 54, height: 62 }}>
               {/* Page edges — thin stack, only visible on right + bottom */}
               <div
                 className="absolute rounded-[5px]"
@@ -796,116 +796,120 @@ function NotebookListItem({
               </div>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-foreground break-words overflow-hidden group-hover:text-primary transition-colors">
-                  {note.title || 'Untitled Notebook'}
-                </h3>
-                {note.is_public && (
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onToggleVisibility();
-                    }}
-                    className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 hover:bg-emerald-100 transition-all shrink-0 active:scale-95 shadow-sm"
-                    title="Public - click to make private"
-                  >
-                    Public
-                  </button>
+            {/* Content & Actions Wrapper */}
+            <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+              
+              {/* Content Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start sm:items-center gap-2 flex-wrap sm:flex-nowrap">
+                  <h3 className="font-semibold text-foreground break-words overflow-hidden group-hover:text-primary transition-colors">
+                    {note.title || 'Untitled Notebook'}
+                  </h3>
+                  {note.is_public && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onToggleVisibility();
+                      }}
+                      className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 hover:bg-emerald-100 transition-all shrink-0 active:scale-95 shadow-sm mt-0.5 sm:mt-0"
+                      title="Public - click to make private"
+                    >
+                      Public
+                    </button>
+                  )}
+                </div>
+                {/* Content preview */}
+                {preview && (
+                  <p className="text-xs text-foreground-muted/70 truncate mt-0.5">{preview}</p>
                 )}
-              </div>
-              {/* Content preview */}
-              {preview && (
-                <p className="text-xs text-foreground-muted/70 truncate mt-0.5">{preview}</p>
-              )}
-              <div className="flex items-center gap-3 mt-1">
-                <span className="text-xs text-foreground-muted flex items-center gap-1">
-                  <Clock01Icon className="w-3 h-3" />
-                  {formatDate(note.updated_at)}
-                </span>
-                {wordCount > 0 && (
-                  <span className="text-xs text-foreground-muted">
-                    {wordCount.toLocaleString()} words
+                <div className="flex items-center gap-3 mt-1.5 sm:mt-1">
+                  <span className="text-xs text-foreground-muted flex items-center gap-1">
+                    <Clock01Icon className="w-3 h-3" />
+                    {formatDate(note.updated_at)}
                   </span>
-                )}
-                {note.tags && note.tags.length > 0 && (
-                  <div className="hidden sm:flex items-center gap-1">
-                    {note.tags.slice(0, 2).map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-0.5 rounded-full text-[10px] font-medium"
-                        style={{
-                          background: `${colorTheme.primary}15`,
-                          color: colorTheme.primary,
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    {note.tags.length > 2 && (
-                      <span className="text-xs text-foreground-muted">+{note.tags.length - 2}</span>
-                    )}
-                  </div>
-                )}
+                  {wordCount > 0 && (
+                    <span className="text-xs text-foreground-muted">
+                      {wordCount.toLocaleString()} words
+                    </span>
+                  )}
+                  {note.tags && note.tags.length > 0 && (
+                    <div className="hidden sm:flex items-center gap-1">
+                      {note.tags.slice(0, 2).map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-2 py-0.5 rounded-full text-[10px] font-medium"
+                          style={{
+                            background: `${colorTheme.primary}15`,
+                            color: colorTheme.primary,
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {note.tags.length > 2 && (
+                        <span className="text-xs text-foreground-muted">+{note.tags.length - 2}</span>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2 lg:opacity-0 lg:group-hover:opacity-100 lg:pointer-events-none lg:group-hover:pointer-events-auto transition-opacity flex-shrink-0">
-              <button
-                className={`p-2 rounded-lg transition-colors ${shareLinkCopied
-                    ? 'bg-emerald-500/10 text-emerald-500'
-                    : 'bg-primary/10 text-primary hover:bg-primary/20'
-                  }`}
-                title={shareLinkCopied ? 'Copied!' : 'Share'}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onShare(e);
-                }}
-              >
-                <Share01Icon className="w-4 h-4" />
-              </button>
-              <button
-                className={`p-2 rounded-lg transition-colors ${note.is_public
-                    ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'
-                    : 'bg-primary/10 text-primary hover:bg-primary/20'
-                  }`}
-                title={note.is_public ? 'Make Private' : 'Make Public'}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onToggleVisibility();
-                }}
-              >
-                {note.is_public ? <GlobeIcon className="w-4 h-4" /> : <LockIcon className="w-4 h-4" />}
-              </button>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onGenerate();
-                }}
-                className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                title="Generate study materials"
-              >
-                <SparklesIcon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onDelete();
-                }}
-                className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
-                title="Delete notebook"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
+              {/* Actions */}
+              <div className="flex items-center gap-2 lg:opacity-0 lg:group-hover:opacity-100 lg:pointer-events-none lg:group-hover:pointer-events-auto transition-opacity flex-shrink-0 relative z-10">
+                <button
+                  className={`p-2 rounded-lg transition-colors ${shareLinkCopied
+                      ? 'bg-emerald-500/10 text-emerald-500'
+                      : 'bg-primary/10 text-primary hover:bg-primary/20'
+                    }`}
+                  title={shareLinkCopied ? 'Copied!' : 'Share'}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onShare(e);
+                  }}
+                >
+                  <Share01Icon className="w-4 h-4" />
+                </button>
+                <button
+                  className={`p-2 rounded-lg transition-colors ${note.is_public
+                      ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'
+                      : 'bg-primary/10 text-primary hover:bg-primary/20'
+                    }`}
+                  title={note.is_public ? 'Make Private' : 'Make Public'}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onToggleVisibility();
+                  }}
+                >
+                  {note.is_public ? <GlobeIcon className="w-4 h-4" /> : <LockIcon className="w-4 h-4" />}
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onGenerate();
+                  }}
+                  className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                  title="Generate study materials"
+                >
+                  <SparklesIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                  className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                  title="Delete notebook"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
