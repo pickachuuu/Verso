@@ -14,7 +14,9 @@ import {
   Share01Icon,
   Clock01Icon,
   SortingAZ01Icon,
-  Calendar03Icon
+  Calendar03Icon,
+  GlobeIcon,
+  LockIcon
 } from 'hugeicons-react';
 import { NotebookIcon } from '@/component/icons';
 import GenerateStudyMaterialModal from '@/component/features/modal/GenerateStudyMaterialModal';
@@ -326,8 +328,8 @@ export default function LibraryPage() {
               />
             ) : (
               <>
-                {/* Results count */}
-                <div className="flex items-center justify-between">
+                {/* Results count - hidden on mobile to avoid redundancy */}
+                <div className="hidden lg:flex items-center justify-between">
                   <p className="text-sm text-foreground-muted">
                     Showing <span className="font-semibold text-foreground">{processedNotes.length}</span> notebook{processedNotes.length !== 1 ? 's' : ''}
                     {(searchQuery || selectedColor !== 'all') && (
@@ -345,6 +347,12 @@ export default function LibraryPage() {
                       onGenerate={() => handleGenerateMaterials(note)}
                       onDelete={() => handleDeleteNote(note)}
                       onShare={(e) => handleCopyShareLink(note, e)}
+                      onToggleVisibility={() => {
+                        togglePublicMutation.mutate({ 
+                          noteId: note.id, 
+                          isPublic: !note.is_public 
+                        });
+                      }}
                       shareLinkCopied={shareLinkCopied === note.id}
                     />
                   ))}
@@ -675,12 +683,14 @@ function NotebookListItem({
   onGenerate,
   onDelete,
   onShare,
+  onToggleVisibility,
   shareLinkCopied,
 }: {
   note: Note;
   onGenerate: () => void;
   onDelete: () => void;
   onShare: (e: React.MouseEvent) => void;
+  onToggleVisibility: () => void;
   shareLinkCopied: boolean;
 }) {
   const color = (note.cover_color as NotebookColorKey) || 'royal';
@@ -793,9 +803,17 @@ function NotebookListItem({
                   {note.title || 'Untitled Notebook'}
                 </h3>
                 {note.is_public && (
-                  <span className="text-[10px] font-medium uppercase tracking-wide text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onToggleVisibility();
+                    }}
+                    className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 hover:bg-emerald-100 transition-all shrink-0 active:scale-95 shadow-sm"
+                    title="Public - click to make private"
+                  >
                     Public
-                  </span>
+                  </button>
                 )}
               </div>
               {/* Content preview */}
@@ -835,7 +853,7 @@ function NotebookListItem({
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+            <div className="flex items-center gap-2 lg:opacity-0 lg:group-hover:opacity-100 lg:pointer-events-none lg:group-hover:pointer-events-auto transition-opacity flex-shrink-0">
               <button
                 className={`p-2 rounded-lg transition-colors ${shareLinkCopied
                     ? 'bg-emerald-500/10 text-emerald-500'
@@ -849,6 +867,20 @@ function NotebookListItem({
                 }}
               >
                 <Share01Icon className="w-4 h-4" />
+              </button>
+              <button
+                className={`p-2 rounded-lg transition-colors ${note.is_public
+                    ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'
+                    : 'bg-primary/10 text-primary hover:bg-primary/20'
+                  }`}
+                title={note.is_public ? 'Make Private' : 'Make Public'}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onToggleVisibility();
+                }}
+              >
+                {note.is_public ? <GlobeIcon className="w-4 h-4" /> : <LockIcon className="w-4 h-4" />}
               </button>
               <button
                 onClick={(e) => {
