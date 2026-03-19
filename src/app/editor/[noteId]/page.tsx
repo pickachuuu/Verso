@@ -8,14 +8,15 @@ import { useQueryClient } from '@tanstack/react-query';
 // UI Components
 import { EditorToolbar, Editor } from '@/component/ui/RichTextEditor';
 import { TIPTAP_FORMATTING_GUIDE } from '@/component/ui/AISelectionBubble';
-import PageFlipContainer from '@/component/ui/PageFlipContainer';
 import ClayNotebookCover, { NotebookColorKey } from '@/component/ui/ClayNotebookCover';
 import TableOfContents, { NotePage } from '@/component/ui/TableOfContents';
 import NotebookPage from '@/component/ui/NotebookPage';
 import { ClayCard } from '@/component/ui/Clay';
+import EditorSidebar from '@/component/ui/EditorSidebar';
+import { motion, AnimatePresence } from 'motion/react';
 
 // Hooks
-import { useNotebookScale, NOTEBOOK_WIDTH, NOTEBOOK_HEIGHT } from '@/hooks/useNotebookScale';
+// (AutoPageBreak might still be useful for future enhancements, keeping for now if used internally)
 import { useAutoPageBreak } from '@/hooks/useAutoPageBreak';
 
 // Icons
@@ -38,6 +39,7 @@ import {
   NoteIcon,
   SummationCircleIcon,
   FlashIcon,
+  BookOpen01Icon,
 } from 'hugeicons-react';
 import { NotebookIcon } from '@/component/icons';
 
@@ -118,35 +120,21 @@ export default function EditorPage() {
   const noteIdOrSlug = params?.noteId as string | undefined;
   const isNewNote = !noteIdOrSlug || noteIdOrSlug === 'new';
 
-  // Previous content ref for flip animation
-  const previousContentRef = useRef<ReactNode>(null);
-
   // Track if we've initialized this session
   const initializedRef = useRef<string | null>(null);
 
-  // Detect small screens for mobile-specific layout adjustments.
-  // useLayoutEffect runs synchronously before the browser paints, preventing
-  // a flash of the wrong scale (minScale 0.6) on mobile before isSmallScreen is set.
+  // Detect small screens for mobile-responsive layout (sidebar vs drawer)
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useLayoutEffect(() => {
-    const media = window.matchMedia('(max-width: 640px)');
+    const media = window.matchMedia('(max-width: 1024px)'); // breakpoint for sidebar
     const update = () => setIsSmallScreen(media.matches);
     update();
     media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, []);
 
-  // Notebook scaling – keeps a fixed number of grid lines on every screen size.
-  // On mobile, scale by width only so the notebook fills the screen width
-  // and the page scrolls vertically instead of squishing the notebook.
-  const notebookContainerRef = useRef<HTMLDivElement>(null);
-  const rawScale = useNotebookScale(notebookContainerRef, { widthOnly: isSmallScreen });
-
-  // Clamp scale only on larger screens; on mobile use raw scale to avoid horizontal scrolling.
-  const minScale = isSmallScreen ? 0 : 0.6;
-  const scale = Math.max(rawScale, minScale);
-  const isScaleClamped = rawScale < minScale;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // ========================================
   // Zustand Stores
@@ -279,41 +267,8 @@ export default function EditorPage() {
   }, [noteId, pages.length, fetchedNote?.content]);
 
   // ========================================
-  // Capture current state for flip animation
+  // Capture current state for flip animation - REMOVED
   // ========================================
-  const captureCurrentState = useCallback(() => {
-    if (currentView === 'cover') {
-      previousContentRef.current = (
-        <ClayNotebookCover
-          mode="editor"
-          title={title}
-          onTitleChange={() => { }}
-          onOpen={() => { }}
-          color={coverColor}
-          theme={theme}
-        />
-      );
-    } else if (currentView === 'toc') {
-      previousContentRef.current = (
-        <TableOfContents
-          notebookTitle={title}
-          pages={pages}
-          onPageClick={() => { }}
-          onAddPage={() => { }}
-          onDeletePage={() => { }}
-          theme={theme}
-        />
-      );
-    } else if (currentView === 'page' && currentPageIndex !== null) {
-      previousContentRef.current = (
-        <NotebookPage
-          content={currentPageContent}
-          onChange={() => { }}
-          theme={theme}
-        />
-      );
-    }
-  }, [currentView, title, coverColor, theme, pages, currentPageIndex, currentPageContent]);
 
   // ========================================
   // Editor callback
@@ -429,22 +384,14 @@ export default function EditorPage() {
   // ========================================
   const handleOpenNotebook = async () => {
     if (!title.trim()) return;
-    captureCurrentState();
 
     if (!noteId && isNewNote) {
       try {
-        // createNote now inserts with title + slug atomically — no orphan risk
         const { id: newId, slug: newSlug } = await createNoteMutation.mutateAsync({ title, coverColor });
         setId(newId);
         setSaveStatus('saved');
-
-        // Trigger the flip animation FIRST - this must happen before any
-        // router navigation which could re-mount the component and reset animation state
         setCurrentView('toc');
 
-        // Then seed the query cache and defer the URL change to after the
-        // flip animation completes (500ms), preventing both the spinner flash
-        // and animation interference
         setSlug(newSlug);
         queryClient.setQueryData(noteKeys.detail(newSlug), {
           id: newId,
@@ -457,9 +404,8 @@ export default function EditorPage() {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         });
-        setTimeout(() => {
-          router.replace(`/editor/${newSlug}`, { scroll: false });
-        }, 600);
+        
+        router.replace(`/editor/${newSlug}`, { scroll: false });
       } catch (error) {
         setSaveStatus('error');
         return;
@@ -471,18 +417,17 @@ export default function EditorPage() {
 
   const handleAddPage = async () => {
     if (!noteId) return;
-    captureCurrentState();
 
     try {
       const pageId = await createPageMutation.mutateAsync({ noteId });
       if (pageId) {
-        // Single refetch to get updated page list (mutation already invalidated the cache)
         const updatedPages = (await refetchPages()).data || [];
         const newPageIndex = updatedPages.length - 1;
         setCurrentPageIndex(newPageIndex);
         setCurrentPageContent('');
         setLastSavedContent('');
         setCurrentView('page');
+        setSidebarOpen(false);
       }
     } catch (error) {
       console.error('Error creating page:', error);
@@ -492,17 +437,15 @@ export default function EditorPage() {
   const handlePageClick = (pageIndex: number) => {
     const page = pages[pageIndex];
     if (page) {
-      captureCurrentState();
       setCurrentPageIndex(pageIndex);
       setCurrentPageContent(page.content || '');
       setLastSavedContent(page.content || '');
       setCurrentView('page');
+      setSidebarOpen(false);
     }
   };
 
   const handleBackToContents = async () => {
-    captureCurrentState();
-
     // Save current page content before going back
     if (currentPageIndex !== null && pages[currentPageIndex]) {
       const page = pages[currentPageIndex];
@@ -512,7 +455,6 @@ export default function EditorPage() {
           await savePageMutation.mutateAsync({ pageId: page.id, title: pageTitle, content: currentPageContent });
           setLastSavedContent(currentPageContent);
 
-          // Optimistically update the cached pages so TOC shows fresh titles instantly
           queryClient.setQueryData(noteKeys.pages(noteId!), (oldPages: NotePage[] | undefined) => {
             if (!oldPages) return oldPages;
             return oldPages.map((p, i) =>
@@ -527,7 +469,6 @@ export default function EditorPage() {
       }
     }
 
-    // Navigate immediately - no need to await a refetch, cache is already up to date
     navigateToTOC();
   };
 
@@ -546,8 +487,6 @@ export default function EditorPage() {
   // Page Navigation
   // ========================================
   const saveAndNavigate = async (targetIndex: number) => {
-    captureCurrentState();
-
     if (currentPageIndex !== null && pages[currentPageIndex]) {
       const page = pages[currentPageIndex];
       if (currentPageContent !== lastSavedContent) {
@@ -597,6 +536,24 @@ export default function EditorPage() {
     } else if (currentPageIndex !== null && currentPageIndex !== pages.length - 1) {
       saveAndNavigate(pages.length - 1);
     }
+  };
+
+  const onNavigate = (view: 'cover' | 'toc' | 'page', index?: number) => {
+    if (view === 'page' && index !== undefined) {
+      handlePageClick(index);
+    } else if (view === 'toc') {
+      navigateToTOC();
+    } else if (view === 'cover') {
+      setCurrentView('cover');
+    }
+  };
+
+  const handleContentChange = (content: string) => {
+    setCurrentPageContent(content);
+  };
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
   };
 
   const handleAddPageFromEditor = async () => {
@@ -814,607 +771,369 @@ export default function EditorPage() {
   // ========================================
   // Content Components
   // ========================================
-  const coverComponent = (
-    <ClayNotebookCover
-      mode="editor"
-      title={title}
-      onTitleChange={setTitle}
-      onOpen={handleOpenNotebook}
-      onColorChange={setCoverColor}
-      color={coverColor}
-      theme={theme}
-    />
-  );
+  // ========================================
+  // Content Components (Simplified for responsive)
+  // ========================================
 
-  const tocComponent = (
-    <TableOfContents
-      notebookTitle={title}
-      pages={pages}
-      onPageClick={handlePageClick}
-      onAddPage={handleAddPage}
-      onDeletePage={handleDeletePage}
-      theme={theme}
-      isLoading={isLoadingPages}
-    />
-  );
-
-  const pageComponent =
-    currentPageIndex !== null && pages[currentPageIndex] ? (
-      <NotebookPage
-        content={currentPageContent}
-        onChange={setCurrentPageContent}
-        theme={theme}
-        onEditorReady={handleEditorReady}
-      />
-    ) : null;
-
-  const getPreviousContentComponent = (): ReactNode => previousContentRef.current;
-  const showControls = currentView !== 'cover';
-  const pagesPanel = (
-    <ClayCard variant="default" padding="lg" className="rounded-2xl">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold uppercase tracking-wide text-foreground-muted">Pages</span>
-        <span className="text-sm font-semibold text-foreground-muted">{pages.length}</span>
-      </div>
-
-      {pages.length === 0 ? (
-        <div className="mt-4 text-sm text-foreground-muted">
-          No pages yet. Add a new page to start writing.
-        </div>
-      ) : (
-        <div className="mt-3 space-y-2 max-h-[420px] overflow-y-auto pr-1">
-          {pages.map((page, index) => {
-            const isActive = currentView === 'page' && currentPageIndex === index;
-            return (
-              <button
-                key={page.id}
-                onClick={() => handlePageClick(index)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border text-left transition-all ${isActive
-                  ? 'bg-background-muted border-pencil/40 text-foreground'
-                  : 'bg-surface border-border text-foreground-muted hover:text-foreground hover:bg-background-muted'
-                  }`}
-              >
-                <span className="inline-flex items-center justify-center w-8 h-8 rounded-xl text-xs font-semibold bg-background-muted border border-border text-foreground-muted">
-                  {index + 1}
-                </span>
-                <span className="text-base font-semibold truncate">
-                  {page.title || 'Untitled Page'}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      <button
-        onClick={handleAddPageFromEditor}
-        className="mt-4 w-full px-4 py-2.5 rounded-2xl text-sm font-semibold border border-border bg-surface text-foreground hover:bg-background-muted transition-all flex items-center justify-center gap-2"
-      >
-        <Add01Icon className="w-4 h-4" />
-        Add page
-      </button>
-    </ClayCard>
-  );
-  const saveStatusIndicator = (
-    <>
-      {saveStatus === 'saving' && (
-        <span className="inline-flex items-center gap-1.5 text-foreground-muted">
-          <Loading03Icon className="w-3.5 h-3.5 animate-spin" />
-          Saving
-        </span>
-      )}
-      {saveStatus === 'saved' && (
-        <span className="inline-flex items-center gap-1.5 text-emerald-600">
-          <Tick01Icon className="w-3.5 h-3.5" />
-          Saved
-        </span>
-      )}
-      {saveStatus === 'error' && (
-        <span className="inline-flex items-center gap-1.5 text-red-500">
-          <AlertCircleIcon className="w-3.5 h-3.5" />
-          Error
-        </span>
-      )}
-    </>
-  );
-  const notebookCard = (
-    <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
-      <div className="flex items-start gap-3">
-        <div className="p-2.5 rounded-2xl bg-background-muted border border-border">
-          <NotebookIcon className="w-5 h-5 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold uppercase tracking-wide text-foreground-muted">Notebook</p>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Untitled notebook"
-            className="w-full mt-1 text-lg font-semibold bg-transparent border-none focus:outline-none placeholder:text-foreground-muted text-foreground"
-          />
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-foreground-muted">
-          <Tag01Icon className="w-4 h-4" />
-          Tags
-        </div>
-        {tags.length > 0 ? (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-background-muted border border-border text-foreground-muted"
-              >
-                {tag}
-                <button
-                  type="button"
-                  onClick={() => removeTag(tag)}
-                  className="rounded transition-colors hover:text-foreground"
-                >
-                  <Cancel01Icon className="w-3 h-3" />
-                </button>
-              </span>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-2 text-sm text-foreground-muted">
-            Add tags to keep your notebook organized.
-          </p>
+  const sidebarProps = {
+    noteId: resolvedNoteId,
+    title,
+    onTitleChange: handleTitleChange,
+    pages,
+    currentPageIndex,
+    onPageClick: handlePageClick,
+    onAddPage: handleAddPage,
+    tags,
+    onRemoveTag: removeTag,
+    showTagInput,
+    tagInput,
+    onTagInputChange: setTagInput,
+    onTagInputKeyDown: handleTagKeyDown,
+    onTagInputBlur: () => {
+      if (tagInput.trim()) handleAddTag();
+      setTimeout(() => setShowTagInput(false), 150);
+    },
+    onAddTagClick: () => setShowTagInput(true),
+    saveStatusIndicator: (
+      <div className="flex items-center gap-2">
+        {saveStatus === 'saving' && (
+          <span className="inline-flex items-center gap-1.5 text-foreground-muted">
+            <Loading03Icon className="w-3.5 h-3.5 animate-spin" />
+            Saving
+          </span>
         )}
-        <div className="mt-2">
-          {showTagInput ? (
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleTagKeyDown}
-              onBlur={() => {
-                if (tagInput.trim()) handleAddTag();
-                setTimeout(() => setShowTagInput(false), 150);
-              }}
-              placeholder="Add tag..."
-              className="w-full px-3 py-2.5 rounded-xl text-sm bg-surface border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground placeholder:text-foreground-muted"
-              autoFocus
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowTagInput(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-border bg-surface text-foreground-muted hover:text-foreground hover:bg-background-muted transition-all"
-            >
-              <Tag01Icon className="w-4 h-4" />
-              Add tag
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-4 flex items-center gap-2 text-sm font-semibold">
-        {saveStatusIndicator}
-      </div>
-    </ClayCard>
-  );
-  const mobileTitleCard = (
-    <ClayCard variant="elevated" padding="sm" className="rounded-2xl">
-      <div className="flex items-start gap-3">
-        <div className="p-2 rounded-xl bg-background-muted border border-border">
-          <NotebookIcon className="w-4 h-4 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">Notebook</p>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Untitled notebook"
-            className="w-full mt-1 text-base font-semibold bg-transparent border-none focus:outline-none placeholder:text-foreground-muted text-foreground"
-          />
-        </div>
-      </div>
-      <div className="mt-3 flex items-center gap-2 text-xs font-semibold">
-        {saveStatusIndicator}
-      </div>
-    </ClayCard>
-  );
-  const navCard = (
-    <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
-      <div className="flex items-center justify-between">
-        {currentView === 'page' ? (
-          <button
-            onClick={handleBackToContents}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-border bg-surface hover:bg-background-muted transition-all"
-          >
-            <Menu01Icon className="w-4 h-4 text-foreground-muted" />
-            Contents
-          </button>
-        ) : (
-          <Link
-            href="/library"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-border bg-surface hover:bg-background-muted transition-all"
-          >
-            <ArrowLeft02Icon className="w-4 h-4 text-foreground-muted" />
-            Library
-          </Link>
+        {saveStatus === 'saved' && (
+          <span className="inline-flex items-center gap-1.5 text-emerald-600">
+            <Tick01Icon className="w-3.5 h-3.5" />
+            Saved
+          </span>
         )}
-
-        <Link
-          href="/dashboard"
-          className="h-10 w-10 rounded-2xl border border-border bg-surface hover:bg-background-muted transition-all flex items-center justify-center"
-          title="Dashboard"
-        >
-          <Home01Icon className="w-4 h-4 text-foreground-muted" />
-        </Link>
+        {saveStatus === 'error' && (
+          <span className="inline-flex items-center gap-1.5 text-red-500">
+            <AlertCircleIcon className="w-3.5 h-3.5" />
+            Error
+          </span>
+        )}
       </div>
+    ),
+    onBack: handleBack,
+  };
 
-      <div className="flex items-center justify-between mt-4">
-        <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-foreground-muted">
-          <Menu01Icon className="w-4 h-4" />
-          Navigation
-        </div>
-        <span className="text-sm font-semibold text-foreground-muted">
-          {currentView === 'toc'
-            ? `${pages.length} pages`
-            : `Page ${(currentPageIndex ?? 0) + 1} / ${pages.length}`}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2 mt-3">
-        <button
-          onClick={handlePrevPage}
-          disabled={currentView === 'toc'}
-          className="px-4 py-2.5 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span className="inline-flex items-center gap-1.5 justify-center">
-            <ArrowLeft01Icon className="w-4 h-4" />
-            Prev
-          </span>
-        </button>
-        <button
-          onClick={handleNextPage}
-          disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
-          className="px-4 py-2.5 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span className="inline-flex items-center gap-1.5 justify-center">
-            <ArrowRight01Icon className="w-4 h-4" />
-            {currentView === 'toc' ? 'Open First' : 'Next'}
-          </span>
-        </button>
-        <button
-          onClick={handleFirstPage}
-          disabled={currentView === 'toc'}
-          className="px-4 py-2.5 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span className="inline-flex items-center gap-1.5 justify-center">
-            <ArrowDownLeft01Icon className="w-4 h-4" />
-            Contents
-          </span>
-        </button>
-        <button
-          onClick={handleLastPage}
-          disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
-          className="px-4 py-2.5 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span className="inline-flex items-center gap-1.5 justify-center">
-            <ArrowUpRight01Icon className="w-4 h-4" />
-            Last
-          </span>
-        </button>
-      </div>
-    </ClayCard>
-  );
-  const mobileNavCard = (
-    <ClayCard variant="default" padding="sm" className="rounded-2xl">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
-          <Menu01Icon className="w-4 h-4" />
-          Navigation
-        </div>
-        <span className="text-xs font-semibold text-foreground-muted">
-          {currentView === 'toc'
-            ? `${pages.length} pages`
-            : `Page ${(currentPageIndex ?? 0) + 1} / ${pages.length}`}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2 mt-3">
-        <button
-          onClick={handlePrevPage}
-          disabled={currentView === 'toc'}
-          className="px-3 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span className="inline-flex items-center gap-1.5 justify-center">
-            <ArrowLeft01Icon className="w-4 h-4" />
-            Prev
-          </span>
-        </button>
-        <button
-          onClick={handleNextPage}
-          disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
-          className="px-3 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span className="inline-flex items-center gap-1.5 justify-center">
-            <ArrowRight01Icon className="w-4 h-4" />
-            {currentView === 'toc' ? 'Open First' : 'Next'}
-          </span>
-        </button>
-        <button
-          onClick={handleFirstPage}
-          disabled={currentView === 'toc'}
-          className="px-3 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span className="inline-flex items-center gap-1.5 justify-center">
-            <ArrowDownLeft01Icon className="w-4 h-4" />
-            Contents
-          </span>
-        </button>
-        <button
-          onClick={handleLastPage}
-          disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
-          className="px-3 py-2 rounded-xl border border-border bg-surface text-xs font-semibold text-foreground hover:bg-background-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span className="inline-flex items-center gap-1.5 justify-center">
-            <ArrowUpRight01Icon className="w-4 h-4" />
-            Last
-          </span>
-        </button>
-      </div>
-    </ClayCard>
-  );
-  const leftRail = (
-    <div className="space-y-4">
-      {notebookCard}
-      {navCard}
-      {pagesPanel}
-    </div>
-  );
-
-  const showTopToolbar = showControls;
   const aiButtons = [
-    {
-      id: 'continue_writing',
-      label: 'Continue',
-      title: 'AI continues writing from cursor position',
-      icon: PencilEdit02Icon,
-      tone: 'blue',
-    },
-    {
-      id: 'generate_outline',
-      label: 'Outline',
-      title: 'Generate heading structure for this page',
-      icon: NoteIcon,
-      tone: 'blue',
-    },
-    {
-      id: 'summarize_page',
-      label: 'Summarize',
-      title: 'Summarize the entire page',
-      icon: SummationCircleIcon,
-      tone: 'blue',
-    },
-    {
-      id: 'generate_flashcards',
-      label: 'Flashcards',
-      title: 'Generate flashcards from page content',
-      icon: FlashIcon,
-      tone: 'orange',
-    },
+    { id: 'continue_writing', label: 'Continue', icon: PencilEdit02Icon, title: 'AI continues writing from cursor' },
+    { id: 'generate_outline', label: 'Outline', icon: NoteIcon, title: 'Generate heading structure' },
+    { id: 'summarize_page', label: 'Summarize', icon: SummationCircleIcon, title: 'Summarize the entire page' },
+    { id: 'generate_flashcards', label: 'Flashcards', icon: FlashIcon, title: 'Generate flashcards' },
   ] as const;
-
-  const backButton = (
-    <button
-      type="button"
-      onClick={handleBack}
-      title="Back"
-      aria-label="Go back"
-      className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl border border-border bg-surface hover:bg-background-muted transition-all flex items-center justify-center shadow-sm text-foreground-muted"
-    >
-      <ArrowLeft02Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-    </button>
-  );
 
   // ========================================
   // Render
   // ========================================
-  return (
-    <div className="min-h-[100dvh] flex flex-col paper-bg text-foreground">
-      {/* Main content area — extra bottom padding on mobile for the fixed bottom bar */}
-      <div className={`flex-1 relative px-3 sm:px-4 py-4 sm:py-5 flex flex-col max-w-none mx-auto w-full ${showControls ? 'pb-6 min-[75rem]:pb-5' : ''}`}>
-        {showTopToolbar && (
-          <div className="sticky top-0 z-[70] -mx-3 sm:-mx-4 -mt-4 sm:-mt-5 mb-3">
-            {/* Back button bar — always visible when not on cover */}
-            {!editor && (
-              <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-surface/95 backdrop-blur border-b border-border shadow-sm">
-                {backButton}
-                <Link
-                  href="/dashboard"
-                  className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl border border-border bg-surface hover:bg-background-muted transition-all flex items-center justify-center shadow-sm text-foreground-muted"
-                  title="Dashboard"
-                >
-                  <Home01Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-                </Link>
-              </div>
-            )}
-            {/* Formatting toolbar — only when editing a page */}
-            {editor && <EditorToolbar editor={editor} fullscreen leadingSlot={backButton} />}
-            {/* AI Assist bar — only when editing a page */}
-            {editor && (
-              <div className="flex flex-wrap items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-surface/95 backdrop-blur border-b border-border shadow-sm">
-                <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-foreground-muted">
-                  <GoogleGeminiIcon className="w-3.5 h-3.5 text-blue-500" />
-                  AI Assist
-                </div>
-                {aiButtons.map((action) => {
-                  const Icon = action.icon;
-                  const isLoading = aiLoading === action.id;
-                  // Use paper-themed claymorphism with subtle ink (primary) and terracotta (secondary) tints
-                  const toneClasses = action.tone === 'orange'
-                    ? 'bg-surface text-[var(--secondary)] border border-[var(--border)] shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-2px_4px_rgba(199,123,75,0.15),0_2px_4px_var(--paper-shadow-soft)] hover:shadow-[inset_0_2px_4px_rgba(255,255,255,1),inset_0_-2px_4px_rgba(199,123,75,0.25),0_4px_8px_var(--paper-shadow)] hover:-translate-y-[1px] hover:bg-[var(--secondary-muted)] hover:text-[var(--foreground)]'
-                    : 'bg-surface text-[var(--primary)] border border-[var(--border)] shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-2px_4px_rgba(43,93,139,0.15),0_2px_4px_var(--paper-shadow-soft)] hover:shadow-[inset_0_2px_4px_rgba(255,255,255,1),inset_0_-2px_4px_rgba(43,93,139,0.25),0_4px_8px_var(--paper-shadow)] hover:-translate-y-[1px] hover:bg-[var(--primary-muted)] hover:text-[var(--foreground)]';
-                  return (
-                    <button
-                      key={action.id}
-                      type="button"
-                      onClick={() => handleAIAction(action.id)}
-                      disabled={!editor || Boolean(aiLoading)}
-                      title={action.title}
-                      className={`
-                        inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] sm:text-xs sm:px-3 sm:py-1.5 sm:rounded-xl font-semibold transition-all
-                        disabled:opacity-40 disabled:cursor-not-allowed
-                        ${toneClasses}
-                      `}
-                    >
-                      {isLoading ? (
-                        <Loading03Icon className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Icon className="w-3.5 h-3.5" />
-                      )}
-                      <span>{action.label}</span>
-                    </button>
-                  );
-                })}
-                {aiLoading && (
-                  <span className="text-[11px] text-foreground-muted">Running…</span>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-        <div className="flex-1 flex items-start justify-start">
-          <div
-            className={`w-full max-w-[1920px] grid gap-4 sm:gap-6 items-start ${showControls
-              ? 'justify-items-start grid-cols-1 min-[75rem]:grid-cols-[minmax(240px,360px)_minmax(0,1fr)]'
-              : 'justify-items-center grid-cols-1'
-              }`}
-          >
 
-            {/* Left sidebar — hidden below desktop breakpoint, visible as column on desktop */}
-            {showControls && (
-              <aside className="hidden min-[75rem]:block w-full space-y-4 min-[75rem]:sticky min-[75rem]:top-6 self-start relative z-[60] pt-4 sm:pt-6">
-                {leftRail}
-              </aside>
-            )}
-
-            {/* Notebook — always visible, full width on mobile/tablet */}
-            <div className="flex flex-col pt-4 sm:pt-6 w-full">
-              <div
-                ref={notebookContainerRef}
-                className={`relative w-full flex-1 min-h-[520px] sm:min-h-[640px] max-h-[calc(100dvh-9rem)] sm:max-h-none flex items-start ${isScaleClamped ? 'justify-start overflow-auto' : 'justify-center'
-                  }`}
-              >
-                <div
-                  className="relative"
-                  style={{
-                    width: NOTEBOOK_WIDTH * scale,
-                    height: NOTEBOOK_HEIGHT * scale,
-                  }}
-                >
-                  <div
-                    className="relative"
-                    style={{
-                      width: NOTEBOOK_WIDTH,
-                      height: NOTEBOOK_HEIGHT,
-                      transform: `scale(${scale})`,
-                      transformOrigin: 'top left',
-                    }}
-                  >
-                    {/* Page stack effect */}
-                    {currentView === 'page' && pages.length > 1 && (
-                      <>
-                        {[...Array(Math.min(pages.length - 1, 4))].map((_, i) => (
-                          <div
-                            key={i}
-                            className="absolute rounded-[18px]"
-                            style={{
-                              top: `${(i + 1) * 3}px`,
-                              right: `${-(i + 1) * 3}px`,
-                              bottom: `${-(i + 1) * 3}px`,
-                              left: `${(i + 1) * 3}px`,
-                              background: `linear-gradient(135deg, rgba(255, 249, 241, 0.98) 0%, rgba(244, 235, 223, 0.98) 100%)`,
-                              boxShadow: `0 ${2 + i}px ${6 + i * 2}px rgba(60,50,40,${0.18 - i * 0.02})`,
-                              border: '1px solid rgba(60, 50, 40, 0.08)',
-                              zIndex: -i - 1,
-                            }}
-                          />
-                        ))}
-                      </>
-                    )}
-
-                    {/* Main notebook */}
-                    <div className="relative h-full rounded-[22px] shadow-[0_18px_48px_rgba(60,50,40,0.2)]">
-                      <PageFlipContainer
-                        currentView={currentView}
-                        currentPageIndex={currentPageIndex}
-                        totalPages={pages.length}
-                        cover={coverComponent}
-                        toc={tocComponent}
-                        pageContent={pageComponent}
-                        previousContent={getPreviousContentComponent()}
-                        theme={theme}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right sidebar — hidden below desktop breakpoint, visible as column on desktop */}
-          </div>
+  if (!isNewNote && (isLoadingNote || (!!resolvedNoteId && isLoadingPages))) {
+    return (
+      <div className="h-[100dvh] flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loading03Icon className="w-10 h-10 text-primary animate-spin" />
+          <p className="text-foreground-muted font-medium">Preparing your workspace...</p>
         </div>
       </div>
+    );
+  }
 
-      {/* ====== Mobile Floating Menu Button ====== */}
-      {showControls && !mobileDrawerOpen && (
-        <button
-          onClick={() => setMobileDrawerOpen(true)}
-          className="fixed right-4 bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] z-50 min-[75rem]:hidden inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-border bg-surface shadow-lg text-sm font-semibold text-foreground hover:bg-background-muted transition-colors"
-          aria-label="Open notebook panel"
-        >
-          <Menu01Icon className="w-4 h-4 text-foreground-muted" />
-          Notebook
-        </button>
+  return (
+    <div className="h-[100dvh] flex overflow-hidden bg-background selection:bg-primary/10">
+      {/* Desktop Sidebar */}
+      {!isSmallScreen && (
+        <EditorSidebar {...sidebarProps} className="w-72 shrink-0" />
       )}
 
-      {/* ====== Mobile / Tablet Slide-out Drawer (< desktop breakpoint) ====== */}
-      <div
-        className={`fixed inset-0 z-[70] min-[75rem]:hidden transition-[visibility] duration-300 ${mobileDrawerOpen ? 'visible' : 'invisible'
-          }`}
-      >
-        {/* Backdrop */}
-        <div
-          className={`absolute inset-0 bg-black/25 backdrop-blur-[2px] transition-opacity duration-300 ${mobileDrawerOpen ? 'opacity-100' : 'opacity-0'
-            }`}
-          onClick={() => setMobileDrawerOpen(false)}
-          aria-hidden="true"
-        />
-
-        {/* Drawer panel — bottom sheet on mobile */}
-        <div
-          className={`absolute left-0 right-0 bottom-0 max-h-[80dvh] bg-surface border-t border-border shadow-2xl overflow-hidden transition-transform duration-300 ease-out ${mobileDrawerOpen ? 'translate-y-0' : 'translate-y-full'
-            }`}
-        >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface">
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">Notebook</span>
-              <span className="text-sm font-semibold text-foreground">Quick controls</span>
-            </div>
-            <button
-              onClick={() => setMobileDrawerOpen(false)}
-              className="p-2 -mr-2 rounded-xl text-foreground-muted hover:text-foreground hover:bg-background-muted transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label="Close panel"
+      {/* Mobile Sidebar Drawer */}
+      <AnimatePresence>
+        {isSmallScreen && sidebarOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100]"
+            />
+            <motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 left-0 w-80 max-w-[85%] z-[110]"
             >
-              <Cancel01Icon className="w-5 h-5" />
-            </button>
+              <EditorSidebar {...sidebarProps} onBack={() => setSidebarOpen(false)} className="border-r-0 shadow-2xl" isMobile />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Main Canvas Area */}
+      <main className="flex-1 flex flex-col min-w-0 relative">
+        {/* Header / Top Toolbar */}
+        <header className="h-16 shrink-0 border-b border-border bg-surface/80 backdrop-blur-md flex items-center justify-between px-4 z-50">
+          <div className="flex items-center gap-3 min-w-0">
+            {isSmallScreen && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="p-2 rounded-xl bg-background-muted hover:bg-border transition-all text-foreground-muted"
+              >
+                <Menu01Icon className="w-5 h-5" />
+              </button>
+            )}
+            <div className="flex flex-col min-w-0">
+              <h1 className="text-sm font-bold truncate text-foreground leading-tight">
+                {currentView === 'page' && currentPageIndex !== null 
+                  ? pages[currentPageIndex]?.title || 'Untitled Page'
+                  : currentView === 'toc' ? 'Table of Contents' : 'Notebook Cover'}
+              </h1>
+              <div className="flex items-center gap-1.5 opacity-60">
+                 <span className="text-[10px] font-black uppercase tracking-wider text-primary">
+                   {title || 'Untitled Notebook'}
+                 </span>
+              </div>
+            </div>
           </div>
 
-          {/* Drawer content — mobile-optimized panels */}
-          <div className="p-3 space-y-3 pb-5 overflow-y-auto max-h-[calc(80dvh-3.5rem)]">
-            {mobileTitleCard}
-            {mobileNavCard}
+          <div className="flex items-center gap-2">
+            {!isSmallScreen && (
+              <div className="flex items-center gap-2 pr-4 border-r border-border mr-2">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentView === 'toc' || (currentView === 'page' && currentPageIndex === 0)}
+                  className="p-2 rounded-xl hover:bg-background-muted text-foreground-muted disabled:opacity-30 transition-all"
+                  title="Previous Page"
+                >
+                  <ArrowLeft01Icon className="w-4.5 h-4.5" />
+                </button>
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentView === 'page' && currentPageIndex === pages.length - 1}
+                  className="p-2 rounded-xl hover:bg-background-muted text-foreground-muted disabled:opacity-30 transition-all"
+                  title="Next Page"
+                >
+                  <ArrowRight01Icon className="w-4.5 h-4.5" />
+                </button>
+              </div>
+            )}
+            
+            {/* Save indicator on top right for desktop */}
+            {!isSmallScreen && sidebarProps.saveStatusIndicator}
           </div>
+        </header>
+
+        {/* Dynamic Toolbar (Formatting + AI) */}
+        {currentView === 'page' && editor && (
+          <div className="shrink-0 border-b border-border bg-surface/50 overflow-hidden">
+             <div className="flex flex-col">
+                <EditorToolbar editor={editor} fullscreen />
+                <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 border-t border-border/50 overflow-x-auto scrollbar-hide">
+                  <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-blue-500/80 pr-3 border-r border-border/50 mr-1 shrink-0">
+                    <GoogleGeminiIcon className="w-3.5 h-3.5" />
+                    AI Assist
+                  </div>
+                  <div className="sm:hidden flex items-center pr-2 border-r border-border/50 mr-1 shrink-0">
+                     <GoogleGeminiIcon className="w-4 h-4 text-blue-500/80" />
+                  </div>
+                  {aiButtons.map((action) => {
+                    const Icon = action.icon;
+                    const isLoading = aiLoading === action.id;
+                    return (
+                      <button
+                        key={action.id}
+                        type="button"
+                        onClick={() => handleAIAction(action.id)}
+                        disabled={!editor || Boolean(aiLoading)}
+                        title={action.title}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-bold transition-all bg-background-muted border border-border hover:bg-border text-foreground-muted hover:text-foreground disabled:opacity-40 whitespace-nowrap"
+                      >
+                        {isLoading ? <Loading03Icon className="w-3.5 h-3.5 animate-spin" /> : <Icon className="w-3.5 h-3.5" />}
+                        <span className="hidden sm:inline">{action.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+             </div>
+          </div>
+        )}
+
+        {/* Editor Content Area */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide relative bg-[#FFFAF0]/30">
+          <AnimatePresence mode="wait">
+            {currentView === 'cover' ? (
+              <motion.div
+                key="cover"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.02 }}
+                className="min-h-full flex items-center justify-center p-6 sm:p-12"
+              >
+                <div className="w-full max-w-md aspect-[3/4.2] shadow-2xl rounded-[2.5rem] overflow-hidden">
+                  <ClayNotebookCover
+                    mode="editor"
+                    title={title}
+                    onTitleChange={setTitle}
+                    onOpen={handleOpenNotebook}
+                    onColorChange={setCoverColor}
+                    color={coverColor}
+                    theme={theme}
+                  />
+                </div>
+              </motion.div>
+            ) : currentView === 'toc' ? (
+              isSmallScreen ? (
+                /* ── Mobile-Optimised TOC ── */
+                <motion.div
+                  key="toc-mobile"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="min-h-full p-4 pb-28"
+                >
+                  {/* Header */}
+                  <div className="mb-5">
+                    <h2 className="text-[11px] font-black text-[#C77B4B] uppercase tracking-[0.2em] mb-1">Contents</h2>
+                    <h3 className="text-[18px] font-black text-foreground tracking-tight leading-tight truncate">{title || 'Untitled Notebook'}</h3>
+                    <span className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider mt-1.5 block">
+                      {pages.length} {pages.length === 1 ? 'page' : 'pages'}
+                    </span>
+                  </div>
+
+                  {/* Page cards */}
+                  {isLoadingPages ? (
+                    <div className="space-y-2">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-surface border border-border animate-pulse">
+                          <span className="w-8 h-8 rounded-xl bg-background-muted" />
+                          <div className="flex-1 h-4 rounded bg-background-muted" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : pages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                      <div className="w-16 h-16 rounded-3xl bg-background-muted border border-border flex items-center justify-center mb-4">
+                        <BookOpen01Icon className="w-7 h-7 text-primary" />
+                      </div>
+                      <p className="text-[13px] font-bold text-foreground">No pages yet</p>
+                      <p className="text-[11px] text-foreground-muted mt-1">Tap below to create your first page</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {pages.map((p, i) => (
+                        <button
+                          key={p.id}
+                          onClick={() => handlePageClick(i)}
+                          className="w-full flex items-center gap-4 p-4 rounded-2xl bg-surface border border-border shadow-sm active:scale-[0.98] active:bg-background-muted transition-all text-left"
+                        >
+                          <span className="w-8 h-8 flex items-center justify-center rounded-xl bg-[#F5EADF] text-[#C77B4B] text-[11px] font-black shrink-0">
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-bold text-foreground truncate">{p.title || 'Untitled Page'}</p>
+                          </div>
+                          <ArrowRight01Icon className="w-4 h-4 text-foreground-muted/40 shrink-0" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add page */}
+                  <button
+                    onClick={handleAddPage}
+                    disabled={isLoadingPages}
+                    className="w-full mt-4 py-4 border-2 border-dashed border-border rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-[11px] uppercase tracking-widest active:scale-[0.98] active:bg-background-muted transition-all"
+                  >
+                    <Add01Icon className="w-4 h-4" />
+                    <span>New Page</span>
+                  </button>
+                </motion.div>
+              ) : (
+                /* ── Desktop TOC ── */
+                <motion.div
+                  key="toc"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="min-h-full max-w-4xl mx-auto w-full p-3 sm:p-12"
+                >
+                  <TableOfContents
+                    notebookTitle={title}
+                    pages={pages}
+                    onPageClick={handlePageClick}
+                    onAddPage={handleAddPage}
+                    onDeletePage={handleDeletePage}
+                    theme={theme}
+                    isLoading={isLoadingPages}
+                  />
+                </motion.div>
+              )
+            ) : (
+              <motion.div
+                key={`page-${currentPageIndex}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="min-h-full flex flex-col items-stretch sm:items-center"
+              >
+                <div className="w-full sm:max-w-4xl flex-1 flex flex-col relative bg-surface shadow-2xl sm:shadow-xl sm:my-8 sm:rounded-2xl border-x sm:border border-border/50 overflow-hidden ring-1 ring-black/[0.02]">
+                   {currentPageIndex !== null && pages[currentPageIndex] ? (
+                    <NotebookPage
+                      content={currentPageContent}
+                      onChange={setCurrentPageContent}
+                      theme={theme}
+                      onEditorReady={handleEditorReady}
+                      simpleMode={true}
+                    />
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-4">
+                       <div className="w-16 h-16 rounded-full bg-background-muted flex items-center justify-center text-foreground-muted opacity-20">
+                         <BookOpen01Icon className="w-8 h-8" />
+                       </div>
+                       <p className="text-foreground-muted font-bold uppercase tracking-[0.2em] text-[10px]">No page selected</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </div>
+
+        {/* Mobile Bottom Navigation (Visible only on small screens when in page view) */}
+        {isSmallScreen && currentView === 'page' && (
+           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[80] flex items-center gap-2 p-1.5 bg-surface/80 backdrop-blur-xl border border-border shadow-2xl shadow-black/10 rounded-full">
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPageIndex === 0}
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-background-muted text-foreground-muted disabled:opacity-20 transition-all"
+              >
+                <ArrowLeft01Icon className="w-5 h-5" />
+              </button>
+              
+              <div className="h-4 w-px bg-border mx-1" />
+              
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="px-4 py-2 flex items-center gap-2 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-all"
+              >
+                Page { (currentPageIndex ?? 0) + 1 } / { pages.length }
+              </button>
+
+              <div className="h-4 w-px bg-border mx-1" />
+
+              <button
+                onClick={handleNextPage}
+                disabled={currentPageIndex === pages.length - 1}
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-background-muted text-foreground-muted disabled:opacity-20 transition-all"
+              >
+                <ArrowRight01Icon className="w-5 h-5" />
+              </button>
+           </div>
+        )}
+      </main>
     </div>
   );
 }
