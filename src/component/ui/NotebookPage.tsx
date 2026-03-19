@@ -54,7 +54,7 @@ export default function NotebookPage({
           onChange={handleChange}
           placeholder="Start writing... Use Heading 1 (H1) for the page title"
           className="h-full"
-          editorClassName="notebook-editor-content"
+          editorClassName={`notebook-editor-content ${simpleMode ? 'pb-32 sm:pb-0' : ''}`}
           autoFocus={readOnly ? false : autoFocus}
           fullscreen={false}
           hideToolbar={true}

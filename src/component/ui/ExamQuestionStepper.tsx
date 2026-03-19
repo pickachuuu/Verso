@@ -32,6 +32,7 @@ export interface ExamQuestionStepperProps {
   onSaveAnswer: (questionId: string, answer: string) => void;
   onSubmit: () => void;
   className?: string;
+  isSubmitting?: boolean;
 }
 
 // ============================================
@@ -45,6 +46,7 @@ export default function ExamQuestionStepper({
   onSaveAnswer,
   onSubmit,
   className,
+  isSubmitting,
 }: ExamQuestionStepperProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentQuestion = questions[currentIndex];
@@ -126,15 +128,15 @@ export default function ExamQuestionStepper({
   return (
     <div className={clsx('flex flex-col h-full overflow-hidden', className)}>
       {/* Progress bar */}
-      <div className="w-full bg-background-muted rounded-full h-1.5 mb-6 overflow-hidden">
+      <div className="shrink-0 w-full bg-background-muted rounded-full h-1.5 mb-4 sm:mb-6 overflow-hidden">
         <div
           className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
 
-      {/* Question dots / mini nav */}
-      <div className="flex items-center justify-center gap-1.5 mb-6 flex-wrap">
+      {/* Question dots / mini nav (Optional depending on design) */}
+      <div className="shrink-0 flex items-center justify-center gap-1.5 mb-4 sm:mb-6 flex-wrap opacity-50 hover:opacity-100 transition-opacity">
         {questions.map((q, idx) => {
           const qAnswered = answers.has(q.id) && answers.get(q.id)?.trim();
           const isCurrent = idx === currentIndex;
@@ -143,17 +145,17 @@ export default function ExamQuestionStepper({
               key={q.id}
               onClick={() => goToQuestion(idx)}
               className={clsx(
-                'w-8 h-8 rounded-full text-xs font-bold transition-all duration-200 flex items-center justify-center border-2',
+                'w-6 h-6 rounded-full text-[10px] font-bold transition-all duration-200 flex items-center justify-center border-2',
                 isCurrent
-                  ? 'bg-primary text-white border-primary scale-110 shadow-md shadow-primary/30'
+                  ? 'bg-foreground text-surface border-foreground scale-110 shadow-md'
                   : qAnswered
-                    ? 'bg-emerald-100 text-emerald-700 border-emerald-300 hover:border-emerald-400'
-                    : 'bg-surface text-foreground-muted border-border hover:border-foreground-muted/50'
+                    ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
+                    : 'bg-surface text-foreground-muted border-border'
               )}
               title={`Question ${idx + 1}${qAnswered ? ' (answered)' : ''}`}
             >
               {qAnswered && !isCurrent ? (
-                <Tick01Icon className="w-3.5 h-3.5" />
+                <Tick01Icon className="w-3 h-3" />
               ) : (
                 idx + 1
               )}
@@ -163,99 +165,110 @@ export default function ExamQuestionStepper({
       </div>
 
       {/* Question card — wrapped in ClayCard for visual separation */}
-      <ClayCard variant="elevated" padding="lg" className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        {/* Question type badge + status — fixed row */}
-        <div className="flex items-center justify-between mb-4 shrink-0">
-          <QuestionTypeBadge type={currentQuestion.question_type} />
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-foreground-muted font-medium">
-              {currentQuestion.points} pt{currentQuestion.points !== 1 ? 's' : ''}
-            </span>
-            {isAnswered && (
-              <span className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
-                <CheckmarkCircle01Icon className="w-3.5 h-3.5" />
-                Answered
-              </span>
-            )}
+      <ClayCard variant="elevated" padding="none" className="w-full flex-1 min-h-0 rounded-[2.5rem] sm:rounded-[3rem] border border-border/20 shadow-2xl flex flex-col overflow-hidden bg-surface transition-all duration-500">
+        
+        {/* Top Content Area: Question */}
+        <div className={`transition-all duration-700 ease-[0.16,1,0.3,1] flex flex-col p-6 lg:p-10 shrink-0 max-h-[40%] bg-background-muted/5 border-b border-border/10`}>
+          <div className="flex items-center justify-between mb-4 lg:mb-6 shrink-0">
+             <div className="flex items-center gap-3">
+               <div className="w-2 h-2 rounded-full bg-primary opacity-60 shadow-[0_0_8px_currentColor]" />
+               <span className="text-[11px] font-black uppercase tracking-[0.3em] text-primary opacity-50">QUESTION {currentIndex + 1}</span>
+             </div>
+             <div className="flex items-center gap-3">
+                <span className="text-[10px] uppercase font-black tracking-widest text-foreground-muted px-3 py-1 bg-surface border border-border/40 rounded-xl">
+                  {currentQuestion.points} PT{currentQuestion.points !== 1 ? 'S' : ''}
+                </span>
+             </div>
+          </div>
+          
+          <div className="flex-1 flex text-left overflow-y-auto scrollbar-hide">
+            <h2 className={clsx(
+              "font-black text-foreground whitespace-pre-line leading-tight pb-2",
+              currentQuestion.question.length < 60 ? "text-2xl sm:text-3xl md:text-3xl" :
+              currentQuestion.question.length < 120 ? "text-xl sm:text-2xl md:text-3xl" :
+              currentQuestion.question.length < 200 ? "text-lg sm:text-xl md:text-2xl" :
+              "text-base sm:text-lg md:text-xl"
+            )}>
+              {currentQuestion.question}
+            </h2>
           </div>
         </div>
 
-        {/* Question text — generous height, scrolls only for very long questions */}
-        <div className="mb-6 shrink-0 max-h-[200px] overflow-y-auto">
-          <h2 className="text-lg sm:text-xl font-semibold text-foreground leading-relaxed">
-            <span className="text-foreground-muted font-bold mr-2">{currentIndex + 1}.</span>
-            {currentQuestion.question}
-          </h2>
-        </div>
-
         {/* Answer area — takes remaining space, content scrolls inside */}
-        <div className="flex-1 min-h-0 overflow-y-auto pb-2">
-          {currentQuestion.question_type === 'multiple_choice' && (
-            <MultipleChoiceInput
-              question={currentQuestion}
-              value={currentAnswer}
-              onChange={(answer) => onAnswerChange(currentQuestion.id, answer)}
-            />
-          )}
-          {currentQuestion.question_type === 'identification' && (
-            <IdentificationInput
-              ref={inputRef as React.Ref<HTMLInputElement>}
-              value={currentAnswer}
-              onChange={(answer) => onAnswerChange(currentQuestion.id, answer)}
-              onSubmit={goToNext}
-            />
-          )}
-          {currentQuestion.question_type === 'essay' && (
-            <EssayInput
-              ref={inputRef as React.Ref<HTMLTextAreaElement>}
-              value={currentAnswer}
-              onChange={(answer) => onAnswerChange(currentQuestion.id, answer)}
-            />
-          )}
-        </div>
+        <div className="flex-1 flex flex-col min-h-0 bg-surface overflow-hidden p-6 lg:p-10 relative">
+          <div className="flex items-center justify-between mb-4 lg:mb-6 shrink-0">
+             <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-secondary opacity-60 shadow-[0_0_8px_currentColor]" />
+                <span className="text-[11px] font-black uppercase tracking-[0.3em] text-secondary opacity-50">YOUR ANSWER</span>
+             </div>
+             <QuestionTypeBadge type={currentQuestion.question_type} />
+          </div>
 
-        {/* Navigation — always pinned to the bottom */}
-        <div className="flex items-center justify-between mt-4 pt-6 border-t border-border shrink-0">
-          <button
-            onClick={goToPrev}
-            disabled={isFirst}
-            className={clsx(
-              'flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all',
-              isFirst
-                ? 'opacity-40 cursor-not-allowed text-foreground-muted'
-                : 'text-foreground hover:bg-background-muted active:scale-95'
+          <div className="flex-1 flex flex-col min-h-0 overflow-y-auto scrollbar-hide -mx-2 px-2 pb-4 pt-2">
+            {currentQuestion.question_type === 'multiple_choice' && (
+              <MultipleChoiceInput
+                question={currentQuestion}
+                value={currentAnswer}
+                onChange={(answer) => onAnswerChange(currentQuestion.id, answer)}
+              />
             )}
-          >
-            <ArrowLeft02Icon className="w-4 h-4" />
-            Previous
-          </button>
-
-          <span className="text-sm text-foreground-muted font-medium">
-            {answeredCount} of {totalQuestions} answered
-          </span>
-
-          {isLast ? (
-            <button
-              onClick={() => {
-                saveCurrentAnswer();
-                onSubmit();
-              }}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95"
-            >
-              Submit
-              <CheckmarkCircle01Icon className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              onClick={goToNext}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95"
-            >
-              Next
-              <ArrowRight02Icon className="w-4 h-4" />
-            </button>
-          )}
+            {currentQuestion.question_type === 'identification' && (
+              <IdentificationInput
+                ref={inputRef as React.Ref<HTMLInputElement>}
+                value={currentAnswer}
+                onChange={(answer) => onAnswerChange(currentQuestion.id, answer)}
+                onSubmit={goToNext}
+              />
+            )}
+            {currentQuestion.question_type === 'essay' && (
+              <EssayInput
+                ref={inputRef as React.Ref<HTMLTextAreaElement>}
+                value={currentAnswer}
+                onChange={(answer) => onAnswerChange(currentQuestion.id, answer)}
+              />
+            )}
+          </div>
         </div>
       </ClayCard>
+
+      {/* ⚡ ACTION BAR (Fixed at bottom of stage) */}
+      <footer className="shrink-0 mt-6 h-20 w-full flex items-center justify-between gap-4 max-w-sm mx-auto">
+        <button
+          onClick={goToPrev}
+          disabled={isFirst || isSubmitting}
+          className={clsx(
+            'flex-1 h-full rounded-[2.5rem] font-black text-lg sm:text-xl transition-all flex items-center justify-center gap-2 border-2',
+            isFirst || isSubmitting
+              ? 'border-border/40 text-foreground-muted/40 cursor-not-allowed bg-transparent'
+              : 'border-border bg-surface text-foreground hover:bg-background-muted active:scale-95'
+          )}
+        >
+          <ArrowLeft02Icon className="w-6 h-6" />
+        </button>
+
+        {isLast ? (
+          <button
+            onClick={() => {
+              saveCurrentAnswer();
+              onSubmit();
+            }}
+            disabled={isSubmitting}
+            className="flex-[3] h-full rounded-[2.5rem] bg-foreground text-surface font-black text-lg sm:text-xl hover:bg-foreground/90 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+          >
+            <span>SUBMIT EXAM</span>
+            <CheckmarkCircle01Icon className="w-6 h-6" />
+          </button>
+        ) : (
+          <button
+            onClick={goToNext}
+            disabled={isSubmitting}
+            className="flex-[3] h-full rounded-[2.5rem] bg-foreground text-surface font-black text-lg sm:text-xl hover:bg-foreground/90 transition-all flex items-center justify-center gap-3 active:scale-95"
+          >
+            <span>NEXT QUESTION</span>
+            <ArrowRight02Icon className="w-6 h-6" />
+          </button>
+        )}
+      </footer>
     </div>
   );
 }
@@ -288,11 +301,11 @@ function QuestionTypeBadge({ type }: { type: StepperQuestion['question_type'] })
   return (
     <span
       className={clsx(
-        'inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border',
+        'inline-flex items-center gap-1.5 text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full border',
         badgeClass
       )}
     >
-      <Icon className="w-3.5 h-3.5" />
+      <Icon className="w-3 h-3" />
       {label}
     </span>
   );
@@ -314,7 +327,7 @@ function MultipleChoiceInput({
   if (!question.options) return null;
 
   return (
-    <div className="space-y-3">
+    <div className="flex-1 flex flex-col gap-3 min-h-0 pb-1">
       {question.options.map((opt, idx) => {
         const letter = String.fromCharCode(65 + idx);
         const isSelected = value.toUpperCase() === letter;
@@ -326,19 +339,19 @@ function MultipleChoiceInput({
             key={idx}
             onClick={() => onChange(letter)}
             className={clsx(
-              'w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all duration-200',
+              'w-full flex-1 flex items-center gap-4 p-4 sm:p-5 rounded-[1.5rem] border-2 text-left transition-all duration-200 group focus:outline-none focus:ring-4 focus:ring-primary/20 min-h-[4.5rem]',
               isSelected
-                ? 'border-primary bg-primary/5 shadow-sm'
+                ? 'border-primary bg-primary/5 shadow-md shadow-primary/10'
                 : 'border-border bg-surface hover:border-foreground-muted/40 hover:bg-background-muted/50'
             )}
           >
             {/* Letter circle */}
             <span
               className={clsx(
-                'w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all duration-200',
+                'w-10 h-10 rounded-full flex items-center justify-center text-sm font-black shrink-0 transition-all duration-200',
                 isSelected
-                  ? 'bg-primary text-white'
-                  : 'bg-background-muted text-foreground-muted border border-border'
+                  ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/30'
+                  : 'bg-background-muted text-foreground-muted border border-border group-hover:border-foreground-muted/30'
               )}
             >
               {letter}
@@ -347,8 +360,8 @@ function MultipleChoiceInput({
             {/* Option text */}
             <span
               className={clsx(
-                'text-sm font-medium transition-colors',
-                isSelected ? 'text-foreground' : 'text-foreground-muted'
+                'text-base md:text-lg font-bold transition-colors leading-snug',
+                isSelected ? 'text-foreground' : 'text-foreground-muted group-hover:text-foreground'
               )}
             >
               {optionText}
@@ -356,7 +369,7 @@ function MultipleChoiceInput({
 
             {/* Check indicator */}
             {isSelected && (
-              <CheckmarkCircle01Icon className="w-5 h-5 text-primary ml-auto shrink-0" />
+              <CheckmarkCircle01Icon className="w-6 h-6 text-primary ml-auto shrink-0 animate-in zoom-in duration-300" />
             )}
           </button>
         );
@@ -378,10 +391,7 @@ const IdentificationInput = forwardRef<
   }
 >(function IdentificationInput({ value, onChange, onSubmit }, ref) {
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-foreground-muted">
-        Type your answer below
-      </label>
+    <div className="space-y-3 flex flex-col h-full p-2">
       <input
         ref={ref}
         type="text"
@@ -393,12 +403,14 @@ const IdentificationInput = forwardRef<
             onSubmit();
           }
         }}
-        placeholder="Your answer..."
-        className="w-full px-5 py-4 rounded-2xl bg-surface border-2 border-border text-foreground placeholder:text-foreground-muted/50 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-base"
+        placeholder="Type your answer..."
+        className="w-full px-6 py-5 rounded-[1.5rem] bg-surface border-2 border-border text-foreground placeholder:text-foreground-muted/40 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-xl font-bold font-sans shadow-sm hover:border-foreground-muted/30"
       />
-      <p className="text-xs text-foreground-muted/70">
-        Press Enter to go to the next question
-      </p>
+      <div className="flex justify-end">
+        <p className="text-[10px] font-black tracking-widest uppercase text-foreground-muted/50">
+          PRESS ENTER TO CONTINUE
+        </p>
+      </div>
     </div>
   );
 });
@@ -417,24 +429,20 @@ const EssayInput = forwardRef<
   const wordCount = value.trim() ? value.trim().split(/\s+/).length : 0;
 
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-foreground-muted">
-        Write your answer below
-      </label>
+    <div className="flex flex-col h-full flex-1 space-y-3 p-2">
       <textarea
         ref={ref}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Write your answer here..."
-        rows={8}
-        className="w-full px-5 py-4 rounded-2xl bg-surface border-2 border-border text-foreground placeholder:text-foreground-muted/50 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-base resize-y min-h-[200px]"
+        placeholder="Write your comprehensive answer here..."
+        className="flex-1 w-full px-6 py-5 rounded-[1.5rem] bg-surface border-2 border-border text-foreground placeholder:text-foreground-muted/40 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-lg font-medium shadow-sm hover:border-foreground-muted/30 resize-none"
       />
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-foreground-muted/70">
-          Provide a thorough, well-structured answer
+      <div className="flex items-center justify-between shrink-0">
+        <p className="text-[10px] font-black tracking-widest uppercase text-foreground-muted/50">
+          BE AS DETAILED AS POSSIBLE
         </p>
-        <span className="text-xs text-foreground-muted font-medium">
-          {wordCount} word{wordCount !== 1 ? 's' : ''}
+        <span className="text-[10px] font-black tracking-widest uppercase text-primary/70 bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10">
+          {wordCount} WORD{wordCount !== 1 ? 'S' : ''}
         </span>
       </div>
     </div>

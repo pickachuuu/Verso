@@ -21,49 +21,66 @@ export default function GenerateStudyMaterialModal({
 }: GenerateStudyMaterialModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <ClayCard variant="elevated" padding="lg" className="w-full max-w-md rounded-3xl">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-2xl bg-background-muted border border-border flex items-center justify-center">
-            <NotebookIcon className="w-5 h-5 text-primary" />
+      <div className="w-full max-w-md">
+        <ClayCard variant="elevated" padding="none" className="rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl ring-1 ring-border/40">
+          <div className="px-8 py-6 bg-background-muted/5 border-b border-border/40 shrink-0">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-[1rem] bg-background-muted flex items-center justify-center shadow-lg shadow-black/5 border border-border/40 shrink-0">
+                <NotebookIcon className="w-6 h-6 text-foreground-muted" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-2xl font-black text-foreground tracking-tight truncate">Generate</h3>
+                <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1 truncate">
+                  {noteTitle ? `From "${noteTitle}"` : 'Choose what to create'}
+                </p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">Generate from notebook</h3>
-            <p className="text-xs text-foreground-muted">
-              {noteTitle ? `From "${noteTitle}"` : 'Choose what to create'}
-            </p>
+
+          <div className="px-8 py-6 space-y-4 flex-1">
+            <button
+              type="button"
+              onClick={() => onSelect('flashcards')}
+              className="w-full text-left p-5 rounded-[1.5rem] border-2 border-border/60 bg-surface hover:bg-background-muted active:scale-[0.98] transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="p-3.5 rounded-[1rem] bg-primary/10 border-2 border-primary/20 shrink-0 group-hover:scale-110 transition-transform">
+                  <FlashcardIcon className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-lg font-black text-foreground leading-tight tracking-tight">Create flashcards</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1">Generate a study set from this notebook</p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onSelect('exam')}
+              className="w-full text-left p-5 rounded-[1.5rem] border-2 border-border/60 bg-surface hover:bg-background-muted active:scale-[0.98] transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="p-3.5 rounded-[1rem] bg-secondary/10 border-2 border-secondary/20 shrink-0 group-hover:scale-110 transition-transform">
+                  <ExamIcon className="w-6 h-6 text-secondary" />
+                </div>
+                <div>
+                  <p className="text-lg font-black text-foreground leading-tight tracking-tight">Create an exam</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1">Generate practice questions</p>
+                </div>
+              </div>
+            </button>
           </div>
-        </div>
 
-        <div className="space-y-3">
-          <button
-            type="button"
-            onClick={() => onSelect('flashcards')}
-            className="w-full flex items-center gap-3 p-4 rounded-2xl border border-border bg-surface hover:bg-background-muted transition-colors"
-          >
-            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <FlashcardIcon className="w-5 h-5" />
-            </div>
-            <div className="text-left">
-              <p className="text-sm font-semibold text-foreground">Create flashcards</p>
-              <p className="text-xs text-foreground-muted">Generate a study set from this notebook</p>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onSelect('exam')}
-            className="w-full flex items-center gap-3 p-4 rounded-2xl border border-border bg-surface hover:bg-background-muted transition-colors"
-          >
-            <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
-              <ExamIcon className="w-5 h-5" />
-            </div>
-            <div className="text-left">
-              <p className="text-sm font-semibold text-foreground">Create an exam</p>
-              <p className="text-xs text-foreground-muted">Generate practice questions from this notebook</p>
-            </div>
-          </button>
-        </div>
-      </ClayCard>
+          <div className="px-8 py-6 bg-surface border-t border-border/40 flex items-center justify-end shrink-0">
+            <button
+              onClick={onClose}
+              className="px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all text-foreground flex items-center justify-center gap-2"
+            >
+              Cancel
+            </button>
+          </div>
+        </ClayCard>
+      </div>
     </Modal>
   );
 }

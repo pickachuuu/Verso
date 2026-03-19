@@ -633,10 +633,10 @@ export function VerticalEditorToolbar({ editor, theme, onAIAction, aiLoading, co
           <VerticalToolbarDivider theme={theme} />
 
           {/* AI Header */}
-          <div className="flex items-center gap-2 px-1">
-            <GoogleGeminiIcon className="w-3.5 h-3.5 text-blue-400" />
-            <span className={`text-[10px] font-semibold uppercase tracking-wider ${isDark ? 'text-blue-400/70' : 'text-blue-500/70'}`}>
-              AI Assist
+          <div className="flex items-center gap-2 px-1 mb-1">
+            <GoogleGeminiIcon className="w-3.5 h-3.5 text-blue-400 opacity-60" />
+            <span className={`text-[10px] font-black uppercase tracking-[0.25em] ${isDark ? 'text-blue-400/50' : 'text-blue-500/50'}`}>
+              AI ASSIST
             </span>
           </div>
 
@@ -754,9 +754,10 @@ interface EditorToolbarProps {
   editor: Editor | null;
   fullscreen?: boolean;
   leadingSlot?: React.ReactNode;
+  trailingSlot?: React.ReactNode;
 }
 
-export function EditorToolbar({ editor, fullscreen, leadingSlot }: EditorToolbarProps) {
+export function EditorToolbar({ editor, fullscreen, leadingSlot, trailingSlot }: EditorToolbarProps) {
   const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -852,7 +853,7 @@ export function EditorToolbar({ editor, fullscreen, leadingSlot }: EditorToolbar
       clay-toolbar
       flex items-center flex-nowrap overflow-x-auto scrollbar-hide
       ${fullscreen ? 'justify-start' : 'justify-center'}
-      gap-0.5 sm:gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2
+      gap-1 sm:gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 w-full
     `}>
       <input
         type="file"
@@ -861,165 +862,177 @@ export function EditorToolbar({ editor, fullscreen, leadingSlot }: EditorToolbar
         accept="image/*"
         className="hidden"
       />
+      
       {leadingSlot && (
-        <div className="mr-1 flex items-center">
+        <div className="shrink-0 flex items-center pr-2 border-r border-border/10">
           {leadingSlot}
         </div>
       )}
-      {/* Undo/Redo */}
-      <ToolbarButton
-        onClick={() => editor.chain().focus().undo().run()}
-        disabled={!editor.can().undo()}
-        title="Undo (Ctrl+Z)"
-      >
-        <ArrowTurnBackwardIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().redo().run()}
-        disabled={!editor.can().redo()}
-        title="Redo (Ctrl+Y)"
-      >
-        <ArrowTurnForwardIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
 
-      <ToolbarDivider />
+      <div className="flex items-center gap-1 sm:gap-1.5">
+        {/* Undo/Redo */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().undo()}
+          title="Undo (Ctrl+Z)"
+        >
+          <ArrowTurnBackwardIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().redo()}
+          title="Redo (Ctrl+Y)"
+        >
+          <ArrowTurnForwardIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
 
-      {/* Text Formatting */}
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        isActive={editor.isActive('bold')}
-        title="Bold (Ctrl+B)"
-      >
-        <TextBoldIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        isActive={editor.isActive('italic')}
-        title="Italic (Ctrl+I)"
-      >
-        <TextItalicIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleUnderline().run()}
-        isActive={editor.isActive('underline')}
-        title="Underline (Ctrl+U)"
-      >
-        <TextUnderlineIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        isActive={editor.isActive('strike')}
-        title="Strikethrough"
-      >
-        <TextStrikethroughIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleHighlight().run()}
-        isActive={editor.isActive('highlight')}
-        title="Highlight"
-      >
-        <PaintBrush04Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
+        <ToolbarDivider />
 
-      <ToolbarDivider />
+        {/* Text Formatting */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          isActive={editor.isActive('bold')}
+          title="Bold (Ctrl+B)"
+        >
+          <TextBoldIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          isActive={editor.isActive('italic')}
+          title="Italic (Ctrl+I)"
+        >
+          <TextItalicIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          isActive={editor.isActive('underline')}
+          title="Underline (Ctrl+U)"
+        >
+          <TextUnderlineIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          isActive={editor.isActive('strike')}
+          title="Strikethrough"
+        >
+          <TextStrikethroughIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleHighlight().run()}
+          isActive={editor.isActive('highlight')}
+          title="Highlight"
+        >
+          <PaintBrush04Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
 
-      {/* Headings */}
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        isActive={editor.isActive('heading', { level: 1 })}
-        title="Heading 1"
-      >
-        <Heading01Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        isActive={editor.isActive('heading', { level: 2 })}
-        title="Heading 2"
-      >
-        <Heading02Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        isActive={editor.isActive('heading', { level: 3 })}
-        title="Heading 3"
-      >
-        <Heading03Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
+        <ToolbarDivider />
 
-      <ToolbarDivider />
+        {/* Headings */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          isActive={editor.isActive('heading', { level: 1 })}
+          title="Heading 1"
+        >
+          <Heading01Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          isActive={editor.isActive('heading', { level: 2 })}
+          title="Heading 2"
+        >
+          <Heading02Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          isActive={editor.isActive('heading', { level: 3 })}
+          title="Heading 3"
+        >
+          <Heading03Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
 
-      {/* Lists */}
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        isActive={editor.isActive('bulletList')}
-        title="Bullet List"
-      >
-        <ListViewIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        isActive={editor.isActive('orderedList')}
-        title="Numbered List"
-      >
-        <LeftToRightListNumberIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
+        <ToolbarDivider />
 
-      <ToolbarDivider />
+        {/* Lists */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          isActive={editor.isActive('bulletList')}
+          title="Bullet List"
+        >
+          <ListViewIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          isActive={editor.isActive('orderedList')}
+          title="Numbered List"
+        >
+          <LeftToRightListNumberIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
 
-      {/* Block Elements */}
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        isActive={editor.isActive('blockquote')}
-        title="Quote"
-      >
-        <QuoteDownIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-        isActive={editor.isActive('codeBlock')}
-        title="Code Block"
-      >
-        <SourceCodeIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        title="Horizontal Rule"
-      >
-        <MinusSignIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => fileInputRef.current?.click()}
-        isActive={editor.isActive('polaroidImage')}
-        title="Insert Polaroid"
-      >
-        <Image01Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-      </ToolbarButton>
+        <ToolbarDivider />
 
-      <ToolbarDivider />
+        {/* Block Elements */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          isActive={editor.isActive('blockquote')}
+          title="Quote"
+        >
+          <QuoteDownIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          isActive={editor.isActive('codeBlock')}
+          title="Code Block"
+        >
+          <SourceCodeIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setHorizontalRule().run()}
+          title="Horizontal Rule"
+        >
+          <MinusSignIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => fileInputRef.current?.click()}
+          isActive={editor.isActive('polaroidImage')}
+          title="Insert Polaroid"
+        >
+          <Image01Icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
 
-      {/* Text Alignment */}
-      <ToolbarButton
-        onClick={() => editor.chain().focus().setTextAlign('left').run()}
-        isActive={editor.isActive({ textAlign: 'left' })}
-        title="Align Left"
-      >
-        <TextAlignLeftIcon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().setTextAlign('center').run()}
-        isActive={editor.isActive({ textAlign: 'center' })}
-        title="Align Center"
-      >
-        <TextAlignCenterIcon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.chain().focus().setTextAlign('right').run()}
-        isActive={editor.isActive({ textAlign: 'right' })}
-        title="Align Right"
-      >
-        <TextAlignRightIcon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
-      </ToolbarButton>
+        <ToolbarDivider />
 
+        {/* Text Alignment */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          isActive={editor.isActive({ textAlign: 'left' })}
+          title="Align Left"
+        >
+          <TextAlignLeftIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          isActive={editor.isActive({ textAlign: 'center' })}
+          title="Align Center"
+        >
+          <TextAlignCenterIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          isActive={editor.isActive({ textAlign: 'right' })}
+          title="Align Right"
+        >
+          <TextAlignRightIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+        </ToolbarButton>
+      </div>
+
+      {trailingSlot && (
+        <>
+          <ToolbarDivider />
+          <div className="shrink-0 flex items-center pl-1">
+            {trailingSlot}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -1072,7 +1085,6 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
         placeholder,
         emptyEditorClass: 'is-editor-empty',
       }),
-      Underline,
       TextStyle,
       Color,
       Highlight.configure({
