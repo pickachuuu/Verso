@@ -89,12 +89,12 @@ export default function ConfirmDeleteModal({
           )}
         </Card.Content>
 
-        <Card.Footer className="flex space-x-2">
+        <Card.Footer className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-2">
           <Button
             variant="outline"
             onClick={handleClose}
             disabled={isDeleting || loading}
-            className="flex-1"
+            className="w-full sm:flex-1"
           >
             Cancel
           </Button>
@@ -102,15 +102,15 @@ export default function ConfirmDeleteModal({
             variant="destructive"
             onClick={handleConfirm}
             disabled={isDeleting || loading}
-            className="flex-1"
+            className="w-full sm:flex-1"
           >
             {isDeleting || loading ? (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-center space-x-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 <span>Deleting...</span>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-center space-x-2">
                 <Delete01Icon className="w-4 h-4" />
                 <span>Delete {itemType === 'note' ? 'Note' : itemType === 'notebook' ? 'Notebook' : 'Set'}</span>
               </div>

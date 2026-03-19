@@ -639,18 +639,18 @@ function FlashcardsHeader({
   onCreateNew: () => void;
 }) {
   return (
-    <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
+    <ClayCard variant="elevated" padding="lg" className="rounded-[2rem] sm:rounded-3xl">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         {/* Title area */}
-        <div className="flex items-start gap-3 min-w-0">
-          <FlashcardIcon className="w-12 h-12 text-primary shrink-0" />
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="p-3 bg-primary/10 rounded-2xl shrink-0">
+            <FlashcardIcon className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+          </div>
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground truncate">
-                Flashcards
-              </h1>
-            </div>
-            <p className="text-sm sm:text-base text-foreground-muted truncate">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-foreground truncate">
+              Flashcards
+            </h1>
+            <p className="text-xs sm:text-sm text-foreground-muted truncate">
               Study with AI-generated interactive flashcards
             </p>
           </div>
@@ -659,9 +659,9 @@ function FlashcardsHeader({
         {/* CTA */}
         <div className="shrink-0">
           <HeroActionButton
-            icon={<FlashcardAddIcon className="w-5 h-5" />}
+            icon={<FlashcardAddIcon className="w-4 h-4" />}
             onClick={onCreateNew}
-            className="w-full sm:w-auto justify-center"
+            className="w-full sm:w-auto justify-center px-6 py-4 sm:py-3.5 text-base sm:text-sm font-black"
           >
             Forge Flashcards
           </HeroActionButton>
@@ -905,51 +905,52 @@ function FlashcardListItem({
             </div>
 
             {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors flex-1 min-w-[120px]">
+            <div className="flex-1 min-w-0 py-1">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-x-2 gap-y-1">
+                <h3 className="font-bold text-sm sm:text-base text-foreground truncate group-hover:text-primary transition-colors flex-1">
                   {set.title}
                 </h3>
-                <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0">
                   {set.is_public && (
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-lg border border-emerald-100">
                       Public
                     </span>
                   )}
-                  <span className={`inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0 ${masteryLabel.className}`}>
+                  <span className={`inline-flex text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-lg border shrink-0 ${masteryLabel.className}`}>
                     {masteryLabel.text}
                   </span>
                 </div>
               </div>
+
               {/* Source note */}
               {sourceNote && (
-                <p className="text-[11px] text-foreground-muted/70 truncate mt-0.5">
-                  From: {sourceNote.title}
+                <p className="text-[10px] sm:text-[11px] text-foreground-muted/70 truncate mt-0.5">
+                  Refined from {sourceNote.title}
                 </p>
               )}
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-                <span className="text-xs text-foreground-muted flex items-center gap-1">
-                  <Clock01Icon className="w-3 h-3" />
-                  {formatDate(set.updated_at || set.created_at)}
-                </span>
-                <span className="text-xs text-foreground-muted">
-                  <span className="font-medium text-foreground">{set.total_cards}</span> cards
-                </span>
-                {learningCards > 0 && !isMastered && (
-                  <span className="text-xs text-foreground-muted">
-                    <span className="font-medium text-primary">{learningCards}</span> to learn
+
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2">
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] text-foreground-muted flex items-center gap-1 font-medium">
+                    <Clock01Icon className="w-3 h-3" />
+                    {formatDate(set.updated_at || set.created_at)}
                   </span>
-                )}
-                {/* Mini progress bar */}
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <div className="w-16 sm:w-20 bg-surface rounded-full h-1.5 overflow-hidden shrink-0">
+                  <span className="text-[10px] text-foreground-muted font-medium">
+                    <span className="font-bold text-foreground">{set.total_cards}</span> cards
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2 flex-grow sm:flex-grow-0">
+                  <div className="flex-1 sm:w-20 bg-background-muted rounded-full h-1.5 overflow-hidden ring-1 ring-border/20">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${isMastered ? 'bg-emerald-400' : progress >= 50 ? 'bg-amber-400' : 'bg-primary/70'
                         }`}
                       style={{ width: `${progress}%` }}
                     />
                   </div>
-                  <span className={`text-[10px] font-bold shrink-0 ${isMastered ? 'text-emerald-600' : 'text-foreground-muted'}`}>{progress}%</span>
+                  <span className={`text-[10px] font-black shrink-0 ${isMastered ? 'text-emerald-600' : 'text-foreground-muted'}`}>
+                    {progress}%
+                  </span>
                 </div>
               </div>
             </div>

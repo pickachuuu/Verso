@@ -20,6 +20,7 @@ import {
   Clock01Icon,
   SortingAZ01Icon,
   Calendar03Icon,
+  Task01Icon,
 } from 'hugeicons-react';
 import { NotebookIcon } from '@/component/icons';
 import { NOTEBOOK_COLORS, NotebookColorKey } from '@/component/ui/ClayNotebookCover';
@@ -78,17 +79,17 @@ const DEFAULT_VALUES: FormData = {
 
 function StepIndicator({ currentStep, steps }: { currentStep: Step; steps: typeof STEPS }) {
   return (
-    <div className="flex items-center justify-center gap-2 mb-8">
+    <div className="flex items-center justify-center gap-1 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto scrollbar-hide py-1">
       {steps.map((step, index) => {
         const isCompleted = currentStep > step.number;
         const isCurrent = currentStep === step.number;
         const Icon = step.icon;
 
         return (
-          <div key={step.number} className="flex items-center">
+          <div key={step.number} className="flex items-center shrink-0">
             <div
               className={clsx(
-                'flex items-center gap-2 px-4 py-2 rounded-2xl transition-all duration-300',
+                'flex items-center gap-2 px-3 sm:px-4 py-2 rounded-2xl transition-all duration-300',
                 isCurrent && 'clay-step-active',
                 isCompleted && 'clay-step-completed',
                 !isCurrent && !isCompleted && 'clay-step-inactive'
@@ -96,21 +97,21 @@ function StepIndicator({ currentStep, steps }: { currentStep: Step; steps: typeo
             >
               <div
                 className={clsx(
-                  'w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300',
+                  'w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm',
                   isCurrent && 'bg-accent text-white',
                   isCompleted && 'bg-green-500 text-white',
                   !isCurrent && !isCompleted && 'bg-border text-foreground-muted'
                 )}
               >
                 {isCompleted ? (
-                  <Tick01Icon className="w-4 h-4" />
+                  <Tick01Icon className="w-3.5 h-3.5" />
                 ) : (
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                 )}
               </div>
               <span
                 className={clsx(
-                  'text-sm font-medium hidden sm:block',
+                  'text-[11px] sm:text-sm font-black uppercase tracking-widest',
                   isCurrent && 'text-foreground',
                   isCompleted && 'text-green-600',
                   !isCurrent && !isCompleted && 'text-foreground-muted'
@@ -122,7 +123,7 @@ function StepIndicator({ currentStep, steps }: { currentStep: Step; steps: typeo
             {index < steps.length - 1 && (
               <div
                 className={clsx(
-                  'w-8 h-0.5 mx-1 rounded-full transition-all duration-300',
+                  'w-4 sm:w-8 h-0.5 mx-0.5 sm:mx-1 rounded-full transition-all duration-300',
                   currentStep > step.number ? 'bg-green-500' : 'bg-border'
                 )}
               />
@@ -163,7 +164,7 @@ function NoteCard({
           className="w-1.5 shrink-0 rounded-l-xl"
           style={{ background: color.primary }}
         />
-        <div className="flex items-start gap-3 p-4 flex-1 min-w-0">
+        <div className="flex items-start gap-2.5 sm:gap-3 p-3 sm:p-4 flex-1 min-w-0">
           <div
             className={clsx(
               'w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200',
@@ -378,17 +379,17 @@ export default function ForgeFlashcardsModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="clay-modal w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-3xl flex flex-col border border-dashed border-pencil/40">
+      <div className="clay-modal w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden rounded-[2rem] sm:rounded-3xl flex flex-col border border-dashed border-pencil/40">
           {/* Header */}
           <div className="clay-modal-header px-6 py-5 border-b border-border">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
-                  <SparklesIcon className="w-5 h-5 text-white" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shrink-0">
+                  <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold text-foreground">Forge Flashcards</h2>
-                  <p className="text-sm text-foreground-muted">Create flashcards from your notes</p>
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-xl font-bold text-foreground truncate">Forge Flashcards</h2>
+                  <p className="text-xs sm:text-sm text-foreground-muted truncate">Create flashcards from your notes</p>
                 </div>
               </div>
               <button
@@ -430,7 +431,7 @@ export default function ForgeFlashcardsModal({
                         placeholder="Search notes..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-border bg-surface text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+                        className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-border bg-surface text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all shadow-sm"
                       />
                     </div>
                     {/* Color filter + Sort */}
@@ -574,21 +575,32 @@ export default function ForgeFlashcardsModal({
                     name="difficulty"
                     control={control}
                     render={({ field }) => (
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {DIFFICULTY_OPTIONS.map((option) => (
                           <button
                             key={option.value}
                             type="button"
                             onClick={() => field.onChange(option.value)}
                             className={clsx(
-                              'p-3 rounded-xl text-left transition-all duration-200 border-2',
+                              'p-4 rounded-2xl text-left transition-all duration-200 border-2 flex items-start gap-3',
                               field.value === option.value
-                                ? 'clay-option-selected border-accent bg-accent/5'
-                                : 'clay-option-unselected border-transparent hover:border-border'
+                                ? 'clay-option-selected border-accent bg-accent/5 shadow-xl shadow-accent/5'
+                                : 'clay-option-unselected border-transparent hover:border-border bg-background-muted/30'
                             )}
                           >
-                            <div className="font-medium text-sm">{option.label}</div>
-                            <div className="text-xs text-foreground-muted">{option.description}</div>
+                            <div className={clsx(
+                                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-border/40 transition-all shadow-sm",
+                                field.value === option.value ? 'bg-accent text-white' : 'bg-white text-foreground-muted'
+                            )}>
+                                {option.value === 'easy' && <Clock01Icon className="w-5 h-5" />}
+                                {option.value === 'medium' && <SparklesIcon className="w-5 h-5" />}
+                                {option.value === 'hard' && <Task01Icon className="w-5 h-5" />}
+                                {option.value === 'all' && <Settings02Icon className="w-5 h-5" />}
+                            </div>
+                            <div className="min-w-0">
+                                <div className="font-black text-sm uppercase tracking-tight">{option.label}</div>
+                                <div className="text-[11px] text-foreground-muted leading-relaxed mt-0.5">{option.description}</div>
+                            </div>
                           </button>
                         ))}
                       </div>
@@ -733,21 +745,22 @@ export default function ForgeFlashcardsModal({
           </div>
 
           {/* Footer */}
-          <div className="clay-modal-footer px-6 py-4 border-t border-border flex items-center justify-between shrink-0">
-            <div>
+          <div className="clay-modal-footer px-4 sm:px-6 py-4 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+            <div className="flex justify-start order-2 sm:order-1">
               {currentStep > 1 && (
                 <ClayButton
                   variant="ghost"
                   onClick={handleBack}
                   disabled={isGenerating || saving}
+                  className="w-full sm:w-auto"
                 >
                   Back
                 </ClayButton>
               )}
             </div>
 
-            <div className="flex gap-2">
-              <ClayButton variant="secondary" onClick={onClose} disabled={isGenerating || saving}>
+            <div className="flex gap-2 order-1 sm:order-2">
+              <ClayButton variant="secondary" onClick={onClose} disabled={isGenerating || saving} className="flex-1 sm:flex-none">
                 Cancel
               </ClayButton>
 
@@ -756,6 +769,7 @@ export default function ForgeFlashcardsModal({
                   variant="primary"
                   onClick={handleNext}
                   disabled={currentStep === 1 && selectedNotes.length === 0}
+                  className="flex-1 sm:flex-none"
                 >
                   Continue
                 </ClayButton>
@@ -766,6 +780,7 @@ export default function ForgeFlashcardsModal({
                   variant="primary"
                   onClick={handleConfirm}
                   disabled={saving}
+                  className="flex-1 sm:flex-none"
                 >
                   {saving ? (
                     <>
@@ -775,7 +790,7 @@ export default function ForgeFlashcardsModal({
                   ) : (
                     <>
                       <Tick01Icon className="w-4 h-4 mr-2" />
-                      Confirm & Save
+                      Confirm
                     </>
                   )}
                 </ClayButton>

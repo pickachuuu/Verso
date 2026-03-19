@@ -181,7 +181,7 @@ export default function ReforgeModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-        <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <Card className="w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-y-auto rounded-3xl sm:rounded-2xl">
           <Card.Header>
             <Card.Title>Reforge Flashcards</Card.Title>
             <Card.Description>
@@ -312,27 +312,27 @@ export default function ReforgeModal({
             )}
           </Card.Content>
 
-          <Card.Footer className="flex space-x-2">
+           <Card.Footer className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-2">
             <Button
               variant="outline"
               onClick={onClose}
               disabled={isLoading || saving}
-              className="flex-1"
+              className="w-full sm:flex-1"
             >
               Cancel
             </Button>
             <Button
               onClick={generateFlashcards}
               disabled={isLoading || saving}
-              className="flex-1"
+              className="w-full sm:flex-1"
             >
               {isLoading ? (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Generating...</span>
                 </div>
               ) : saving ? (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Saving...</span>
                 </div>
@@ -387,17 +387,17 @@ export default function ReforgeModal({
                 </div>
               </Card.Content>
 
-              <Card.Footer className="flex space-x-2">
+              <Card.Footer className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-2">
                 <Button
                   variant="outline"
                   onClick={handleCancelPreview}
-                  className="flex-1"
+                  className="w-full sm:flex-1"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleSaveFlashcards}
-                  className="flex-1"
+                  className="w-full sm:flex-1"
                 >
                   Save Flashcards
                 </Button>

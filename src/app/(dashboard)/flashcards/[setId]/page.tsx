@@ -131,21 +131,21 @@ export default function FlashcardBrowsePage() {
 
   return (
     <div className="max-w-5xl mx-auto py-8 space-y-6">
-      <ClayCard variant="elevated" padding="md" className="rounded-3xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+      <ClayCard variant="elevated" padding="md" className="rounded-[2rem] sm:rounded-3xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => router.push('/flashcards')}
-              className="p-2 rounded-xl bg-background-muted border border-border hover:bg-background-muted/70 transition-all flex-shrink-0"
+              className="p-3 rounded-2xl bg-background-muted border border-border hover:bg-background-muted/70 transition-all flex-shrink-0"
               title="Back to sets"
             >
               <ArrowLeft01Icon className="w-4 h-4 text-foreground-muted" />
             </button>
             <div className="min-w-0">
-              <h1 className="text-xl font-bold text-foreground break-words overflow-hidden">
+              <h1 className="text-xl font-black text-foreground break-words overflow-hidden leading-tight">
                 {studyData.set.title || 'Flashcards'}
               </h1>
-              <p className="text-xs text-foreground-muted mt-0.5">
+              <p className="text-[10px] text-foreground-muted font-bold uppercase tracking-widest mt-0.5">
                 {progress.total} cards · {progress.mastered} mastered
               </p>
             </div>
@@ -153,9 +153,9 @@ export default function FlashcardBrowsePage() {
 
           <button
             onClick={() => router.push(`/flashcards/${setId}/study`)}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-primary text-white hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 shrink-0"
+            className="flex items-center justify-center gap-2 px-6 py-4 sm:py-3 rounded-2xl font-black text-base sm:text-sm bg-primary text-white hover:bg-primary-dark transition-all shadow-xl shadow-primary/20 shrink-0"
           >
-            <BookOpen01Icon className="w-4 h-4" />
+            <BookOpen01Icon className="w-5 h-5 sm:w-4 sm:h-4" />
             Study Due Cards
           </button>
         </div>
@@ -366,11 +366,14 @@ function BrowseCard({
 
       {/* Answer (expanded) */}
       {isExpanded && (
-        <div className="border-t border-border/30 px-4 pb-4 pt-3 ml-10">
-          <p className="text-[10px] uppercase tracking-widest font-bold text-primary-light/60 mb-2">
-            Answer
-          </p>
-          <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+        <div className="border-t border-border/30 px-4 pb-5 pt-4 sm:ml-10">
+          <div className="flex items-center gap-2 mb-3">
+             <div className="w-1 h-3 rounded-full bg-primary/40" />
+             <p className="text-[10px] uppercase tracking-[0.2em] font-black text-foreground-muted/60">
+               Answer
+             </p>
+          </div>
+          <p className="text-sm sm:text-base text-foreground leading-relaxed whitespace-pre-line font-medium">
             {card.answer}
           </p>
           {/* Meta info */}

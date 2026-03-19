@@ -158,13 +158,13 @@ export default function FlashcardSetInfoModal({
           {/* Stats grid */}
           <div className="px-6 pb-4">
             {isLoading ? (
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="h-16 rounded-xl bg-surface-elevated/60 animate-pulse" />
                 ))}
               </div>
             ) : stats ? (
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <StatBox
                   label="New"
                   value={stats.newCount}
@@ -200,7 +200,7 @@ export default function FlashcardSetInfoModal({
           {/* Difficulty breakdown */}
           <div className="px-6 pb-4">
             <p className="text-xs font-medium text-foreground-muted mb-2">Difficulty</p>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <DifficultyPill label="Easy" count={difficulty.easy} color="bg-emerald-500" />
               <DifficultyPill label="Medium" count={difficulty.medium} color="bg-amber-500" />
               <DifficultyPill label="Hard" count={difficulty.hard} color="bg-red-500" />
@@ -210,33 +210,33 @@ export default function FlashcardSetInfoModal({
           {/* Due cards highlight */}
           {dueNow > 0 && (
             <div className="mx-6 mb-4 p-3 rounded-xl bg-primary/10 border border-primary/15 flex items-center gap-3">
-              <div className="p-1.5 rounded-lg bg-primary/20">
+              <div className="p-2 rounded-lg bg-primary/20 shrink-0">
                 <AlertCircleIcon className="w-4 h-4 text-primary-light" />
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">
                   {dueNow} card{dueNow !== 1 ? 's' : ''} due for review
                 </p>
-                <p className="text-xs text-foreground-muted">Start a study session to keep up</p>
+                <p className="text-xs text-foreground-muted truncate">Start a study session to keep up</p>
               </div>
             </div>
           )}
 
           {/* Action buttons */}
-          <div className="px-6 pb-6 flex gap-3">
+          <div className="px-6 pb-6 flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleBrowse}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm border border-border/60 bg-surface-elevated/50 hover:bg-surface-elevated text-foreground transition-all"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl font-semibold text-sm border border-border/60 bg-surface-elevated/50 hover:bg-surface-elevated text-foreground transition-all order-2 sm:order-1"
             >
               <ViewIcon className="w-4 h-4" />
               Browse Cards
             </button>
             <button
               onClick={handleStudy}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm bg-primary text-white hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl font-semibold text-sm bg-primary text-white hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 order-1 sm:order-2"
             >
               <BookOpen01Icon className="w-4 h-4" />
-              {dueNow > 0 ? `Study (${dueNow} due)` : 'Study'}
+              {dueNow > 0 ? `Study (${dueNow} due)` : 'Study Session'}
             </button>
           </div>
         </ClayCard>
