@@ -178,7 +178,7 @@ body {
   transform: rotateY(0deg);
 }
 
-/* Dashboard grid + gradient background tuned to Verso palette */
+/* Dashboard clean background tuned to Verso palette */
 .dashboard-grid-bg {
   position: relative;
   min-height: 100vh;
@@ -192,45 +192,29 @@ body {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--border-light) 80%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--border-light) 80%, transparent) 1px, transparent 1px),
-    radial-gradient(circle 800px at 0% 200px, color-mix(in srgb, var(--secondary-muted) 70%, #ffe1c4) 0%, transparent 70%);
-  background-size: 96px 64px, 96px 64px, 100% 100%;
-  opacity: 0.9;
+  background: transparent;
+  opacity: 0;
 }
 
-/* Lively global background canvas */
+/* Clean global background canvas */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -2;
   pointer-events: none;
-  /* Warm desk-like gradient with subtle accent washes */
-  background:
-    radial-gradient(ellipse 1200px 700px at 0% 0%, rgba(255, 255, 255, 0.7) 0%, transparent 65%),
-    radial-gradient(ellipse 900px 700px at 100% 100%, rgba(60, 50, 40, 0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 700px 900px at -10% 110%, rgba(43, 93, 139, 0.08) 0%, transparent 75%),
-    radial-gradient(ellipse 700px 900px at 110% -10%, rgba(199, 123, 75, 0.08) 0%, transparent 75%),
-    color-mix(in srgb, var(--background) 92%, #E8DFD0);
+  background: color-mix(in srgb, var(--background) 94%, #E8DFD0);
 }
 
-/* Soft animated academic pattern layer */
+/* Clean subtle background layer */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.28;
-  background-image:
-    linear-gradient(90deg, color-mix(in srgb, var(--border) 60%, transparent) 1px, transparent 1px),
-    linear-gradient(180deg, color-mix(in srgb, var(--border) 60%, transparent) 1px, transparent 1px),
-    radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.6) 0, transparent 50%);
-  background-size: 72px 72px, 72px 72px, 700px 700px;
-  mix-blend-mode: multiply;
-  animation: body-grid-drift 45s linear infinite;
+  opacity: 0;
+  background: transparent;
 }
 
 @keyframes body-grid-drift {
