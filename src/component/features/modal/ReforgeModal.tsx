@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { GeminiFlashcard, GeminiResponse } from '@/lib/gemini';
-import Button from '@/component/ui/Button';
-import Card from '@/component/ui/Card';
 import Modal from '@/component/ui/Modal';
+import { ClayCard } from '@/component/ui/Clay';
+import { SparklesIcon, Cancel01Icon, Tick01Icon } from 'hugeicons-react';
 import { cn } from '@/lib/utils';
 
 export interface ReforgeModalProps {
@@ -181,18 +181,33 @@ export default function ReforgeModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-        <Card className="w-full max-w-md max-h-[92vh] sm:max-h-[90vh] overflow-y-auto rounded-3xl sm:rounded-2xl">
-          <Card.Header>
-            <Card.Title>Reforge Flashcards</Card.Title>
-            <Card.Description>
-              {settings.action === 'regenerate'
-                ? 'Regenerate all flashcards from your note'
-                : `Add ${settings.minCount} more flashcards to your existing ${existingFlashcards.length} cards`
-              }
-            </Card.Description>
-          </Card.Header>
+        <ClayCard variant="elevated" padding="none" className="w-full max-w-xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden rounded-[2.5rem] flex flex-col shadow-2xl">
+          <div className="px-8 py-6 bg-background-muted/5 border-b border-border/40 shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-[1rem] bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/20 border border-primary/20 shrink-0">
+                  <SparklesIcon className="w-6 h-6 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-2xl font-black text-foreground tracking-tight truncate">Reforge Flashcards</h2>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1 truncate">
+                    {settings.action === 'regenerate'
+                      ? 'Regenerate all flashcards from your note'
+                      : `Add ${settings.minCount} more flashcards`}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-3 rounded-2xl hover:bg-surface-elevated transition-colors"
+                disabled={isLoading}
+              >
+                <Cancel01Icon className="w-5 h-5 text-foreground-muted" />
+              </button>
+            </div>
+          </div>
 
-          <Card.Content className="space-y-4">
+          <div className="px-8 py-6 overflow-y-auto space-y-6 flex-1 min-h-[300px]">
             {/* Action selection */}
             <div className="space-y-2">
               <label className="text-sm font-medium">
@@ -226,23 +241,24 @@ export default function ReforgeModal({
               </div>
             </div>
 
-            {/* Minimum count input */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">
+              <label className="text-sm font-black text-foreground">
                 Number of flashcards to {settings.action === 'regenerate' ? 'generate' : 'add'}
               </label>
-              <input
-                type="number"
-                min="1"
-                max={MAX_FLASHCARDS}
-                value={settings.minCount}
-                onChange={(e) => handleSettingChange('minCount', parseInt(e.target.value) || 1)}
-                className="w-full px-3 py-2 border border-border rounded-md bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-                disabled={isLoading}
-              />
-              <p className="text-xs text-foreground-muted">
-                Maximum per generate: {MAX_FLASHCARDS} cards
-              </p>
+              <div className="flex items-center gap-4">
+                <input
+                  type="range"
+                  min="1"
+                  max={MAX_FLASHCARDS}
+                  value={settings.minCount}
+                  onChange={(e) => handleSettingChange('minCount', parseInt(e.target.value) || 1)}
+                  className="flex-1 accent-primary"
+                  disabled={isLoading}
+                />
+                <span className="w-12 text-center font-black text-primary text-xl">
+                  {settings.minCount}
+                </span>
+              </div>
             </div>
 
             {/* Difficulty dropdown */}
@@ -310,99 +326,98 @@ export default function ReforgeModal({
                 <p className="text-sm text-green-600">{success}</p>
               </div>
             )}
-          </Card.Content>
+          </div>
 
-           <Card.Footer className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-2">
-            <Button
-              variant="outline"
+          <div className="px-8 py-6 bg-surface border-t border-border/40 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0">
+            <button
               onClick={onClose}
               disabled={isLoading || saving}
-              className="w-full sm:flex-1"
+              className="px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center justify-center gap-2"
             >
               Cancel
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={generateFlashcards}
               disabled={isLoading || saving}
-              className="w-full sm:flex-1"
+              className="px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
             >
               {isLoading ? (
-                <div className="flex items-center justify-center space-x-2">
+                <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Generating...</span>
-                </div>
+                  Generating...
+                </>
               ) : saving ? (
-                <div className="flex items-center justify-center space-x-2">
+                <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Saving...</span>
-                </div>
+                  Saving...
+                </>
               ) : (
-                settings.action === 'regenerate' ? 'Regenerate All' : 'Add More'
+                <>
+                  <SparklesIcon className="w-4 h-4" />
+                  {settings.action === 'regenerate' ? 'Regenerate All' : 'Add More'}
+                </>
               )}
-            </Button>
-          </Card.Footer>
-        </Card>
+            </button>
+          </div>
+        </ClayCard>
 
       {/* Preview Modal */}
       <Modal isOpen={showPreview} onClose={handleCancelPreview} nested>
-            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <Card.Header>
-                <Card.Title>
-                  {settings.action === 'regenerate' ? 'Regenerated' : 'New'} Flashcards Preview
-                </Card.Title>
-                <Card.Description>
-                  Review your flashcards before saving
-                </Card.Description>
-              </Card.Header>
+        <div className="w-full max-w-2xl max-h-[90vh] bg-surface overflow-hidden rounded-[2.5rem] flex flex-col shadow-2xl ring-1 ring-border/40">
+          <div className="px-8 py-6 bg-background-muted/5 border-b border-border/40 shrink-0">
+            <h2 className="text-2xl font-black text-foreground tracking-tight">
+              {settings.action === 'regenerate' ? 'Regenerated' : 'New'} Flashcards Preview
+            </h2>
+            <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1">Review your flashcards before saving</p>
+          </div>
 
-              <Card.Content className="space-y-4">
-                <div className="space-y-3">
-                  {generatedFlashcards.map((flashcard, index) => (
-                    <div key={index} className="p-4 border border-border rounded-lg bg-background-muted">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-foreground-muted">
-                          Card {index + 1}
-                        </span>
-                        <span className={cn(
-                          "text-xs px-2 py-1 rounded-full",
-                          flashcard.difficulty === 'easy' && "bg-green-100 text-green-800",
-                          flashcard.difficulty === 'medium' && "bg-yellow-100 text-yellow-800",
-                          flashcard.difficulty === 'hard' && "bg-red-100 text-red-800"
-                        )}>
-                          {flashcard.difficulty}
-                        </span>
-                      </div>
-                      <div className="space-y-2">
-                        <div>
-                          <strong className="text-sm">Question:</strong>
-                          <p className="text-sm mt-1 whitespace-pre-line">{flashcard.question}</p>
-                        </div>
-                        <div>
-                          <strong className="text-sm">Answer:</strong>
-                          <p className="text-sm mt-1">{flashcard.answer}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+          <div className="px-8 py-6 overflow-y-auto space-y-4 flex-1">
+            {generatedFlashcards.map((flashcard, index) => (
+              <div key={index} className="p-5 border-2 border-border/60 rounded-[1.5rem] bg-background-muted/30">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-foreground-muted">
+                    Card {index + 1}
+                  </span>
+                  <span className={cn(
+                    "text-[10px] uppercase font-black tracking-widest px-3 py-1 rounded-full",
+                    flashcard.difficulty === 'easy' && "bg-green-100 text-green-800",
+                    flashcard.difficulty === 'medium' && "bg-yellow-100 text-yellow-800",
+                    flashcard.difficulty === 'hard' && "bg-red-100 text-red-800"
+                  )}>
+                    {flashcard.difficulty}
+                  </span>
                 </div>
-              </Card.Content>
+                <div className="space-y-4">
+                  <div>
+                    <strong className="text-xs font-black uppercase tracking-widest text-foreground">Question</strong>
+                    <p className="text-base font-medium mt-1 whitespace-pre-line text-foreground">{flashcard.question}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-surface border border-border/40">
+                    <strong className="text-xs font-black uppercase tracking-widest text-foreground-muted">Answer</strong>
+                    <p className="text-sm mt-1 text-foreground">{flashcard.answer}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
 
-              <Card.Footer className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleCancelPreview}
-                  className="w-full sm:flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSaveFlashcards}
-                  className="w-full sm:flex-1"
-                >
-                  Save Flashcards
-                </Button>
-              </Card.Footer>
-            </Card>
+          <div className="px-8 py-6 bg-surface border-t border-border/40 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0">
+            <button
+              onClick={handleCancelPreview}
+              className="px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center justify-center gap-2"
+            >
+              <Cancel01Icon className="w-4 h-4" />
+              Cancel Focus
+            </button>
+            <button
+              onClick={handleSaveFlashcards}
+              className="px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+            >
+              <Tick01Icon className="w-4 h-4" />
+              Save Flashcards
+            </button>
+          </div>
+        </div>
       </Modal>
     </Modal>
   );
