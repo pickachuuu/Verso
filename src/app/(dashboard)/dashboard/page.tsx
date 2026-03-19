@@ -19,20 +19,19 @@ export default function Dashboard() {
       </div>
 
       {/* Desktop layout */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:flex flex-col gap-10 max-w-[1700px] mx-auto pt-8 px-8">
         <DashboardHeader user={user ?? undefined} />
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-4">
-            <StudyStreak />
-          </div>
-          <div className="lg:col-span-8">
+        
+        <div className="grid grid-cols-12 gap-10">
+          <div className="col-span-12 xl:col-span-8 flex flex-col gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <ContinueLearning />
+              <StudyStreak />
+            </div>
             <WeeklyActivityChart />
           </div>
-          <div className="lg:col-span-7">
-            <ContinueLearning />
-          </div>
-          <div className="lg:col-span-5">
+          
+          <div className="col-span-12 xl:col-span-4 flex flex-col gap-10">
             <RecentActivity />
           </div>
         </div>

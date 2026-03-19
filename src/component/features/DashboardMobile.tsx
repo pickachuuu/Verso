@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
-import { ClayBadge, ClayCard } from '@/component/ui/Clay';
 import type { UserProfile } from '@/hooks/useAuth';
 import {
   Add01Icon,
@@ -31,161 +30,63 @@ type DashboardMobileProps = {
 
 const ACTIVITY_META = {
   note: {
-    label: 'Note',
-    badge: 'accent',
+    label: 'NOTE',
     icon: NotebookIcon,
-    tint: 'text-primary',
+    badgeClasses: 'bg-accent/20 text-accent border border-accent/30',
   },
   flashcard: {
-    label: 'Flashcard',
-    badge: 'success',
+    label: 'FLASHCARD',
     icon: FlashcardIcon,
-    tint: 'text-tertiary',
+    badgeClasses: 'bg-success/20 text-success border border-success/30',
   },
   exam: {
-    label: 'Exam',
-    badge: 'warning',
+    label: 'EXAM',
     icon: ExamIcon,
-    tint: 'text-secondary',
+    badgeClasses: 'bg-warning/20 text-warning border border-warning/30',
   },
 } as const;
 
 function MobileHeader({ user }: DashboardMobileProps) {
   const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  useEffect(() => { setIsMounted(true); }, []);
 
   const currentDate = new Date();
   const greeting = (() => {
     const hour = currentDate.getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
+    if (hour < 12) return 'GOOD MORNING';
+    if (hour < 17) return 'GOOD AFTERNOON';
+    return 'GOOD EVENING';
   })();
-  const displayName = isMounted
-    ? user?.full_name || user?.email?.split('@')[0] || 'there'
-    : 'there';
+  const displayName = isMounted ? user?.full_name || user?.email?.split('@')[0] || 'THERE' : 'THERE';
 
   return (
-    <ClayCard variant="elevated" padding="sm" className="rounded-2xl">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0 px-2">
-          <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-widest text-foreground-muted">{greeting}</p>
-            <h1 className="text-base font-semibold text-foreground truncate">
-              Hi, <span className="text-primary">{displayName}</span>
-            </h1>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-background-muted border border-border">
-          <Calendar03Icon className="w-4 h-4 text-primary" />
-          <div className="text-right">
-            <p className="text-[9px] uppercase tracking-widest text-foreground-muted">Today</p>
-            <p className="text-[11px] font-semibold text-foreground">
-              {format(currentDate, 'MMM d')}
-            </p>
-          </div>
-        </div>
+    <div className="flex items-center justify-between gap-4 pt-2 pb-2">
+      <div className="min-w-0">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground-muted mb-1">{greeting}</p>
+        <h1 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none truncate">
+          {displayName}
+        </h1>
       </div>
-    </ClayCard>
+      <div className="flex flex-col items-center justify-center w-12 h-12 rounded-full border-2 border-foreground bg-surface shadow-sm shrink-0">
+        <span className="text-[12px] font-black leading-none">{format(currentDate, 'd')}</span>
+        <span className="text-[8px] font-black uppercase tracking-widest text-foreground-muted">{format(currentDate, 'MMM')}</span>
+      </div>
+    </div>
   );
 }
 
-function MobileWeeklySnapshot() {
-  const { data: streak, isLoading: streakLoading } = useStudyStreak();
-  const { data: weeklyData, isLoading: weeklyLoading } = useWeeklyActivity();
-
-  if (streakLoading || weeklyLoading) {
-    return (
-      <ClayCard variant="default" padding="sm" className="rounded-2xl animate-pulse">
-        <div className="h-3 w-24 bg-background-muted rounded mb-3" />
-        <div className="grid grid-cols-3 gap-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-16 rounded-xl bg-background-muted border border-border/50" />
-          ))}
-        </div>
-        <div className="mt-3 h-10 rounded-xl bg-background-muted border border-border/50" />
-      </ClayCard>
-    );
-  }
-
-  const currentStreak = streak?.currentStreak || 0;
-  const studiedToday = streak?.studiedToday || false;
-  const data = weeklyData || [];
-  const totalCards = data.reduce((sum, d) => sum + d.cardsStudied, 0);
-  const totalMinutes = data.reduce((sum, d) => sum + d.minutesStudied, 0);
-  const activeDays = data.filter((d) => d.cardsStudied > 0 || d.sessions > 0).length;
-  const maxCards = Math.max(...data.map((d) => d.cardsStudied), 1);
-
+function MobileQuickActions() {
   return (
-    <ClayCard variant="default" padding="sm" className="rounded-2xl">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-foreground">This week</span>
-        <span className="text-[10px] text-foreground-muted">{activeDays}/7 active</span>
-      </div>
-
-      <div className="mt-3 grid grid-cols-3 gap-2 text-left">
-        <div className="rounded-xl bg-background-muted border border-border px-2 py-2">
-          <div className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-foreground-muted">
-            <FireIcon className="w-3.5 h-3.5 text-secondary" />
-            Streak
-          </div>
-          <p className="text-lg font-semibold text-foreground mt-1">{currentStreak}d</p>
-          <p className="text-[9px] text-foreground-muted">{studiedToday ? 'Today ✓' : 'Keep it up'}</p>
-        </div>
-        <div className="rounded-xl bg-background-muted border border-border px-2 py-2">
-          <div className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-foreground-muted">
-            <FlashcardIcon className="w-3.5 h-3.5 text-primary" />
-            Cards
-          </div>
-          <p className="text-lg font-semibold text-foreground mt-1">{totalCards}</p>
-          <p className="text-[9px] text-foreground-muted">Studied</p>
-        </div>
-        <div className="rounded-xl bg-background-muted border border-border px-2 py-2">
-          <div className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-foreground-muted">
-            <Clock01Icon className="w-3.5 h-3.5 text-tertiary" />
-            Minutes
-          </div>
-          <p className="text-lg font-semibold text-foreground mt-1">{totalMinutes}</p>
-          <p className="text-[9px] text-foreground-muted">Focused</p>
-        </div>
-      </div>
-
-      <div className="mt-3">
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-foreground-muted mb-2">
-          <Target01Icon className="w-3.5 h-3.5" />
-          Activity
-        </div>
-        <div className="flex items-end gap-1.5 h-20">
-          {data.map((day, index) => {
-            const isToday = index === data.length - 1;
-            const hasActivity = day.cardsStudied > 0 || day.sessions > 0;
-            const heightPercent = maxCards > 0 ? (day.cardsStudied / maxCards) * 100 : 0;
-            return (
-              <div key={day.date} className="flex-1 h-full flex flex-col items-center justify-end">
-                <div className="w-full h-full flex items-end">
-                  <div
-                    className={`w-full rounded-lg transition-all duration-500 ${
-                      hasActivity
-                        ? `bg-primary/45 ${isToday ? 'ring-2 ring-primary/30 ring-offset-1 ring-offset-background' : ''}`
-                        : 'bg-background-muted border border-border'
-                    }`}
-                    style={{
-                      height: hasActivity ? `${Math.max(heightPercent, 22)}%` : '8px',
-                      minHeight: hasActivity ? '14px' : '8px',
-                    }}
-                  />
-                </div>
-                <span className={`mt-1 text-[9px] ${isToday ? 'text-primary font-semibold' : 'text-foreground-muted'}`}>
-                  {day.shortDay.slice(0, 1)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </ClayCard>
+    <div className="flex gap-2 mt-4">
+      <Link href="/library" className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-full bg-foreground text-surface shadow-lg hover:bg-foreground/90 transition-all active:scale-95">
+        <PencilEdit01Icon className="w-4 h-4" />
+        <span className="text-[10px] font-black uppercase tracking-widest mt-0.5">NEW NOTE</span>
+      </Link>
+      <Link href="/flashcards" className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-full bg-surface border-2 border-border/40 text-foreground hover:bg-background-muted transition-all active:scale-95 shadow-sm">
+        <FlashcardIcon className="w-4 h-4" />
+        <span className="text-[10px] font-black uppercase tracking-widest mt-0.5">BROWSE SETS</span>
+      </Link>
+    </div>
   );
 }
 
@@ -194,183 +95,173 @@ function MobileContinueLearning() {
 
   if (isLoading) {
     return (
-      <ClayCard variant="default" padding="sm" className="rounded-2xl animate-pulse">
-        <div className="h-4 w-28 bg-background-muted rounded mb-3" />
-        <div className="h-16 rounded-xl bg-background-muted border border-border/50" />
-      </ClayCard>
+      <div className="rounded-[2.5rem] bg-surface border-2 border-border/40 p-8 animate-pulse mt-4">
+        <div className="h-4 w-32 bg-background-muted mb-6 rounded-full" />
+        <div className="h-12 w-3/4 bg-background-muted mb-4 rounded-xl" />
+      </div>
     );
   }
 
-  const { lastStudiedSet, suggestedAction, dueCardsCount } = data || {};
-
+  const { lastStudiedSet, suggestedAction } = data || {};
   const config = (() => {
     switch (suggestedAction) {
-      case 'review_due':
-        return {
-          title: 'Review due cards',
-          subtitle: `${dueCardsCount} cards waiting`,
-          icon: <Clock01Icon className="w-5 h-5" />,
-          href: '/flashcards',
-          accent: 'secondary',
-        };
-      case 'continue_set':
-        return {
-          title: 'Continue studying',
-          subtitle: lastStudiedSet ? lastStudiedSet.title : 'Pick up where you left off',
-          icon: <PlayIcon className="w-5 h-5" />,
-          href: lastStudiedSet ? `/flashcards/${lastStudiedSet.id}/study` : '/flashcards',
-          accent: 'primary',
-        };
-      case 'start_new':
-        return {
-          title: 'Start a new set',
-          subtitle: 'Begin studying a new set',
-          icon: <FlashcardIcon className="w-5 h-5" />,
-          href: '/flashcards',
-          accent: 'tertiary',
-        };
+      case 'review_due': return { title: 'REVIEW DUE CARDS', icon: <Clock01Icon className="w-6 h-6" />, href: '/flashcards' };
+      case 'continue_set': return { title: 'CONTINUE STUDYING', icon: <PlayIcon className="w-6 h-6" />, href: lastStudiedSet ? `/flashcards/${lastStudiedSet.id}/study` : '/flashcards' };
+      case 'start_new': return { title: 'START A NEW SET', icon: <FlashcardIcon className="w-6 h-6" />, href: '/flashcards' };
       case 'create_cards':
-      default:
-        return {
-          title: 'Create flashcards',
-          subtitle: 'Generate from your notes',
-          icon: <Add01Icon className="w-5 h-5" />,
-          href: '/library',
-          accent: 'primary',
-        };
+      default: return { title: 'CREATE FLASHCARDS', icon: <Add01Icon className="w-6 h-6" />, href: '/library' };
     }
   })();
 
-  const accentClasses = {
-    primary: 'text-primary',
-    secondary: 'text-secondary',
-    tertiary: 'text-tertiary',
-  } as const;
-
   return (
-    <ClayCard variant="default" padding="sm" className="rounded-2xl">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-          <div className="p-1.5 rounded-lg bg-background-muted border border-border">
-            <SparklesIcon className="w-3.5 h-3.5 text-primary" />
-          </div>
-          Recommended
-        </div>
-        <Link href={config.href} className="text-xs text-primary font-semibold flex items-center gap-1">
-          Start
-          <ArrowRight01Icon className="w-3.5 h-3.5" />
-        </Link>
-      </div>
-
-      <Link href={config.href} className="block">
-        <div className="rounded-xl border border-border bg-surface p-3 flex items-center gap-3">
-          <div className={`p-2 rounded-lg bg-background-muted border border-border ${accentClasses[config.accent as keyof typeof accentClasses]}`}>
+    <div className="mt-4">
+      <Link href={config.href} className="block group">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-foreground text-surface p-8 shadow-xl hover:scale-[1.02] active:scale-95 transition-all cursor-pointer flex flex-col items-center text-center">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-surface opacity-10 blur-3xl rounded-full translate-x-1/3 -translate-y-1/3" />
+          
+          <div className="p-4 rounded-full bg-surface/10 backdrop-blur-sm border border-surface/20 text-surface mb-5 shrink-0 relative z-10">
             {config.icon}
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground">{config.title}</p>
-            <p className="text-[11px] text-foreground-muted truncate">{config.subtitle}</p>
-          </div>
+          
+          <h2 className="text-[9px] font-black uppercase tracking-[0.2em] text-surface/70 mb-2 relative z-10">UP NEXT</h2>
+          <h3 className="font-black text-2xl uppercase tracking-widest text-surface leading-tight relative z-10">
+            {config.title}
+          </h3>
+          
+          {suggestedAction === 'continue_set' && lastStudiedSet && (
+            <div className="w-full mt-8 relative z-10">
+              <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-surface/60 mb-2">
+                <span>PROGRESS</span>
+                <span className="text-surface">{lastStudiedSet.progress}%</span>
+              </div>
+              <div className="h-2.5 bg-surface/20 rounded-full overflow-hidden">
+                <div className="h-full bg-surface rounded-full transition-all duration-500" style={{ width: `${lastStudiedSet.progress}%` }} />
+              </div>
+            </div>
+          )}
         </div>
       </Link>
+    </div>
+  );
+}
 
-      {suggestedAction === 'continue_set' && lastStudiedSet && (
-        <div className="mt-3">
-          <div className="flex items-center justify-between text-[11px] text-foreground-muted">
-            <span>Progress</span>
-            <span className="font-semibold text-foreground">{lastStudiedSet.progress}%</span>
-          </div>
-          <div className="mt-2 h-2 bg-background-muted rounded-full overflow-hidden border border-border">
-            <div
-              className="h-full bg-primary rounded-full transition-all duration-500"
-              style={{ width: `${lastStudiedSet.progress}%` }}
-            />
-          </div>
-        </div>
-      )}
+function MobileStreakAndActivity() {
+  const { data: streak, isLoading: streakLoading } = useStudyStreak();
+  const { data: weeklyData, isLoading: weeklyLoading } = useWeeklyActivity();
 
-      <div className="mt-3 flex gap-2">
-        <Link
-          href="/library"
-          className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl border border-border bg-surface text-[11px] font-semibold text-foreground-muted hover:text-foreground"
-        >
-          <PencilEdit01Icon className="w-3.5 h-3.5 text-secondary" />
-          New note
-        </Link>
-        <Link
-          href="/flashcards"
-          className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl border border-border bg-surface text-[11px] font-semibold text-foreground-muted hover:text-foreground"
-        >
-          <FlashcardIcon className="w-3.5 h-3.5 text-tertiary" />
-          Browse sets
-        </Link>
+  if (streakLoading || weeklyLoading) {
+    return (
+      <div className="flex gap-2 h-40 mt-4">
+        <div className="flex-1 rounded-[2.5rem] bg-surface border-2 border-border/40 animate-pulse" />
+        <div className="w-2/5 rounded-[2.5rem] bg-surface border-2 border-border/40 animate-pulse" />
       </div>
-    </ClayCard>
+    );
+  }
+
+  const currentStreak = streak?.currentStreak || 0;
+  const data = weeklyData || [];
+  const activeDays = data.filter((d) => d.cardsStudied > 0 || d.sessions > 0).length;
+  const totalCards = data.reduce((sum, d) => sum + d.cardsStudied, 0);
+
+  return (
+    <div className="mt-4 flex gap-2">
+      {/* Massive Streak Block */}
+      <div className="flex-1 rounded-[2.5rem] bg-surface border-2 border-border/40 p-6 flex flex-col justify-between shadow-sm relative overflow-hidden">
+        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-foreground-muted mb-4 z-10">
+          <FireIcon className="w-4 h-4 text-secondary drop-shadow-sm" />
+          STREAK
+        </div>
+        <div className="z-10 mt-auto pt-4">
+          <p className="text-6xl font-black tracking-tighter text-foreground leading-none">{currentStreak}</p>
+          <p className="text-[9px] font-black uppercase tracking-widest text-foreground-muted mt-2">DAY{currentStreak === 1 ? '' : 'S'} IN A ROW</p>
+        </div>
+        {/* Decorative huge fire watermark */}
+        <FireIcon className="absolute top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/3 w-40 h-40 text-secondary/[0.03] -z-0 pointer-events-none" />
+      </div>
+
+      {/* Mini Stats Stack */}
+      <div className="w-2/5 flex flex-col gap-2">
+        <div className="flex-1 rounded-[2rem] bg-surface border-2 border-border/40 p-4 flex flex-col justify-center items-center text-center shadow-sm">
+          <p className="text-2xl font-black text-foreground leading-none">{totalCards}</p>
+          <p className="text-[8px] font-black uppercase tracking-widest text-foreground-muted mt-1.5">CARDS REVIWED</p>
+        </div>
+        <div className="flex-1 rounded-[2rem] bg-surface border-2 border-border/40 p-4 flex flex-col justify-center items-center text-center shadow-sm">
+          <p className="text-2xl font-black text-foreground leading-none">{activeDays}<span className="text-foreground-muted/50 text-base">/7</span></p>
+          <p className="text-[8px] font-black uppercase tracking-widest text-foreground-muted mt-1.5">ACTIVE DAYS</p>
+        </div>
+      </div>
+    </div>
   );
 }
 
 function MobileRecentActivity() {
   const { data: activities = [], isLoading } = useRecentActivity();
-  const items = activities.slice(0, 3);
+  const items = activities.slice(0, 4);
 
   return (
-    <ClayCard variant="elevated" padding="sm" className="rounded-2xl">
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h3 className="text-sm font-semibold text-foreground">Recent activity</h3>
-          <p className="text-[11px] text-foreground-muted">Latest updates</p>
-        </div>
-        <Link href="/library" className="text-[11px] text-primary font-semibold flex items-center gap-1">
-          View all
-          <ArrowRight01Icon className="w-3.5 h-3.5" />
-        </Link>
+    <div className="mt-8 mb-6">
+      <div className="flex items-center justify-between px-2 mb-4">
+        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground">ACTIVITY LOG</h3>
+        <Link href="/library" className="text-[8px] font-black uppercase tracking-widest text-foreground-muted hover:text-foreground">VIEW ALL &rarr;</Link>
       </div>
 
       {isLoading ? (
-        <div className="space-y-2 animate-pulse">
+        <div className="space-y-3 animate-pulse px-2">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-12 rounded-xl bg-background-muted border border-border/50" />
+             <div key={i} className="h-16 bg-surface border border-border/40 rounded-2xl" />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="text-xs text-foreground-muted">No activity yet. Start learning!</div>
+        <div className="text-[10px] uppercase font-black tracking-widest text-foreground-muted text-center py-8">
+          NO ACTIVITY YET
+        </div>
       ) : (
         <div className="space-y-2">
-          {items.map((item) => {
+          {items.map((item, index) => {
             const meta = ACTIVITY_META[item.type] || ACTIVITY_META.note;
             const Icon = meta.icon;
             return (
-              <Link key={item.id} href={item.href} className="block">
-                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface px-3 py-2 hover:bg-background-muted transition-colors">
-                  <div className="p-2 rounded-lg bg-background-muted border border-border">
-                    <Icon className={`w-4 h-4 ${meta.tint}`} />
+              <Link key={item.id} href={item.href} className="group block relative">
+                {/* Connecting timeline */}
+                {index !== items.length - 1 && (
+                  <div className="absolute left-[34px] top-[48px] bottom-[-24px] w-[2px] bg-foreground/10 z-0" />
+                )}
+                <div className="flex items-start gap-4 p-3 rounded-3xl bg-surface border border-border/40 hover:border-foreground/20 transition-all shadow-sm relative z-10">
+                  <div className={`p-3 rounded-full bg-background-muted shrink-0 group-hover:scale-105 transition-transform`}>
+                    <Icon className="w-5 h-5 text-foreground" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-foreground truncate">{item.title}</p>
-                      <ClayBadge variant={meta.badge} className="text-[9px] px-2 py-0.5">
+                  <div className="min-w-0 flex-1 py-1">
+                    <div className="flex flex-col items-start gap-2 mb-2 pr-2">
+                      <h4 className="font-black text-sm text-foreground leading-tight line-clamp-3 break-words">{item.title}</h4>
+                      <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${meta.badgeClasses}`}>
                         {meta.label}
-                      </ClayBadge>
+                      </span>
                     </div>
-                    <p className="text-[11px] text-foreground-muted truncate">{item.description}</p>
+                    <div className="flex flex-wrap items-center gap-2 mt-1 pr-2">
+                       {item.description && <span className="text-[10px] font-bold text-foreground-muted tracking-tight">{item.description}</span>}
+                      <span className="text-[8px] font-black text-foreground-muted tracking-widest uppercase bg-border/40 px-2 py-0.5 rounded-full flex items-center gap-1">
+                         <Clock01Icon className="w-3 h-3"/>
+                         {item.time}
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-[10px] text-foreground-muted flex-shrink-0">{item.time}</span>
                 </div>
               </Link>
             );
           })}
         </div>
       )}
-    </ClayCard>
+    </div>
   );
 }
 
 export default function DashboardMobile({ user }: DashboardMobileProps) {
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-2 px-4 pt-6 pb-24">
       <MobileHeader user={user} />
-      <MobileWeeklySnapshot />
+      <MobileQuickActions />
       <MobileContinueLearning />
+      <MobileStreakAndActivity />
       <MobileRecentActivity />
     </div>
   );

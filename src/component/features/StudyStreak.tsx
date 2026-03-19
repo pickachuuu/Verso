@@ -1,24 +1,15 @@
 'use client';
 
 import Image from 'next/image';
-import { ClayCard } from '@/component/ui/Clay';
 import { useStudyStreak, useWeeklyActivity } from '@/hooks/useDashboard';
 import { FireIcon, Target01Icon } from 'hugeicons-react';
 
 function StreakSkeleton() {
   return (
-    <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse h-full">
-      <div className="flex flex-col items-center gap-4 py-6">
-        <div className="w-20 h-20 bg-gradient-to-br from-surface to-surface-elevated rounded-full" />
-        <div className="h-8 w-16 bg-surface rounded-lg" />
-        <div className="h-4 w-24 bg-surface rounded-lg" />
-        <div className="flex gap-1.5 mt-4">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} className="w-8 h-8 bg-surface rounded-lg" />
-          ))}
-        </div>
-      </div>
-    </ClayCard>
+    <div className="flex flex-col justify-between rounded-[3rem] bg-surface border-2 border-border/40 p-8 animate-pulse h-full min-h-[350px]">
+      <div className="w-20 h-20 bg-background-muted rounded-full" />
+      <div className="h-20 w-32 bg-background-muted rounded-2xl" />
+    </div>
   );
 }
 
@@ -35,115 +26,76 @@ export default function StudyStreak() {
   const studiedToday = streak?.studiedToday || false;
   const weekData = weeklyData || [];
 
-  // Flame intensity based on streak
   const isOnFire = currentStreak >= 7;
-  const isWarm = currentStreak >= 3;
-  const isActive = currentStreak > 0;
-  const flameTone = isOnFire
-    ? 'text-secondary'
-    : isWarm
-      ? 'text-secondary/80'
-      : isActive
-        ? 'text-secondary/60'
-        : 'text-foreground-muted';
-  const flameShell = isActive
-    ? 'bg-secondary/10 border-secondary/30 shadow-sm'
-    : 'bg-background-muted border-border';
 
   return (
-    <ClayCard variant="default" padding="none" className="rounded-2xl h-full relative">
-      <div className="relative z-10 p-6 flex flex-col items-center text-center h-full">
-        {/* Flame / Icon */}
-        <div className="relative mb-4">
-          <div className={`relative w-20 h-20 rounded-full border ${flameShell} flex items-center justify-center`}>
-            <FireIcon className={`w-10 h-10 ${flameTone} ${isOnFire ? 'animate-pulse' : ''}`} />
+    <div className="h-full rounded-[3rem] bg-surface border-2 border-border/40 p-8 relative overflow-hidden flex flex-col justify-between shadow-sm group">
+      {/* Absolute Fire watermark */}
+      <FireIcon className="absolute top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/3 w-[20rem] h-[20rem] text-secondary/[0.04] -z-0 pointer-events-none transition-transform group-hover:scale-110 duration-700" />
+      
+      <div className="relative z-10 flex flex-col h-full">
+        {/* Header Ribbon */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2 text-[12px] font-black uppercase tracking-[0.2em] text-foreground">
+            <FireIcon className="w-5 h-5 text-secondary drop-shadow-sm" />
+            STREAK
           </div>
-          {/* Fire badge for 7+ */}
-          {isOnFire && (
-            <div className="absolute -top-1 -right-1 w-7 h-7 bg-secondary/15 rounded-full flex items-center justify-center border border-secondary/40">
-              <span className="text-xs">🔥</span>
-            </div>
+          {studiedToday && (
+            <span className="px-4 py-2 bg-success text-[10px] text-surface font-black uppercase tracking-widest rounded-full shadow-sm">
+              STUDIED TODAY ✓
+            </span>
           )}
         </div>
 
-        {/* Streak count */}
-        <p className="text-5xl font-extrabold text-foreground tracking-tight leading-none">
-          {currentStreak}
-        </p>
-        <p className="text-sm text-foreground-muted font-medium mt-1">
-          day {currentStreak === 1 ? '' : 's'} streak
-        </p>
+        {/* Center Giant Number */}
+        <div className="flex-1 flex flex-col items-center justify-center py-6">
+          <p className="text-[8rem] font-black text-foreground tracking-tighter leading-none">
+            {currentStreak}
+          </p>
+          <p className="text-[14px] font-black uppercase tracking-[0.3em] text-foreground-muted mt-4">
+            DAY{currentStreak === 1 ? '' : 'S'} IN A ROW
+          </p>
+        </div>
 
-        {/* Studied today badge */}
-        {studiedToday && (
-          <span className="mt-3 px-3 py-1 bg-tertiary/10 text-tertiary text-xs font-bold rounded-full border border-tertiary/30">
-            Studied today ✓
-          </span>
-        )}
-
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Mini 7-day heatmap */}
-        <div className="w-full mt-5 pt-5 border-t border-border/70">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-foreground-muted font-semibold">This week</span>
+        {/* Heatmap Footer */}
+        <div className="mt-8 pt-6 border-t-4 border-foreground/5">
+          <div className="flex justify-between items-end mb-4 px-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-foreground-muted">THIS WEEK</span>
             <div className="flex items-center gap-1.5 text-foreground-muted">
-              <Target01Icon className="w-3.5 h-3.5" />
-              <span className="text-xs font-bold">{longestStreak} best</span>
+              <Target01Icon className="w-4 h-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest">{longestStreak} BEST</span>
             </div>
           </div>
-          <div className="grid grid-cols-7 gap-1.5">
+          
+          <div className="flex justify-between gap-2">
             {weekData.map((day, i) => {
               const hasActivity = day.cardsStudied > 0 || day.sessions > 0;
               const intensity = day.cardsStudied > 10 ? 'high' : day.cardsStudied > 3 ? 'med' : 'low';
               const isToday = i === weekData.length - 1;
 
               return (
-                <div key={day.date} className="flex flex-col items-center gap-1">
+                <div key={day.date} className="flex-1 flex flex-col items-center gap-2 group/day cursor-default">
                   <div
-                    className={`w-full aspect-square rounded-lg transition-all duration-300 ${
+                    className={`w-full aspect-square rounded-[1rem] transition-all duration-300 ${
                       hasActivity
                         ? intensity === 'high'
-                          ? 'bg-primary/40 border border-primary/40'
+                          ? 'bg-foreground border-2 border-foreground'
                           : intensity === 'med'
-                            ? 'bg-primary/25 border border-primary/30'
-                            : 'bg-primary/15 border border-primary/20'
-                        : 'bg-background-muted border border-border'
-                    } ${isToday ? 'ring-2 ring-primary/30 ring-offset-1 ring-offset-background' : ''}`}
+                            ? 'bg-foreground/50 border-2 border-foreground/50'
+                            : 'bg-foreground/20 border-2 border-foreground/20'
+                        : 'bg-transparent border-2 border-foreground/10'
+                    } ${isToday ? 'scale-110 shadow-lg' : ''}`}
                     title={`${day.shortDay}: ${day.cardsStudied} cards`}
                   />
-                  <span className={`text-[10px] font-medium ${isToday ? 'text-primary font-bold' : 'text-foreground-muted'}`}>
-                    {day.shortDay}
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${isToday ? 'text-primary' : 'text-foreground-muted'}`}>
+                    {day.shortDay.charAt(0)}
                   </span>
                 </div>
               );
             })}
           </div>
         </div>
-
-        {/* Motivation line */}
-        {!studiedToday && currentStreak > 0 && (
-          <p className="mt-4 text-xs text-secondary font-semibold flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-            Don&apos;t break your {currentStreak}-day streak!
-          </p>
-        )}
-        {currentStreak === 0 && (
-          <div className="mt-4 flex flex-col items-center gap-2">
-            <Image
-              src="/brand/verso-empty-clean.svg"
-              alt="Verso mascot — empty state"
-              width={40}
-              height={40}
-              className="drop-shadow-sm"
-            />
-            <p className="text-xs text-foreground-muted">
-              Start studying to begin your streak!
-            </p>
-          </div>
-        )}
       </div>
-    </ClayCard>
+    </div>
   );
 }

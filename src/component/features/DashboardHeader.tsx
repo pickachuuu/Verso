@@ -1,10 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { ClayCard, ClayBadge } from '@/component/ui/Clay';
-import { Calendar03Icon } from 'hugeicons-react';
 import type { UserProfile } from '@/hooks/useAuth';
 
 export default function DashboardHeader({ user }: { user?: UserProfile | null }) {
@@ -14,52 +11,40 @@ export default function DashboardHeader({ user }: { user?: UserProfile | null })
   }, []);
 
   const currentDate = new Date();
-  const greeting = getGreeting();
-
-  function getGreeting() {
+  const greeting = (() => {
     const hour = currentDate.getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  }
+    if (hour < 12) return 'GOOD MORNING';
+    if (hour < 17) return 'GOOD AFTERNOON';
+    return 'GOOD EVENING';
+  })();
 
   const displayName = isMounted
-    ? user?.full_name || user?.email?.split('@')[0] || 'there'
-    : 'there';
+    ? user?.full_name || user?.email?.split('@')[0] || 'THERE'
+    : 'THERE';
 
   return (
-    <ClayCard variant="elevated" padding="lg" className="rounded-3xl relative">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        {/* Title area */}
-        <div className="flex items-start gap-3">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                {greeting},{' '}
-                <span className="text-primary border-b-2 border-pencil/60 border-dashed pb-0.5">
-                  {displayName}
-                </span>
-              </h1>
-            </div>
-            <p className="text-foreground-muted">
-              Here&apos;s an overview of your study progress
-            </p>
-          </div>
+    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 pt-4 border-b-[6px] border-foreground/10 w-full mb-4">
+      <div className="flex-1">
+        <p className="text-[12px] font-black uppercase tracking-[0.3em] text-primary mb-3">
+          {greeting}
+        </p>
+        <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-foreground uppercase leading-none">
+          {displayName}
+        </h1>
+      </div>
+      
+      <div className="flex items-center gap-5">
+        <div className="flex flex-col text-right">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground-muted mb-2">TODAY IS</p>
+          <p className="text-2xl md:text-3xl font-black text-foreground uppercase tracking-widest leading-none">
+            {format(currentDate, 'EEEE')}
+          </p>
         </div>
-
-        {/* Date */}
-        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-background-muted border border-border shadow-sm">
-          <div className="p-2 rounded-xl bg-surface border border-border">
-            <Calendar03Icon className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <p className="text-[10px] text-foreground-muted font-semibold uppercase tracking-widest">Today</p>
-            <p className="text-sm font-bold text-foreground">
-              {format(currentDate, 'EEEE, MMM d')}
-            </p>
-          </div>
+        <div className="flex flex-col items-center justify-center w-20 h-20 rounded-full bg-foreground text-surface shadow-xl shrink-0">
+          <span className="text-3xl font-black leading-none">{format(currentDate, 'd')}</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-surface/70 mt-0.5">{format(currentDate, 'MMM')}</span>
         </div>
       </div>
-    </ClayCard>
+    </div>
   );
 }
