@@ -18,7 +18,7 @@ export default function DashboardLayout({ children }: Readonly<{
     <div className="flex min-h-screen w-full overflow-x-hidden">
       <Navbar />
       <main className="flex-1 md:ml-60 min-w-0 dashboard-grid-bg min-h-screen">
-        <div className="relative z-10 px-2 sm:px-4 lg:px-6 pt-24 pb-6 md:py-6 max-w-7xl mx-auto w-full">
+        <div className="relative z-10 px-2 sm:px-4 lg:px-6 pt-24 pb-20 md:py-6 max-w-7xl mx-auto w-full">
           {children}
         </div>
       </main>
