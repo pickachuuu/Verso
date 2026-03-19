@@ -4,20 +4,22 @@ import { navItems } from "./navConfig";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Logout01Icon, Menu01Icon, Cancel01Icon } from "hugeicons-react";
+import { Logout01Icon, Menu01Icon, Cancel01Icon, ArrowLeft01Icon, ArrowRight01Icon } from "hugeicons-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useUserProfile } from '@/hooks/useAuth';
 import { NotebookIcon, FlashcardIcon, ExamIcon, DashboardIcon, SavedIcon, CommunityIcon, NotificationIcon } from '@/component/icons';
 import { useCardsDue, useClearNotifications, useNotificationDismissals, useStudyStreak } from '@/hooks';
 import SignOutModal from '@/component/ui/SignOutModal';
 
+const SIDEBAR_STORAGE_KEY = 'verso-sidebar-collapsed';
+
 const getNavIcon = (href: string) => {
   switch (href) {
-    case '/dashboard': return <DashboardIcon className="w-6 h-6" />;
-    case '/library': return <NotebookIcon className="w-6 h-6" />;
-    case '/flashcards': return <FlashcardIcon className="w-6 h-6" />;
-    case '/exams': return <ExamIcon className="w-6 h-6" />;
+    case '/dashboard': return <DashboardIcon className="w-5 h-5" />;
+    case '/library': return <NotebookIcon className="w-5 h-5" />;
+    case '/flashcards': return <FlashcardIcon className="w-5 h-5" />;
+    case '/exams': return <ExamIcon className="w-5 h-5" />;
     default: return null;
   }
 };
@@ -30,6 +32,36 @@ export default function Navbar() {
   const { data: userProfile } = useUserProfile();
   const [isSignOutOpen, setIsSignOutOpen] = useState(false);
 
+  // Collapsed state with localStorage persistence
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+    try {
+      const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+      if (stored === 'true') setIsCollapsed(true);
+    } catch {}
+  }, []);
+
+  const toggleCollapse = useCallback(() => {
+    setIsCollapsed(prev => {
+      const next = !prev;
+      try { localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next)); } catch {}
+      // Dispatch a custom event so the layout can listen
+      window.dispatchEvent(new CustomEvent('sidebar-toggle', { detail: { collapsed: next } }));
+      return next;
+    });
+  }, []);
+
+  // Fire initial event after mount so layout picks up stored state
+  useEffect(() => {
+    if (hasMounted) {
+      window.dispatchEvent(new CustomEvent('sidebar-toggle', { detail: { collapsed: isCollapsed } }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMounted]);
+
   const avatarLabelSource = (userProfile?.full_name || userProfile?.email || '').trim();
   const avatarFallback = (() => {
     if (!avatarLabelSource) return 'U';
@@ -39,10 +71,13 @@ export default function Navbar() {
     return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
   })();
 
+  const displayName = userProfile?.full_name || userProfile?.email?.split('@')[0] || '';
+
   const secondaryItems = [
-    { name: 'Saved Materials', href: '/saved', icon: <SavedIcon className="w-6 h-6" /> },
-    { name: 'Community', href: '/community', icon: <CommunityIcon className="w-6 h-6" /> },
+    { name: 'Saved', href: '/saved', icon: <SavedIcon className="w-5 h-5" /> },
+    { name: 'Community', href: '/community', icon: <CommunityIcon className="w-5 h-5" /> },
   ];
+
   const { data: cardsDue, isLoading: cardsDueLoading } = useCardsDue();
   const { data: streakData, isLoading: streakLoading } = useStudyStreak();
   const { data: dismissals = [], isLoading: dismissalsLoading } = useNotificationDismissals();
@@ -69,7 +104,6 @@ export default function Navbar() {
         detail: `You have ${dueToday} card${dueToday === 1 ? '' : 's'} due today.`,
       });
     }
-
     if (!streakLoading && streakData?.studiedToday) {
       items.push({
         id: 'streak',
@@ -77,7 +111,6 @@ export default function Navbar() {
         detail: 'Streak preserved—1 day left to keep it going.',
       });
     }
-
     return items.filter((item) => !dismissedToday.has(item.id));
   }, [cardsDue, cardsDueLoading, dismissedToday, streakData, streakLoading]);
 
@@ -100,9 +133,7 @@ export default function Navbar() {
   const handleCloseSignOut = () => setIsSignOutOpen(false);
 
   useEffect(() => {
-    if (!mobileMenuOpen) {
-      setNotificationsOpen(false);
-    }
+    if (!mobileMenuOpen) setNotificationsOpen(false);
   }, [mobileMenuOpen]);
 
   useEffect(() => {
@@ -120,26 +151,29 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const sidebarWidth = isCollapsed ? 'w-[5rem]' : 'w-[18rem]';
+
   return (
     <>
       {/* ═══════════════ Desktop Sidebar ═══════════════ */}
-      <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-60 z-50 flex-col bg-surface border-r border-border shadow-[4px_0_24px_rgba(60,50,40,0.08)]">
+      <aside className={`hidden md:flex fixed left-0 top-0 bottom-0 z-50 flex-col bg-surface border-r-2 border-border/30 transition-all duration-300 ease-in-out ${sidebarWidth}`}>
+        
         {/* Logo */}
-        <div className="px-5 pt-6 pb-8 flex justify-center">
-          <Link href="/dashboard" className="group">
+        <div className={`flex items-center pt-8 pb-6 ${isCollapsed ? 'justify-center px-2' : 'px-6'}`}>
+          <Link href="/dashboard" className="group shrink-0">
             <Image
               src="/brand/verso-mark.png"
               alt="Verso logo"
-              width={56}
-              height={56}
-              className="w-14 h-14 shrink-0 group-hover:scale-105 transition-transform"
+              width={isCollapsed ? 36 : 44}
+              height={isCollapsed ? 36 : 44}
+              className="shrink-0 group-hover:scale-110 transition-transform duration-300"
               priority
             />
           </Link>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-3 space-y-2">
+        {/* Primary Navigation */}
+        <nav className={`flex-1 flex flex-col ${isCollapsed ? 'px-2' : 'px-3'} gap-1`}>
           {navItems.map((item, index) => {
             const isActive = pathname === item.href ||
               (item.href !== '/dashboard' && pathname.startsWith(item.href));
@@ -147,59 +181,99 @@ export default function Navbar() {
               <Link
                 key={index}
                 href={item.href}
-                className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 border ${
+                title={isCollapsed ? item.name : undefined}
+                className={`group relative flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${isCollapsed ? 'px-0 py-3' : 'px-4 py-3'} rounded-2xl text-sm transition-all duration-200 ${
                   isActive
-                    ? "bg-background-muted text-foreground border-pencil/40 shadow-sm relative after:content-[''] after:absolute after:left-4 after:right-4 after:bottom-2 after:h-[2px] after:bg-pencil/50 after:rounded-full"
-                    : 'text-foreground-muted border-transparent hover:bg-background-muted hover:text-foreground hover:border-border'
+                    ? 'bg-foreground text-surface shadow-md'
+                    : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
                 }`}
               >
-                {getNavIcon(item.href)}
-                {item.name}
+                <span className="shrink-0">{getNavIcon(item.href)}</span>
+                {!isCollapsed && (
+                  <span className="font-black text-[13px] uppercase tracking-[0.12em] leading-none mt-0.5 truncate">
+                    {item.name}
+                  </span>
+                )}
+                {/* Collapsed tooltip */}
+                {isCollapsed && (
+                  <span className="absolute left-full ml-3 px-3 py-1.5 rounded-full bg-foreground text-surface text-[10px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-[60]">
+                    {item.name}
+                  </span>
+                )}
               </Link>
             );
           })}
 
-          <div className="my-3 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          {/* Divider */}
+          <div className={`my-2 h-[3px] bg-foreground/5 rounded-full ${isCollapsed ? 'mx-2' : 'mx-3'}`} />
 
+          {/* Secondary Items */}
           {secondaryItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 border ${
+                title={isCollapsed ? item.name : undefined}
+                className={`group relative flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${isCollapsed ? 'px-0 py-3' : 'px-4 py-3'} rounded-2xl text-sm transition-all duration-200 ${
                   isActive
-                    ? "bg-background-muted text-foreground border-pencil/40 shadow-sm relative after:content-[''] after:absolute after:left-4 after:right-4 after:bottom-2 after:h-[2px] after:bg-pencil/50 after:rounded-full"
-                    : 'text-foreground-muted border-transparent hover:bg-background-muted hover:text-foreground hover:border-border'
+                    ? 'bg-foreground text-surface shadow-md'
+                    : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
                 }`}
               >
-                {item.icon}
-                {item.name}
+                <span className="shrink-0">{item.icon}</span>
+                {!isCollapsed && (
+                  <span className="font-black text-[11px] uppercase tracking-[0.15em] leading-none mt-0.5 truncate">
+                    {item.name}
+                  </span>
+                )}
+                {isCollapsed && (
+                  <span className="absolute left-full ml-3 px-3 py-1.5 rounded-full bg-foreground text-surface text-[10px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-[60]">
+                    {item.name}
+                  </span>
+                )}
               </Link>
             );
           })}
 
+          {/* Notifications */}
           <div ref={notificationRef} className="relative">
             <button
               type="button"
               onClick={() => setNotificationsOpen((prev) => !prev)}
-              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 border ${
+              title={isCollapsed ? 'Notifications' : undefined}
+              className={`group relative w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${isCollapsed ? 'px-0 py-3' : 'px-4 py-3'} rounded-2xl text-sm transition-all duration-200 ${
                 notificationsOpen
-                  ? 'bg-background-muted text-foreground border-pencil/40 shadow-sm'
-                  : 'text-foreground-muted border-transparent hover:bg-background-muted hover:text-foreground hover:border-border'
+                  ? 'bg-background-muted text-foreground'
+                  : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
               }`}
             >
-              <NotificationIcon className="w-6 h-6" />
-              Notifications
+              <span className="relative shrink-0">
+                <NotificationIcon className="w-5 h-5" />
+                {hasNotifications && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-secondary rounded-full border-2 border-surface animate-pulse" />
+                )}
+              </span>
+              {!isCollapsed && (
+                <span className="font-black text-[13px] uppercase tracking-[0.12em] leading-none mt-0.5">
+                  ALERTS
+                </span>
+              )}
+              {isCollapsed && (
+                <span className="absolute left-full ml-3 px-3 py-1.5 rounded-full bg-foreground text-surface text-[10px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-[60]">
+                  ALERTS
+                </span>
+              )}
             </button>
 
+            {/* Notification Popover */}
             {notificationsOpen && (
-              <div className="absolute left-full top-0 ml-3 w-72 z-50">
-                <div className="rounded-2xl bg-surface border border-dashed border-pencil/40 shadow-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-foreground">Notifications</span>
+              <div className={`absolute ${isCollapsed ? 'left-full ml-2' : 'left-full ml-3'} top-0 w-72 z-50`}>
+                <div className="rounded-[2rem] bg-surface border-2 border-border/40 shadow-xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-foreground">NOTIFICATIONS</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-foreground-muted">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-foreground-muted bg-background-muted px-2 py-1 rounded-full">
                         {notificationStatusLabel}
                       </span>
                       {hasNotifications && (
@@ -207,27 +281,27 @@ export default function Navbar() {
                           type="button"
                           onClick={handleClearNotifications}
                           disabled={clearNotifications.isPending}
-                          className="text-xs text-foreground-muted hover:text-foreground transition-colors disabled:text-foreground-muted/60 disabled:cursor-not-allowed"
+                          className="text-[9px] font-black uppercase tracking-widest text-foreground-muted hover:text-foreground transition-colors"
                         >
-                          Clear
+                          CLEAR
                         </button>
                       )}
                     </div>
                   </div>
                   {isLoadingNotifications ? (
-                    <div className="text-xs text-foreground-muted bg-background-muted border border-border rounded-xl px-3 py-3 text-center">
-                      Checking your notifications...
+                    <div className="text-[10px] font-black uppercase tracking-widest text-foreground-muted bg-background-muted rounded-2xl px-4 py-4 text-center">
+                      CHECKING...
                     </div>
                   ) : !hasNotifications ? (
-                    <div className="text-xs text-foreground-muted bg-background-muted border border-border rounded-xl px-3 py-3 text-center">
-                      You&apos;re all caught up.
+                    <div className="text-[10px] font-black uppercase tracking-widest text-foreground-muted bg-background-muted rounded-2xl px-4 py-4 text-center">
+                      ALL CAUGHT UP
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {notifications.map((note) => (
-                        <div key={note.id} className="rounded-xl border border-border bg-background-muted px-3 py-2">
-                          <p className="text-xs font-semibold text-foreground">{note.title}</p>
-                          <p className="text-[11px] text-foreground-muted">{note.detail}</p>
+                        <div key={note.id} className="rounded-2xl border-2 border-border/40 bg-background-muted/50 px-4 py-3">
+                          <p className="text-[11px] font-black text-foreground uppercase tracking-wider">{note.title}</p>
+                          <p className="text-[10px] text-foreground-muted mt-1 leading-relaxed">{note.detail}</p>
                         </div>
                       ))}
                     </div>
@@ -236,31 +310,59 @@ export default function Navbar() {
               </div>
             )}
           </div>
+
+          {/* Spacer */}
+          <div className="flex-1" />
         </nav>
 
-        {/* Sign Out */}
-        <div className="px-3 pb-6 mt-auto">
-          <div className="h-px mx-3 mb-4 bg-gradient-to-r from-transparent via-border to-transparent" />
+        {/* Bottom: Avatar + Sign Out + Collapse Toggle */}
+        <div className={`pb-6 ${isCollapsed ? 'px-2' : 'px-3'}`}>
+          <div className={`h-[3px] bg-foreground/5 rounded-full mb-4 ${isCollapsed ? 'mx-2' : 'mx-3'}`} />
+
+          {/* Avatar + Sign Out */}
           <button
             onClick={handleOpenSignOut}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-foreground-muted hover:text-error hover:bg-error/10"
+            title={isCollapsed ? 'Sign Out' : undefined}
+            className={`group relative w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${isCollapsed ? 'px-0 py-3' : 'px-4 py-3'} rounded-2xl text-sm transition-all text-foreground-muted hover:text-foreground hover:bg-background-muted`}
           >
-            <span className="flex items-center gap-3">
-              <span className="h-9 w-9 rounded-full overflow-hidden border border-border bg-background-muted flex items-center justify-center text-xs font-semibold text-foreground">
-                {userProfile?.avatar_url ? (
-                  <img
-                    src={userProfile.avatar_url}
-                    alt={userProfile?.full_name ? `${userProfile.full_name} avatar` : 'User avatar'}
-                    className="h-full w-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span>{avatarFallback}</span>
-                )}
-              </span>
-              <Logout01Icon className="w-5 h-5" />
+            <span className="h-9 w-9 rounded-full overflow-hidden border-2 border-border bg-background-muted flex items-center justify-center text-[10px] font-black text-foreground shrink-0">
+              {userProfile?.avatar_url ? (
+                <img
+                  src={userProfile.avatar_url}
+                  alt={userProfile?.full_name ? `${userProfile.full_name} avatar` : 'User avatar'}
+                  className="h-full w-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <span>{avatarFallback}</span>
+              )}
             </span>
-            Sign Out
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0 text-left">
+                <p className="font-black text-[12px] uppercase tracking-[0.12em] text-foreground truncate leading-none">{displayName}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1.5 flex items-center gap-1">
+                  <Logout01Icon className="w-3 h-3" />
+                  SIGN OUT
+                </p>
+              </div>
+            )}
+            {isCollapsed && (
+              <span className="absolute left-full ml-3 px-3 py-1.5 rounded-full bg-foreground text-surface text-[10px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-[60]">
+                SIGN OUT
+              </span>
+            )}
+          </button>
+
+          {/* Collapse/Expand Toggle — always at the bottom */}
+          <button
+            onClick={toggleCollapse}
+            className={`w-full mt-2 flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-4'} py-2.5 rounded-2xl text-foreground-muted hover:text-foreground hover:bg-background-muted transition-all active:scale-90`}
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? <ArrowRight01Icon className="w-4 h-4" /> : <ArrowLeft01Icon className="w-4 h-4" />}
+            {!isCollapsed && (
+              <span className="font-black text-[10px] uppercase tracking-widest leading-none mt-0.5">COLLAPSE</span>
+            )}
           </button>
         </div>
       </aside>
