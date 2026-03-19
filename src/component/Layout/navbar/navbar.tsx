@@ -372,29 +372,23 @@ export default function Navbar() {
           )}
         </AnimatePresence>
 
-        {/* Mobile Dock (Bottom Centerpiece) */}
-        <div className="fixed bottom-4 left-0 right-0 z-50 px-4 flex justify-center pointer-events-none">
-          <div className="pointer-events-auto bg-surface/90 backdrop-blur-2xl border border-border/50 rounded-[2.5rem] shadow-[0_20px_50px_rgba(60,50,40,0.2)] p-2 flex items-stretch h-[4.75rem] w-full max-w-[440px]">
+        {/* Mobile Dock (Bottom Centerpiece) - Planted to bottom */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
+          <div className="pointer-events-auto bg-surface/95 backdrop-blur-2xl border-t border-border/50 flex items-stretch h-[4.75rem] w-full px-2 pb-safe">
             {[...navItems, ...secondaryItems].map((item) => {
               const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
               
-              const shortName = 
-                item.name === 'Dashboard' ? 'Home' : 
-                item.name === 'Library' ? 'Lib' : 
-                item.name === 'Flashcards' ? 'Cards' : 
-                item.name === 'Exams' ? 'Exams' : 
-                item.name === 'Saved Materials' ? 'Saved' : 
-                item.name === 'Community' ? 'Comm' : item.name;
+              const displayName = item.name === 'Saved Materials' ? 'Saved' : item.name;
 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative flex-1 flex flex-col items-center justify-center gap-1 rounded-[1.75rem] transition-all duration-300 active:scale-95 ${
-                    isActive ? "bg-primary/5 text-primary" : "text-foreground-muted hover:text-foreground"
+                  className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 transition-all duration-300 active:scale-95 ${
+                    isActive ? "text-primary" : "text-foreground-muted hover:text-foreground"
                   }`}
                 >
-                  <div className={`transition-all duration-400 ${isActive ? "scale-110 drop-shadow-[0_0_10px_rgba(43,93,139,0.25)]" : "opacity-70"}`}>
+                  <div className={`transition-all duration-400 ${isActive ? "scale-105 drop-shadow-[0_0_10px_rgba(43,93,139,0.25)]" : "opacity-70"}`}>
                     {item.href === '/dashboard' ? <DashboardIcon className="w-6 h-6" /> :
                      item.href === '/library' ? <NotebookIcon className="w-6 h-6" /> :
                      item.href === '/flashcards' ? <FlashcardIcon className="w-6 h-6" /> :
@@ -403,10 +397,10 @@ export default function Navbar() {
                      item.href === '/community' ? <CommunityIcon className="w-6 h-6" /> : null}
                   </div>
                   
-                  <span className={`text-[9px] font-black uppercase tracking-[0.05em] transition-all duration-300 ${
+                  <span className={`text-[9px] font-black uppercase tracking-wider text-center leading-none transition-all duration-300 px-0.5 ${
                     isActive ? "opacity-100 translate-y-0" : "opacity-40 translate-y-0.5"
                   }`}>
-                    {shortName}
+                    {displayName}
                   </span>
 
                   {isActive && (
