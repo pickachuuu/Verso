@@ -3,45 +3,25 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "@/component/Layout/navbar/navbar";
-
-const SIDEBAR_STORAGE_KEY = 'verso-sidebar-collapsed';
+import { useUIStore } from "@/stores";
 
 export default function DashboardLayout({ children }: Readonly<{
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
+  const toggleSidebar = useUIStore((state) => state.toggleSidebar);
 
   // Safety: ensure body scroll is never stuck hidden after page navigation
   useEffect(() => {
     document.body.style.overflow = '';
   }, [pathname]);
 
-  // Read initial sidebar state from localStorage
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-      if (stored === 'true') setSidebarCollapsed(true);
-    } catch {}
-  }, []);
-
-  // Listen for sidebar toggle events
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      if (detail && typeof detail.collapsed === 'boolean') {
-        setSidebarCollapsed(detail.collapsed);
-      }
-    };
-    window.addEventListener('sidebar-toggle', handler);
-    return () => window.removeEventListener('sidebar-toggle', handler);
-  }, []);
-
   const isStudyMode = pathname?.includes('/study');
 
   return (
     <div className="flex min-h-screen w-full overflow-x-hidden">
-      {!isStudyMode && <Navbar />}
+      {!isStudyMode && <Navbar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />}
       <main className={`flex-1 min-w-0 dashboard-grid-bg min-h-screen transition-all duration-300 ease-in-out ${
         !isStudyMode
           ? sidebarCollapsed ? 'md:ml-[5rem]' : 'md:ml-[18rem]'
