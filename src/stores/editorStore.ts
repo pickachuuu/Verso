@@ -182,6 +182,7 @@ interface UIState {
   isLoading: boolean;
   showTagInput: boolean;
   tagInput: string;
+  sidebarCollapsed: boolean;
 }
 
 interface UIActions {
@@ -189,14 +190,26 @@ interface UIActions {
   setIsLoading: (loading: boolean) => void;
   setShowTagInput: (show: boolean) => void;
   setTagInput: (input: string) => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+  toggleSidebar: () => void;
   reset: () => void;
 }
+
+const STORAGE_KEY = 'verso-sidebar-collapsed';
+
+const getInitialSidebarState = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(STORAGE_KEY) === 'true';
+  }
+  return false;
+};
 
 const initialUIState: UIState = {
   saveStatus: 'saved',
   isLoading: false,
   showTagInput: false,
   tagInput: '',
+  sidebarCollapsed: getInitialSidebarState(),
 };
 
 export const useUIStore = create<UIState & UIActions>((set) => ({
@@ -206,5 +219,20 @@ export const useUIStore = create<UIState & UIActions>((set) => ({
   setIsLoading: (loading) => set({ isLoading: loading }),
   setShowTagInput: (show) => set({ showTagInput: show }),
   setTagInput: (input) => set({ tagInput: input }),
+  setSidebarCollapsed: (collapsed) => {
+    set({ sidebarCollapsed: collapsed });
+    try {
+      localStorage.setItem(STORAGE_KEY, String(collapsed));
+    } catch {}
+  },
+  toggleSidebar: () => {
+    set((state) => {
+      const next = !state.sidebarCollapsed;
+      try {
+        localStorage.setItem(STORAGE_KEY, String(next));
+      } catch {}
+      return { sidebarCollapsed: next };
+    });
+  },
   reset: () => set(initialUIState),
 }));
