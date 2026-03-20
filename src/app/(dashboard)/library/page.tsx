@@ -220,163 +220,130 @@ export default function LibraryPage() {
           </div>
         )}
 
-        {/* Layout Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative flex-1">
-          
-          {/* ==============================================
-              MOBILE CONTROLS (Top area on Mobile only)
-          ============================================== */}
-          <div className="lg:hidden col-span-1 flex flex-col gap-6 w-full text-foreground relative z-20">
-            {/* Massive Search & Filter Row */}
-            <div className="flex w-full items-stretch gap-3 h-[4rem]">
-              <div className="flex-1 bg-background-muted rounded-[2rem] flex items-center px-6 gap-4 min-w-0">
-                <Search01Icon className="w-6 h-6 opacity-40 shrink-0" />
-                <input
-                  type="text"
-                  placeholder="SEARCH NOTEBOOKS..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent border-none focus:outline-none text-[13px] font-black uppercase tracking-widest text-foreground placeholder:text-foreground/30 min-w-0"
-                />
-              </div>
-              <button
-                onClick={() => setMobileFiltersOpen(true)}
-                className="w-[4rem] h-[4rem] shrink-0 bg-foreground text-surface rounded-[2rem] flex items-center justify-center active:scale-95 transition-transform relative"
-              >
-                <FilterIcon className="w-6 h-6" />
-                {activeFilters > 0 && <span className="absolute top-2 right-2 w-3 h-3 bg-[#ff3b30] rounded-full border-2 border-foreground" />}
-              </button>
-            </div>
-            
-            {/* Meta Stats Row */}
-            <div className="flex items-center justify-between px-2 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/50">
-              <span>SHOWING {processedNotes.length} NOTEBOOK{processedNotes.length !== 1 ? 'S' : ''}</span>
-              <span>{colorLabel} / {sortLabel}</span>
-            </div>
-          </div>
-
-          {/* ==============================================
-              NOTEBOOK LIST FEED 
-          ============================================== */}
-          <div className="lg:col-span-8 flex flex-col space-y-6 lg:space-y-8 z-10 w-full relative">
-            
-            {isLoading ? (
-              <NotebooksSkeleton />
-            ) : processedNotes.length === 0 ? (
-              <EmptyState 
-                hasFilters={searchQuery.trim() !== '' || selectedColor !== 'all'} 
-                onClearFilters={() => { setSearchQuery(''); setSelectedColor('all'); }} 
+        {/* ==============================================
+            MOBILE CONTROLS (Visible on Mobile only)
+        ============================================== */}
+        <div className="lg:hidden flex flex-col gap-6 w-full text-foreground relative z-20">
+          <div className="flex w-full items-stretch gap-3 h-[4rem]">
+            <div className="flex-1 bg-background-muted rounded-[2rem] flex items-center px-6 gap-4 min-w-0">
+              <Search01Icon className="w-6 h-6 opacity-40 shrink-0" />
+              <input
+                type="text"
+                placeholder="SEARCH NOTEBOOKS..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent border-none focus:outline-none text-[13px] font-black uppercase tracking-widest text-foreground placeholder:text-foreground/30 min-w-0"
               />
-            ) : (
-              <div className="w-full flex flex-col gap-4">
-                {processedNotes.map((note) => (
-                  <NotebookListItem
-                    key={note.id}
-                    note={note}
-                    onGenerate={() => handleGenerateMaterials(note)}
-                    onDelete={() => handleDeleteNote(note)}
-                    onShare={(e) => handleCopyShareLink(note, e)}
-                    onToggleVisibility={() => togglePublicMutation.mutate({ noteId: note.id, isPublic: !note.is_public })}
-                    shareLinkCopied={shareLinkCopied === note.id}
-                  />
-                ))}
-              </div>
-            )}
+            </div>
+            <button
+              onClick={() => setMobileFiltersOpen(true)}
+              className="w-[4rem] h-[4rem] shrink-0 bg-foreground text-surface rounded-[2rem] flex items-center justify-center active:scale-95 transition-transform relative"
+            >
+              <FilterIcon className="w-6 h-6" />
+              {activeFilters > 0 && <span className="absolute top-2 right-2 w-3 h-3 bg-[#ff3b30] rounded-full border-2 border-foreground" />}
+            </button>
           </div>
+          <div className="flex items-center justify-between px-2 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/50">
+            <span>SHOWING {processedNotes.length} NOTEBOOK{processedNotes.length !== 1 ? 'S' : ''}</span>
+            <span>{colorLabel} / {sortLabel}</span>
+          </div>
+        </div>
 
-          {/* ==============================================
-              DESKTOP SIDEBAR (Hidden on Mobile)
-          ============================================== */}
-          <div className="hidden lg:flex flex-col lg:col-span-4 space-y-8 relative z-10 pl-6">
-            <div className="sticky top-24 w-full flex flex-col gap-8">
-              
-              {/* Massive Stats Block (Desktop) */}
-              <div className="w-full bg-foreground text-surface rounded-[3rem] p-8 lg:p-10 flex flex-col gap-6 shadow-2xl shadow-foreground/10">
-                <div className="w-full">
-                  <p className="text-[10px] lg:text-[11px] font-black uppercase tracking-[0.3em] opacity-50 mb-2">TOTAL NOTEBOOKS</p>
-                  <p className="text-5xl lg:text-6xl font-black tracking-tighter leading-none">{totalNotes}</p>
-                </div>
-                <div className="w-full h-1 bg-surface/10 rounded-full" />
-                <div className="w-full">
-                  <p className="text-[10px] lg:text-[11px] font-black uppercase tracking-[0.3em] opacity-50 mb-2">CURRENT VIEW</p>
-                  <p className="text-4xl lg:text-5xl font-black tracking-tighter leading-none">{processedNotes.length}</p>
-                </div>
-              </div>
-
-              {/* Search Block (Desktop) */}
-              <div className="w-full bg-background-muted rounded-[2.5rem] p-8 space-y-6">
-                <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-foreground/50">
-                  <Search01Icon className="w-5 h-5" /> SEARCH
-                </div>
-                <div className="flex items-center gap-4 bg-surface rounded-[2rem] px-6 py-5 focus-within:ring-4 focus-within:ring-foreground/10 transition-all border-2 border-transparent focus-within:border-border">
-                  <input
-                    type="text"
-                    placeholder="KEYWORD..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-transparent border-none focus:outline-none text-[14px] font-black uppercase tracking-widest text-foreground placeholder:text-foreground/30 min-w-0"
-                  />
-                </div>
-              </div>
-
-              {/* Filtering Block (Desktop) */}
-              <div className="w-full bg-background-muted rounded-[2.5rem] p-8 space-y-8">
-                {/* Colors */}
-                <div className="w-full">
-                  <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-5">
-                    <FilterIcon className="w-5 h-5" /> COLOR CODE
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      onClick={() => setSelectedColor('all')}
-                      className={`px-6 py-4 rounded-[1.5rem] text-[12px] font-black uppercase tracking-widest transition-all ${
-                        selectedColor === 'all' ? 'bg-foreground text-surface shadow-xl' : 'bg-surface text-foreground hover:bg-white border-2 border-transparent'
-                      }`}
-                    >
-                      ALL
-                    </button>
-                    {(Object.keys(NOTEBOOK_COLORS) as NotebookColorKey[]).map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`w-14 h-14 rounded-[1.5rem] transition-all shadow-sm ${
-                          selectedColor === color ? 'ring-4 ring-foreground/20 scale-110 shadow-lg border-2 border-foreground' : 'hover:scale-105 hover:shadow-md border-2 border-transparent'
-                        }`}
-                        style={{ background: NOTEBOOK_COLORS[color].primary }}
-                        title={NOTEBOOK_COLORS[color].name}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Sort */}
-                <div className="w-full">
-                  <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-5">
-                    <SortingAZ01Icon className="w-5 h-5" /> SORT SYSTEM
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    {[
-                      { id: 'recent', label: 'THE MOST RECENT', icon: <Clock01Icon className="w-6 h-6" /> },
-                      { id: 'alphabetical', label: 'ALPHABETICAL', icon: <SortingAZ01Icon className="w-6 h-6" /> },
-                      { id: 'oldest', label: 'OLDEST FIRST', icon: <Calendar03Icon className="w-6 h-6" /> },
-                    ].map((opt) => (
-                      <button
-                        key={opt.id}
-                        onClick={() => setSortBy(opt.id as SortOption)}
-                        className={`flex items-center gap-4 px-6 py-5 rounded-[2rem] transition-all shadow-sm ${
-                          sortBy === opt.id ? 'bg-foreground text-surface shadow-xl scale-[1.02]' : 'bg-surface text-foreground hover:bg-white border-2 border-transparent'
-                        }`}
-                      >
-                        {opt.icon}
-                        <span className="text-[13px] font-black uppercase tracking-widest">{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
+        {/* ==============================================
+            DESKTOP INLINE TOOLBAR (Hidden on Mobile)
+        ============================================== */}
+        <div className="hidden lg:flex flex-col gap-5 w-full relative z-20">
+          {/* Search + Count Row */}
+          <div className="flex items-center gap-4 w-full">
+            <div className="flex-1 bg-background-muted rounded-[1.5rem] flex items-center px-5 gap-3 h-[3.25rem]">
+              <Search01Icon className="w-5 h-5 opacity-40 shrink-0" />
+              <input
+                type="text"
+                placeholder="SEARCH NOTEBOOKS..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent border-none focus:outline-none text-[12px] font-black uppercase tracking-widest text-foreground placeholder:text-foreground/30 min-w-0"
+              />
+            </div>
+            <div className="shrink-0 bg-foreground text-surface px-5 h-[3.25rem] rounded-[1.5rem] flex items-center gap-2">
+              <span className="text-[22px] font-black tracking-tighter leading-none">{processedNotes.length}</span>
+              <span className="text-[10px] font-black uppercase tracking-widest opacity-60">/ {totalNotes}</span>
             </div>
           </div>
+
+          {/* Filters Row */}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {/* Color Chips */}
+            <div className="flex items-center gap-2 mr-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 mr-1">COLOR</span>
+              <button
+                onClick={() => setSelectedColor('all')}
+                className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                  selectedColor === 'all' ? 'bg-foreground text-surface shadow-md' : 'bg-background-muted text-foreground hover:bg-border/40'
+                }`}
+              >ALL</button>
+              {(Object.keys(NOTEBOOK_COLORS) as NotebookColorKey[]).map((color) => (
+                <button
+                  key={color}
+                  onClick={() => setSelectedColor(color)}
+                  className={`w-8 h-8 rounded-full transition-all ${
+                    selectedColor === color ? 'ring-[3px] ring-foreground/30 scale-110 shadow-md' : 'hover:scale-110'
+                  }`}
+                  style={{ background: NOTEBOOK_COLORS[color].primary }}
+                  title={NOTEBOOK_COLORS[color].name}
+                />
+              ))}
+            </div>
+
+            {/* Divider */}
+            <div className="w-px h-6 bg-foreground/10 mx-1" />
+
+            {/* Sort Chips */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 mr-1">SORT</span>
+              {[
+                { id: 'recent', label: 'RECENT' },
+                { id: 'alphabetical', label: 'A–Z' },
+                { id: 'oldest', label: 'OLDEST' },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setSortBy(opt.id as SortOption)}
+                  className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                    sortBy === opt.id ? 'bg-foreground text-surface shadow-md' : 'bg-background-muted text-foreground hover:bg-border/40'
+                  }`}
+                >{opt.label}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ==============================================
+            CONTENT AREA
+        ============================================== */}
+        <div className="w-full relative z-10">
+          {isLoading ? (
+            <NotebooksSkeleton />
+          ) : processedNotes.length === 0 ? (
+            <EmptyState 
+              hasFilters={searchQuery.trim() !== '' || selectedColor !== 'all'} 
+              onClearFilters={() => { setSearchQuery(''); setSelectedColor('all'); }} 
+            />
+          ) : (
+            <div className="w-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {processedNotes.map((note) => (
+                <NotebookListItem
+                  key={note.id}
+                  note={note}
+                  onGenerate={() => handleGenerateMaterials(note)}
+                  onDelete={() => handleDeleteNote(note)}
+                  onShare={(e) => handleCopyShareLink(note, e)}
+                  onToggleVisibility={() => togglePublicMutation.mutate({ noteId: note.id, isPublic: !note.is_public })}
+                  shareLinkCopied={shareLinkCopied === note.id}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

@@ -24,7 +24,12 @@ const getNavIcon = (href: string) => {
   }
 };
 
-export default function Navbar() {
+interface NavbarProps {
+  collapsed?: boolean;
+  onToggle?: () => void;
+}
+
+export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -32,35 +37,17 @@ export default function Navbar() {
   const { data: userProfile } = useUserProfile();
   const [isSignOutOpen, setIsSignOutOpen] = useState(false);
 
-  // Collapsed state with localStorage persistence
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-    try {
-      const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-      if (stored === 'true') setIsCollapsed(true);
-    } catch {}
-  }, []);
+  // Use props if provided, otherwise fallback to local state for safety if used in other layouts
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
+  const isCollapsed = propCollapsed ?? internalCollapsed;
 
   const toggleCollapse = useCallback(() => {
-    setIsCollapsed(prev => {
-      const next = !prev;
-      try { localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next)); } catch {}
-      // Dispatch a custom event so the layout can listen
-      window.dispatchEvent(new CustomEvent('sidebar-toggle', { detail: { collapsed: next } }));
-      return next;
-    });
-  }, []);
-
-  // Fire initial event after mount so layout picks up stored state
-  useEffect(() => {
-    if (hasMounted) {
-      window.dispatchEvent(new CustomEvent('sidebar-toggle', { detail: { collapsed: isCollapsed } }));
+    if (onToggle) {
+      onToggle();
+    } else {
+      setInternalCollapsed(prev => !prev);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasMounted]);
+  }, [onToggle]);
 
   const avatarLabelSource = (userProfile?.full_name || userProfile?.email || '').trim();
   const avatarFallback = (() => {

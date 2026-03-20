@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import Image from 'next/image';
-import { ClayCard, ClayBadge } from '@/component/ui/Clay';
+import Link from 'next/link';
 import MobileBottomSheet from '@/component/ui/MobileBottomSheet';
 import {
   RefreshIcon,
@@ -15,10 +15,10 @@ import {
   SortingAZ01Icon,
   Calendar03Icon,
   CheckmarkCircle01Icon,
-  Loading01Icon
+  Loading01Icon,
+  MoreVerticalIcon,
 } from 'hugeicons-react';
 import { FlashcardIcon, FlashcardAddIcon } from '@/component/icons';
-import HeroActionButton from '@/component/ui/HeroActionButton';
 import { useFlashcardActions } from '@/hook/useFlashcardActions';
 import { FlashcardSet } from '@/lib/database.types';
 import ReforgeModal from '@/component/features/modal/ReforgeModal';
@@ -69,8 +69,6 @@ export default function FlashcardDashboardPage() {
   // Filter and sort flashcard sets
   const processedSets = useMemo(() => {
     let filtered = [...flashcardSets];
-
-    // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -79,8 +77,6 @@ export default function FlashcardDashboardPage() {
           set.description?.toLowerCase().includes(query)
       );
     }
-
-    // Mastery filter
     if (masteryFilter !== 'all') {
       filtered = filtered.filter((set) => {
         const progress = set.total_cards > 0 ? (set.mastered_cards / set.total_cards) * 100 : 0;
@@ -89,8 +85,6 @@ export default function FlashcardDashboardPage() {
         return true;
       });
     }
-
-    // Sort
     switch (sortBy) {
       case 'alphabetical':
         filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
@@ -102,7 +96,6 @@ export default function FlashcardDashboardPage() {
       default:
         filtered.sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime());
     }
-
     return filtered;
   }, [flashcardSets, searchQuery, masteryFilter, sortBy]);
 
@@ -121,7 +114,6 @@ export default function FlashcardDashboardPage() {
 
   const handleReforgeFlashcards = async (set: FlashcardSet) => {
     setSelectedSet(set);
-
     try {
       const flashcards = await getFlashcardsBySet(set.id);
       setExistingFlashcards(flashcards.map(f => ({
@@ -133,13 +125,11 @@ export default function FlashcardDashboardPage() {
       console.error('Error fetching existing flashcards:', error);
       setExistingFlashcards([]);
     }
-
     setIsReforgeModalOpen(true);
   };
 
   const handleFlashcardsGenerated = async (geminiResponse: GeminiResponse, action: 'add_more' | 'regenerate') => {
     if (!selectedSet) return;
-
     setSaveSuccess(undefined);
     try {
       await reforgeMutation.mutateAsync({
@@ -147,7 +137,6 @@ export default function FlashcardDashboardPage() {
         action,
         flashcards: geminiResponse.flashcards
       });
-
       const actionText = action === 'regenerate' ? 'regenerated' : 'added';
       setSaveSuccess(`Successfully ${actionText} ${geminiResponse.flashcards.length} flashcards!`);
       setTimeout(() => setSaveSuccess(undefined), 3000);
@@ -171,7 +160,6 @@ export default function FlashcardDashboardPage() {
 
   const handleConfirmDelete = async () => {
     if (!selectedSet) return;
-
     try {
       await deleteMutation.mutateAsync(selectedSet.id);
       setSaveSuccess('Flashcard set deleted successfully!');
@@ -208,7 +196,6 @@ export default function FlashcardDashboardPage() {
 
   const handleCopyShareLink = async (set: FlashcardSet, e: React.MouseEvent) => {
     e.stopPropagation();
-
     if (!set.is_public) {
       try {
         await togglePublicMutation.mutateAsync({ setId: set.id, isPublic: true });
@@ -217,7 +204,6 @@ export default function FlashcardDashboardPage() {
         return;
       }
     }
-
     const shareUrl = `${window.location.origin}/public/flashcards/${set.id}`;
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -231,402 +217,247 @@ export default function FlashcardDashboardPage() {
   // Handle auth errors
   if (flashcardSets === undefined && !isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="w-full max-w-7xl mx-auto pt-8 md:pt-4 pb-20 space-y-10 px-2 md:px-0">
         <FlashcardsHeader totalSets={0} totalCards={0} onCreateNew={() => setIsForgeModalOpen(true)} />
-        <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
-          <div className="text-center py-12">
-            <div className="w-20 h-20 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto mb-6">
-              <FlashcardIcon className="w-10 h-10 text-red-500" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">Error loading flashcards</h3>
-            <p className="text-foreground-muted mb-6">
-              There was an error loading your flashcard sets. Please try again.
-            </p>
-          </div>
-        </ClayCard>
+        <div className="bg-foreground text-surface rounded-[3rem] p-12 text-center">
+          <h3 className="text-3xl font-black uppercase tracking-tight mb-4">ERROR LOADING</h3>
+          <p className="opacity-70 mb-8 max-w-md mx-auto text-base leading-relaxed font-bold">
+            There was an error loading your flashcard sets.
+          </p>
+          <button className="px-8 py-4 bg-surface text-foreground rounded-full font-black uppercase tracking-[0.2em] text-[12px] hover:bg-surface-elevated transition-all active:scale-95">
+            RETRY NOW
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="space-y-6">
-        {/* Hero Header */}
-        <FlashcardsHeader
-          totalSets={totalSets}
-          totalCards={totalCards}
-          onCreateNew={() => setIsForgeModalOpen(true)}
-        />
+      <div className="w-full max-w-7xl mx-auto pt-8 md:pt-4 pb-20 space-y-10 lg:space-y-14 px-2 md:px-0">
+        
+        {/* Massive Hero Header */}
+        <FlashcardsHeader totalSets={totalSets} totalCards={totalCards} onCreateNew={() => setIsForgeModalOpen(true)} />
 
-        {/* Success/Error Message */}
+        {/* Global Toast */}
         {saveSuccess && (
-          <div
-            className={`px-4 py-3 rounded-xl border-2 transition-all ${saveSuccess.includes('Error')
-              ? 'border-red-200 bg-red-50'
-              : 'border-green-200 bg-green-50'
-              }`}
-          >
-            <p className={`text-sm font-semibold ${saveSuccess.includes('Error') ? 'text-red-600' : 'text-green-600'
-              }`}>
-              {saveSuccess}
-            </p>
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] animate-in fade-in slide-in-from-bottom-4">
+            <div className={`px-8 py-4 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.15)] flex items-center gap-3 ${
+              saveSuccess.includes('Error') ? 'bg-[#ff3b30] text-white' : 'bg-foreground text-surface'
+            }`}>
+              <SparklesIcon className="w-5 h-5 flex-shrink-0" />
+              <p className="text-[12px] font-black uppercase tracking-widest">{saveSuccess}</p>
+            </div>
           </div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-12">
-          {/* Main content */}
-          <div className="order-2 lg:order-1 lg:col-span-8 space-y-4">
-            {/* Mobile controls */}
-            <div className="lg:hidden space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl bg-surface border border-border">
-                  <Search01Icon className="w-4 h-4 text-foreground-muted" />
-                  <input
-                    type="text"
-                    placeholder="Search flashcard sets..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-transparent border-none focus:outline-none text-sm text-foreground placeholder:text-foreground-muted"
-                  />
-                </div>
-                <button
-                  onClick={() => setMobileFiltersOpen(true)}
-                  className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-2xl border border-border bg-surface text-sm font-semibold text-foreground hover:bg-background-muted transition-colors"
-                >
-                  <FilterIcon className="w-4 h-4 text-foreground-muted" />
-                  Filters
-                  {activeFilters > 0 && (
-                    <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-background-muted text-foreground">
-                      {activeFilters}
-                    </span>
-                  )}
-                </button>
+        {/* MOBILE CONTROLS */}
+        <div className="lg:hidden flex flex-col gap-4 w-full text-foreground relative z-20">
+          <div className="flex w-full items-stretch gap-3 h-[3.5rem]">
+            <div className="flex-1 bg-background-muted rounded-[2rem] flex items-center px-5 gap-3 min-w-0">
+              <Search01Icon className="w-5 h-5 opacity-40 shrink-0" />
+              <input
+                type="text"
+                placeholder="SEARCH SETS..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent border-none focus:outline-none text-[12px] font-black uppercase tracking-widest text-foreground placeholder:text-foreground/30 min-w-0"
+              />
+            </div>
+            <button
+              onClick={() => setMobileFiltersOpen(true)}
+              className="w-[3.5rem] h-[3.5rem] shrink-0 bg-foreground text-surface rounded-[2rem] flex items-center justify-center active:scale-95 transition-transform relative"
+            >
+              <FilterIcon className="w-5 h-5" />
+              {activeFilters > 0 && <span className="absolute top-2 right-2 w-3 h-3 bg-[#ff3b30] rounded-full border-2 border-foreground" />}
+            </button>
+          </div>
+          <div className="flex items-center justify-between px-2 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/50">
+            <span>SHOWING {processedSets.length} SET{processedSets.length !== 1 ? 'S' : ''}</span>
+            <span>{masteryLabel} / {sortLabel}</span>
+          </div>
+        </div>
+
+        {/* DESKTOP INLINE TOOLBAR */}
+        <div className="hidden lg:flex flex-col gap-5 w-full relative z-20">
+          <div className="flex items-center gap-4 w-full">
+            <div className="flex-1 bg-background-muted rounded-[1.5rem] flex items-center px-5 gap-3 h-[3.25rem]">
+              <Search01Icon className="w-5 h-5 opacity-40 shrink-0" />
+              <input
+                type="text"
+                placeholder="SEARCH FLASHCARD SETS..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent border-none focus:outline-none text-[12px] font-black uppercase tracking-widest text-foreground placeholder:text-foreground/30 min-w-0"
+              />
+            </div>
+            <div className="shrink-0 flex items-center gap-3">
+              <div className="bg-foreground text-surface px-5 h-[3.25rem] rounded-[1.5rem] flex items-center gap-2">
+                <span className="text-[22px] font-black tracking-tighter leading-none">{processedSets.length}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">SETS</span>
               </div>
-              <div className="flex items-center justify-between text-xs text-foreground-muted">
-                <span>Showing {processedSets.length} set{processedSets.length !== 1 ? 's' : ''}</span>
-                <span>{masteryLabel} · {sortLabel}</span>
+              <div className="bg-background-muted px-5 h-[3.25rem] rounded-[1.5rem] flex items-center gap-2">
+                <span className="text-[22px] font-black tracking-tighter leading-none text-foreground">{totalCards}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-foreground/50">CARDS</span>
               </div>
             </div>
-
-            {isLoading ? (
-              <FlashcardsSkeleton />
-            ) : processedSets.length === 0 ? (
-              <EmptyState
-                hasFilters={searchQuery.trim() !== '' || masteryFilter !== 'all'}
-                onClearFilters={() => {
-                  setSearchQuery('');
-                  setMasteryFilter('all');
-                }}
-                onCreateNew={() => setIsForgeModalOpen(true)}
-                totalSets={totalSets}
-              />
-            ) : (
-              <>
-                {/* Results count - hidden on mobile as redundant */}
-                <div className="hidden lg:flex items-center justify-between">
-                  <p className="text-sm text-foreground-muted">
-                    Showing <span className="font-semibold text-foreground">{processedSets.length}</span> set{processedSets.length !== 1 ? 's' : ''}
-                    {(searchQuery || masteryFilter !== 'all') && (
-                      <span> matching your filters</span>
-                    )}
-                  </p>
-                </div>
-
-                {/* Flashcard Sets List */}
-                <div className="space-y-3">
-                  {processedSets.map((set) => (
-                    <FlashcardListItem
-                      key={set.id}
-                      set={set}
-                      onClick={() => handleCardClick(set)}
-                      onReforge={() => handleReforgeFlashcards(set)}
-                      onDelete={() => handleDeleteFlashcardSet(set)}
-                      onShare={(e) => handleCopyShareLink(set, e)}
-                      shareLinkCopied={shareLinkCopied === set.id}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
           </div>
 
-          {/* Sidebar controls */}
-          <div className="order-1 lg:order-2 lg:col-span-4 space-y-4 hidden lg:block">
-            <ClayCard variant="default" padding="md" className="rounded-2xl">
-              <div className="flex items-center gap-2">
-                <Search01Icon className="w-5 h-5 text-foreground-muted" />
-                <input
-                  type="text"
-                  placeholder="Search flashcard sets..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-foreground placeholder:text-foreground-muted"
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 mr-1">MASTERY</span>
+              {[
+                { id: 'all', label: 'ALL' },
+                { id: 'learning', label: 'LEARNING' },
+                { id: 'mastered', label: 'MASTERED' },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setMasteryFilter(opt.id as MasteryFilter)}
+                  className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                    masteryFilter === opt.id ? 'bg-foreground text-surface shadow-md' : 'bg-background-muted text-foreground hover:bg-border/40'
+                  }`}
+                >{opt.label}</button>
+              ))}
+            </div>
+
+            <div className="w-px h-6 bg-foreground/10 mx-1" />
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 mr-1">SORT</span>
+              {[
+                { id: 'recent', label: 'RECENT' },
+                { id: 'alphabetical', label: 'A–Z' },
+                { id: 'oldest', label: 'OLDEST' },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setSortBy(opt.id as SortOption)}
+                  className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                    sortBy === opt.id ? 'bg-foreground text-surface shadow-md' : 'bg-background-muted text-foreground hover:bg-border/40'
+                  }`}
+                >{opt.label}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* CONTENT AREA */}
+        <div className="w-full relative z-10">
+          {isLoading ? (
+            <FlashcardsSkeleton />
+          ) : processedSets.length === 0 ? (
+            <EmptyState
+              hasFilters={searchQuery.trim() !== '' || masteryFilter !== 'all'}
+              onClearFilters={() => { setSearchQuery(''); setMasteryFilter('all'); }}
+              onCreateNew={() => setIsForgeModalOpen(true)}
+              totalSets={totalSets}
+            />
+          ) : (
+            <div className="w-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {processedSets.map((set) => (
+                <FlashcardListItem
+                  key={set.id}
+                  set={set}
+                  onClick={() => handleCardClick(set)}
+                  onReforge={() => handleReforgeFlashcards(set)}
+                  onDelete={() => handleDeleteFlashcardSet(set)}
+                  onShare={(e) => handleCopyShareLink(set, e)}
+                  shareLinkCopied={shareLinkCopied === set.id}
                 />
-              </div>
-            </ClayCard>
-
-            <ClayCard variant="default" padding="md" className="rounded-2xl">
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
-                    <FilterIcon className="w-4 h-4" />
-                    Mastery
-                  </div>
-                  <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
-                    <button
-                      onClick={() => setMasteryFilter('all')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${masteryFilter === 'all'
-                        ? 'bg-surface text-foreground shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                        }`}
-                    >
-                      All
-                    </button>
-                    <button
-                      onClick={() => setMasteryFilter('learning')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${masteryFilter === 'learning'
-                        ? 'bg-surface text-foreground shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                        }`}
-                    >
-                      <Loading01Icon className="w-3 h-3" />
-                      Learning
-                    </button>
-                    <button
-                      onClick={() => setMasteryFilter('mastered')}
-                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${masteryFilter === 'mastered'
-                        ? 'bg-surface text-foreground shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                        }`}
-                    >
-                      <CheckmarkCircle01Icon className="w-3 h-3" />
-                      Mastered
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted mb-2">
-                    <SortingAZ01Icon className="w-4 h-4" />
-                    Sort
-                  </div>
-                  <div className="flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
-                    <button
-                      onClick={() => setSortBy('recent')}
-                      className={`p-2 rounded-md transition-all ${sortBy === 'recent'
-                        ? 'bg-surface text-primary shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                        }`}
-                      title="Sort by recent"
-                    >
-                      <Clock01Icon className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setSortBy('alphabetical')}
-                      className={`p-2 rounded-md transition-all ${sortBy === 'alphabetical'
-                        ? 'bg-surface text-primary shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                        }`}
-                      title="Sort alphabetically"
-                    >
-                      <SortingAZ01Icon className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setSortBy('oldest')}
-                      className={`p-2 rounded-md transition-all ${sortBy === 'oldest'
-                        ? 'bg-surface text-primary shadow-sm'
-                        : 'text-foreground-muted hover:text-foreground'
-                        }`}
-                      title="Sort by oldest"
-                    >
-                      <Calendar03Icon className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </ClayCard>
-
-            <ClayCard variant="default" padding="md" className="rounded-2xl">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-foreground-muted">Sets</p>
-                  <p className="text-2xl font-bold text-foreground">{totalSets}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-foreground-muted">Cards</p>
-                  <p className="text-2xl font-bold text-foreground">{totalCards}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-xs uppercase tracking-wide text-foreground-muted">Mastered sets</p>
-                  <p className="text-lg font-semibold text-foreground">{masteredSets}</p>
-                </div>
-              </div>
-              <div className="mt-3 text-xs text-foreground-muted">
-                {masteryLabel} · {sortLabel}
-              </div>
-            </ClayCard>
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
+      {/* ==============================================
+          MOBILE BOTTOM SHEET FILTERS
+      ============================================== */}
       <MobileBottomSheet
         open={mobileFiltersOpen}
         onClose={() => setMobileFiltersOpen(false)}
-        title="Filters"
-        description="Refine your flashcards"
+        title="REFINE SEARCH"
+        description="FILTER YOUR STUDY DECKS"
         footer={(
-          <div className="flex items-center gap-2">
+          <div className="flex gap-3 w-full p-2">
             <button
-              onClick={() => {
-                setMasteryFilter('all');
-                setSortBy('recent');
-              }}
-              className="flex-1 px-3 py-2 rounded-xl border border-border bg-surface text-sm font-semibold text-foreground-muted hover:text-foreground hover:bg-background-muted transition-all"
+              onClick={() => { setMasteryFilter('all'); setSortBy('recent'); }}
+              className="flex-1 py-4 rounded-[2rem] bg-background-muted text-foreground font-black uppercase tracking-[0.2em] text-[12px] hover:bg-border/40 active:scale-95 transition-all"
             >
-              Reset
+              RESET
             </button>
             <button
               onClick={() => setMobileFiltersOpen(false)}
-              className="flex-1 px-3 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all"
+              className="flex-[2] py-4 rounded-[2rem] bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[12px] shadow-[0_8px_30px_rgba(0,0,0,0.2)] active:scale-95 transition-all"
             >
-              Done
+              APPLY FILTERS
             </button>
           </div>
         )}
       >
-        <div className="space-y-4">
+        <div className="space-y-10 pt-4 pb-6 px-1">
+          {/* Mastery */}
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
-              <FilterIcon className="w-4 h-4" />
-              Mastery
-            </div>
-            <div className="mt-2 flex items-center gap-2 flex-wrap">
-              <button
-                onClick={() => setMasteryFilter('all')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${masteryFilter === 'all'
-                  ? 'bg-background-muted text-foreground border border-border'
-                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-5">MASTERY LEVEL</div>
+            <div className="flex flex-col gap-3">
+              {[
+                { id: 'all', label: 'ALL SETS', icon: <FlashcardIcon className="w-5 h-5" /> },
+                { id: 'learning', label: 'LEARNING', icon: <Loading01Icon className="w-5 h-5" /> },
+                { id: 'mastered', label: 'MASTERED', icon: <CheckmarkCircle01Icon className="w-5 h-5" /> },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setMasteryFilter(opt.id as MasteryFilter)}
+                  className={`flex items-center gap-4 px-5 py-4 rounded-[2rem] transition-all shadow-sm ${
+                    masteryFilter === opt.id ? 'bg-foreground text-surface' : 'bg-background-muted text-foreground'
                   }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setMasteryFilter('learning')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all inline-flex items-center gap-1 ${masteryFilter === 'learning'
-                  ? 'bg-background-muted text-foreground border border-border'
-                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                  }`}
-              >
-                <Loading01Icon className="w-3 h-3" />
-                Learning
-              </button>
-              <button
-                onClick={() => setMasteryFilter('mastered')}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all inline-flex items-center gap-1 ${masteryFilter === 'mastered'
-                  ? 'bg-background-muted text-foreground border border-border'
-                  : 'text-foreground-muted border border-transparent hover:text-foreground hover:border-border'
-                  }`}
-              >
-                <CheckmarkCircle01Icon className="w-3 h-3" />
-                Mastered
-              </button>
+                >
+                  {opt.icon}
+                  <span className="text-[12px] font-black uppercase tracking-widest">{opt.label}</span>
+                </button>
+              ))}
             </div>
           </div>
 
+          {/* Sort */}
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
-              <SortingAZ01Icon className="w-4 h-4" />
-              Sort
-            </div>
-            <div className="mt-2 flex items-center gap-1 p-1 rounded-lg bg-background-muted border border-border">
-              <button
-                onClick={() => setSortBy('recent')}
-                className={`p-2 rounded-md transition-all ${sortBy === 'recent'
-                  ? 'bg-surface text-primary shadow-sm'
-                  : 'text-foreground-muted hover:text-foreground'
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-5">SORT ORDER</div>
+            <div className="flex flex-col gap-3">
+              {[
+                { id: 'recent', label: 'MOST RECENT', icon: <Clock01Icon className="w-5 h-5" /> },
+                { id: 'alphabetical', label: 'ALPHABETICAL (A-Z)', icon: <SortingAZ01Icon className="w-5 h-5" /> },
+                { id: 'oldest', label: 'OLDEST ARCHIVES', icon: <Calendar03Icon className="w-5 h-5" /> },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setSortBy(opt.id as SortOption)}
+                  className={`flex items-center gap-4 px-5 py-4 rounded-[2rem] transition-all shadow-sm ${
+                    sortBy === opt.id ? 'bg-foreground text-surface' : 'bg-background-muted text-foreground'
                   }`}
-                title="Sort by recent"
-              >
-                <Clock01Icon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setSortBy('alphabetical')}
-                className={`p-2 rounded-md transition-all ${sortBy === 'alphabetical'
-                  ? 'bg-surface text-primary shadow-sm'
-                  : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                title="Sort alphabetically"
-              >
-                <SortingAZ01Icon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setSortBy('oldest')}
-                className={`p-2 rounded-md transition-all ${sortBy === 'oldest'
-                  ? 'bg-surface text-primary shadow-sm'
-                  : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                title="Sort by oldest"
-              >
-                <Calendar03Icon className="w-4 h-4" />
-              </button>
+                >
+                  {opt.icon}
+                  <span className="text-[12px] font-black uppercase tracking-widest">{opt.label}</span>
+                </button>
+              ))}
             </div>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-background-muted p-3 text-xs text-foreground-muted">
-            <div className="flex items-center justify-between">
-              <span>Sets</span>
-              <span className="font-semibold text-foreground">{totalSets}</span>
-            </div>
-            <div className="flex items-center justify-between mt-1">
-              <span>Cards</span>
-              <span className="font-semibold text-foreground">{totalCards}</span>
-            </div>
-            <div className="flex items-center justify-between mt-1">
-              <span>Mastered</span>
-              <span className="font-semibold text-foreground">{masteredSets}</span>
-            </div>
-            <div className="mt-2 text-[11px]">{masteryLabel} · {sortLabel}</div>
           </div>
         </div>
       </MobileBottomSheet>
 
-      <ReforgeModal
-        isOpen={isReforgeModalOpen}
-        onClose={handleCloseReforgeModal}
-        noteContent={selectedSet?.description || ''}
-        existingFlashcards={existingFlashcards}
-        onFlashcardsGenerated={handleFlashcardsGenerated}
-        saving={saving}
-      />
-
-      <ConfirmDeleteModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleConfirmDelete}
-        title="Delete Flashcard Set"
-        description="Are you sure you want to delete this flashcard set? This action cannot be undone."
-        itemName={selectedSet?.title || 'Untitled Set'}
-        itemType="flashcard set"
-      />
-
-      <ForgeFlashcardsModal
-        isOpen={isForgeModalOpen}
-        onClose={() => setIsForgeModalOpen(false)}
-        onFlashcardsGenerated={handleForgeFlashcards}
-        saving={saving}
-      />
-
-      <FlashcardSetInfoModal
-        isOpen={isInfoModalOpen}
-        onClose={() => setIsInfoModalOpen(false)}
-        set={selectedSet}
-      />
+      {/* ==============================================
+          MODALS
+      ============================================== */}
+      <ReforgeModal isOpen={isReforgeModalOpen} onClose={handleCloseReforgeModal} noteContent={selectedSet?.description || ''} existingFlashcards={existingFlashcards} onFlashcardsGenerated={handleFlashcardsGenerated} saving={saving} />
+      <ConfirmDeleteModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleConfirmDelete} title="DELETE FLASHCARD SET" description="Are you absolutely sure you want to permanently delete this flashcard set? This action cannot be undone." itemName={selectedSet?.title || 'Untitled Set'} itemType="flashcard set" />
+      <ForgeFlashcardsModal isOpen={isForgeModalOpen} onClose={() => setIsForgeModalOpen(false)} onFlashcardsGenerated={handleForgeFlashcards} saving={saving} />
+      <FlashcardSetInfoModal isOpen={isInfoModalOpen} onClose={() => setIsInfoModalOpen(false)} set={selectedSet} />
     </>
   );
 }
 
 // ============================================
-// Sub-components
+// Components
 // ============================================
 
 function FlashcardsHeader({
@@ -639,173 +470,130 @@ function FlashcardsHeader({
   onCreateNew: () => void;
 }) {
   return (
-    <ClayCard variant="elevated" padding="lg" className="rounded-[2rem] sm:rounded-3xl">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        {/* Title area */}
-        <div className="flex items-center gap-4 min-w-0">
-          <div className="p-3 bg-primary/10 rounded-2xl shrink-0">
-            <FlashcardIcon className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-foreground truncate">
-              Flashcards
-            </h1>
-            <p className="text-xs sm:text-sm text-foreground-muted truncate">
-              Study with AI-generated interactive flashcards
-            </p>
-          </div>
+    <div className="w-full flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8 pb-4">
+      <div className="flex flex-col">
+        <div className="flex items-center gap-3 mb-2 md:mb-3">
+          <div className="w-3 h-3 rounded-full bg-primary flex-shrink-0" />
+          <h1 className="text-[11px] md:text-[12px] font-black uppercase tracking-[0.3em] text-foreground/50">YOUR STUDY DECKS</h1>
         </div>
-
-        {/* CTA */}
-        <div className="shrink-0">
-          <HeroActionButton
-            icon={<FlashcardAddIcon className="w-4 h-4" />}
-            onClick={onCreateNew}
-            className="w-full sm:w-auto justify-center px-6 py-4 sm:py-3.5 text-base sm:text-sm font-black"
-          >
-            Forge Flashcards
-          </HeroActionButton>
-        </div>
+        <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase text-foreground leading-[0.85]">
+          FLASHCARDS
+        </h2>
       </div>
-    </ClayCard>
+
+      <div className="flex shrink-0 w-full md:w-auto pb-1 mt-2 md:mt-0">
+        <button
+          onClick={onCreateNew}
+          className="group flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 rounded-[2rem] bg-foreground text-surface hover:bg-foreground/90 transition-all font-black uppercase tracking-[0.2em] text-[12px] shadow-lg active:scale-95"
+        >
+          <FlashcardAddIcon className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+          FORGE FLASHCARDS
+        </button>
+      </div>
+    </div>
   );
 }
 
 function FlashcardsSkeleton() {
   return (
-    <div className="space-y-3">
+    <div className="w-full flex flex-col gap-3">
       {Array.from({ length: 5 }).map((_, i) => (
-        <ClayCard key={i} variant="default" padding="none" className="rounded-2xl overflow-hidden animate-pulse">
-          <div className="flex items-stretch">
-            <div className="w-1 bg-background-muted" />
-            <div className="flex items-center gap-4 p-3 pr-5 flex-1">
-              <div className="w-14 h-12 bg-background-muted rounded-lg" />
-              <div className="flex-1 min-w-0 space-y-2">
-                <div className="h-4 w-2/3 bg-background-muted rounded" />
-                <div className="h-3 w-1/2 bg-background-muted/80 rounded" />
-                <div className="flex items-center gap-2 pt-1">
-                  <div className="h-2.5 w-20 bg-background-muted/70 rounded" />
-                  <div className="h-2.5 w-16 bg-background-muted/70 rounded" />
-                </div>
-              </div>
-              <div className="hidden sm:flex items-center gap-2">
-                <div className="h-8 w-8 bg-background-muted rounded-lg" />
-                <div className="h-8 w-8 bg-background-muted rounded-lg" />
-              </div>
+        <div key={i} className="w-full bg-background-muted rounded-[2rem] p-5 lg:p-6 animate-pulse flex items-center gap-5">
+          <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-[1rem] bg-black/5 shrink-0" />
+          <div className="flex-1 flex flex-col gap-3">
+            <div className="h-5 w-3/4 bg-black/5 rounded-full" />
+            <div className="flex gap-2">
+              <div className="h-4 w-20 bg-black/5 rounded-full" />
+              <div className="h-4 w-16 bg-black/5 rounded-full" />
             </div>
+            <div className="h-2 w-full bg-black/5 rounded-full" />
           </div>
-        </ClayCard>
+        </div>
       ))}
     </div>
   );
 }
 
 function EmptyState({
-  hasFilters,
-  onClearFilters,
-  onCreateNew,
-  totalSets
+  hasFilters, onClearFilters, onCreateNew, totalSets
+
 }: {
-  hasFilters: boolean;
-  onClearFilters: () => void;
-  onCreateNew: () => void;
-  totalSets: number;
+  hasFilters: boolean; onClearFilters: () => void; onCreateNew: () => void; totalSets: number;
 }) {
   return (
-    <ClayCard variant="elevated" padding="lg" className="rounded-3xl">
-      <div className="text-center py-16">
-        <Image
-          src="/brand/verso-empty-clean.svg"
-          alt="Verso mascot — empty state"
-          width={140}
-          height={140}
-          className="mx-auto mb-8 drop-shadow-sm"
-        />
-
-        {hasFilters ? (
-          <>
-            <h3 className="text-2xl font-bold text-foreground mb-3">No matching flashcard sets</h3>
-            <p className="text-foreground-muted mb-8 max-w-md mx-auto">
-              Try adjusting your search or filters to find what you&apos;re looking for
-            </p>
-            <button
-              onClick={onClearFilters}
-              className="px-6 py-3 rounded-xl bg-surface text-foreground font-semibold border border-border hover:shadow-md transition-all"
-            >
-              Clear filters
-            </button>
-          </>
-        ) : totalSets === 0 ? (
-          <>
-            <h3 className="text-2xl font-bold text-foreground mb-3">Start studying with flashcards</h3>
-            <p className="text-foreground-muted mb-8 max-w-md mx-auto">
-              Create flashcards from your notes to begin studying with spaced repetition
-            </p>
-            <HeroActionButton
-              icon={<FlashcardAddIcon className="w-5 h-5" />}
-              onClick={onCreateNew}
-            >
-              Forge Flashcards
-            </HeroActionButton>
-          </>
-        ) : (
-          <>
-            <h3 className="text-2xl font-bold text-foreground mb-3">No results found</h3>
-            <p className="text-foreground-muted mb-8 max-w-md mx-auto">
-              No flashcard sets match your current filters
-            </p>
-            <button
-              onClick={onClearFilters}
-              className="px-6 py-3 rounded-xl bg-surface text-foreground font-semibold border border-border hover:shadow-md transition-all"
-            >
-              Clear filters
-            </button>
-          </>
-        )}
+    <div className="w-full bg-background-muted rounded-[3rem] p-10 lg:p-20 text-center flex flex-col items-center border-[6px] border-surface">
+      <div className="w-40 h-40 mb-10 relative opacity-90 drop-shadow-xl saturate-50">
+        <Image src="/brand/verso-empty-clean.svg" alt="Empty" fill className="object-contain" />
       </div>
-    </ClayCard>
+      {hasFilters ? (
+        <>
+          <h3 className="text-3xl lg:text-4xl font-black uppercase tracking-tighter text-foreground mb-4">NO MATCHES</h3>
+          <p className="opacity-60 mb-10 text-[13px] max-w-md font-bold uppercase tracking-widest leading-relaxed">
+            NOTHING FOUND FOR YOUR CURRENT SEARCH OR MASTERY FILTERS.
+          </p>
+          <button onClick={onClearFilters} className="px-10 py-4 rounded-full bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[12px] hover:scale-105 transition-all shadow-[0_12px_30px_rgba(0,0,0,0.15)]">
+            CLEAR ALL FILTERS
+          </button>
+        </>
+      ) : totalSets === 0 ? (
+        <>
+          <h3 className="text-3xl lg:text-4xl font-black uppercase tracking-tighter text-foreground mb-4">BLANK SLATE</h3>
+          <p className="opacity-60 mb-10 text-[13px] max-w-md font-bold uppercase tracking-widest leading-relaxed">
+            CREATE YOUR FIRST FLASHCARD SET FROM YOUR NOTES TO BEGIN STUDYING.
+          </p>
+          <button
+            onClick={onCreateNew}
+            className="group flex items-center justify-center gap-3 px-8 py-4 rounded-[2rem] bg-foreground text-surface hover:bg-foreground/90 transition-all font-black uppercase tracking-[0.2em] text-[12px] shadow-lg active:scale-95"
+          >
+            <FlashcardAddIcon className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+            FORGE FLASHCARDS
+          </button>
+        </>
+      ) : (
+        <>
+          <h3 className="text-3xl lg:text-4xl font-black uppercase tracking-tighter text-foreground mb-4">NO RESULTS</h3>
+          <p className="opacity-60 mb-10 text-[13px] max-w-md font-bold uppercase tracking-widest leading-relaxed">
+            NO FLASHCARD SETS MATCH YOUR CURRENT FILTERS.
+          </p>
+          <button onClick={onClearFilters} className="px-10 py-4 rounded-full bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[12px] hover:scale-105 transition-all shadow-[0_12px_30px_rgba(0,0,0,0.15)]">
+            CLEAR FILTERS
+          </button>
+        </>
+      )}
+    </div>
   );
 }
 
 function FlashcardListItem({
-  set,
-  onClick,
-  onReforge,
-  onDelete,
-  onShare,
-  shareLinkCopied,
+  set, onClick, onReforge, onDelete, onShare, shareLinkCopied,
 }: {
-  set: FlashcardSet;
-  onClick: () => void;
-  onReforge: () => void;
-  onDelete: () => void;
-  onShare: (e: React.MouseEvent) => void;
-  shareLinkCopied: boolean;
+  set: FlashcardSet; onClick: () => void; onReforge: () => void; onDelete: () => void; onShare: (e: React.MouseEvent) => void; shareLinkCopied: boolean;
 }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const progress = Math.round((set.mastered_cards / set.total_cards) * 100) || 0;
   const isMastered = progress === 100;
   const learningCards = set.total_cards - set.mastered_cards;
 
-  // Choose accent colors based on mastery
-  const accentColor = isMastered ? '#10b981' : '#6366f1';
-  const accentColorLight = isMastered ? '#34d399' : '#818cf8';
-  const accentShadow = isMastered ? 'rgba(16,185,129,0.3)' : 'rgba(99,102,241,0.3)';
-
-  // Mastery status label
-  const getMasteryLabel = () => {
-    if (isMastered) return { text: 'Mastered', className: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' };
-    if (progress >= 50) return { text: 'In Progress', className: 'text-amber-600 bg-amber-500/10 border-amber-500/20' };
-    if (progress > 0) return { text: 'Learning', className: 'text-primary bg-primary/10 border-primary/20' };
-    return { text: 'New', className: 'text-foreground-muted bg-surface border-border/50' };
+  // Mastery-based color for the icon
+  const getMasteryColor = () => {
+    if (isMastered) return '#10b981';
+    if (progress >= 50) return '#f59e0b';
+    if (progress > 0) return '#6366f1';
+    return '#94a3b8';
   };
 
-  const masteryLabel = getMasteryLabel();
+  const getMasteryBadge = () => {
+    if (isMastered) return { text: 'MASTERED', cls: 'bg-[#10b981] text-white' };
+    if (progress >= 50) return { text: 'IN PROGRESS', cls: 'bg-[#f59e0b] text-white' };
+    if (progress > 0) return { text: 'LEARNING', cls: 'bg-[#6366f1] text-white' };
+    return { text: 'NEW', cls: 'bg-foreground/10 text-foreground' };
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-
     if (diff < 60) return 'Just now';
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
@@ -813,187 +601,109 @@ function FlashcardListItem({
     return date.toLocaleDateString();
   };
 
-  // Get the source note name from the set metadata
   const sourceNote = (set as FlashcardSet & { notes?: { id: string; title: string } | null }).notes;
+  const masteryBadge = getMasteryBadge();
 
   return (
-    <div onClick={onClick} className="block group cursor-pointer">
-      <ClayCard variant="default" padding="none" className="rounded-2xl overflow-hidden hover:shadow-lg transition-all">
-        <div className="flex items-stretch">
-          {/* Mastery accent left border */}
-          <div
-            className="w-1 flex-shrink-0 rounded-l-2xl"
-            style={{
-              background: isMastered
-                ? 'linear-gradient(180deg, #34d399, #10b981)'
-                : progress >= 50
-                  ? 'linear-gradient(180deg, #fbbf24, #f59e0b)'
-                  : progress > 0
-                    ? 'linear-gradient(180deg, #818cf8, #6366f1)'
-                    : 'linear-gradient(180deg, #94a3b8, #64748b)'
-            }}
-          />
+    <div
+      onClick={onClick}
+      className={`group relative w-full bg-background-muted rounded-[2rem] p-5 lg:p-6 flex items-start gap-4 lg:gap-5 cursor-pointer transition-all hover:bg-surface-elevated shadow-sm hover:shadow-xl hover:-translate-y-1 ${isMenuOpen ? 'z-50' : 'z-10'}`}
+    >
+      {/* Flat mastery icon block */}
+      <div
+        className="w-14 h-14 lg:w-16 lg:h-16 rounded-[1rem] flex-shrink-0 flex items-center justify-center shadow-inner relative overflow-hidden"
+        style={{ background: getMasteryColor() }}
+      >
+        <div className="absolute inset-0 opacity-20 mix-blend-overlay" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
+        <FlashcardIcon className="w-7 h-7 lg:w-8 lg:h-8 text-white relative z-10 drop-shadow-md" />
+      </div>
 
-          <div className="flex items-center gap-2 sm:gap-4 p-2 sm:p-3 pr-3 sm:pr-5 flex-1 min-w-0">
-            {/* 3D mini flashcard stack */}
-            <div className="shrink-0 w-11 sm:w-14">
-              <div className="relative flex-shrink-0 scale-75 sm:scale-100 origin-left" style={{ width: 56, height: 44 }}>
-                {/* Bottom card (3rd in stack) — offset right + down */}
-                <div
-                  className="absolute rounded-[6px]"
-                  style={{
-                    top: 4,
-                    left: 4,
-                    right: 0,
-                    bottom: 0,
-                    background: 'linear-gradient(135deg, #d1d5db, #c4c8cd)',
-                    boxShadow: '1px 1px 2px rgba(0,0,0,0.10)',
-                  }}
-                />
-                {/* Middle card (2nd in stack) */}
-                <div
-                  className="absolute rounded-[6px]"
-                  style={{
-                    top: 2,
-                    left: 2,
-                    right: 2,
-                    bottom: 2,
-                    background: 'linear-gradient(135deg, #e2e5ea, #d5d8dd)',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
-                  }}
-                />
-                {/* Front card — main colored card */}
-                <div
-                  className="absolute rounded-[6px] overflow-hidden"
-                  style={{
-                    top: 0,
-                    left: 0,
-                    right: 4,
-                    bottom: 4,
-                    background: `linear-gradient(145deg, ${accentColorLight} 0%, ${accentColor} 60%, ${accentColor} 100%)`,
-                    boxShadow: `2px 3px 6px ${accentShadow}`,
-                  }}
-                >
-                  {/* Glossy highlight */}
-                  <div
-                    className="absolute pointer-events-none"
-                    style={{
-                      top: '-15%',
-                      left: '5%',
-                      right: '35%',
-                      bottom: '55%',
-                      background: 'linear-gradient(160deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
-                      borderRadius: '50%',
-                      filter: 'blur(1px)',
-                    }}
-                  />
-                  {/* Divider line (Q/A split) */}
-                  <div
-                    className="absolute left-[15%] right-[15%]"
-                    style={{
-                      top: '50%',
-                      height: 1,
-                      background: 'rgba(255,255,255,0.3)',
-                    }}
-                  />
-                  {/* Lightning bolt icon */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <SparklesIcon className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.35)' }} />
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* Content */}
+      <div className="flex-1 min-w-0 flex flex-col justify-center pr-8 lg:pr-10">
+        <h3 className="text-[14px] lg:text-[16px] font-black uppercase tracking-widest text-foreground truncate max-w-[95%] leading-tight mb-2">
+          {set.title || 'UNTITLED SET'}
+        </h3>
 
-            {/* Content */}
-            <div className="flex-1 min-w-0 py-1">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-x-2 gap-y-1">
-                <h3 className="font-bold text-sm sm:text-base text-foreground truncate group-hover:text-primary transition-colors flex-1">
-                  {set.title}
-                </h3>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {set.is_public && (
-                    <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-lg border border-emerald-100">
-                      Public
-                    </span>
-                  )}
-                  <span className={`inline-flex text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-lg border shrink-0 ${masteryLabel.className}`}>
-                    {masteryLabel.text}
-                  </span>
-                </div>
-              </div>
+        {sourceNote && (
+          <p className="text-[9px] lg:text-[10px] font-bold uppercase tracking-widest text-foreground/40 truncate mb-2">
+            FROM {sourceNote.title}
+          </p>
+        )}
 
-              {/* Source note */}
-              {sourceNote && (
-                <p className="text-[10px] sm:text-[11px] text-foreground-muted/70 truncate mt-0.5">
-                  Refined from {sourceNote.title}
-                </p>
-              )}
-
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] text-foreground-muted flex items-center gap-1 font-medium">
-                    <Clock01Icon className="w-3 h-3" />
-                    {formatDate(set.updated_at || set.created_at)}
-                  </span>
-                  <span className="text-[10px] text-foreground-muted font-medium">
-                    <span className="font-bold text-foreground">{set.total_cards}</span> cards
-                  </span>
-                </div>
-                
-                <div className="flex items-center gap-2 flex-grow sm:flex-grow-0">
-                  <div className="flex-1 sm:w-20 bg-background-muted rounded-full h-1.5 overflow-hidden ring-1 ring-border/20">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${isMastered ? 'bg-emerald-400' : progress >= 50 ? 'bg-amber-400' : 'bg-primary/70'
-                        }`}
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <span className={`text-[10px] font-black shrink-0 ${isMastered ? 'text-emerald-600' : 'text-foreground-muted'}`}>
-                    {progress}%
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Actions (hidden on mobile) */}
-            <div className="hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-              <button
-                className={`p-2 rounded-lg transition-colors ${shareLinkCopied
-                  ? 'bg-emerald-500/10 text-emerald-500'
-                  : 'bg-primary/10 text-primary hover:bg-primary/20'
-                  }`}
-                title={shareLinkCopied ? 'Copied!' : 'Share'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onShare(e);
-                }}
-              >
-                <Share01Icon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onReforge();
-                }}
-                className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                title="Reforge flashcards"
-              >
-                <RefreshIcon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-                className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
-                title="Delete set"
-              >
-                <Delete01Icon className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[0.75rem] border-2 border-border/80 text-foreground-muted text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] leading-none bg-surface/50">
+            <Clock01Icon className="w-3.5 h-3.5 opacity-70" /> {formatDate(set.updated_at || set.created_at)}
+          </span>
+          <span className="inline-flex px-3 py-1.5 rounded-[0.75rem] border-2 border-border/80 text-foreground-muted text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] leading-none bg-surface/50">
+            {set.total_cards} CARDS
+          </span>
+          <span className={`inline-flex px-3 py-1.5 rounded-[0.75rem] text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] leading-none shadow-sm ${masteryBadge.cls}`}>
+            {masteryBadge.text}
+          </span>
+          {set.is_public && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[0.75rem] bg-[#00c569] text-white text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] leading-none shadow-sm">
+              PUBLIC
+            </span>
+          )}
         </div>
-      </ClayCard>
+
+        {/* Progress bar */}
+        <div className="flex items-center gap-3 w-full">
+          <div className="flex-1 bg-border/30 rounded-full h-2 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${progress}%`, background: getMasteryColor() }}
+            />
+          </div>
+          <span className="text-[10px] font-black text-foreground/60 shrink-0 w-8 text-right">{progress}%</span>
+        </div>
+      </div>
+
+      {/* 3-Dot Dropdown */}
+      <div className="absolute top-4 right-4 lg:top-5 lg:right-5 z-20">
+        <button
+          onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }}
+          className={`p-2.5 rounded-full transition-all shadow-sm ${
+            isMenuOpen ? 'bg-foreground text-surface' : 'bg-surface/80 backdrop-blur-md text-foreground hover:bg-foreground hover:text-surface'
+          }`}
+        >
+          <MoreVerticalIcon className="w-5 h-5" />
+        </button>
+
+        {isMenuOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); }} />
+            <div className="absolute top-full right-0 mt-2 w-[11rem] lg:w-[12rem] bg-surface rounded-[1.25rem] shadow-2xl p-2 flex flex-col gap-1.5 border-2 border-border/20 z-50 origin-top-right animate-in zoom-in-95 duration-100">
+              
+              <button
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] transition-all w-full text-left ${
+                  shareLinkCopied ? 'bg-[#00c569] text-white cursor-default shadow-sm' : 'hover:bg-background-muted text-foreground'
+                }`}
+                onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); onShare(e); }}
+              >
+                <Share01Icon className="w-4 h-4 shrink-0" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">{shareLinkCopied ? 'COPIED!' : 'SHARE LINK'}</span>
+              </button>
+
+              <button
+                className="flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] hover:bg-background-muted text-foreground transition-all w-full text-left"
+                onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); onReforge(); }}
+              >
+                <RefreshIcon className="w-4 h-4 shrink-0" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">REFORGE</span>
+              </button>
+
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); onDelete(); }}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] hover:bg-[#ff3b30]/10 hover:text-[#ff3b30] text-[#ff3b30] transition-all w-full text-left"
+              >
+                <Delete01Icon className="w-4 h-4 shrink-0" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">DELETE</span>
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

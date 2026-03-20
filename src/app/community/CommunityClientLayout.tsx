@@ -4,6 +4,7 @@ import LandingNavbar from "@/component/Layout/navbar/LandingNavbar";
 import Navbar from "@/component/Layout/navbar/navbar";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useUIStore } from "@/stores";
 
 export default function CommunityClientLayout({
     children,
@@ -13,6 +14,8 @@ export default function CommunityClientLayout({
     isAuthenticated: boolean;
 }) {
     const pathname = usePathname();
+    const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
+    const toggleSidebar = useUIStore((state) => state.toggleSidebar);
 
     useEffect(() => {
         document.body.style.overflow = '';
@@ -21,8 +24,10 @@ export default function CommunityClientLayout({
     if (isAuthenticated) {
         return (
             <div className="flex min-h-screen w-full overflow-x-hidden">
-                <Navbar />
-                <main className="flex-1 md:ml-60 min-h-screen min-w-0 dashboard-grid-bg">
+                <Navbar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+                <main className={`flex-1 min-w-0 dashboard-grid-bg min-h-screen transition-all duration-300 ease-in-out ${
+                    sidebarCollapsed ? 'md:ml-[5rem]' : 'md:ml-[18rem]'
+                }`}>
                     <div className="relative z-10 px-2 sm:px-4 lg:px-6 pt-24 md:pt-6 pb-20 md:pb-6 max-w-7xl mx-auto w-full">
                         {children}
                     </div>
