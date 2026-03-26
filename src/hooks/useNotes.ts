@@ -341,23 +341,24 @@ async function createPage({ noteId, pageOrder }: CreatePageParams): Promise<stri
     sync_status: 'pending'
   });
 
-  try {
-    const { error } = await supabase
-      .from('note_pages')
-      .insert([{
-        id: pageId,
-        note_id: noteId,
-        title: 'Untitled Page',
-        content: '',
-        page_order: order,
-      }]);
-
-    if (!error) {
-      await db.notePages.update(pageId, { sync_status: 'synced' });
-    }
-  } catch (error) {
-    console.log("Offline mode: Page creation will sync later");
-  }
+  // Fire-and-forget Supabase insert for optimistic offline-first behavior
+  supabase
+    .from('note_pages')
+    .insert([{
+      id: pageId,
+      note_id: noteId,
+      title: 'Untitled Page',
+      content: '',
+      page_order: order,
+    }])
+    .then(({ error }) => {
+      if (!error) {
+        db.notePages.update(pageId, { sync_status: 'synced' }).catch(() => {});
+      }
+    })
+    .catch((error) => {
+      console.log("Offline mode: Page creation will sync later");
+    });
 
   return pageId;
 }
@@ -495,7 +496,30 @@ export function useCreatePage() {
 
   return useMutation({
     mutationFn: createPage,
-    onSuccess: (_, variables) => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: noteKeys.pages(variables.noteId) });
+      const previousPages = queryClient.getQueryData<NotePage[]>(noteKeys.pages(variables.noteId)) || [];
+      const newPageOrder = previousPages.length > 0 ? previousPages[previousPages.length - 1].page_order + 1 : 0;
+      
+      const optimisticPage: NotePage = {
+        id: 'temp-' + Date.now(),
+        note_id: variables.noteId,
+        title: 'Untitled Page',
+        content: '',
+        page_order: newPageOrder,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      
+      queryClient.setQueryData<NotePage[]>(noteKeys.pages(variables.noteId), [...previousPages, optimisticPage]);
+      return { previousPages };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousPages) {
+        queryClient.setQueryData(noteKeys.pages(variables.noteId), context.previousPages);
+      }
+    },
+    onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: noteKeys.pages(variables.noteId) });
     },
   });
