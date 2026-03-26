@@ -120,11 +120,11 @@ function ToolbarButton({ onClick, isActive, disabled, children, title, vertical,
       disabled={disabled}
       title={title}
       className={`
-        p-1 sm:p-1.5 rounded-lg transition-all duration-200
+        w-8 h-8 sm:w-10 sm:h-10 rounded-[1.25rem] flex items-center justify-center transition-all duration-200
         disabled:opacity-30 disabled:cursor-not-allowed
         ${isActive
-          ? 'clay-button-secondary'
-          : 'clay-button-ghost'
+          ? 'bg-foreground text-surface shadow-md scale-100'
+          : 'bg-background-muted/40 hover:bg-background-muted text-foreground hover:scale-105'
         }
       `}
     >
@@ -138,9 +138,9 @@ function ToolbarButton({ onClick, isActive, disabled, children, title, vertical,
 // ============================================
 function ToolbarDivider({ vertical }: { vertical?: boolean }) {
   if (vertical) {
-    return <div className="w-full h-px bg-gray-200 my-1" />;
+    return <div className="w-full h-px bg-border/40 my-1" />;
   }
-  return <div className="w-px h-6 bg-border/50 mx-0.5" />;
+  return <div className="w-px h-8 sm:h-10 bg-border/40 mx-1 sm:mx-2 rounded-full" />;
 }
 
 // ============================================
@@ -184,18 +184,12 @@ function VerticalToolbarButton({
         w-full ${sizeClass} flex items-center justify-center transition-all
         disabled:opacity-30 disabled:cursor-not-allowed
         ${isActive
-          ? isDark
-            ? 'bg-blue-700/60 text-blue-200'
-            : 'bg-blue-500/20 text-blue-600'
-          : isDark
-            ? 'bg-gray-800/80 hover:bg-gray-700/80 text-gray-300'
-            : 'bg-white/80 hover:bg-white text-gray-600'
+          ? 'bg-foreground text-surface shadow-md scale-100'
+          : 'bg-background-muted hover:bg-border/40 text-foreground hover:scale-[1.02]'
         }
       `}
       style={{
-        boxShadow: disabled ? 'none' : (isDark
-          ? '0 2px 4px rgba(0,0,0,0.3)'
-          : '0 2px 4px rgba(0,0,0,0.08)'),
+        boxShadow: disabled ? 'none' : undefined,
       }}
     >
       {children}
@@ -205,14 +199,7 @@ function VerticalToolbarButton({
 
 function VerticalToolbarDivider({ theme }: { theme: 'light' | 'dark' }) {
   return (
-    <div
-      className="w-full h-px"
-      style={{
-        background: theme === 'dark'
-          ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)'
-          : 'linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)'
-      }}
-    />
+    <div className="w-full h-px bg-border/40 rounded-full" />
   );
 }
 
@@ -850,10 +837,9 @@ export function EditorToolbar({ editor, fullscreen, leadingSlot, trailingSlot }:
 
   return (
     <div className={`
-      clay-toolbar
       flex items-center flex-nowrap overflow-x-auto scrollbar-hide
       ${fullscreen ? 'justify-start' : 'justify-center'}
-      gap-1 sm:gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 w-full
+      gap-2 px-4 py-3 sm:px-6 sm:py-4 w-full bg-surface border-b border-border/40 rounded-t-[2.5rem]
     `}>
       <input
         type="file"
