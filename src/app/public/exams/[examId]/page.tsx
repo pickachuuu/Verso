@@ -141,108 +141,132 @@ export default function PublicExamPage() {
 
   if (error || !exam) {
     return (
-      <div className="space-y-6 max-w-4xl mx-auto px-4 py-8">
-        <Card variant="elevated" className="text-center py-12">
-          <p className="text-foreground-muted">{error || 'This exam is not available for public viewing.'}</p>
-          <div className="mt-6 flex justify-center">
-            <Link href="/community">
-              <Button variant="outline">
-                <ArrowLeft01Icon className="w-4 h-4 mr-2" />
-                Back to Community
-              </Button>
-            </Link>
-          </div>
-        </Card>
+      <div className="w-full max-w-7xl mx-auto pt-8 md:pt-4 pb-20 px-2 md:px-0">
+        <div className="w-full bg-background-muted rounded-[3rem] p-12 lg:p-20 text-center flex flex-col items-center border-[6px] border-surface">
+          <h3 className="text-3xl lg:text-4xl font-black uppercase tracking-tighter text-foreground mb-4">
+            EXAM NOT FOUND
+          </h3>
+          <p className="opacity-60 mb-10 text-[13px] max-w-md font-bold leading-relaxed uppercase tracking-widest leading-relaxed">
+            {error || 'THIS EXAM IS NOT AVAILABLE FOR PUBLIC VIEWING.'}
+          </p>
+          <Link href="/community" className="px-10 py-5 rounded-full bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[13px] hover:scale-105 transition-all shadow-lg flex items-center gap-3">
+            <ArrowLeft01Icon className="w-5 h-5" />
+            BACK TO COMMUNITY
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-        <Link href="/community" className="flex items-center gap-2 text-foreground-muted hover:text-foreground transition-colors">
-          <ArrowLeft01Icon className="w-4 h-4" />
-          <span className="text-sm font-medium">Community</span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setIsSaveModalOpen(true)}>
-            <Bookmark01Icon className="w-4 h-4 mr-2" />
-            Save
-          </Button>
-          <Link href={`/exam/${exam.id}`}>
-            <Button size="sm">
-              <PlayIcon className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Start Attempt</span>
-              <span className="sm:hidden">Start</span>
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      <Card variant="elevated" className="space-y-3">
-        <Card.Header>
-          <h1 className="text-2xl font-bold text-foreground break-words">{exam.title || 'Exam'}</h1>
-          {exam.description && (
-            <p className="text-sm text-foreground-muted">{exam.description}</p>
-          )}
-          <div className="flex flex-wrap items-center gap-2 text-xs text-foreground-muted">
-            <span>Updated {updatedLabel}</span>
-            <span className="h-1 w-1 rounded-full bg-border" />
-            <span>{exam.total_questions} questions</span>
-            <span className="h-1 w-1 rounded-full bg-border" />
-            <span className="capitalize">{exam.difficulty}</span>
-            {exam.time_limit_minutes && (
-              <>
-                <span className="h-1 w-1 rounded-full bg-border" />
-                <span>{exam.time_limit_minutes} min</span>
-              </>
-            )}
-          </div>
-        </Card.Header>
-      </Card>
-
-      <Card variant="default" className="space-y-4">
-        <Card.Header>
-          <h2 className="text-lg font-semibold text-foreground">Preview questions</h2>
-          <p className="text-sm text-foreground-muted">
-            Answers are hidden in preview mode. Start an attempt to take the exam.
-          </p>
-        </Card.Header>
-        <Card.Content>
-          {questions.length === 0 ? (
-            <p className="text-sm text-foreground-muted">No questions available for this exam.</p>
-          ) : (
-            <div className="space-y-4">
-              {questions.map((question, index) => (
-                <div key={question.id} className="rounded-xl border border-border bg-surface px-4 py-3">
-                  <div className="flex items-center justify-between text-xs text-foreground-muted mb-2">
-                    <span>Question {index + 1}</span>
-                    <span>{TYPE_LABELS[question.question_type]}</span>
-                  </div>
-                  <p className="text-sm text-foreground">{question.question}</p>
-                  {question.options && question.options.length > 0 && (
-                    <ul className="mt-3 space-y-1 text-sm text-foreground-muted list-disc list-inside">
-                      {question.options.map((option, optionIndex) => (
-                        <li key={`${question.id}-${optionIndex}`}>{option}</li>
-                      ))}
-                    </ul>
-                  )}
+    <div className="w-full max-w-[90rem] mx-auto pt-8 md:pt-4 pb-20 px-4 lg:px-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
+        
+        {/* Left Sticky Pane */}
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-6 lg:sticky lg:top-8 h-fit z-20">
+          
+          {/* Hero Header */}
+          <div className="w-full flex flex-col gap-5">
+            <div className="flex items-center gap-3">
+              <Link href="/community" className="px-4 py-2 rounded-full border-2 border-border/60 hover:bg-background-muted transition-all hidden sm:flex items-center gap-2">
+                <ArrowLeft01Icon className="w-3.5 h-3.5" />
+              </Link>
+              <div className="w-3 h-3 rounded-full bg-warning flex-shrink-0" />
+              <h1 className="text-[11px] font-black uppercase tracking-[0.3em] text-foreground/50">COMMUNITY EXAM</h1>
+            </div>
+            <h2 className="text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter text-foreground leading-[0.85] break-words uppercase">
+              {exam.title || 'UNTITLED EXAM'}
+            </h2>
+            
+            <div className="flex flex-col gap-3 mt-4">
+              <div className="flex items-center justify-between px-5 py-4 rounded-[1.5rem] bg-background-muted border border-border/40">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/50">QUESTIONS</span>
+                <span className="text-[12px] font-black uppercase tracking-widest text-foreground">{exam.total_questions}</span>
+              </div>
+              <div className="flex items-center justify-between px-5 py-4 rounded-[1.5rem] bg-background-muted border border-border/40">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/50">DIFFICULTY</span>
+                <span className="text-[12px] font-black uppercase tracking-widest text-foreground">{exam.difficulty}</span>
+              </div>
+              {exam.time_limit_minutes && (
+                <div className="flex items-center justify-between px-5 py-4 rounded-[1.5rem] bg-background-muted border border-border/40">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/50">TIME LIMIT</span>
+                  <span className="text-[12px] font-black uppercase tracking-widest text-foreground">{exam.time_limit_minutes} MIN</span>
                 </div>
-              ))}
+              )}
+            </div>
+
+            <div className="flex flex-col gap-3 mt-2">
+              <button onClick={() => setIsSaveModalOpen(true)} className="w-full flex justify-center items-center gap-3 px-6 py-4 rounded-[2rem] bg-background-muted hover:bg-border/40 text-foreground font-black uppercase tracking-[0.2em] text-[11px] active:scale-95 transition-all">
+                <Bookmark01Icon className="w-4 h-4" />
+                SAVE EXAM
+              </button>
+              <Link href={`/exam/${exam.id}`} className="w-full flex justify-center items-center gap-3 px-6 py-4 rounded-[2rem] bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[11px] hover:bg-foreground/90 active:scale-95 transition-all shadow-lg">
+                <PlayIcon className="w-4 h-4 fill-current" />
+                START ATTEMPT
+              </Link>
+            </div>
+          </div>
+
+          {exam.description && (
+            <div className="w-full bg-background-muted rounded-[2rem] p-6">
+              <p className="text-[13px] font-bold text-foreground/80 leading-relaxed">{exam.description}</p>
             </div>
           )}
-        </Card.Content>
-      </Card>
+        </div>
 
-      <SaveMaterialModal
-        isOpen={isSaveModalOpen}
-        onClose={() => setIsSaveModalOpen(false)}
-        itemType="exam"
-        title={exam.title || 'Exam'}
-        onSaveReference={handleSaveReference}
-        onSaveCopy={handleSaveCopy}
-        savingAction={savingAction}
-      />
+        {/* Right Scrolling Pane */}
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col min-h-[70vh] z-10 w-full lg:pt-8">
+
+      <div className="w-full bg-background-muted rounded-[3rem] p-6 lg:p-10">
+        <div className="mb-8">
+          <h2 className="text-2xl lg:text-3xl font-black tracking-tighter uppercase text-foreground">PREVIEW QUESTIONS</h2>
+          <p className="text-[11px] font-black tracking-widest uppercase text-foreground/40 mt-1">
+            ANSWERS ARE HIDDEN IN PREVIEW MODE. START AN ATTEMPT TO TAKE THE EXAM.
+          </p>
+        </div>
+
+        {questions.length === 0 ? (
+          <div className="w-full text-center py-10">
+            <p className="text-[13px] font-black uppercase tracking-widest text-foreground/50">NO QUESTIONS AVAILABLE FOR THIS EXAM.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {questions.map((question, index) => (
+              <div key={question.id} className="rounded-[1.5rem] bg-surface p-5 lg:p-6 shadow-sm">
+                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-3 pb-3 border-b border-border/30">
+                  <span>QUESTION {index + 1}</span>
+                  <span className="bg-background-muted px-3 py-1.5 rounded-full text-foreground/60">{TYPE_LABELS[question.question_type]}</span>
+                </div>
+                <p className="text-[14px] lg:text-[15px] font-bold text-foreground leading-relaxed">
+                  {question.question}
+                </p>
+                {question.options && question.options.length > 0 && (
+                  <div className="mt-5 space-y-2 pl-4 border-l-2 border-border/40">
+                    {question.options.map((option, optionIndex) => (
+                      <div key={`${question.id}-${optionIndex}`} className="flex items-start gap-3">
+                        <span className="w-4 h-4 shrink-0 rounded-full border-2 border-border/60 mt-[2px]" />
+                        <span className="text-[13px] font-medium text-foreground/80 leading-relaxed">{option}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+        <SaveMaterialModal
+          isOpen={isSaveModalOpen}
+          onClose={() => setIsSaveModalOpen(false)}
+          itemType="exam"
+          title={exam.title || 'Exam'}
+          onSaveReference={handleSaveReference}
+          onSaveCopy={handleSaveCopy}
+          savingAction={savingAction}
+        />
+        </div>
+      </div>
     </div>
   );
 }

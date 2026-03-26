@@ -220,88 +220,80 @@ export default function PublicFlashcardSetPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-8 space-y-6">
-      <ClayCard variant="elevated" padding="md" className="rounded-3xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link
-              href="/community"
-              className="p-2 rounded-xl bg-background-muted border border-border hover:bg-background-muted/70 transition-all flex-shrink-0"
-              title="Back to community"
-            >
-              <ArrowLeft01Icon className="w-4 h-4 text-foreground-muted" />
-            </Link>
-            <div className="min-w-0">
-              <h1 className="text-xl font-bold text-foreground break-words overflow-hidden">
-                {set.title || 'Flashcards'}
-              </h1>
-              <p className="text-xs text-foreground-muted mt-0.5">
-                {flashcards.length} cards · Shared publicly
-              </p>
+    <div className="w-full max-w-[90rem] mx-auto pt-8 md:pt-4 pb-20 px-4 lg:px-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
+        
+        {/* Left Sticky Pane */}
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-6 lg:sticky lg:top-8 h-fit z-20">
+          
+          {/* Hero Header */}
+          <div className="w-full flex flex-col gap-5">
+            <div className="flex items-center gap-3">
+              <Link href="/community" className="px-4 py-2 rounded-full border-2 border-border/60 hover:bg-background-muted transition-all hidden sm:flex items-center gap-2">
+                <ArrowLeft01Icon className="w-3.5 h-3.5" />
+              </Link>
+              <div className="w-3 h-3 rounded-full bg-success flex-shrink-0" />
+              <h1 className="text-[11px] font-black uppercase tracking-[0.3em] text-foreground/50">COMMUNITY FLASHCARDS</h1>
+            </div>
+            <h2 className="text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter text-foreground leading-[0.85] break-words uppercase">
+              {set.title || 'UNTITLED FLASHCARDS'}
+            </h2>
+            <p className="text-[12px] font-black uppercase tracking-widest text-foreground/40 mt-2">
+              {flashcards.length} CARDS
+            </p>
+
+            <div className="flex flex-col gap-3 mt-2">
+              <button onClick={() => setIsSaveModalOpen(true)} className="w-full flex justify-center items-center gap-3 px-6 py-4 rounded-[2rem] bg-background-muted hover:bg-border/40 text-foreground font-black uppercase tracking-[0.2em] text-[11px] active:scale-95 transition-all">
+                <Bookmark01Icon className="w-4 h-4" />
+                SAVE SET
+              </button>
+              <button onClick={copyShareLink} className="w-full flex justify-center items-center gap-3 px-6 py-4 rounded-[2rem] bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[11px] hover:bg-foreground/90 active:scale-95 transition-all shadow-lg">
+                <Share01Icon className="w-4 h-4" />
+                COPY LINK
+              </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <Button
-              onClick={() => setIsSaveModalOpen(true)}
-              variant="outline"
-              size="sm"
-              className="shrink-0"
+          {set.description && (
+            <div className="w-full bg-background-muted rounded-[2rem] p-6">
+              <p className="text-[13px] font-bold text-foreground/80 leading-relaxed">{set.description}</p>
+            </div>
+          )}
+
+          {/* Control Strip */}
+          <div className="w-full bg-background-muted rounded-[2rem] p-4 flex flex-col gap-3">
+            <div className="w-full relative flex items-center bg-surface rounded-[1.5rem] px-5 h-[3.5rem] shadow-sm">
+              <Search01Icon className="w-5 h-5 opacity-40 shrink-0" />
+              <input
+                type="text"
+                placeholder="SEARCH..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent border-none focus:outline-none text-[12px] font-black uppercase tracking-widest text-foreground placeholder:text-foreground/30 min-w-0 px-3"
+              />
+            </div>
+            <button
+              onClick={allExpanded ? collapseAll : expandAll}
+              className="w-full px-6 py-4 rounded-[1.5rem] bg-surface text-[10px] font-black uppercase tracking-[0.2em] text-foreground hover:bg-border/40 transition-all shadow-sm"
             >
-              <Bookmark01Icon className="w-4 h-4 mr-2" />
-              Save
-            </Button>
-            <Button
-              onClick={copyShareLink}
-              variant="outline"
-              size="sm"
-              className="shrink-0"
-            >
-              <Share01Icon className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Copy Link</span>
-              <span className="sm:hidden">Share</span>
-            </Button>
+              {allExpanded ? 'COLLAPSE ALL' : 'EXPAND ALL'}
+            </button>
           </div>
         </div>
-      </ClayCard>
 
-      {set.description && (
-        <ClayCard variant="default" padding="md" className="rounded-2xl">
-          <p className="text-sm text-foreground-muted">{set.description}</p>
-        </ClayCard>
-      )}
-
-      <ClayCard variant="default" padding="md" className="rounded-2xl">
-        <div className="flex items-center gap-3">
-          <div className="flex-1 relative">
-            <Search01Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" />
-            <input
-              type="text"
-              placeholder="Search cards..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm text-foreground placeholder:text-foreground-muted"
-            />
-          </div>
-          <button
-            onClick={allExpanded ? collapseAll : expandAll}
-            className="px-3 py-2.5 rounded-xl text-xs font-medium border border-border bg-background-muted hover:bg-background-muted/70 text-foreground-muted hover:text-foreground transition-all whitespace-nowrap"
-          >
-            {allExpanded ? 'Collapse All' : 'Expand All'}
-          </button>
-        </div>
-      </ClayCard>
+        {/* Right Scrolling Pane */}
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col min-h-[70vh] z-10 w-full lg:pt-8">
 
       {filteredCards.length === 0 ? (
-        <ClayCard variant="default" padding="lg" className="rounded-2xl text-center">
-          <p className="text-foreground-muted py-8">
+        <div className="w-full bg-background-muted rounded-[3rem] p-12 text-center border-[6px] border-surface">
+          <p className="text-[13px] font-black uppercase tracking-widest text-foreground/50 py-8">
             {searchQuery.trim()
-              ? 'No cards match your search.'
-              : 'No cards in this set.'}
+              ? 'NO CARDS MATCH YOUR SEARCH.'
+              : 'NO CARDS IN THIS SET.'}
           </p>
-        </ClayCard>
+        </div>
       ) : (
-        <div className="space-y-2">
+        <div className="w-full bg-background-muted rounded-[2rem] p-4 lg:p-6 space-y-3">
           {filteredCards.map((card, index) => (
             <BrowseCard
               key={card.id}
@@ -314,19 +306,21 @@ export default function PublicFlashcardSetPage() {
         </div>
       )}
 
-      <p className="text-center text-xs text-foreground-muted/60 pb-4">
-        Showing {filteredCards.length} of {flashcards.length} cards
+      <p className="text-center text-[10px] font-black uppercase tracking-widest text-foreground/40 pb-4">
+        SHOWING {filteredCards.length} OF {flashcards.length} CARDS
       </p>
 
-      <SaveMaterialModal
-        isOpen={isSaveModalOpen}
-        onClose={() => setIsSaveModalOpen(false)}
-        itemType="flashcard"
-        title={set.title || 'Flashcards'}
-        onSaveReference={handleSaveReference}
-        onSaveCopy={handleSaveCopy}
-        savingAction={savingAction}
-      />
+        <SaveMaterialModal
+          isOpen={isSaveModalOpen}
+          onClose={() => setIsSaveModalOpen(false)}
+          itemType="flashcard"
+          title={set.title || 'Flashcards'}
+          onSaveReference={handleSaveReference}
+          onSaveCopy={handleSaveCopy}
+          savingAction={savingAction}
+        />
+        </div>
+      </div>
     </div>
   );
 }
@@ -361,55 +355,58 @@ function BrowseCard({
         : 'text-amber-500';
 
   return (
-    <ClayCard variant="default" padding="none" className="rounded-2xl overflow-hidden">
+    <div className="w-full bg-surface rounded-[1.5rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-border/40 hover:border-border">
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-4 p-4 text-left hover:bg-surface-elevated/30 transition-all"
+        className="w-full flex items-start sm:items-center gap-4 p-5 sm:p-6 text-left hover:bg-surface-elevated/30 transition-all"
       >
-        <span className="text-xs font-bold text-foreground-muted/40 w-6 text-right flex-shrink-0">
+        <span className="text-[10px] font-black uppercase tracking-widest text-foreground/30 w-6 text-right flex-shrink-0 pt-0.5 sm:pt-0">
           {index + 1}
         </span>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground leading-relaxed line-clamp-2">
+          <p className="text-[13px] sm:text-[14px] font-black tracking-wide text-foreground leading-relaxed line-clamp-3">
             {card.question}
           </p>
         </div>
-        <span
-          className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border flex-shrink-0 ${statusStyle.bg} ${statusStyle.text}`}
-        >
-          {statusStyle.label}
-        </span>
-        <ArrowDown01Icon
-          className={`w-4 h-4 text-foreground-muted transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''
-            }`}
-        />
+        <div className="flex items-center gap-4 flex-shrink-0">
+          <span
+            className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border border-transparent ${statusStyle.bg} ${statusStyle.text}`}
+          >
+            {statusStyle.label}
+          </span>
+          <ArrowDown01Icon
+            className={`w-5 h-5 text-foreground/40 transition-transform ${isExpanded ? 'rotate-180' : ''
+              }`}
+          />
+        </div>
       </button>
 
       {isExpanded && (
-        <div className="border-t border-border/30 px-4 pb-4 pt-3 ml-10">
-          <p className="text-[10px] uppercase tracking-widest font-bold text-primary-light/60 mb-2">
-            Answer
+        <div className="px-5 sm:px-6 pb-6 pt-3 ml-[3.25rem]">
+          <div className="w-12 h-1 bg-border/40 rounded-full mb-5" />
+          <p className="text-[10px] font-black uppercase tracking-widest text-primary/60 mb-3">
+            ANSWER
           </p>
-          <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+          <p className="text-[13px] sm:text-[14px] font-medium text-foreground leading-relaxed whitespace-pre-line text-foreground/90">
             {card.answer}
           </p>
-          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border/20">
-            <span className={`text-[10px] font-medium ${difficultyColor}`}>{difficultyLabel}</span>
+          
+          <div className="flex flex-wrap items-center gap-3 mt-6">
+            <span className={`px-4 py-2 rounded-full border border-border/40 bg-background-muted text-[9px] font-black uppercase tracking-widest ${difficultyColor}`}>{difficultyLabel}</span>
             {card.review_count > 0 && (
-              <span className="text-[10px] text-foreground-muted">
-                {card.review_count} review{card.review_count !== 1 ? 's' : ''} ·{' '}
-                {card.correct_count}/{card.review_count} correct
+              <span className="px-4 py-2 rounded-full border border-border/40 bg-background-muted text-[9px] font-black uppercase tracking-widest text-foreground/50">
+                {card.review_count} REVIEWS · {card.correct_count} CORRECT
               </span>
             )}
             {card.status === 'mastered' && (
-              <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium">
-                <CheckmarkCircle01Icon className="w-3 h-3" />
-                Mastered
+              <span className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-border/40 bg-background-muted text-[9px] text-emerald-500 font-black uppercase tracking-widest">
+                <CheckmarkCircle01Icon className="w-3.5 h-3.5" />
+                MASTERED
               </span>
             )}
           </div>
         </div>
       )}
-    </ClayCard>
+    </div>
   );
 }
