@@ -231,6 +231,11 @@ body::after {
   }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 
 /* Markdown/Prose Styles */
 .prose h1 {
