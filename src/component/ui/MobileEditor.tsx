@@ -82,28 +82,28 @@ export default function MobileEditor({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#FFFAF0] flex flex-col safe-area-inset overflow-hidden text-[13px]">
+    <div className="fixed inset-0 z-[100] bg-surface flex flex-col safe-area-inset overflow-hidden text-[13px]">
       {/* 🏛️ ULTRA-PREMIUM MOBILE HEADER */}
-      <header className="h-14 shrink-0 flex items-center justify-between px-3 bg-white border-b border-[#E6D5C3] shadow-[0_2px_10px_rgba(0,0,0,0.02)] z-[100]">
+      <header className="h-16 shrink-0 flex items-center justify-between px-4 bg-surface/90 backdrop-blur-xl border-b border-border/40 shadow-sm z-[100]">
         <button 
           onClick={onBack}
-          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[#FFFAF0] border border-[#E6D5C3] text-[#4A443D] active:scale-90 transition-transform shadow-sm"
+          className="w-10 h-10 flex items-center justify-center rounded-[1.25rem] bg-background-muted border border-border/20 text-foreground active:scale-95 transition-transform"
         >
           <ArrowLeft02Icon className="w-5 h-5" />
         </button>
 
         <div className="flex-1 px-4 min-w-0 flex flex-col items-center">
-           <h1 className="text-[12px] font-black text-[#2D2A26] uppercase tracking-tighter truncate w-full text-center">
-             {currentView === 'cover' ? 'Settings' : note.title}
+           <h1 className="text-[13px] font-black text-foreground uppercase tracking-widest truncate w-full text-center">
+             {currentView === 'cover' ? 'SETTINGS' : note.title || 'UNTITLED NOTEBOOK'}
            </h1>
            {currentView === 'page' && (
-             <div className="flex items-center gap-1.5 mt-0.5">
-               <span className="text-[9px] font-black text-[#C77B4B] uppercase tracking-[0.2em]">
-                 Page {currentPageIndex! + 1}
+             <div className="flex items-center gap-2 mt-0.5">
+               <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">
+                 PAGE {currentPageIndex! + 1}
                </span>
-               <span className="w-1 h-1 rounded-full bg-[#E6D5C3]" />
-               <span className="text-[9px] font-bold text-[#4A443D]/40 uppercase tracking-[0.1em]">
-                 {pages.length} Total
+               <span className="w-1 h-1 rounded-full bg-border" />
+               <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-[0.2em]">
+                 {pages.length} TOTAL
                </span>
              </div>
            )}
@@ -111,7 +111,7 @@ export default function MobileEditor({
 
         <button 
           onClick={() => setShowNav(true)}
-          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[#2D2A26] text-white active:scale-90 transition-transform shadow-lg shadow-[#2D2A26]/20"
+          className="w-10 h-10 flex items-center justify-center rounded-[1.25rem] bg-foreground text-surface active:scale-95 transition-transform shadow-md"
         >
           <Menu01Icon className="w-5 h-5" />
         </button>
@@ -124,12 +124,12 @@ export default function MobileEditor({
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="h-12 shrink-0 bg-[#FCF8F3] border-b border-[#E6D5C3] flex items-center px-2 gap-1 overflow-x-auto scrollbar-hide z-[90]"
+            className="h-14 shrink-0 bg-background-muted/30 border-b border-border/40 flex items-center px-4 gap-2 overflow-x-auto scrollbar-hide z-[90]"
           >
              <ToolbarBtn icon={TextBoldIcon} active={editor?.isActive('bold')} onClick={() => runFormat('bold')} />
              <ToolbarBtn icon={TextItalicIcon} active={editor?.isActive('italic')} onClick={() => runFormat('italic')} />
              <ToolbarBtn icon={TextUnderlineIcon} active={editor?.isActive('underline')} onClick={() => runFormat('underline')} />
-             <div className="w-px h-6 bg-[#E6D5C3] mx-1" />
+             <div className="w-px h-6 bg-border/40 mx-1 rounded-full" />
              <ToolbarBtn icon={ListViewIcon} active={editor?.isActive('bulletList')} onClick={() => runFormat('list')} />
              
              <div className="flex-1 min-w-4" />
@@ -137,32 +137,32 @@ export default function MobileEditor({
              <button 
                onClick={() => onAIAction?.('continue_writing')}
                disabled={aiLoading === 'continue_writing'}
-               className="h-9 px-4 rounded-xl bg-gradient-to-r from-[#2B5D8B] to-[#3B7DAC] text-white flex items-center gap-2 active:scale-95 transition-all shadow-md shadow-[#2B5D8B]/20"
+               className="h-10 px-5 rounded-full bg-primary text-white flex items-center gap-2 active:scale-95 transition-all shadow-md"
              >
                {aiLoading === 'continue_writing' ? (
                  <Loading03Icon className="w-4 h-4 animate-spin" />
                ) : (
                  <GoogleGeminiIcon className="w-4 h-4" />
                )}
-               <span className="text-[10px] font-black uppercase tracking-wider">AI Fill</span>
+               <span className="text-[11px] font-black uppercase tracking-widest">AI FILL</span>
              </button>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* 📜 MAIN CANVAS */}
-      <main className="flex-1 overflow-y-auto scrollbar-hide pb-32">
+      <main className="flex-1 overflow-y-auto scrollbar-hide pb-[8rem]">
         <AnimatePresence mode="wait">
           {currentView === 'cover' ? (
             <motion.div 
               key="cover"
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="px-6 py-10"
+              className="px-6 py-12"
             >
-              <div className="relative aspect-[3/4.2] max-w-[280px] mx-auto group">
-                <div className="absolute inset-0 bg-[#2D2A26] rounded-[2.5rem] blur-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
-                <div className="relative h-full rounded-[2.5rem] overflow-hidden border-8 border-white shadow-2xl shadow-stone-800/20 transform -rotate-1">
+              <div className="relative aspect-[3/4.2] max-w-[300px] mx-auto group">
+                <div className="absolute inset-0 bg-foreground rounded-[2.5rem] blur-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
+                <div className="relative h-full rounded-[2.5rem] overflow-hidden border-[6px] border-surface shadow-2xl shadow-foreground/10 transform rotate-1">
                   <ClayNotebookCover
                     mode="editor"
                     title={note.title}
@@ -175,19 +175,19 @@ export default function MobileEditor({
                 </div>
               </div>
 
-              <div className="mt-12 grid grid-cols-2 gap-4">
+              <div className="mt-14 grid grid-cols-2 gap-4">
                  <ActionBox 
                     icon={Task01Icon} 
-                    title="Index" 
-                    subtitle="Browse all"
-                    className="bg-[#2B5D8B] text-white" 
+                    title="INDEX" 
+                    subtitle="BROWSE ALL"
+                    className="bg-primary text-white shadow-xl" 
                     onClick={() => onNavigate('toc')}
                  />
                  <ActionBox 
                     icon={Add01Icon} 
-                    title="New" 
-                    subtitle="Quick add"
-                    className="bg-[#C77B4B] text-white"
+                    title="NEW" 
+                    subtitle="QUICK ADD"
+                    className="bg-secondary text-white shadow-xl"
                     onClick={onAddPage}
                  />
               </div>
@@ -197,43 +197,45 @@ export default function MobileEditor({
               key="toc"
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              className="p-4 pb-8"
+              className="p-6 pb-12"
             >
               {/* Mobile TOC Header */}
-              <div className="mb-5">
-                <h2 className="text-[11px] font-black text-[#C77B4B] uppercase tracking-[0.2em] mb-1">Contents</h2>
-                <h3 className="text-[18px] font-black text-[#2D2A26] tracking-tight leading-tight truncate">{note.title || 'Untitled Notebook'}</h3>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-[10px] font-bold text-[#4A443D]/50 uppercase tracking-wider">
-                    {pages.length} {pages.length === 1 ? 'page' : 'pages'}
+              <div className="mb-6 bg-background-muted p-8 rounded-[2.5rem] border border-surface shadow-sm text-center">
+                <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-2">CONTENTS</h2>
+                <h3 className="text-2xl font-black text-foreground tracking-tighter uppercase leading-tight">{note.title || 'UNTITLED NOTEBOOK'}</h3>
+                <div className="flex items-center justify-center mt-4">
+                  <span className="text-[10px] font-black text-foreground/50 uppercase tracking-[0.2em] bg-surface px-4 py-2 rounded-full shadow-sm">
+                    {pages.length} PAGE{pages.length !== 1 ? 'S' : ''}
                   </span>
                 </div>
               </div>
 
               {/* Page List */}
               {pages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="w-16 h-16 rounded-3xl bg-[#F5EADF] border border-[#E6D5C3] flex items-center justify-center mb-4">
-                    <Note01Icon className="w-7 h-7 text-[#C77B4B]" />
+                <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed border-border/60 rounded-[2.5rem]">
+                  <div className="w-16 h-16 rounded-[1.25rem] bg-background-muted flex items-center justify-center mb-4">
+                    <Note01Icon className="w-7 h-7 text-primary" />
                   </div>
-                  <p className="text-[13px] font-bold text-[#4A443D]">No pages yet</p>
-                  <p className="text-[11px] text-[#4A443D]/50 mt-1">Tap below to create your first page</p>
+                  <p className="text-[13px] font-black uppercase tracking-widest text-foreground">NO PAGES YET</p>
+                  <p className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest mt-2">TAP BELOW TO CREATE YOUR FIRST PAGE</p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {pages.map((p, i) => (
                     <button 
                       key={p.id}
                       onClick={() => onNavigate('page', i)}
-                      className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white border border-[#E6D5C3] shadow-sm active:scale-[0.98] active:bg-[#FCF8F3] transition-all"
+                      className="w-full flex items-center gap-5 p-4 rounded-[1.5rem] bg-surface border border-border/40 shadow-sm active:scale-[0.98] hover:bg-background-muted transition-all"
                     >
-                      <span className="w-8 h-8 flex items-center justify-center rounded-xl bg-[#F5EADF] text-[#C77B4B] text-[11px] font-black shrink-0">
+                      <span className="w-10 h-10 flex items-center justify-center rounded-[1rem] bg-background-muted text-primary text-[11px] font-black shrink-0">
                         {String(i + 1).padStart(2, '0')}
                       </span>
                       <div className="flex-1 min-w-0 text-left">
-                        <p className="text-[13px] font-bold text-[#2D2A26] truncate">{p.title || 'Untitled Page'}</p>
+                        <p className="text-[13px] font-black uppercase tracking-widest text-foreground truncate">{p.title || 'UNTITLED PAGE'}</p>
                       </div>
-                      <ArrowRight02Icon className="w-4 h-4 text-[#D9CBB9] shrink-0" />
+                      <div className="w-8 h-8 flex items-center justify-center rounded-full bg-foreground text-surface shrink-0">
+                        <ArrowRight02Icon className="w-4 h-4" />
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -242,10 +244,10 @@ export default function MobileEditor({
               {/* Add Page */}
               <button 
                 onClick={onAddPage}
-                className="w-full mt-4 py-4 border-2 border-dashed border-[#E6D5C3] rounded-2xl flex items-center justify-center gap-2 text-[#C77B4B] font-black text-[11px] uppercase tracking-widest active:scale-[0.98] active:bg-[#FCF8F3] transition-all"
+                className="w-full mt-6 py-5 border-2 border-dashed border-foreground/20 rounded-[1.5rem] flex items-center justify-center gap-3 text-foreground font-black text-[11px] uppercase tracking-[0.2em] active:scale-[0.98] hover:bg-background-muted transition-all"
               >
-                <Add01Icon className="w-4 h-4" />
-                <span>New Page</span>
+                <Add01Icon className="w-5 h-5" />
+                <span>NEW PAGE</span>
               </button>
             </motion.div>
           ) : (
@@ -253,9 +255,9 @@ export default function MobileEditor({
               key={`page-${currentPageIndex}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="min-h-full p-4"
+              className="min-h-full p-4 md:p-6"
             >
-              <div className="mobile-editor-wrapper">
+              <div className="bg-surface rounded-[2rem] shadow-sm border border-border/40 overflow-hidden">
                 <NotebookPage
                   content={activePage?.content || ''}
                   onChange={onUpdatePage}
@@ -270,22 +272,22 @@ export default function MobileEditor({
       </main>
 
       {/* 🛸 DYNAMIC CONTEXT DOCK (BOTTOM) */}
-      <div className="fixed bottom-8 left-0 right-0 z-50 px-6 flex justify-center pointer-events-none">
+      <div className="fixed bottom-6 left-0 right-0 z-50 px-4 flex justify-center pointer-events-none">
         <motion.div 
           initial={{ y: 60, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="pointer-events-auto h-16 px-2 flex items-center bg-[#2D2A26] rounded-full border border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] backdrop-blur-3xl ring-1 ring-white/10"
+          className="pointer-events-auto h-[4.5rem] px-3 flex items-center bg-foreground rounded-[2.5rem] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] backdrop-blur-3xl ring-2 ring-surface/10"
         >
-          <div className="flex items-center gap-1 pr-3 border-r border-white/10 mr-3">
+          <div className="flex items-center gap-1.5 pr-4 border-r border-surface/10 mr-4">
             <NavBtn icon={PencilEdit02Icon} active={currentView === 'page'} onClick={() => onNavigate('page', currentPageIndex || 0)} />
             <NavBtn icon={Layout01Icon} active={currentView === 'toc'} onClick={() => onNavigate('toc')} />
           </div>
 
-          <div className="flex items-center gap-4 px-2">
+          <div className="flex items-center gap-3 px-2">
              <button 
                onClick={() => onNavigate('page', Math.max(0, (currentPageIndex || 0) - 1))}
-               className="p-1.5 text-white/40 active:text-white disabled:opacity-5"
-               disabled={pages.length < 2 || currentPageIndex === 0}
+               className="w-10 h-10 flex items-center justify-center rounded-full text-surface/40 hover:bg-surface/10 active:text-surface disabled:opacity-0 transition-all"
+               disabled={pages.length < 2 || currentPageIndex === 0 || currentView !== 'page'}
              >
                <ArrowLeft02Icon className="w-5 h-5" />
              </button>
@@ -293,19 +295,19 @@ export default function MobileEditor({
              <button 
                onClick={() => onAIAction?.('summarize_page')}
                disabled={aiLoading === 'summarize_page'}
-               className="w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-[#2B5D8B] to-[#3B7DAC] border border-white/20 shadow-xl active:scale-90 transition-transform"
+               className="w-12 h-12 flex items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/20 active:scale-90 transition-transform"
              >
                {aiLoading === 'summarize_page' ? (
-                 <Loading03Icon className="w-5 h-5 text-white animate-spin" />
+                 <Loading03Icon className="w-5 h-5 text-surface animate-spin" />
                ) : (
-                 <GoogleGeminiIcon className="w-5 h-5 text-white" />
+                 <GoogleGeminiIcon className="w-5 h-5 text-surface" />
                )}
              </button>
 
              <button 
                onClick={() => onNavigate('page', Math.min(pages.length - 1, (currentPageIndex || 0) + 1))}
-               className="p-1.5 text-white/40 active:text-white disabled:opacity-5"
-               disabled={pages.length < 2 || currentPageIndex === pages.length - 1}
+               className="w-10 h-10 flex items-center justify-center rounded-full text-surface/40 hover:bg-surface/10 active:text-surface disabled:opacity-0 transition-all"
+               disabled={pages.length < 2 || currentPageIndex === pages.length - 1 || currentView !== 'page'}
              >
                <ArrowRight02Icon className="w-5 h-5" />
              </button>
@@ -313,9 +315,9 @@ export default function MobileEditor({
 
           <button 
             onClick={onAddPage}
-            className="ml-3 w-10 h-10 flex items-center justify-center rounded-full bg-[#FFFAF0] text-[#2D2A26] border border-[#E6D5C3] shadow-inner active:scale-90 transition-transform"
+            className="ml-4 w-[3.5rem] h-[3.5rem] flex items-center justify-center rounded-full bg-surface text-foreground shadow-inner active:scale-95 transition-transform"
           >
-            <Add01Icon className="w-5 h-5" />
+            <Add01Icon className="w-6 h-6" />
           </button>
         </motion.div>
       </div>
@@ -327,45 +329,45 @@ export default function MobileEditor({
             <motion.div 
                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                onClick={() => setShowNav(false)}
-               className="fixed inset-0 bg-[#2D2A26]/80 backdrop-blur-md z-[110]" 
+               className="fixed inset-0 bg-foreground/60 backdrop-blur-sm z-[110]" 
             />
             <motion.div 
                initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-               className="fixed inset-y-0 right-0 w-[85%] max-w-sm bg-white z-[120] flex flex-col"
+               className="fixed inset-y-0 right-0 w-[85%] max-w-sm bg-surface z-[120] flex flex-col rounded-l-[2.5rem] border-l-[6px] border-background-muted"
             >
-               <div className="p-8 border-b border-[#E6D5C3]">
-                  <h2 className="text-xl font-black text-[#2D2A26] uppercase tracking-tighter">Directory</h2>
-                  <p className="text-[10px] font-bold text-[#C77B4B] uppercase tracking-[0.2em] mt-1">{note.title}</p>
+               <div className="p-8 pb-6 border-b border-border/20">
+                  <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter">DIRECTORY</h2>
+                  <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mt-2">{note.title}</p>
                </div>
 
-               <div className="flex-1 overflow-y-auto p-4 space-y-2">
+               <div className="flex-1 overflow-y-auto p-6 space-y-3">
                   {pages.map((p, i) => (
                     <button 
                       key={p.id}
                       onClick={() => { onNavigate('page', i); setShowNav(false); }}
-                      className={`w-full flex items-center justify-between p-4 rounded-3xl transition-all border ${
+                      className={`w-full flex items-center justify-between p-4 rounded-[1.5rem] transition-all border-2 ${
                         currentPageIndex === i 
-                        ? 'bg-[#2B5D8B] text-white border-[#2B5D8B] shadow-lg shadow-[#2B5D8B]/20' 
-                        : 'bg-[#FFFAF0] border-[#E6D5C3] text-[#4A443D] active:bg-[#F5EADF]'
+                        ? 'bg-foreground text-surface border-foreground shadow-lg' 
+                        : 'bg-background-muted border-transparent text-foreground hover:border-border'
                       }`}
                     >
                       <div className="flex items-center gap-4 min-w-0">
-                         <span className={`text-[10px] font-black ${currentPageIndex === i ? 'text-white/50' : 'text-[#D9CBB9]'}`}>
+                         <span className={`text-[10px] font-black w-8 h-8 rounded-[1rem] flex items-center justify-center shrink-0 ${currentPageIndex === i ? 'bg-surface/20 text-surface' : 'bg-surface text-primary'}`}>
                            {String(i + 1).padStart(2, '0')}
                          </span>
-                         <span className="text-[14px] font-bold truncate uppercase tracking-tight">{p.title || 'Untitled Page'}</span>
+                         <span className="text-[12px] font-black truncate uppercase tracking-widest">{p.title || 'UNTITLED PAGE'}</span>
                       </div>
-                      <ArrowRight02Icon className="w-4 h-4 opacity-30" />
+                      {currentPageIndex === i ? null : <ArrowRight02Icon className="w-4 h-4 opacity-40 shrink-0" />}
                     </button>
                   ))}
                </div>
 
-               <div className="p-4 pt-0">
-                  <div className="p-5 bg-[#F5EADF] rounded-[2rem] border border-[#E6D5C3]">
-                     <div className="grid grid-cols-2 gap-3">
-                        <SideTool icon={GoogleGeminiIcon} label="Summary" onClick={() => onAIAction?.('summarize_page')} />
-                        <SideTool icon={Note01Icon} label="Outlines" onClick={() => onAIAction?.('generate_outline')} />
+               <div className="p-6 pt-0">
+                  <div className="p-6 bg-background-muted rounded-[2rem] border-[3px] border-surface">
+                     <div className="grid grid-cols-2 gap-4">
+                        <SideTool icon={GoogleGeminiIcon} label="SUMMARY" onClick={() => onAIAction?.('summarize_page')} />
+                        <SideTool icon={Note01Icon} label="OUTLINES" onClick={() => onAIAction?.('generate_outline')} />
                      </div>
                   </div>
                </div>
@@ -385,10 +387,10 @@ function ToolbarBtn({ icon: Icon, onClick, active }: { icon: any, onClick: () =>
   return (
     <button 
       onClick={onClick}
-      className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all active:scale-90 ${
+      className={`w-10 h-10 shrink-0 flex items-center justify-center rounded-[1rem] transition-all active:scale-90 ${
         active 
-        ? 'bg-[#2B5D8B] text-white shadow-md' 
-        : 'text-[#4A443D] hover:bg-[#E6D5C3]/40'
+        ? 'bg-foreground text-surface shadow-md' 
+        : 'text-foreground hover:bg-surface'
       }`}
     >
       <Icon className="w-5 h-5" />
@@ -400,11 +402,11 @@ function NavBtn({ icon: Icon, active, onClick }: { icon: any, active: boolean, o
   return (
     <button 
       onClick={onClick}
-      className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${
-        active ? 'bg-white text-[#2B5D8B] scale-110 shadow-lg' : 'text-white/40 hover:text-white'
+      className={`w-[3.25rem] h-[3.25rem] flex items-center justify-center rounded-full transition-all ${
+        active ? 'bg-surface text-foreground shadow-lg scale-100' : 'text-surface/40 hover:text-surface scale-90 hover:scale-100'
       }`}
     >
-      <Icon className="w-6 h-6" />
+      <Icon className="w-[1.4rem] h-[1.4rem]" />
     </button>
   );
 }
@@ -413,14 +415,14 @@ function ActionBox({ icon: Icon, title, subtitle, className, onClick }: { icon: 
   return (
     <button 
        onClick={onClick} 
-       className={`flex flex-col items-center gap-2 p-6 rounded-[2.5rem] shadow-xl active:scale-95 transition-transform ${className}`}
+       className={`flex flex-col items-center justify-center gap-3 p-6 rounded-[2rem] active:scale-95 transition-transform ${className}`}
     >
-      <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+      <div className="w-12 h-12 rounded-[1.25rem] bg-white/20 flex items-center justify-center">
         <Icon className="w-6 h-6" />
       </div>
       <div className="text-center">
-        <p className="text-[12px] font-black uppercase tracking-widest">{title}</p>
-        <p className="text-[9px] font-bold opacity-60 uppercase tracking-tight">{subtitle}</p>
+        <p className="text-[13px] font-black uppercase tracking-widest leading-tight">{title}</p>
+        <p className="text-[9px] font-bold opacity-70 uppercase tracking-[0.2em] leading-tight mt-1">{subtitle}</p>
       </div>
     </button>
   );
@@ -430,10 +432,10 @@ function SideTool({ icon: Icon, label, onClick }: { icon: any, label: string, on
   return (
     <button 
       onClick={onClick}
-      className="flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl bg-white border border-[#E6D5C3] text-[#2D2A26] shadow-sm active:scale-90 transition-transform"
+      className="flex flex-col items-center justify-center gap-2 aspect-square rounded-[1.5rem] bg-surface text-foreground shadow-sm active:scale-90 transition-transform border border-border/20 hover:border-border"
     >
-      <Icon className="w-5 h-5 text-[#2B5D8B]" />
-      <span className="text-[9px] font-black uppercase tracking-wider">{label}</span>
+      <Icon className="w-6 h-6 text-primary" />
+      <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
     </button>
   );
 }
