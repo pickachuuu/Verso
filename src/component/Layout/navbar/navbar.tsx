@@ -138,21 +138,33 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const sidebarWidth = isCollapsed ? 'w-[5rem]' : 'w-[18rem]';
+  const sidebarWidth = isCollapsed ? 'w-[5rem]' : 'w-[20rem]';
+
+  // Delay showing text labels until the sidebar has started opening,
+  // so text fades in as the panel slides out rather than snapping in instantly.
+  const [showText, setShowText] = useState(!isCollapsed);
+  useEffect(() => {
+    if (isCollapsed) {
+      setShowText(false); // hide immediately on collapse
+    } else {
+      const t = setTimeout(() => setShowText(true), 150); // show after sidebar starts opening
+      return () => clearTimeout(t);
+    }
+  }, [isCollapsed]);
 
   return (
     <>
       {/* ═══════════════ Desktop Sidebar ═══════════════ */}
-      <aside className={`hidden md:flex fixed left-0 top-0 bottom-0 z-50 flex-col bg-surface border-r-2 border-border/30 transition-all duration-300 ease-in-out ${sidebarWidth}`}>
+      <aside className={`hidden md:flex fixed left-0 top-0 bottom-0 z-50 flex-col bg-surface border-r-2 border-border/30 transition-[width] duration-300 ease-in-out ${sidebarWidth}`}>
         
         {/* Logo */}
-        <div className={`flex items-center pt-8 pb-6 ${isCollapsed ? 'justify-center px-2' : 'px-6'}`}>
+        <div className="flex items-center pt-8 pb-6 px-[1.375rem]">
           <Link href="/dashboard" className="group shrink-0">
             <Image
               src="/brand/verso-mark.png"
               alt="Verso logo"
-              width={isCollapsed ? 36 : 44}
-              height={isCollapsed ? 36 : 44}
+              width={32}
+              height={32}
               className="shrink-0 group-hover:scale-110 transition-transform duration-300"
               priority
             />
@@ -160,7 +172,7 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
         </div>
 
         {/* Primary Navigation */}
-        <nav className={`flex-1 flex flex-col ${isCollapsed ? 'px-2' : 'px-3'} gap-1`}>
+        <nav className="flex-1 flex flex-col px-3 gap-1.5">
           {navItems.map((item, index) => {
             const isActive = pathname === item.href ||
               (item.href !== '/dashboard' && pathname.startsWith(item.href));
@@ -169,19 +181,18 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
                 key={index}
                 href={item.href}
                 title={isCollapsed ? item.name : undefined}
-                className={`group relative flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${isCollapsed ? 'px-0 py-3' : 'px-4 py-3'} rounded-2xl text-sm transition-all duration-200 ${
+                className={`group relative flex items-center gap-3 px-[1.125rem] py-3 rounded-2xl text-sm transition-all duration-200 ${
                   isActive
                     ? 'bg-foreground text-surface shadow-md'
                     : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
                 }`}
               >
                 <span className="shrink-0">{getNavIcon(item.href)}</span>
-                {!isCollapsed && (
-                  <span className="font-black text-[13px] uppercase tracking-[0.12em] leading-none mt-0.5 truncate">
+                {showText && (
+                  <span className="font-black text-[14px] uppercase tracking-[0.12em] leading-none truncate animate-[fadeIn_0.15s_ease-in_both]">
                     {item.name}
                   </span>
                 )}
-                {/* Collapsed tooltip */}
                 {isCollapsed && (
                   <span className="absolute left-full ml-3 px-3 py-1.5 rounded-full bg-foreground text-surface text-[10px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-[60]">
                     {item.name}
@@ -192,7 +203,7 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
           })}
 
           {/* Divider */}
-          <div className={`my-2 h-[3px] bg-foreground/5 rounded-full ${isCollapsed ? 'mx-2' : 'mx-3'}`} />
+          <div className="my-2 h-[3px] bg-foreground/5 rounded-full mx-2" />
 
           {/* Secondary Items */}
           {secondaryItems.map((item) => {
@@ -202,15 +213,15 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
                 key={item.href}
                 href={item.href}
                 title={isCollapsed ? item.name : undefined}
-                className={`group relative flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${isCollapsed ? 'px-0 py-3' : 'px-4 py-3'} rounded-2xl text-sm transition-all duration-200 ${
+                className={`group relative flex items-center gap-3 px-[1.125rem] py-3 rounded-2xl text-sm transition-all duration-200 ${
                   isActive
                     ? 'bg-foreground text-surface shadow-md'
                     : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
                 }`}
               >
                 <span className="shrink-0">{item.icon}</span>
-                {!isCollapsed && (
-                  <span className="font-black text-[11px] uppercase tracking-[0.15em] leading-none mt-0.5 truncate">
+                {showText && (
+                  <span className="font-black text-[14px] uppercase tracking-[0.12em] leading-none truncate animate-[fadeIn_0.15s_ease-in_both]">
                     {item.name}
                   </span>
                 )}
@@ -229,7 +240,7 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
               type="button"
               onClick={() => setNotificationsOpen((prev) => !prev)}
               title={isCollapsed ? 'Notifications' : undefined}
-              className={`group relative w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${isCollapsed ? 'px-0 py-3' : 'px-4 py-3'} rounded-2xl text-sm transition-all duration-200 ${
+              className={`group relative w-full flex items-center gap-3 px-[1.125rem] py-3 rounded-2xl text-sm transition-all duration-200 ${
                 notificationsOpen
                   ? 'bg-background-muted text-foreground'
                   : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
@@ -241,8 +252,8 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
                   <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-secondary rounded-full border-2 border-surface animate-pulse" />
                 )}
               </span>
-              {!isCollapsed && (
-                <span className="font-black text-[13px] uppercase tracking-[0.12em] leading-none mt-0.5">
+              {showText && (
+                <span className="font-black text-[14px] uppercase tracking-[0.12em] leading-none animate-[fadeIn_0.15s_ease-in_both]">
                   ALERTS
                 </span>
               )}
@@ -303,14 +314,14 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
         </nav>
 
         {/* Bottom: Avatar + Sign Out + Collapse Toggle */}
-        <div className={`pb-6 ${isCollapsed ? 'px-2' : 'px-3'}`}>
-          <div className={`h-[3px] bg-foreground/5 rounded-full mb-4 ${isCollapsed ? 'mx-2' : 'mx-3'}`} />
+        <div className="pb-6 px-3">
+          <div className="h-[3px] bg-foreground/5 rounded-full mb-4 mx-2" />
 
           {/* Avatar + Sign Out */}
           <button
             onClick={handleOpenSignOut}
             title={isCollapsed ? 'Sign Out' : undefined}
-            className={`group relative w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${isCollapsed ? 'px-0 py-3' : 'px-4 py-3'} rounded-2xl text-sm transition-all text-foreground-muted hover:text-foreground hover:bg-background-muted`}
+            className="group relative w-full overflow-hidden flex items-center gap-3 px-[1.125rem] py-3 rounded-2xl text-sm transition-all text-foreground-muted hover:text-foreground hover:bg-background-muted"
           >
             <span className="h-9 w-9 rounded-full overflow-hidden border-2 border-border bg-background-muted flex items-center justify-center text-[10px] font-black text-foreground shrink-0">
               {userProfile?.avatar_url ? (
@@ -324,31 +335,27 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
                 <span>{avatarFallback}</span>
               )}
             </span>
-            {!isCollapsed && (
-              <div className="flex-1 min-w-0 text-left">
-                <p className="font-black text-[12px] uppercase tracking-[0.12em] text-foreground truncate leading-none">{displayName}</p>
-                <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1.5 flex items-center gap-1">
-                  <Logout01Icon className="w-3 h-3" />
-                  SIGN OUT
-                </p>
-              </div>
-            )}
-            {isCollapsed && (
-              <span className="absolute left-full ml-3 px-3 py-1.5 rounded-full bg-foreground text-surface text-[10px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-[60]">
+            {/* Always rendered — keeps button height stable. fadeIn matches all other labels. */}
+            <div className={`flex-1 min-w-0 text-left ${showText ? 'animate-[fadeIn_0.15s_ease-in_both]' : 'opacity-0'}`}>
+              <p className="font-black text-[12px] uppercase tracking-[0.12em] text-foreground truncate leading-none whitespace-nowrap">{displayName}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1.5 flex items-center gap-1 whitespace-nowrap">
+                <Logout01Icon className="w-3 h-3" />
                 SIGN OUT
-              </span>
-            )}
+              </p>
+            </div>
           </button>
 
           {/* Collapse/Expand Toggle — always at the bottom */}
           <button
             onClick={toggleCollapse}
-            className={`w-full mt-2 flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-4'} py-2.5 rounded-2xl text-foreground-muted hover:text-foreground hover:bg-background-muted transition-all active:scale-90`}
+            className="w-full mt-2 flex items-center gap-3 px-[1.125rem] py-2.5 rounded-2xl text-foreground-muted hover:text-foreground hover:bg-background-muted transition-all active:scale-90"
             title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {isCollapsed ? <ArrowRight01Icon className="w-4 h-4" /> : <ArrowLeft01Icon className="w-4 h-4" />}
-            {!isCollapsed && (
-              <span className="font-black text-[10px] uppercase tracking-widest leading-none mt-0.5">COLLAPSE</span>
+            <span className="shrink-0">
+              {isCollapsed ? <ArrowRight01Icon className="w-4 h-4" /> : <ArrowLeft01Icon className="w-4 h-4" />}
+            </span>
+            {showText && (
+              <span className="font-black text-[10px] uppercase tracking-widest leading-none mt-0.5 animate-[fadeIn_0.15s_ease-in_both]">COLLAPSE</span>
             )}
           </button>
         </div>
