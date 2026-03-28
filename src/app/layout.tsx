@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Just_Another_Hand, Varela_Round, Cinzel } from "next/font/google";
 import { Cormorant_Garamond } from "next/font/google";
 import { QueryProvider } from "@/lib/queryClient";
-import PWAInstallToast from "@/component/ui/PWAInstallToast";
+
 import "./globals.css";
 
 // Font declarations
@@ -100,7 +100,7 @@ export default function RootLayout({
       >
         <QueryProvider>
           {children}
-          <PWAInstallToast />
+
         </QueryProvider>
       </body>
     </html>
