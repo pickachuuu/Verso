@@ -3,36 +3,20 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ClayButton } from '@/component/ui/Clay';
 import { motion } from 'framer-motion';
-import { PencilEdit01Icon, TextIcon, CheckmarkCircle01Icon, FireIcon, LeftToRightListNumberIcon, Tag01Icon } from 'hugeicons-react';
-import { NotebookIcon, FlashcardIcon, ExamIcon } from '@/component/icons';
+import { SparklesIcon, ArrowRight01Icon, PencilEdit01Icon, Tag01Icon, Book01Icon, LeftToRightListNumberIcon } from 'hugeicons-react';
+import { FlashcardIcon, ExamIcon, NotebookIcon } from '@/component/icons';
 import { createClient } from '@/utils/supabase/client';
 import LandingNavbar from '@/component/Layout/navbar/LandingNavbar';
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 32 },
-  visible: { opacity: 1, y: 0 },
-};
-
-const fadeLeft = {
-  hidden: { opacity: 0, x: -40 },
-  visible: { opacity: 1, x: 0 },
-};
-
-const fadeRight = {
-  hidden: { opacity: 0, x: 40 },
-  visible: { opacity: 1, x: 0 },
-};
 
 const staggerContainer = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
-const staggerItem = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0 },
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 20 } },
 };
 
 export default function LandingPage() {
@@ -48,703 +32,337 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background selection:bg-foreground selection:text-surface overflow-x-hidden">
       <LandingNavbar />
 
-      <main className="flex-1">
-        {/* ===== HERO ===== */}
-        <section className="relative overflow-hidden bg-primary-dark text-white">
-          {/* Refined Academic Mesh Background */}
-          <div className="absolute inset-0 pointer-events-none opacity-40">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,var(--primary-light),transparent)]" />
-            <div
-              className="absolute inset-0 animate-[hero-grid-drift_40s_linear_infinite]"
-              style={{
-                backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
-                backgroundSize: '40px 40px'
-              }}
+      <main className="flex-1 pt-24 pb-20 px-4 sm:px-8 max-w-[1700px] mx-auto w-full flex flex-col gap-10">
+
+        {/* ===== HERO SECTION ===== */}
+        <section className="relative min-h-[75vh] md:min-h-[85vh] flex flex-col justify-center items-center text-center">
+
+          <motion.div
+            className="relative z-10 flex flex-col items-center w-full max-w-6xl"
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+          >
+            <motion.div variants={fadeUp} className="mb-6 md:mb-10 inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-foreground/10 bg-surface/50">
+              <SparklesIcon className="w-4 h-4 text-secondary" />
+              <span className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.3em] text-foreground">
+                Verso 2.0 Is Live
+              </span>
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="w-full relative">
+              <h1 className="text-[12vw] sm:text-[8rem] lg:text-[11rem] font-black tracking-tighter text-foreground uppercase leading-[0.85] w-full mix-blend-multiply drop-shadow-sm">
+                LEARN
+                <br />
+                FASTER.
+              </h1>
+            </motion.div>
+
+            <motion.p variants={fadeUp} className="mt-8 md:mt-12 text-sm md:text-base font-black uppercase tracking-[0.2em] text-foreground-muted max-w-2xl px-4 leading-relaxed">
+              WRITE NOTES. GENERATE FLASHCARDS INSTANTLY. TEST YOURSELF WITH MOCK EXAMS. ALL IN ONE SEAMLESS FLOW.
+            </motion.p>
+
+            <motion.div variants={fadeUp} className="mt-12 md:mt-16 flex flex-col sm:flex-row items-center gap-6">
+              <Link href={isLoggedIn ? '/dashboard' : '/auth'} className="w-full sm:w-auto outline-none">
+                <div className="group flex items-center justify-center gap-4 px-10 py-6 rounded-[2rem] bg-foreground text-surface shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer">
+                  <span className="font-black text-[14px] md:text-[16px] uppercase tracking-[0.2em] leading-none mt-1">
+                    {isLoggedIn ? 'ENTER DASHBOARD' : 'START STUDYING'}
+                  </span>
+                  <ArrowRight01Icon className="w-6 h-6 shrink-0 group-hover:translate-x-2 transition-transform" />
+                </div>
+              </Link>
+            </motion.div>
+          </motion.div>
+
+          {/* Epic Mascot Centerpiece beneath the hero */}
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
+            className="absolute bottom-[-5%] left-1/2 -translate-x-1/2 pointer-events-none -z-10 w-[80%] max-w-[600px]"
+          >
+            <div className="absolute inset-0 bg-secondary/10 blur-[100px] rounded-full" />
+            <Image
+              src="/brand/verso-happy-clean.png"
+              alt="Verso Mascot"
+              width={800}
+              height={800}
+              className="w-full h-auto drop-shadow-2xl opacity-90 mix-blend-multiply"
+              priority
             />
-          </div>
+          </motion.div>
+        </section>
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 md:py-40">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        {/* ===== BENTO DASHBOARD GRID ===== */}
+        <section className="grid grid-cols-12 gap-8 md:gap-10 mt-20 relative z-20">
+
+          {/* NOTE WRITING - SPAN 8 */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={fadeUp}
+            className="col-span-12 xl:col-span-8 flex flex-col group h-full"
+          >
+            <div className="h-full rounded-[3rem] bg-surface border-2 border-border/40 relative overflow-hidden flex flex-col md:flex-row items-stretch shadow-sm hover:shadow-xl transition-shadow duration-500">
+
               {/* Text Side */}
-              <motion.div
-                className="space-y-8 text-center lg:text-left order-2 lg:order-1"
-                initial="hidden"
-                animate="visible"
-                variants={staggerContainer}
-              >
-                <motion.div className="space-y-4" variants={fadeUp}>
+              <div className="flex-1 p-10 md:p-14 flex flex-col justify-center relative z-10">
+                <div className="absolute top-[-10rem] left-[-10rem] w-[25rem] h-[25rem] bg-primary/5 blur-3xl rounded-full pointer-events-none" />
 
-                  <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08]">
-                    Turn your notes into <br />
-                    <span className="text-blue-200">mastery</span>
-                  </h1>
-
-                  <p className="max-w-xl mx-auto lg:mx-0 text-base sm:text-xl text-blue-100/90 leading-relaxed font-medium">
-                    Write notes, generate flashcards, and practice with mock exams — all in one flow.
-                  </p>
-                </motion.div>
-
-                <motion.div
-                  className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4"
-                  variants={fadeUp}
-                >
-                  <Link href={isLoggedIn ? '/dashboard' : '/auth'}>
-                    <ClayButton variant="secondary" size="lg" className="shadow-2xl shadow-primary-dark/50">
-                      {isLoggedIn ? 'Go to Dashboard' : 'Start Studying'}
-                    </ClayButton>
-                  </Link>
-                </motion.div>
-              </motion.div>
-
-              {/* Mascot Side */}
-              <motion.div
-                className="relative flex items-center justify-center order-1 lg:order-2"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
-              >
-                {/* Modern Backdrop for Mascot */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-primary-light/20 blur-[100px] rounded-full animate-pulse" />
-                  <div className="absolute w-[250px] h-[250px] sm:w-[400px] sm:h-[400px] border border-white/5 rounded-full scale-150 animate-[spin_60s_linear_infinite]" />
-                  <div className="absolute w-[200px] h-[200px] sm:w-[350px] sm:h-[350px] border border-dashed border-white/10 rounded-full scale-125 animate-[spin_40s_linear_infinite_reverse]" />
+                <div className="flex items-center gap-3 mb-6">
+                  <NotebookIcon className="w-6 h-6 text-foreground" />
+                  <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-foreground-muted">NOTE WRITING</h3>
                 </div>
 
-                <Image
-                  src="/brand/verso-happy-clean.png"
-                  alt="Verso mascot"
-                  width={580}
-                  height={580}
-                  className="relative z-10 w-[220px] sm:w-[380px] md:w-[480px] lg:w-[540px] h-auto drop-shadow-[0_25px_50px_rgba(0,0,0,0.3)] animate-bounce [animation-duration:1.4s]"
-                  priority
-                />
-              </motion.div>
-            </div>
-          </div>
+                <h2 className="text-4xl md:text-[3.5rem] font-black uppercase tracking-widest text-foreground leading-[0.95] mb-8">
+                  WRITE & <br /> ORGANIZE
+                </h2>
 
-          {/* Elegant transition wave to the next section */}
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-background [clip-path:polygon(0_100%,100%_100%,100%_0,50%_100%,0_0)] opacity-100" />
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-background/50 [clip-path:polygon(0_100%,100%_100%,100%_20%,50%_100%,0_20%)]" />
-        </section>
+                <p className="text-[11px] md:text-[13px] font-black uppercase tracking-[0.2em] text-foreground-muted leading-relaxed mb-10 max-w-sm">
+                  Our smart editor tightens your wording and structures your ideas perfectly. Ideal for review.
+                </p>
 
-        {/* ===== NOTE WRITING ===== */}
-        <section className="relative bg-background overflow-x-clip">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute -top-24 left-10 h-52 w-52 rounded-full bg-accent/8 blur-3xl" />
-            <div className="absolute -bottom-20 right-8 h-60 w-60 rounded-full bg-primary/8 blur-3xl" />
-          </div>
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-center">
-              <motion.div
-                className="flex justify-center lg:justify-start order-2 lg:order-1"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-                variants={fadeLeft}
-                transition={{ duration: 0.6 }}
-              >
-                <Image
-                  src="/brand/notes-preview.png"
-                  alt="Earth science notes preview"
-                  width={991}
-                  height={768}
-                  className="w-full max-w-[400px] sm:max-w-[520px] xl:max-w-[560px] h-auto rounded-2xl border border-border/70 ring-1 ring-black/5 shadow-[0_30px_65px_-24px_rgba(15,23,42,0.48)] drop-shadow-[0_16px_22px_rgba(0,0,0,0.2)]"
-                />
-              </motion.div>
-
-              <motion.div
-                className="relative order-1 lg:order-2"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-                variants={staggerContainer}
-              >
-                {/* Mascot: inline centered on mobile, absolute floating on desktop */}
-                <motion.div className="lg:hidden flex justify-center mb-4" variants={fadeUp} transition={{ duration: 0.5 }}>
-                  <Image
-                    src="/brand/verso-writing-notes-clean.svg"
-                    alt="Verso writing notes mascot"
-                    width={160}
-                    height={160}
-                    className="w-[130px] sm:w-[160px] h-auto -rotate-3 drop-shadow-[0_12px_20px_rgba(0,0,0,0.18)]"
-                  />
-                </motion.div>
-                <Image
-                  src="/brand/verso-writing-notes-clean.svg"
-                  alt="Verso writing notes mascot"
-                  width={265}
-                  height={265}
-                  className="pointer-events-none absolute -top-[5.75rem] -right-10 lg:-top-[6.75rem] lg:-right-12 z-0 hidden lg:block w-[220px] lg:w-[265px] h-auto -rotate-6 opacity-95 drop-shadow-[0_18px_28px_rgba(0,0,0,0.24)]"
-                />
-                <motion.div className="relative mb-4 lg:pr-40" variants={fadeUp} transition={{ duration: 0.5 }}>
-                  <h2 className="relative z-10 max-w-xl text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-tight">
-                    AI-Assisted <span className="text-accent">Note Writing</span>
-                  </h2>
-                </motion.div>
-
-                <motion.p
-                  className="relative z-10 max-w-lg text-base sm:text-xl text-foreground-muted leading-relaxed"
-                  variants={fadeUp}
-                  transition={{ duration: 0.5 }}
-                >
-                  Write naturally while AI helps structure ideas, tighten wording, and prepare
-                  your notes for review-ready studying.
-                </motion.p>
-
-                <motion.div
-                  className="relative z-10 mt-6 space-y-4"
-                  variants={staggerContainer}
-                >
-                  {[
-                    { icon: PencilEdit01Icon, title: 'Structure ideas', desc: 'Turn rough thoughts into clear, organized study notes.' },
-                    { icon: TextIcon, title: 'Refine wording', desc: 'Rephrase sections instantly for clarity, tone, and grammar.' },
-                    { icon: CheckmarkCircle01Icon, title: 'Exam-ready', desc: 'Keep everything polished without breaking your writing flow.' },
-                  ].map((item) => (
-                    <motion.div key={item.title} className="flex items-start gap-3" variants={staggerItem} transition={{ duration: 0.4 }}>
-                      <item.icon className="w-5 h-5 text-accent shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-base font-semibold text-foreground">{item.title}</p>
-                        <p className="text-base text-foreground-muted leading-relaxed">{item.desc}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* ===== FLASHCARDS ===== */}
-        <section className="relative bg-background-muted/60 overflow-x-clip">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute -top-24 left-10 h-52 w-52 rounded-full bg-accent/12 blur-3xl" />
-            <div className="absolute -bottom-20 right-8 h-60 w-60 rounded-full bg-primary/12 blur-3xl" />
-          </div>
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24">
-
-            {/* ── Mobile: Mascot → Title → Paragraph → Image → Steps (single column) ── */}
-            <div className="lg:hidden space-y-8">
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-                variants={staggerContainer}
-                className="space-y-4"
-              >
-                <motion.div className="flex justify-center" variants={fadeUp} transition={{ duration: 0.5 }}>
-                  <Image
-                    src="/brand/verso-flashcards-clean.svg"
-                    alt="Verso flashcards mascot"
-                    width={160}
-                    height={160}
-                    className="w-[130px] sm:w-[160px] h-auto drop-shadow-[0_12px_20px_rgba(0,0,0,0.18)] [transform:scaleX(-1)]"
-                  />
-                </motion.div>
-                <motion.h2
-                  className="text-3xl sm:text-4xl font-black tracking-tight text-foreground leading-tight"
-                  variants={fadeUp}
-                  transition={{ duration: 0.5 }}
-                >
-                  AI-Powered <span className="text-accent">Flashcards</span>
-                </motion.h2>
-                <motion.p
-                  className="max-w-lg text-base sm:text-xl text-foreground-muted leading-relaxed"
-                  variants={fadeUp}
-                  transition={{ duration: 0.5 }}
-                >
-                  Turn your notes into smart flashcards with AI in seconds, then study them with
-                  active recall for stronger long-term memory.
-                </motion.p>
-              </motion.div>
-
-              <motion.div
-                className="flex justify-center"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6 }}
-              >
-                <Image
-                  src="/brand/flashcard-session-preview.png"
-                  alt="Flashcard study session preview"
-                  width={1030}
-                  height={618}
-                  className="w-full max-w-[400px] sm:max-w-[520px] h-auto rounded-2xl border border-border/70 ring-1 ring-black/5 shadow-[0_30px_65px_-24px_rgba(15,23,42,0.48)] drop-shadow-[0_16px_22px_rgba(0,0,0,0.2)]"
-                />
-              </motion.div>
-
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-                variants={staggerContainer}
-              >
-                {[
-                  { step: 1, icon: NotebookIcon, label: 'Pick your notes', desc: 'Select any notebook — AI reads your content and extracts key concepts.' },
-                  { step: 2, icon: FlashcardIcon, label: 'Generate cards', desc: 'Instantly create Q&A flashcards, then flip through and test yourself.' },
-                  { step: 3, icon: FireIcon, label: 'Master it', desc: 'Keep practicing with spaced repetition until it sticks for good.' },
-                ].map((item, i) => (
-                  <motion.div key={item.step} className="flex items-start gap-4" variants={staggerItem} transition={{ duration: 0.4 }}>
-                    <div className="flex flex-col items-center">
-                      <div className="w-8 h-8 rounded-full border-2 border-accent text-accent flex items-center justify-center text-sm font-bold shrink-0">
-                        {item.step}
-                      </div>
-                      {i < 2 && <div className="w-px h-8 bg-border" />}
-                    </div>
-                    <div className="pb-4">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <item.icon className="w-4 h-4 text-accent" />
-                        <p className="text-base font-semibold text-foreground">{item.label}</p>
-                      </div>
-                      <p className="text-base text-foreground-muted leading-relaxed">{item.desc}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-
-            {/* ── Desktop: original side-by-side grid (unchanged) ── */}
-            <div className="hidden lg:grid grid-cols-2 gap-14 items-center">
-              <motion.div
-                className="relative"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-                variants={staggerContainer}
-              >
-                <div className="relative mb-4 pr-40">
-                  <Image
-                    src="/brand/verso-flashcards-clean.svg"
-                    alt="Verso flashcards mascot"
-                    width={265}
-                    height={265}
-                    className="pointer-events-none absolute -top-[6.75rem] -right-12 z-30 w-[265px] h-auto opacity-100 drop-shadow-[0_18px_28px_rgba(0,0,0,0.24)] [transform:scaleX(-1)]"
-                  />
-                  <motion.h2
-                    className="relative z-10 max-w-xl text-5xl font-black tracking-tight text-foreground leading-tight"
-                    variants={fadeUp}
-                    transition={{ duration: 0.5 }}
-                  >
-                    AI-Powered <span className="text-accent">Flashcards</span>
-                  </motion.h2>
+                <div className="flex flex-col gap-4 mt-auto">
+                  <div className="flex items-center gap-3 border-b-2 border-foreground/5 pb-4">
+                    <PencilEdit01Icon className="w-5 h-5 text-foreground" />
+                    <span className="font-black text-[10px] md:text-[12px] uppercase tracking-widest text-foreground">STRUCTURE IDEAS INSTANTLY</span>
+                  </div>
+                  <div className="flex items-center gap-3 border-b-2 border-foreground/5 pb-4">
+                    <SparklesIcon className="w-5 h-5 text-foreground" />
+                    <span className="font-black text-[10px] md:text-[12px] uppercase tracking-widest text-foreground">AI REFINES YOUR GRAMMAR</span>
+                  </div>
                 </div>
-
-                <motion.p
-                  className="relative z-10 max-w-lg text-lg text-foreground-muted leading-relaxed"
-                  variants={fadeUp}
-                  transition={{ duration: 0.5 }}
-                >
-                  Turn your notes into smart flashcards with AI in seconds, then study them with
-                  active recall for stronger long-term memory.
-                </motion.p>
-
-                <motion.div
-                  className="relative z-10 mt-6"
-                  variants={staggerContainer}
-                >
-                  {[
-                    { step: 1, icon: NotebookIcon, label: 'Pick your notes', desc: 'Select any notebook — AI reads your content and extracts key concepts.' },
-                    { step: 2, icon: FlashcardIcon, label: 'Generate cards', desc: 'Instantly create Q&A flashcards, then flip through and test yourself.' },
-                    { step: 3, icon: FireIcon, label: 'Master it', desc: 'Keep practicing with spaced repetition until it sticks for good.' },
-                  ].map((item, i) => (
-                    <motion.div key={item.step} className="flex items-start gap-4" variants={staggerItem} transition={{ duration: 0.4 }}>
-                      <div className="flex flex-col items-center">
-                        <div className="w-8 h-8 rounded-full border-2 border-accent text-accent flex items-center justify-center text-sm font-bold shrink-0">
-                          {item.step}
-                        </div>
-                        {i < 2 && <div className="w-px h-8 bg-border" />}
-                      </div>
-                      <div className="pb-4">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <item.icon className="w-4 h-4 text-accent" />
-                          <p className="text-base font-semibold text-foreground">{item.label}</p>
-                        </div>
-                        <p className="text-base text-foreground-muted leading-relaxed">{item.desc}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </motion.div>
-
-              <motion.div
-                className="flex justify-end"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-                variants={fadeRight}
-                transition={{ duration: 0.6, delay: 0.15 }}
-              >
-                <Image
-                  src="/brand/flashcard-session-preview.png"
-                  alt="Flashcard study session preview"
-                  width={1030}
-                  height={618}
-                  className="w-full max-w-[520px] xl:max-w-[560px] h-auto rounded-2xl border border-border/70 ring-1 ring-black/5 shadow-[0_30px_65px_-24px_rgba(15,23,42,0.48)] drop-shadow-[0_16px_22px_rgba(0,0,0,0.2)]"
-                />
-              </motion.div>
-            </div>
-
-          </div>
-        </section>
-
-        {/* ===== MOCK EXAMS ===== */}
-        <section className="relative bg-background overflow-x-hidden overflow-y-visible">
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="absolute -top-24 left-1/3 h-52 w-52 rounded-full bg-primary/8 blur-3xl" />
-            <div className="absolute -bottom-20 right-1/4 h-60 w-60 rounded-full bg-accent/8 blur-3xl" />
-          </div>
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24">
-
-            {/* Shared keyframes */}
-            <style>{`
-              @keyframes examShuffle {
-                0%, 27% {
-                  transform: translate(0px, 0px) rotate(0deg) scale(1);
-                  z-index: 3;
-                  box-shadow: 0 25px 50px -12px rgba(15,23,42,0.35);
-                }
-                33%, 60% {
-                  transform: translate(28px, 14px) rotate(3.5deg) scale(0.95);
-                  z-index: 1;
-                  box-shadow: 0 10px 25px -8px rgba(15,23,42,0.2);
-                }
-                66%, 93% {
-                  transform: translate(-18px, 8px) rotate(-2.5deg) scale(0.97);
-                  z-index: 2;
-                  box-shadow: 0 15px 35px -10px rgba(15,23,42,0.25);
-                }
-                100% {
-                  transform: translate(0px, 0px) rotate(0deg) scale(1);
-                  z-index: 3;
-                  box-shadow: 0 25px 50px -12px rgba(15,23,42,0.35);
-                }
-              }
-              @keyframes examShuffleMobile {
-                0%, 27% {
-                  transform: translate(0px, 0px) rotate(0deg) scale(1);
-                  z-index: 3;
-                  box-shadow: 0 20px 40px -10px rgba(15,23,42,0.3);
-                }
-                33%, 60% {
-                  transform: translate(12px, 8px) rotate(2.5deg) scale(0.95);
-                  z-index: 1;
-                  box-shadow: 0 8px 20px -6px rgba(15,23,42,0.18);
-                }
-                66%, 93% {
-                  transform: translate(-8px, 5px) rotate(-1.5deg) scale(0.97);
-                  z-index: 2;
-                  box-shadow: 0 12px 28px -8px rgba(15,23,42,0.22);
-                }
-                100% {
-                  transform: translate(0px, 0px) rotate(0deg) scale(1);
-                  z-index: 3;
-                  box-shadow: 0 20px 40px -10px rgba(15,23,42,0.3);
-                }
-              }
-            `}</style>
-
-            {/* ── Mobile: Mascot → Title → Paragraph → Shuffling cards → Types (single column) ── */}
-            <div className="lg:hidden space-y-8">
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-                variants={staggerContainer}
-                className="space-y-4"
-              >
-                <motion.div className="flex justify-center" variants={fadeUp} transition={{ duration: 0.5 }}>
-                  <Image
-                    src="/brand/verso-thinking-clean.svg"
-                    alt="Verso thinking mascot"
-                    width={160}
-                    height={160}
-                    className="w-[130px] sm:w-[160px] h-auto rotate-3 drop-shadow-[0_12px_20px_rgba(0,0,0,0.18)]"
-                  />
-                </motion.div>
-                <motion.h2
-                  className="text-3xl sm:text-4xl font-black tracking-tight text-foreground leading-tight"
-                  variants={fadeUp}
-                  transition={{ duration: 0.5 }}
-                >
-                  AI-Generated <span className="text-accent">Mock Exams</span>
-                </motion.h2>
-                <motion.p
-                  className="max-w-lg text-base sm:text-xl text-foreground-muted leading-relaxed"
-                  variants={fadeUp}
-                  transition={{ duration: 0.5 }}
-                >
-                  Put your knowledge to the test with AI-crafted practice exams that mirror real
-                  questions, so you walk into exam day fully prepared.
-                </motion.p>
-              </motion.div>
-
-              <motion.div
-                className="flex justify-center"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className="relative w-full max-w-[320px] sm:max-w-[460px] aspect-[4/3]">
-                  {['/brand/exam-preview-1.png', '/brand/exam-preview-2.png', '/brand/exam-preview-3.png'].map((src, i) => (
-                    <div
-                      key={src}
-                      className="absolute inset-0 rounded-2xl border border-border/70 ring-1 ring-black/5 overflow-hidden bg-background"
-                      style={{
-                        animation: 'examShuffleMobile 9s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-                        animationDelay: `${i * -3}s`,
-                      }}
-                    >
-                      <Image
-                        src={src}
-                        alt={`Exam question type preview ${i + 1}`}
-                        width={750}
-                        height={563}
-                        className="w-full h-full object-cover object-top"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              <motion.div
-                className="space-y-5"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-                variants={staggerContainer}
-              >
-                {[
-                  { icon: LeftToRightListNumberIcon, title: 'Multiple Choice', desc: 'Test your knowledge with AI-generated options — instant feedback on every pick.' },
-                  { icon: Tag01Icon, title: 'Identification', desc: 'Fill in the blanks and prove you know the key terms and concepts.' },
-                  { icon: PencilEdit01Icon, title: 'Essays', desc: 'Practice long-form answers and build the writing skills exams demand.' },
-                ].map((item) => (
-                  <motion.div key={item.title} className="flex items-start gap-4" variants={staggerItem} transition={{ duration: 0.4 }}>
-                    <item.icon className="w-6 h-6 text-accent shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-base font-semibold text-foreground mb-0.5">{item.title}</p>
-                      <p className="text-base text-foreground-muted leading-relaxed">{item.desc}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-
-            {/* ── Desktop: original centered layout (unchanged) ── */}
-            <div className="hidden lg:block">
-              <div className="relative">
-                <motion.div
-                  className="pointer-events-none absolute -top-8 right-[4%] lg:right-[8%] z-20"
-                  initial={{ opacity: 0, y: 20, rotate: 0 }}
-                  whileInView={{ opacity: 1, y: 0, rotate: 6 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                >
-                  <Image
-                    src="/brand/verso-thinking-clean.svg"
-                    alt="Verso thinking mascot"
-                    width={265}
-                    height={265}
-                    className="w-[200px] lg:w-[240px] h-auto opacity-95 drop-shadow-[0_18px_28px_rgba(0,0,0,0.24)]"
-                  />
-                </motion.div>
-
-                <motion.div
-                  className="max-w-2xl mx-auto text-center mb-16 pt-20 lg:pt-24"
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.3 }}
-                  variants={staggerContainer}
-                >
-                  <motion.h2
-                    className="relative z-10 text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-tight mb-4"
-                    variants={fadeUp}
-                    transition={{ duration: 0.5 }}
-                  >
-                    AI-Generated <span className="text-accent">Mock Exams</span>
-                  </motion.h2>
-
-                  <motion.p
-                    className="relative z-10 max-w-xl mx-auto text-lg text-foreground-muted leading-relaxed mb-10"
-                    variants={fadeUp}
-                    transition={{ duration: 0.5 }}
-                  >
-                    Put your knowledge to the test with AI-crafted practice exams that mirror real
-                    questions, so you walk into exam day fully prepared.
-                  </motion.p>
-
-                  <motion.div
-                    className="relative z-10 grid grid-cols-3 gap-8"
-                    variants={staggerContainer}
-                  >
-                    {[
-                      { icon: LeftToRightListNumberIcon, title: 'Multiple Choice', desc: 'Test your knowledge with AI-generated options — instant feedback on every pick.' },
-                      { icon: Tag01Icon, title: 'Identification', desc: 'Fill in the blanks and prove you know the key terms and concepts.' },
-                      { icon: PencilEdit01Icon, title: 'Essays', desc: 'Practice long-form answers and build the writing skills exams demand.' },
-                    ].map((item) => (
-                      <motion.div key={item.title} className="flex flex-col items-center text-center" variants={staggerItem} transition={{ duration: 0.4 }}>
-                        <item.icon className="w-7 h-7 text-accent mb-3" />
-                        <p className="text-base font-semibold text-foreground mb-1">{item.title}</p>
-                        <p className="text-base text-foreground-muted leading-relaxed max-w-[220px]">{item.desc}</p>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </motion.div>
               </div>
 
-              <motion.div
-                className="flex justify-center"
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
-              >
-                <div className="relative w-full max-w-[600px] xl:max-w-[660px] aspect-[4/3]">
+              {/* Image Side */}
+              <div className="flex-1 min-h-[400px] bg-foreground/5 relative flex items-center justify-center p-8 border-t-2 md:border-t-0 md:border-l-2 border-border/40">
+                <Image
+                  src="/brand/notes-preview.png"
+                  alt="Notes Preview"
+                  width={600}
+                  height={500}
+                  className="w-full max-w-[320px] rounded-[1.5rem] shadow-2xl border-4 border-surface -rotate-3 group-hover:rotate-0 group-hover:scale-105 transition-all duration-500 z-10"
+                />
+                <Image
+                  src="/brand/verso-writing-notes-clean.svg"
+                  alt="Writing Mascot"
+                  width={200}
+                  height={200}
+                  className="absolute bottom-6 right-6 w-[160px] drop-shadow-xl z-20 group-hover:-translate-y-4 group-hover:rotate-6 transition-transform duration-500"
+                />
+              </div>
+            </div>
+          </motion.div>
+
+          {/* FLASHCARDS - SPAN 4 */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={fadeUp}
+            className="col-span-12 md:col-span-6 xl:col-span-4 h-full"
+          >
+            <div className="h-full rounded-[3rem] bg-foreground text-surface p-10 md:p-14 relative overflow-hidden flex flex-col shadow-2xl group hover:scale-[1.01] transition-transform duration-500">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-surface/5 blur-3xl rounded-full" />
+
+              <div className="flex items-center gap-3 mb-8 relative z-10">
+                <FlashcardIcon className="w-8 h-8 text-surface" />
+                <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-surface/60">ACTIVE RECALL</h3>
+              </div>
+
+              <h2 className="text-4xl md:text-5xl font-black uppercase tracking-widest text-surface leading-[0.95] mb-6 relative z-10">
+                SMART <br /> CARDS
+              </h2>
+
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-surface/70 leading-relaxed mb-10 max-w-[200px] relative z-10">
+                TURN NOTES INTO FLASHCARDS WITH AI. MEMORIZE FASTER WITH SPACED REPETITION.
+              </p>
+
+              <div className="mt-auto relative z-10 w-full flex justify-center">
+                <div className="relative w-[110%] max-w-[300px]">
+                  <Image
+                    src="/brand/flashcard-session-preview.png"
+                    alt="Flashcards App"
+                    width={400}
+                    height={300}
+                    className="w-full rounded-[1.5rem] shadow-[0_-15px_40px_rgba(0,0,0,0.3)] border-[3px] border-surface/20 group-hover:-translate-y-8 transition-transform duration-700 ease-out"
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* EXAMS - SPAN 12 */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={fadeUp}
+            className="col-span-12 h-full mt-4 md:mt-0"
+          >
+            <div className="w-full rounded-[3rem] bg-surface border-2 border-border/40 relative overflow-hidden flex flex-col xl:flex-row items-stretch shadow-sm group">
+
+              {/* Graphics / Cards Shuffle Side */}
+              <div className="xl:flex-1 relative min-h-[450px] p-8 bg-background-muted/50 border-b-2 xl:border-b-0 xl:border-r-2 border-border/40 flex items-center justify-center overflow-hidden">
+                {/* Enormous Watermark */}
+                <ExamIcon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[35rem] h-[35rem] text-foreground/[0.03] pointer-events-none group-hover:scale-110 group-hover:rotate-12 transition-all duration-1000" />
+
+                <div className="relative w-full max-w-[500px] aspect-[4/3] flex items-center justify-center">
                   {['/brand/exam-preview-1.png', '/brand/exam-preview-2.png', '/brand/exam-preview-3.png'].map((src, i) => (
                     <div
                       key={src}
-                      className="absolute inset-0 rounded-2xl border border-border/70 ring-1 ring-black/5 overflow-hidden bg-background"
-                      style={{
-                        animation: 'examShuffle 9s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-                        animationDelay: `${i * -3}s`,
-                      }}
+                      className={`absolute w-[85%] rounded-[1.5rem] shadow-2xl border-[3px] border-surface transition-all duration-1000 origin-center bg-surface overflow-hidden ${i === 0 ? '-rotate-6 -translate-x-6 group-hover:-rotate-[10deg] group-hover:-translate-x-12 group-hover:-translate-y-4' :
+                        i === 1 ? 'rotate-6 translate-x-6 group-hover:rotate-[8deg] group-hover:translate-x-12 group-hover:translate-y-4 z-10' :
+                          'z-20 group-hover:scale-105 group-hover:-translate-y-2'
+                        }`}
                     >
-                      <Image
-                        src={src}
-                        alt={`Exam question type preview ${i + 1}`}
-                        width={750}
-                        height={563}
-                        className="w-full h-full object-cover object-top"
-                      />
+                      <Image src={src} alt="Exam UI" width={600} height={400} className="w-full h-auto object-cover opacity-90" />
+                    </div>
+                  ))}
+                  <Image
+                    src="/brand/verso-thinking-clean.svg"
+                    alt="Thinking Mascot"
+                    width={200}
+                    height={200}
+                    className="absolute z-30 top-1/2 right-[10%] -translate-y-1/2 w-[160px] md:w-[220px] drop-shadow-[0_20px_40px_rgba(0,0,0,0.25)] group-hover:scale-110 transition-transform duration-700"
+                  />
+                </div>
+              </div>
+
+              {/* Content Side */}
+              <div className="xl:flex-1 p-10 md:p-16 flex flex-col justify-center">
+                <div className="flex items-center gap-3 mb-6">
+                  <ExamIcon className="w-6 h-6 text-foreground" />
+                  <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-foreground-muted">MOCK EXAMS</h3>
+                </div>
+
+                <h2 className="text-4xl md:text-6xl font-black uppercase tracking-widest text-foreground leading-[0.95] mb-8 relative">
+                  AI GENERATED <br /> ASSESSMENTS
+                </h2>
+
+                <p className="text-[11px] md:text-[13px] font-black uppercase tracking-[0.2em] text-foreground-muted leading-relaxed mb-12 max-w-lg">
+                  WALK INTO EXAM DAY FULLY PREPARED. AI CRAFTS REALISTIC PRACTICE EXAMS FROM YOUR NOTES WITH INSTANT FEEDBACK ON EVERYTHING.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                  {[
+                    { title: 'MULTIPLE CHOICE', desc: 'Instant feedback on options', icon: LeftToRightListNumberIcon },
+                    { title: 'IDENTIFICATION', desc: 'Master key definitions', icon: Tag01Icon },
+                    { title: 'ESSAYS', desc: 'Long-form preparation', icon: PencilEdit01Icon },
+                  ].map(item => (
+                    <div key={item.title} className="flex gap-4 items-start">
+                      <div className="p-3 bg-foreground rounded-[1rem] text-surface shrink-0 shadow-lg mt-1">
+                        <item.icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-black text-[12px] md:text-[14px] uppercase tracking-widest text-foreground mb-1 mt-1">{item.title}</p>
+                        <p className="font-black text-[9px] uppercase tracking-[0.2em] text-foreground-muted">{item.desc}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </motion.div>
-            </div>
+              </div>
 
-          </div>
+            </div>
+          </motion.div>
+
         </section>
 
-        {/* ===== COMMUNITY ===== */}
-        <section className="relative bg-background-muted/40 overflow-hidden border-y border-border/40">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-accent/5 blur-[120px]" />
-          </div>
+        {/* ===== COMMUNITY CTA - SPAN 12 ===== */}
+        <section className="mt-10 md:mt-16 w-full cursor-pointer group outline-none relative z-20">
+          <Link href="/community" className="block w-full h-full">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={fadeUp}
+              className="w-full rounded-[3rem] bg-surface border-[6px] border-foreground p-10 md:p-16 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-12 shadow-[0_20px_0_rgba(45,42,38,1)] active:shadow-[0_5px_0_rgba(45,42,38,1)] active:translate-y-[15px] transition-all duration-200"
+            >
+              <div className="absolute right-[-10%] bottom-[-20%] w-[600px] h-[600px] bg-foreground/5 blur-[120px] rounded-full pointer-events-none" />
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 md:py-32">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-                variants={staggerContainer}
-                className="space-y-6 text-center lg:text-left"
-              >
-                {/* Mobile mascot — centered above title */}
-                <motion.div className="lg:hidden flex justify-center mb-2" variants={fadeUp} transition={{ duration: 0.5 }}>
-                  <Image
-                    src="/brand/community.svg"
-                    alt="Community mascot"
-                    width={160}
-                    height={160}
-                    className="w-[130px] sm:w-[160px] h-auto drop-shadow-[0_12px_20px_rgba(0,0,0,0.18)]"
-                  />
-                </motion.div>
-
-                <div className="relative lg:pr-72">
-                  {/* Desktop mascot — absolute top-right of the text block */}
-                  <Image
-                    src="/brand/community.svg"
-                    alt="Community mascot"
-                    width={300}
-                    height={300}
-                    className="pointer-events-none absolute -top-[7rem] -right-10 lg:-top-[8rem] lg:-right-16 z-0 hidden lg:block w-[240px] lg:w-[300px] h-auto opacity-95 drop-shadow-[0_18px_28px_rgba(0,0,0,0.24)] animate-float-slow"
-                  />
-                  <motion.h2
-                    className="relative z-10 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-tight"
-                    variants={fadeUp}
-                  >
-                    A Global Library of <span className="text-accent text-glow-sm">Knowledge</span>
-                  </motion.h2>
+              <div className="z-10 flex-1 text-center lg:text-left flex flex-col items-center lg:items-start">
+                <div className="p-4 bg-foreground text-surface rounded-[1.2rem] shadow-xl w-fit mb-8 mx-auto lg:mx-0 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
+                  <Book01Icon className="w-8 h-8" />
                 </div>
 
-                <motion.p
-                  className="max-w-xl mx-auto lg:mx-0 text-base sm:text-xl text-foreground-muted leading-relaxed"
-                  variants={fadeUp}
-                >
-                  Don't start from scratch. Access a growing library of notes, flashcards, and exams shared by students worldwide. Download, remix, and master any subject in seconds.
-                </motion.p>
+                <h2 className="text-4xl sm:text-5xl md:text-7xl font-black text-foreground uppercase tracking-widest leading-[0.9] mb-8">
+                  GLOBAL <br /> LIBRARY
+                </h2>
 
-                <motion.div
-                  className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 pt-4"
-                  variants={staggerContainer}
-                >
-                  {[
-                    { label: 'Notes', desc: 'Detailed summaries', icon: NotebookIcon },
-                    { label: 'Flashcards', desc: 'Active recall decks', icon: FlashcardIcon },
-                    { label: 'Mock Exams', desc: 'Practice tests', icon: ExamIcon },
-                  ].map((item) => (
-                    <motion.div
-                      key={item.label}
-                      className="p-4 rounded-2xl bg-white/50 border border-border/50 backdrop-blur-sm shadow-sm"
-                      variants={staggerItem}
-                    >
-                      <item.icon className="w-6 h-6 text-accent mb-2 mx-auto lg:mx-0" />
-                      <p className="font-bold text-foreground text-base">{item.label}</p>
-                      <p className="text-sm text-foreground-muted">{item.desc}</p>
-                    </motion.div>
-                  ))}
-                </motion.div>
+                <p className="text-[12px] font-black uppercase tracking-[0.3em] text-foreground-muted max-w-md mx-auto lg:mx-0 leading-relaxed">
+                  DON'T START FROM SCRATCH. EXPLORE THOUSANDS OF REMIXABLE DEcks AND EXAMS FROM STUDENTS WORLDWIDE.
+                </p>
+              </div>
 
-                <motion.div variants={fadeUp} className="pt-4">
-                  <Link href="/community">
-                    <ClayButton variant="primary" size="lg" className="shadow-lg shadow-accent/20">
-                      Explore the Library
-                    </ClayButton>
-                  </Link>
-                </motion.div>
-              </motion.div>
+              <div className="flex-1 relative w-full max-w-[500px] h-[300px] lg:h-[400px] z-10 flex items-center justify-center pointer-events-none">
+                <div className="relative w-full h-full flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                  <Image
+                    src="/brand/community-preview.png"
+                    alt="Library Preview"
+                    width={600}
+                    height={400}
+                    className="absolute w-[110%] md:w-[130%] max-w-none shadow-[0_30px_60px_rgba(0,0,0,0.3)] border-[4px] border-foreground rounded-[2rem] rotate-3"
+                  />
+                  <Image
+                    src="/brand/community.svg"
+                    alt="Community Mascot"
+                    width={200}
+                    height={200}
+                    className="absolute -bottom-10 -left-10 md:-left-20 w-[140px] md:w-[200px] drop-shadow-2xl z-20"
+                  />
+                </div>
+              </div>
 
-              <motion.div
-                className="relative flex justify-center lg:justify-end"
-                initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
-                whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.8, type: "spring", bounce: 0.3 }}
-              >
-                <Image
-                  src="/brand/community-preview.png"
-                  alt="Verso Community Library Preview"
-                  width={1000}
-                  height={800}
-                  className="w-full max-w-[540px] h-auto rounded-2xl border border-border/70 ring-1 ring-black/5 shadow-[0_30px_65px_-24px_rgba(15,23,42,0.48)] drop-shadow-[0_16px_22px_rgba(0,0,0,0.2)]"
-                />
-              </motion.div>
-            </div>
-          </div>
+              {/* Decorative huge arrow indicator */}
+              <div className="absolute top-10 right-10">
+                <ArrowRight01Icon className="w-16 h-16 text-foreground opacity-20 group-hover:opacity-100 group-hover:translate-x-4 transition-all duration-300" />
+              </div>
+            </motion.div>
+          </Link>
         </section>
+
       </main>
 
-      <footer className="py-8 px-4 sm:px-6 lg:px-8 bg-foreground">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 group">
-            <Image
-              src="/brand/verso-mark.png"
-              alt="Verso logo"
-              width={32}
-              height={32}
-              className="w-8 h-8 brightness-0 invert group-hover:scale-105 transition-transform"
-            />
-            <span className="text-xl font-bold text-background group-hover:text-accent-muted transition-colors">
-              Verso
-            </span>
-          </Link>
-          <p className="text-background/60 text-sm">© {new Date().getFullYear()} Verso. AI-Powered Study Assistant.</p>
+      {/* ===== BRUTALIST FOOTER ===== */}
+      <footer className="w-full bg-foreground text-surface border-t-8 border-foreground-muted pt-16 pb-8 px-4 sm:px-8 mt-auto z-10 relative">
+        <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
+
+          <div className="flex flex-col items-center md:items-start text-center md:text-left gap-4">
+            <Link href="/" className="flex items-center gap-4 group mb-2">
+              <div className="bg-surface p-3 rounded-full overflow-hidden">
+                <Image
+                  src="/brand/verso-mark.png"
+                  alt="Verso logo"
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 group-hover:scale-110 transition-transform"
+                />
+              </div>
+              <span className="text-4xl md:text-5xl font-black text-surface tracking-widest uppercase relative top-1">
+                VERSo
+              </span>
+            </Link>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-surface/50">
+              THE PAPER-FIRST STUDY PLATFORM.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-6 md:gap-12">
+            <Link href="/community" className="text-[12px] font-black tracking-widest uppercase text-surface/70 hover:text-surface hover:underline decoration-2 underline-offset-8 transition-all">COMMUNITY</Link>
+            <Link href="/auth" className="text-[12px] font-black tracking-widest uppercase text-surface/70 hover:text-surface hover:underline decoration-2 underline-offset-8 transition-all">LOGIN</Link>
+          </div>
+
+        </div>
+
+        <div className="max-w-[1700px] mx-auto mt-16 pt-8 border-t-2 border-surface/10 flex flex-col md:flex-row justify-between items-center gap-4 text-[9px] font-black tracking-widest uppercase text-surface/40">
+          <p>© {new Date().getFullYear()} VERSO APPLICATION.</p>
+          <p>ALL RIGHTS RESERVED WORLDWIDE.</p>
         </div>
       </footer>
-    </div >
+    </div>
   );
 }
