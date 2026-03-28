@@ -207,7 +207,7 @@ export default function TakeExamPage() {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-background">
+      <div className="h-screen flex items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-4">
           <Loading03Icon className="w-10 h-10 text-foreground-muted animate-spin" />
           <p className="text-foreground-muted">Loading exam...</p>
@@ -218,7 +218,7 @@ export default function TakeExamPage() {
 
   if (!exam) {
     return (
-      <div className="h-screen flex items-center justify-center bg-background">
+      <div className="h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <p className="text-foreground mb-4">Exam not found</p>
           <Link href="/exams" className="text-primary underline">Back to Exams</Link>
@@ -228,16 +228,11 @@ export default function TakeExamPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-surface flex flex-col pt-safe pb-safe overflow-hidden select-none">
-      {/* 🌌 IMMERSIVE BACKGROUND */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-           style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '32px 32px' }} 
-      />
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
+    <div className="fixed inset-0 z-[100] bg-white flex flex-col pt-safe pb-safe overflow-hidden select-none">
 
       {/* 🏷️ TOP PROGRESS BAR */}
       <div className="h-1.5 w-full bg-background-muted/30 overflow-hidden shrink-0 z-[10]">
-        <motion.div 
+        <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${progress.percent}%` }}
           className="h-full bg-primary shadow-[0_0_10px_rgba(43,93,139,0.4)]"
@@ -246,7 +241,7 @@ export default function TakeExamPage() {
       </div>
 
       {/* 🏛️ HEADER */}
-      <header className="shrink-0 px-6 py-4 flex items-center justify-between border-b border-border/40 bg-surface/90 backdrop-blur-xl z-[10]">
+      <header className="shrink-0 px-6 py-4 flex items-center justify-between border-b border-border/20 bg-white z-[10]">
         <div className="flex items-center gap-4 flex-1">
           <Link
             href="/exams"
@@ -255,53 +250,53 @@ export default function TakeExamPage() {
             <ArrowLeft02Icon className="w-5 h-5 text-foreground-muted group-hover:-translate-x-0.5 transition-transform" />
           </Link>
           <div className="min-w-0 flex items-center gap-3">
-             <div className="hidden sm:flex p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 shrink-0">
-               <ExamIcon className="w-4 h-4 text-amber-600" />
-             </div>
-             <div>
-               <h1 className="text-[11px] font-black text-foreground uppercase tracking-[0.2em] truncate opacity-80">{exam.title}</h1>
-               <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                    {progress.answered} / {progress.total} ANSWERED
-                  </span>
-               </div>
-             </div>
+            <div className="hidden sm:flex p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 shrink-0">
+              <ExamIcon className="w-4 h-4 text-amber-600" />
+            </div>
+            <div>
+              <h1 className="text-[11px] font-black text-foreground uppercase tracking-[0.2em] truncate opacity-80">{exam.title}</h1>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  {progress.answered} / {progress.total} ANSWERED
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-6">
-           <div className="hidden md:flex items-center gap-4 mr-4 border-r border-border/40 pr-6">
-              <div className="flex flex-col items-center">
-                <div className="flex items-center gap-1.5 opacity-40 mb-0.5">
-                  <Clock01Icon className="w-3 h-3" />
-                  <span className="text-[9px] font-black tracking-widest uppercase">TIMER</span>
-                </div>
-                <span className={`text-[14px] font-black tabular-nums ${timeRemaining !== null && timeRemaining <= 300 ? 'text-red-500 animate-pulse' : 'text-foreground'}`}>
-                  {timeRemaining !== null ? formatTime(timeRemaining) : '--:--'}
-                </span>
+          <div className="hidden md:flex items-center gap-4 mr-4 border-r border-border/40 pr-6">
+            <div className="flex flex-col items-center">
+              <div className="flex items-center gap-1.5 opacity-40 mb-0.5">
+                <Clock01Icon className="w-3 h-3" />
+                <span className="text-[9px] font-black tracking-widest uppercase">TIMER</span>
               </div>
-           </div>
-           
-           <button
-             onClick={() => setShowConfirmSubmit(true)}
-             className="hidden sm:flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-foreground text-surface text-xs font-black uppercase tracking-widest hover:bg-foreground/90 transition-all active:scale-95 shrink-0 shadow-lg"
-           >
-             SUBMIT EXAM
-           </button>
-           
-           <div className="w-12 h-12 relative flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 48 48" className="absolute inset-0 w-full h-full -rotate-90">
-                <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="4" className="text-background-muted/30" />
-                <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="4" className="text-primary transition-all duration-1000 drop-shadow-sm" 
-                        strokeDasharray={126} strokeDashoffset={126 - (126 * progress.percent) / 100} strokeLinecap="round" />
-              </svg>
-              <span className="font-black text-[10px] text-primary relative z-10">{Math.round(progress.percent)}%</span>
-           </div>
+              <span className={`text-[14px] font-black tabular-nums ${timeRemaining !== null && timeRemaining <= 300 ? 'text-red-500 animate-pulse' : 'text-foreground'}`}>
+                {timeRemaining !== null ? formatTime(timeRemaining) : '--:--'}
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setShowConfirmSubmit(true)}
+            className="hidden sm:flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-foreground text-surface text-xs font-black uppercase tracking-widest hover:bg-foreground/90 transition-all active:scale-95 shrink-0 shadow-lg"
+          >
+            SUBMIT EXAM
+          </button>
+
+          <div className="w-12 h-12 relative flex items-center justify-center shrink-0">
+            <svg viewBox="0 0 48 48" className="absolute inset-0 w-full h-full -rotate-90">
+              <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="4" className="text-background-muted/30" />
+              <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="4" className="text-primary transition-all duration-1000 drop-shadow-sm"
+                strokeDasharray={126} strokeDashoffset={126 - (126 * progress.percent) / 100} strokeLinecap="round" />
+            </svg>
+            <span className="font-black text-[10px] text-primary relative z-10">{Math.round(progress.percent)}%</span>
+          </div>
         </div>
       </header>
 
       {/* Main content - Stepper: flex-1 + min-h-0 gives it a bounded height */}
-      <main className="flex-1 px-4 py-4 md:py-8 flex flex-col min-h-0 bg-background-muted/5 relative z-[5]">
+      <main className="flex-1 px-4 py-4 md:py-8 flex flex-col min-h-0 bg-white relative z-[5]">
         <div className="h-full w-full max-w-[min(100%,800px)] lg:max-w-4xl mx-auto flex flex-col min-h-0">
           <ExamQuestionStepper
             questions={sortedQuestions}

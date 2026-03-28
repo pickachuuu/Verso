@@ -98,7 +98,7 @@ export default function LandingPage() {
 
             {/* Intro CTA within the scrolling section */}
             <div className="text-center mb-10">
-              <p className="text-xl md:text-3xl font-black uppercase tracking-[0.2em] text-foreground max-w-4xl mx-auto leading-relaxed">
+              <p className="text-lg sm:text-xl md:text-3xl font-black uppercase tracking-[0.2em] text-foreground max-w-4xl mx-auto leading-relaxed">
                 WRITE NOTES. GENERATE FLASHCARDS INSTANTLY. TEST YOURSELF WITH MOCK EXAMS. ALL IN ONE SEAMLESS FLOW.
               </p>
               <div className="mt-10 flex justify-center">
@@ -127,7 +127,7 @@ export default function LandingPage() {
                 <div className="h-full rounded-[3rem] bg-background border-[4px] border-border/60 relative overflow-hidden flex flex-col md:flex-row items-stretch shadow-sm hover:shadow-xl hover:border-foreground/30 transition-all duration-500">
 
                   {/* Text Side */}
-                  <div className="flex-1 p-10 md:p-14 flex flex-col justify-center relative z-10">
+                  <div className="flex-1 p-6 sm:p-10 md:p-14 flex flex-col justify-center relative z-10">
                     <div className="absolute top-[-10rem] left-[-10rem] w-[25rem] h-[25rem] bg-primary/5 blur-3xl rounded-full pointer-events-none" />
 
                     <div className="flex items-center gap-3 mb-6">
@@ -135,7 +135,7 @@ export default function LandingPage() {
                       <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-foreground-muted">NOTE WRITING</h3>
                     </div>
 
-                    <h2 className="text-4xl md:text-[3.5rem] font-black uppercase tracking-widest text-foreground leading-[0.95] mb-8">
+                    <h2 className="text-2xl sm:text-3xl md:text-[3.5rem] font-black uppercase tracking-widest text-foreground leading-[0.95] mb-8">
                       WRITE & <br /> ORGANIZE
                     </h2>
 
@@ -169,7 +169,7 @@ export default function LandingPage() {
                       alt="Writing Mascot"
                       width={200}
                       height={200}
-                      className="absolute bottom-6 right-6 w-[160px] drop-shadow-2xl z-20 group-hover:-translate-y-4 group-hover:rotate-6 transition-transform duration-500"
+                      className="absolute -top-12 -right-4 md:top-auto md:bottom-6 md:right-6 w-[110px] md:w-[160px] drop-shadow-2xl z-20 group-hover:-translate-y-2 md:group-hover:-translate-y-4 group-hover:rotate-6 transition-all duration-500"
                     />
                   </div>
                 </div>
@@ -183,7 +183,7 @@ export default function LandingPage() {
                 variants={fadeUp}
                 className="col-span-12 md:col-span-6 xl:col-span-4 h-full"
               >
-                <div className="h-full rounded-[3rem] bg-foreground text-surface p-10 md:p-14 relative overflow-hidden flex flex-col shadow-2xl group hover:scale-[1.02] transition-transform duration-500 border-[4px] border-foreground">
+                <div className="h-full rounded-[3rem] bg-foreground text-surface p-6 sm:p-10 md:p-14 relative overflow-hidden flex flex-col shadow-2xl group hover:scale-[1.02] transition-transform duration-500 border-[4px] border-foreground">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-surface/5 blur-3xl rounded-full" />
 
                   <div className="flex items-center gap-3 mb-8 relative z-10">
@@ -191,7 +191,7 @@ export default function LandingPage() {
                     <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-surface/60">ACTIVE RECALL</h3>
                   </div>
 
-                  <h2 className="text-4xl md:text-5xl font-black uppercase tracking-widest text-surface leading-[0.95] mb-6 relative z-10">
+                  <h2 className="text-2xl sm:text-3xl md:text-5xl font-black uppercase tracking-widest text-surface leading-[0.95] mb-6 relative z-10">
                     SMART <br /> CARDS
                   </h2>
 
@@ -246,18 +246,18 @@ export default function LandingPage() {
                       alt="Thinking Mascot"
                       width={160}
                       height={160}
-                      className="absolute z-30 bottom-4 left-4 w-[100px] md:w-[140px] drop-shadow-xl group-hover:scale-110 transition-transform duration-500"
+                      className="absolute z-30 -top-8 -left-2 md:top-auto md:bottom-4 md:left-4 w-[90px] md:w-[140px] drop-shadow-xl group-hover:scale-110 transition-all duration-500"
                     />
                   </div>
 
                   {/* Content Side */}
-                  <div className="xl:flex-1 p-10 md:p-16 flex flex-col justify-center">
+                  <div className="xl:flex-1 p-6 sm:p-10 md:p-16 flex flex-col justify-center">
                     <div className="flex items-center gap-3 mb-6">
                       <ExamIcon className="w-6 h-6 text-foreground" />
                       <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-foreground-muted">MOCK EXAMS</h3>
                     </div>
 
-                    <h2 className="text-4xl md:text-6xl font-black uppercase tracking-widest text-foreground leading-[0.95] mb-8 relative">
+                    <h2 className="text-2xl sm:text-3xl md:text-6xl font-black uppercase tracking-widest text-foreground leading-[0.95] mb-8 relative">
                       AI GENERATED <br /> ASSESSMENTS
                     </h2>
 
@@ -297,16 +297,16 @@ export default function LandingPage() {
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.2 }}
                   variants={fadeUp}
-                  className="w-full rounded-[3rem] md:rounded-[4rem] bg-background border-[8px] md:border-[12px] border-foreground p-10 md:p-16 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-12 shadow-[0_20px_0_rgba(45,42,38,1)] active:shadow-[0_5px_0_rgba(45,42,38,1)] active:translate-y-[15px] transition-all duration-200"
+                  className="w-full rounded-[3rem] md:rounded-[4rem] bg-background border-[8px] md:border-[12px] border-foreground p-6 sm:p-10 md:p-16 relative overflow-hidden flex flex-col lg:flex-row items-center justify-start lg:justify-between gap-10 sm:gap-12 shadow-[0_20px_0_1px_rgba(45,42,38,1)] active:shadow-[0_5px_0_rgba(45,42,38,1)] active:translate-y-[15px] transition-all duration-200"
                 >
                   <div className="absolute right-[-10%] bottom-[-20%] w-[600px] h-[600px] bg-foreground/5 blur-[120px] rounded-full pointer-events-none" />
 
-                  <div className="z-10 flex-1 text-center lg:text-left flex flex-col items-center lg:items-start">
+                  <div className="z-10 lg:flex-[1.2] text-center lg:text-left flex flex-col items-center lg:items-start">
                     <div className="p-5 bg-foreground text-surface rounded-[1.5rem] shadow-2xl w-fit mb-8 mx-auto lg:mx-0 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
                       <Book01Icon className="w-10 h-10" />
                     </div>
 
-                    <h2 className="text-4xl sm:text-5xl md:text-8xl font-black text-foreground uppercase tracking-widest leading-[0.9] mb-8">
+                    <h2 className="text-2xl sm:text-4xl md:text-7xl lg:text-8xl font-black text-foreground uppercase tracking-widest leading-[0.9] mb-8">
                       GLOBAL <br /> LIBRARY
                     </h2>
 
@@ -315,27 +315,27 @@ export default function LandingPage() {
                     </p>
                   </div>
 
-                  <div className="flex-1 relative w-full max-w-[500px] h-[300px] lg:h-[400px] z-10 flex items-center justify-center pointer-events-none">
+                  <div className="lg:flex-[0.8] relative w-full max-w-[450px] h-[220px] sm:h-[300px] lg:h-[360px] z-10 flex items-center justify-center pointer-events-none">
                     <div className="relative w-full h-full flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
                       <Image
                         src="/brand/community-preview.png"
                         alt="Library Preview"
                         width={600}
                         height={400}
-                        className="absolute w-[110%] md:w-[130%] max-w-none shadow-[0_30px_60px_rgba(0,0,0,0.3)] border-[6px] border-foreground rounded-[2rem] rotate-3"
+                        className="absolute w-[110%] lg:w-[115%] max-w-none shadow-[0_30px_60px_rgba(0,0,0,0.3)] border-[6px] border-foreground rounded-[2rem] rotate-3"
                       />
                       <Image
                         src="/brand/community.svg"
                         alt="Community Mascot"
                         width={200}
                         height={200}
-                        className="absolute -bottom-10 -left-10 md:-left-20 w-[140px] md:w-[200px] drop-shadow-2xl z-20"
+                        className="absolute -top-12 -left-4 md:top-auto md:-bottom-10 md:-left-10 w-[110px] sm:w-[140px] md:w-[200px] drop-shadow-2xl z-20"
                       />
                     </div>
                   </div>
 
-                  <div className="absolute top-10 right-10">
-                    <ArrowRight01Icon className="w-16 h-16 text-foreground opacity-20 group-hover:opacity-100 group-hover:translate-x-4 transition-all duration-300" />
+                  <div className="absolute top-6 right-6 lg:top-10 lg:right-10">
+                    <ArrowRight01Icon className="w-8 h-8 lg:w-16 lg:h-16 text-foreground opacity-20 group-hover:opacity-100 group-hover:translate-x-4 transition-all duration-300" />
                   </div>
                 </motion.div>
               </Link>

@@ -26,6 +26,10 @@ function lockBodyScroll() {
   lockCount++;
   if (lockCount === 1) {
     document.body.style.overflow = 'hidden';
+    document.body.style.height = '100vh';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.touchAction = 'none';
   }
 }
 
@@ -33,6 +37,10 @@ function unlockBodyScroll() {
   lockCount = Math.max(0, lockCount - 1);
   if (lockCount === 0) {
     document.body.style.overflow = '';
+    document.body.style.height = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.touchAction = '';
   }
 }
 
@@ -79,7 +87,7 @@ export default function Modal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div 
+      <div
         className="min-h-full flex items-center justify-center p-4"
         onMouseDown={(e) => {
           if (e.target === e.currentTarget) onClose();
