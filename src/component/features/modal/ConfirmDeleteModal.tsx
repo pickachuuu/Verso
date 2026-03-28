@@ -54,8 +54,8 @@ export default function ConfirmDeleteModal({
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <div className="w-full max-w-md">
-        <ClayCard variant="elevated" padding="none" className="rounded-[2.5rem] overflow-hidden flex flex-col">
-          <div className="p-8 text-center bg-background-muted/5 border-b border-border/40">
+        <div className="bg-surface border-[3px] border-foreground rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col relative paper-texture">
+          <div className="p-8 text-center bg-background-muted/20 border-b-[3px] border-foreground/5">
             <div className="mx-auto mb-6 w-16 h-16 bg-red-500/10 border-2 border-red-500/20 rounded-full flex items-center justify-center shadow-sm">
               <Delete01Icon className="w-7 h-7 text-red-600" />
             </div>
@@ -79,10 +79,10 @@ export default function ConfirmDeleteModal({
             </div>
 
             <div className="p-4 bg-red-500/10 border-2 border-red-500/20 rounded-2xl flex items-start gap-3">
-               <Delete01Icon className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
-               <p className="text-sm font-semibold text-red-700 leading-snug">
-                 This action cannot be undone. The {itemType} and all associated data will be permanently deleted.
-               </p>
+              <Delete01Icon className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
+              <p className="text-sm font-semibold text-red-700 leading-snug">
+                This action cannot be undone. The {itemType} and all associated data will be permanently deleted.
+              </p>
             </div>
 
             {error && (
@@ -114,7 +114,7 @@ export default function ConfirmDeleteModal({
               )}
             </button>
           </div>
-        </ClayCard>
+        </div>
       </div>
     </Modal>
   );

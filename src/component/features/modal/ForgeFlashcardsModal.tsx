@@ -379,432 +379,432 @@ export default function ForgeFlashcardsModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] bg-surface overflow-hidden rounded-[2.5rem] flex flex-col shadow-2xl ring-1 ring-border/40">
-          {/* Header */}
-          <div className="px-8 py-6 bg-background-muted/5 border-b border-border/40 shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-[1rem] bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/20 border border-primary/20 shrink-0">
-                  <SparklesIcon className="w-6 h-6 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-2xl font-black text-foreground tracking-tight truncate">Forge Flashcards</h2>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1 truncate">Create flashcards from your notes</p>
-                </div>
+      <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] bg-surface border-[3px] border-foreground rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col relative paper-texture">
+        {/* Header */}
+        <div className="px-8 py-6 bg-background-muted/20 border-b-[3px] border-foreground/5 shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-[1rem] bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/20 border border-primary/20 shrink-0">
+                <SparklesIcon className="w-6 h-6 text-white" />
               </div>
-              <button
-                onClick={onClose}
-                className="p-3 rounded-2xl hover:bg-surface-elevated transition-colors"
-              >
-                <Cancel01Icon className="w-5 h-5 text-foreground-muted" />
-              </button>
+              <div className="min-w-0">
+                <h2 className="text-2xl font-black text-foreground tracking-tight truncate">Forge Flashcards</h2>
+                <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1 truncate">Create flashcards from your notes</p>
+              </div>
             </div>
-          </div>
-
-          {/* Step Indicator */}
-          <div className="px-6 pt-6">
-            <StepIndicator currentStep={currentStep} steps={STEPS} />
-          </div>
-
-          {/* Content */}
-          <div className="px-6 py-4 overflow-y-auto flex-1 min-h-0">
-            {/* Step 1: Select Notes */}
-            {currentStep === 1 && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-foreground">
-                    Select notes to forge flashcards from
-                  </h3>
-                  <ClayBadge variant="accent" className="text-xs">
-                    {selectedNotes.length} selected
-                  </ClayBadge>
-                </div>
-
-                {/* Compact filter bar */}
-                {notes.length > 0 && !notesLoading && (
-                  <div className="space-y-2">
-                    {/* Search */}
-                    <div className="relative">
-                      <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" />
-                      <input
-                        type="text"
-                        placeholder="Search notes..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-border bg-surface text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all shadow-sm"
-                      />
-                    </div>
-                    {/* Color filter + Sort */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-1 flex-wrap">
-                        <button
-                          onClick={() => setSelectedColor('all')}
-                          className={clsx(
-                            'px-2 py-1 rounded-md text-xs font-medium transition-all border',
-                            selectedColor === 'all'
-                              ? 'bg-background-muted text-foreground border-border'
-                              : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
-                          )}
-                        >
-                          All
-                        </button>
-                        {(Object.keys(NOTEBOOK_COLORS) as NotebookColorKey[]).map((color) => (
-                          <button
-                            key={color}
-                            onClick={() => setSelectedColor(color)}
-                            className={clsx(
-                              'w-5 h-5 rounded-md transition-all border',
-                              selectedColor === color
-                                ? 'border-pencil/60 ring-1.5 ring-offset-1 ring-foreground/20 scale-110'
-                                : 'border-transparent hover:scale-110'
-                            )}
-                            style={{ background: NOTEBOOK_COLORS[color].primary }}
-                            title={NOTEBOOK_COLORS[color].name}
-                          />
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-background-muted border border-border shrink-0">
-                        {([
-                          { key: 'recent' as const, icon: Clock01Icon, title: 'Recent' },
-                          { key: 'alphabetical' as const, icon: SortingAZ01Icon, title: 'A–Z' },
-                          { key: 'oldest' as const, icon: Calendar03Icon, title: 'Oldest' },
-                        ]).map(({ key, icon: Icon, title }) => (
-                          <button
-                            key={key}
-                            onClick={() => setSortBy(key)}
-                            title={title}
-                            className={clsx(
-                              'p-1.5 rounded-md transition-all',
-                              sortBy === key
-                                ? 'bg-background text-foreground shadow-sm'
-                                : 'text-foreground-muted hover:text-foreground'
-                            )}
-                          >
-                            <Icon className="w-3.5 h-3.5" />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {notesLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin w-8 h-8 border-2 border-accent border-t-transparent rounded-full" />
-                  </div>
-                ) : notes.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 rounded-2xl bg-surface flex items-center justify-center mx-auto mb-4">
-                      <NotebookIcon className="w-8 h-8 text-foreground-muted" />
-                    </div>
-                    <p className="text-foreground-muted">No notes found. Create some notes first!</p>
-                  </div>
-                ) : filteredNotes.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-sm text-foreground-muted">No notes match your filters.</p>
-                  </div>
-                ) : (
-                  <div className="grid gap-2">
-                    {filteredNotes.map((note) => (
-                      <NoteCard
-                        key={note.id}
-                        note={note}
-                        isSelected={selectedNotes.includes(note.id)}
-                        onToggle={() => toggleNoteSelection(note.id)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Step 2: Configure */}
-            {currentStep === 2 && (
-              <div className="space-y-6">
-                {/* Set Title */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Flashcard Set Title
-                  </label>
-                  <Controller
-                    name="setTitle"
-                    control={control}
-                    render={({ field }) => (
-                      <input
-                        {...field}
-                        type="text"
-                        placeholder="Enter a title for your flashcard set"
-                        className="clay-input w-full px-4 py-3 rounded-xl"
-                      />
-                    )}
-                  />
-                </div>
-
-                {/* Flashcard Count */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Number of Flashcards
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <Controller
-                      name="flashcardCount"
-                      control={control}
-                      render={({ field }) => (
-                        <input
-                          {...field}
-                          type="range"
-                          min="5"
-                          max="30"
-                          className="flex-1 accent-accent"
-                          onChange={(e) => field.onChange(parseInt(e.target.value))}
-                        />
-                      )}
-                    />
-                    <span className="w-12 text-center font-semibold text-accent">
-                      {flashcardCount}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Difficulty */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-foreground">
-                    Difficulty Level
-                  </label>
-                  <Controller
-                    name="difficulty"
-                    control={control}
-                    render={({ field }) => (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {DIFFICULTY_OPTIONS.map((option) => (
-                          <button
-                            key={option.value}
-                            type="button"
-                            onClick={() => field.onChange(option.value)}
-                            className={clsx(
-                              'p-4 rounded-2xl text-left transition-all duration-200 border-2 flex items-start gap-3',
-                              field.value === option.value
-                                ? 'clay-option-selected border-accent bg-accent/5 shadow-xl shadow-accent/5'
-                                : 'clay-option-unselected border-transparent hover:border-border bg-background-muted/30'
-                            )}
-                          >
-                            <div className={clsx(
-                                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-border/40 transition-all shadow-sm",
-                                field.value === option.value ? 'bg-accent text-white' : 'bg-white text-foreground-muted'
-                            )}>
-                                {option.value === 'easy' && <Clock01Icon className="w-5 h-5" />}
-                                {option.value === 'medium' && <SparklesIcon className="w-5 h-5" />}
-                                {option.value === 'hard' && <Task01Icon className="w-5 h-5" />}
-                                {option.value === 'all' && <Settings02Icon className="w-5 h-5" />}
-                            </div>
-                            <div className="min-w-0">
-                                <div className="font-black text-sm uppercase tracking-tight">{option.label}</div>
-                                <div className="text-[11px] text-foreground-muted leading-relaxed mt-0.5">{option.description}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  />
-                </div>
-
-                {/* Custom Prompt */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Custom Instructions (Optional)
-                  </label>
-                  <Controller
-                    name="customPrompt"
-                    control={control}
-                    render={({ field }) => (
-                      <textarea
-                        {...field}
-                        placeholder="e.g., Make them multiple choice, focus on key definitions..."
-                        className="clay-input w-full px-4 py-3 rounded-xl resize-none"
-                        rows={3}
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Generate & Preview */}
-            {currentStep === 3 && (
-              <div className="space-y-6">
-                {/* Summary */}
-                <div className="clay-summary p-4 rounded-2xl space-y-3">
-                  <h4 className="font-semibold text-foreground">Generation Summary</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-foreground-muted">Notes:</span>
-                      <span className="ml-2 font-medium">{selectedNotes.length} selected</span>
-                    </div>
-                    <div>
-                      <span className="text-foreground-muted">Count:</span>
-                      <span className="ml-2 font-medium">{flashcardCount} cards</span>
-                    </div>
-                    <div>
-                      <span className="text-foreground-muted">Difficulty:</span>
-                      <span className="ml-2 font-medium capitalize">{difficulty}</span>
-                    </div>
-                    <div>
-                      <span className="text-foreground-muted">Title:</span>
-                      <span className="ml-2 font-medium truncate">{setTitle || 'Untitled'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Generate Button or Results */}
-                {!generatedFlashcards && !isGenerating && (
-                  <div className="text-center py-8">
-                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-primary-dark/20 flex items-center justify-center mx-auto mb-4">
-                      <SparklesIcon className="w-10 h-10 text-accent" />
-                    </div>
-                    <p className="text-foreground-muted mb-6">
-                      Ready to forge your flashcards? Click the button below to start!
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleGenerate}
-                      className="px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all shadow-sm flex items-center justify-center gap-2 mx-auto"
-                    >
-                      <SparklesIcon className="w-4 h-4" />
-                      Generate Flashcards
-                    </button>
-                  </div>
-                )}
-
-                {/* Loading State */}
-                {isGenerating && (
-                  <div className="text-center py-12">
-                    <div className="relative w-20 h-20 mx-auto mb-4">
-                      <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary to-primary-dark animate-pulse" />
-                      <div className="absolute inset-2 rounded-2xl bg-surface-elevated flex items-center justify-center">
-                        <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
-                      </div>
-                    </div>
-                    <h4 className="font-semibold text-foreground mb-1">Forging Flashcards...</h4>
-                    <p className="text-sm text-foreground-muted">
-                      AI is analyzing your notes and creating flashcards
-                    </p>
-                  </div>
-                )}
-
-                {/* Success State */}
-                {generatedFlashcards && (
-                  <div className="space-y-4">
-                    <div className="text-center py-4">
-                      <div className="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center mx-auto mb-3">
-                        <CheckmarkCircle01Icon className="w-8 h-8 text-green-600" />
-                      </div>
-                      <h4 className="font-semibold text-foreground mb-1">
-                        {generatedFlashcards.flashcards.length} Flashcards Generated!
-                      </h4>
-                      <p className="text-sm text-foreground-muted">
-                        Click confirm to save them to your collection
-                      </p>
-                    </div>
-
-                    {/* Preview Cards */}
-                    <div className="max-h-48 overflow-y-auto space-y-2">
-                      {generatedFlashcards.flashcards.slice(0, 5).map((card, index) => (
-                        <div
-                          key={index}
-                          className="p-3 rounded-xl bg-surface border border-border"
-                        >
-                          <div className="flex items-start gap-2">
-                            <span className="text-xs font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full">
-                              #{index + 1}
-                            </span>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-foreground line-clamp-2">
-                                {card.question}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      {generatedFlashcards.flashcards.length > 5 && (
-                        <p className="text-center text-sm text-foreground-muted">
-                          +{generatedFlashcards.flashcards.length - 5} more flashcards
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Error Display */}
-            {error && (
-              <div className="mt-4 p-4 rounded-xl bg-red-50 border border-red-200">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="px-8 py-6 bg-surface border-t border-border/40 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
-            <div className="flex justify-start order-2 sm:order-1">
-              {currentStep > 1 && (
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  disabled={isGenerating || saving}
-                  className="w-full sm:w-auto px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center justify-center gap-2"
-                >
-                  <ArrowLeft01Icon className="w-4 h-4" />
-                  Back
-                </button>
-              )}
-            </div>
-
-            <div className="flex gap-3 order-1 sm:order-2">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isGenerating || saving}
-                className="flex-[1] sm:flex-none px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center justify-center gap-2"
-              >
-                Cancel
-              </button>
-
-              {currentStep < 3 && (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={currentStep === 1 && selectedNotes.length === 0}
-                  className="flex-[2] sm:flex-none px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
-                >
-                  Continue
-                  <ArrowRight01Icon className="w-4 h-4" />
-                </button>
-              )}
-
-              {currentStep === 3 && generatedFlashcards && (
-                <button
-                  type="button"
-                  onClick={handleConfirm}
-                  disabled={saving}
-                  className="flex-[2] sm:flex-none px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
-                >
-                  {saving ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Tick01Icon className="w-4 h-4 mr-2" />
-                      Confirm & Save
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
+            <button
+              onClick={onClose}
+              className="p-3 rounded-2xl hover:bg-surface-elevated transition-colors"
+            >
+              <Cancel01Icon className="w-5 h-5 text-foreground-muted" />
+            </button>
           </div>
         </div>
+
+        {/* Step Indicator */}
+        <div className="px-6 pt-6">
+          <StepIndicator currentStep={currentStep} steps={STEPS} />
+        </div>
+
+        {/* Content */}
+        <div className="px-6 py-4 overflow-y-auto flex-1 min-h-0">
+          {/* Step 1: Select Notes */}
+          {currentStep === 1 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-foreground">
+                  Select notes to forge flashcards from
+                </h3>
+                <ClayBadge variant="accent" className="text-xs">
+                  {selectedNotes.length} selected
+                </ClayBadge>
+              </div>
+
+              {/* Compact filter bar */}
+              {notes.length > 0 && !notesLoading && (
+                <div className="space-y-2">
+                  {/* Search */}
+                  <div className="relative">
+                    <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+                    <input
+                      type="text"
+                      placeholder="Search notes..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-border bg-surface text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all shadow-sm"
+                    />
+                  </div>
+                  {/* Color filter + Sort */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <button
+                        onClick={() => setSelectedColor('all')}
+                        className={clsx(
+                          'px-2 py-1 rounded-md text-xs font-medium transition-all border',
+                          selectedColor === 'all'
+                            ? 'bg-background-muted text-foreground border-border'
+                            : 'text-foreground-muted border-transparent hover:text-foreground hover:border-border'
+                        )}
+                      >
+                        All
+                      </button>
+                      {(Object.keys(NOTEBOOK_COLORS) as NotebookColorKey[]).map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => setSelectedColor(color)}
+                          className={clsx(
+                            'w-5 h-5 rounded-md transition-all border',
+                            selectedColor === color
+                              ? 'border-pencil/60 ring-1.5 ring-offset-1 ring-foreground/20 scale-110'
+                              : 'border-transparent hover:scale-110'
+                          )}
+                          style={{ background: NOTEBOOK_COLORS[color].primary }}
+                          title={NOTEBOOK_COLORS[color].name}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-background-muted border border-border shrink-0">
+                      {([
+                        { key: 'recent' as const, icon: Clock01Icon, title: 'Recent' },
+                        { key: 'alphabetical' as const, icon: SortingAZ01Icon, title: 'A–Z' },
+                        { key: 'oldest' as const, icon: Calendar03Icon, title: 'Oldest' },
+                      ]).map(({ key, icon: Icon, title }) => (
+                        <button
+                          key={key}
+                          onClick={() => setSortBy(key)}
+                          title={title}
+                          className={clsx(
+                            'p-1.5 rounded-md transition-all',
+                            sortBy === key
+                              ? 'bg-background text-foreground shadow-sm'
+                              : 'text-foreground-muted hover:text-foreground'
+                          )}
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {notesLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin w-8 h-8 border-2 border-accent border-t-transparent rounded-full" />
+                </div>
+              ) : notes.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 rounded-2xl bg-surface flex items-center justify-center mx-auto mb-4">
+                    <NotebookIcon className="w-8 h-8 text-foreground-muted" />
+                  </div>
+                  <p className="text-foreground-muted">No notes found. Create some notes first!</p>
+                </div>
+              ) : filteredNotes.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-foreground-muted">No notes match your filters.</p>
+                </div>
+              ) : (
+                <div className="grid gap-2">
+                  {filteredNotes.map((note) => (
+                    <NoteCard
+                      key={note.id}
+                      note={note}
+                      isSelected={selectedNotes.includes(note.id)}
+                      onToggle={() => toggleNoteSelection(note.id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 2: Configure */}
+          {currentStep === 2 && (
+            <div className="space-y-6">
+              {/* Set Title */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Flashcard Set Title
+                </label>
+                <Controller
+                  name="setTitle"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      type="text"
+                      placeholder="Enter a title for your flashcard set"
+                      className="clay-input w-full px-4 py-3 rounded-xl"
+                    />
+                  )}
+                />
+              </div>
+
+              {/* Flashcard Count */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Number of Flashcards
+                </label>
+                <div className="flex items-center gap-4">
+                  <Controller
+                    name="flashcardCount"
+                    control={control}
+                    render={({ field }) => (
+                      <input
+                        {...field}
+                        type="range"
+                        min="5"
+                        max="30"
+                        className="flex-1 accent-accent"
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      />
+                    )}
+                  />
+                  <span className="w-12 text-center font-semibold text-accent">
+                    {flashcardCount}
+                  </span>
+                </div>
+              </div>
+
+              {/* Difficulty */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-foreground">
+                  Difficulty Level
+                </label>
+                <Controller
+                  name="difficulty"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {DIFFICULTY_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => field.onChange(option.value)}
+                          className={clsx(
+                            'p-4 rounded-2xl text-left transition-all duration-200 border-2 flex items-start gap-3',
+                            field.value === option.value
+                              ? 'clay-option-selected border-accent bg-accent/5 shadow-xl shadow-accent/5'
+                              : 'clay-option-unselected border-transparent hover:border-border bg-background-muted/30'
+                          )}
+                        >
+                          <div className={clsx(
+                            "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-border/40 transition-all shadow-sm",
+                            field.value === option.value ? 'bg-accent text-white' : 'bg-white text-foreground-muted'
+                          )}>
+                            {option.value === 'easy' && <Clock01Icon className="w-5 h-5" />}
+                            {option.value === 'medium' && <SparklesIcon className="w-5 h-5" />}
+                            {option.value === 'hard' && <Task01Icon className="w-5 h-5" />}
+                            {option.value === 'all' && <Settings02Icon className="w-5 h-5" />}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-black text-sm uppercase tracking-tight">{option.label}</div>
+                            <div className="text-[11px] text-foreground-muted leading-relaxed mt-0.5">{option.description}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                />
+              </div>
+
+              {/* Custom Prompt */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Custom Instructions (Optional)
+                </label>
+                <Controller
+                  name="customPrompt"
+                  control={control}
+                  render={({ field }) => (
+                    <textarea
+                      {...field}
+                      placeholder="e.g., Make them multiple choice, focus on key definitions..."
+                      className="clay-input w-full px-4 py-3 rounded-xl resize-none"
+                      rows={3}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Generate & Preview */}
+          {currentStep === 3 && (
+            <div className="space-y-6">
+              {/* Summary */}
+              <div className="clay-summary p-4 rounded-2xl space-y-3">
+                <h4 className="font-semibold text-foreground">Generation Summary</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-foreground-muted">Notes:</span>
+                    <span className="ml-2 font-medium">{selectedNotes.length} selected</span>
+                  </div>
+                  <div>
+                    <span className="text-foreground-muted">Count:</span>
+                    <span className="ml-2 font-medium">{flashcardCount} cards</span>
+                  </div>
+                  <div>
+                    <span className="text-foreground-muted">Difficulty:</span>
+                    <span className="ml-2 font-medium capitalize">{difficulty}</span>
+                  </div>
+                  <div>
+                    <span className="text-foreground-muted">Title:</span>
+                    <span className="ml-2 font-medium truncate">{setTitle || 'Untitled'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Generate Button or Results */}
+              {!generatedFlashcards && !isGenerating && (
+                <div className="text-center py-8">
+                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-primary-dark/20 flex items-center justify-center mx-auto mb-4">
+                    <SparklesIcon className="w-10 h-10 text-accent" />
+                  </div>
+                  <p className="text-foreground-muted mb-6">
+                    Ready to forge your flashcards? Click the button below to start!
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleGenerate}
+                    className="px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all shadow-sm flex items-center justify-center gap-2 mx-auto"
+                  >
+                    <SparklesIcon className="w-4 h-4" />
+                    Generate Flashcards
+                  </button>
+                </div>
+              )}
+
+              {/* Loading State */}
+              {isGenerating && (
+                <div className="text-center py-12">
+                  <div className="relative w-20 h-20 mx-auto mb-4">
+                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary to-primary-dark animate-pulse" />
+                    <div className="absolute inset-2 rounded-2xl bg-surface-elevated flex items-center justify-center">
+                      <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  </div>
+                  <h4 className="font-semibold text-foreground mb-1">Forging Flashcards...</h4>
+                  <p className="text-sm text-foreground-muted">
+                    AI is analyzing your notes and creating flashcards
+                  </p>
+                </div>
+              )}
+
+              {/* Success State */}
+              {generatedFlashcards && (
+                <div className="space-y-4">
+                  <div className="text-center py-4">
+                    <div className="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center mx-auto mb-3">
+                      <CheckmarkCircle01Icon className="w-8 h-8 text-green-600" />
+                    </div>
+                    <h4 className="font-semibold text-foreground mb-1">
+                      {generatedFlashcards.flashcards.length} Flashcards Generated!
+                    </h4>
+                    <p className="text-sm text-foreground-muted">
+                      Click confirm to save them to your collection
+                    </p>
+                  </div>
+
+                  {/* Preview Cards */}
+                  <div className="max-h-48 overflow-y-auto space-y-2">
+                    {generatedFlashcards.flashcards.slice(0, 5).map((card, index) => (
+                      <div
+                        key={index}
+                        className="p-3 rounded-xl bg-surface border border-border"
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="text-xs font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full">
+                            #{index + 1}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground line-clamp-2">
+                              {card.question}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {generatedFlashcards.flashcards.length > 5 && (
+                      <p className="text-center text-sm text-foreground-muted">
+                        +{generatedFlashcards.flashcards.length - 5} more flashcards
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Error Display */}
+          {error && (
+            <div className="mt-4 p-4 rounded-xl bg-red-50 border border-red-200">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-8 py-6 bg-surface border-t border-border/40 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+          <div className="flex justify-start order-2 sm:order-1">
+            {currentStep > 1 && (
+              <button
+                type="button"
+                onClick={handleBack}
+                disabled={isGenerating || saving}
+                className="w-full sm:w-auto px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center justify-center gap-2"
+              >
+                <ArrowLeft01Icon className="w-4 h-4" />
+                Back
+              </button>
+            )}
+          </div>
+
+          <div className="flex gap-3 order-1 sm:order-2">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isGenerating || saving}
+              className="flex-[1] sm:flex-none px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center justify-center gap-2"
+            >
+              Cancel
+            </button>
+
+            {currentStep < 3 && (
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={currentStep === 1 && selectedNotes.length === 0}
+                className="flex-[2] sm:flex-none px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+              >
+                Continue
+                <ArrowRight01Icon className="w-4 h-4" />
+              </button>
+            )}
+
+            {currentStep === 3 && generatedFlashcards && (
+              <button
+                type="button"
+                onClick={handleConfirm}
+                disabled={saving}
+                className="flex-[2] sm:flex-none px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+              >
+                {saving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Tick01Icon className="w-4 h-4 mr-2" />
+                    Confirm & Save
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     </Modal>
   );
 }

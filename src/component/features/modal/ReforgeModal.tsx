@@ -181,190 +181,190 @@ export default function ReforgeModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-        <ClayCard variant="elevated" padding="none" className="w-full max-w-xl max-h-[92vh] sm:max-h-[90vh] overflow-hidden rounded-[2.5rem] flex flex-col shadow-2xl">
-          <div className="px-8 py-6 bg-background-muted/5 border-b border-border/40 shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-[1rem] bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/20 border border-primary/20 shrink-0">
-                  <SparklesIcon className="w-6 h-6 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-2xl font-black text-foreground tracking-tight truncate">Reforge Flashcards</h2>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1 truncate">
-                    {settings.action === 'regenerate'
-                      ? 'Regenerate all flashcards from your note'
-                      : `Add ${settings.minCount} more flashcards`}
-                  </p>
-                </div>
+      <div className="w-full max-w-xl max-h-[92vh] sm:max-h-[90vh] bg-surface border-[3px] border-foreground rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col relative paper-texture">
+        <div className="px-8 py-6 bg-background-muted/20 border-b-[3px] border-foreground/5 shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-[1rem] bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/20 border border-primary/20 shrink-0">
+                <SparklesIcon className="w-6 h-6 text-white" />
               </div>
-              <button
-                onClick={onClose}
-                className="p-3 rounded-2xl hover:bg-surface-elevated transition-colors"
-                disabled={isLoading}
-              >
-                <Cancel01Icon className="w-5 h-5 text-foreground-muted" />
-              </button>
-            </div>
-          </div>
-
-          <div className="px-8 py-6 overflow-y-auto space-y-6 flex-1 min-h-[300px]">
-            {/* Action selection */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Action
-              </label>
-              <div className="flex space-x-2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="action"
-                    value="add_more"
-                    checked={settings.action === 'add_more'}
-                    onChange={(e) => handleSettingChange('action', e.target.value)}
-                    className="w-4 h-4 text-accent border-border focus:ring-accent"
-                    disabled={isLoading}
-                  />
-                  <span className="text-sm">Add More</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="action"
-                    value="regenerate"
-                    checked={settings.action === 'regenerate'}
-                    onChange={(e) => handleSettingChange('action', e.target.value)}
-                    className="w-4 h-4 text-accent border-border focus:ring-accent"
-                    disabled={isLoading}
-                  />
-                  <span className="text-sm">Regenerate All</span>
-                </label>
+              <div className="min-w-0">
+                <h2 className="text-2xl font-black text-foreground tracking-tight truncate">Reforge Flashcards</h2>
+                <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1 truncate">
+                  {settings.action === 'regenerate'
+                    ? 'Regenerate all flashcards from your note'
+                    : `Add ${settings.minCount} more flashcards`}
+                </p>
               </div>
             </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-black text-foreground">
-                Number of flashcards to {settings.action === 'regenerate' ? 'generate' : 'add'}
-              </label>
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min="1"
-                  max={MAX_FLASHCARDS}
-                  value={settings.minCount}
-                  onChange={(e) => handleSettingChange('minCount', parseInt(e.target.value) || 1)}
-                  className="flex-1 accent-primary"
-                  disabled={isLoading}
-                />
-                <span className="w-12 text-center font-black text-primary text-xl">
-                  {settings.minCount}
-                </span>
-              </div>
-            </div>
-
-            {/* Difficulty dropdown */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Difficulty level
-              </label>
-              <select
-                value={settings.difficulty}
-                onChange={(e) => handleSettingChange('difficulty', e.target.value)}
-                className="w-full px-3 py-2 border border-border rounded-md bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-                disabled={isLoading}
-              >
-                {DIFFICULTY_OPTIONS.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Custom prompt input */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Custom Instructions (Optional)
-              </label>
-              <textarea
-                value={settings.customPrompt}
-                onChange={(e) => handleSettingChange('customPrompt', e.target.value)}
-                placeholder="e.g., Focus on key concepts, emphasize definitions, test practical applications, include examples..."
-                className="w-full px-3 py-2 border border-border rounded-md bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent resize-none"
-                rows={3}
-                disabled={isLoading}
-              />
-              <p className="text-xs text-foreground-muted">
-                Add specific instructions to customize the focus of flashcards. Examples: "Focus on key concepts", "Emphasize definitions", "Test practical applications"
-              </p>
-            </div>
-
-            {/* Preview mode toggle */}
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="previewMode"
-                checked={settings.previewMode}
-                onChange={(e) => handleSettingChange('previewMode', e.target.checked)}
-                className="w-4 h-4 text-accent border-border rounded focus:ring-accent"
-                disabled={isLoading}
-              />
-              <label htmlFor="previewMode" className="text-sm font-medium">
-                Show preview before saving
-              </label>
-            </div>
-
-            {/* Error display */}
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
-
-            {/* Success display */}
-            {success && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                <p className="text-sm text-green-600">{success}</p>
-              </div>
-            )}
-          </div>
-
-          <div className="px-8 py-6 bg-surface border-t border-border/40 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0">
             <button
               onClick={onClose}
-              disabled={isLoading || saving}
-              className="px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center justify-center gap-2"
+              className="p-3 rounded-2xl hover:bg-surface-elevated transition-colors"
+              disabled={isLoading}
             >
-              Cancel
-            </button>
-            <button
-              onClick={generateFlashcards}
-              disabled={isLoading || saving}
-              className="px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
-            >
-              {isLoading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Generating...
-                </>
-              ) : saving ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <SparklesIcon className="w-4 h-4" />
-                  {settings.action === 'regenerate' ? 'Regenerate All' : 'Add More'}
-                </>
-              )}
+              <Cancel01Icon className="w-5 h-5 text-foreground-muted" />
             </button>
           </div>
-        </ClayCard>
+        </div>
+
+        <div className="px-8 py-6 overflow-y-auto space-y-6 flex-1 min-h-[300px]">
+          {/* Action selection */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Action
+            </label>
+            <div className="flex space-x-2">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="action"
+                  value="add_more"
+                  checked={settings.action === 'add_more'}
+                  onChange={(e) => handleSettingChange('action', e.target.value)}
+                  className="w-4 h-4 text-accent border-border focus:ring-accent"
+                  disabled={isLoading}
+                />
+                <span className="text-sm">Add More</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="action"
+                  value="regenerate"
+                  checked={settings.action === 'regenerate'}
+                  onChange={(e) => handleSettingChange('action', e.target.value)}
+                  className="w-4 h-4 text-accent border-border focus:ring-accent"
+                  disabled={isLoading}
+                />
+                <span className="text-sm">Regenerate All</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-black text-foreground">
+              Number of flashcards to {settings.action === 'regenerate' ? 'generate' : 'add'}
+            </label>
+            <div className="flex items-center gap-4">
+              <input
+                type="range"
+                min="1"
+                max={MAX_FLASHCARDS}
+                value={settings.minCount}
+                onChange={(e) => handleSettingChange('minCount', parseInt(e.target.value) || 1)}
+                className="flex-1 accent-primary"
+                disabled={isLoading}
+              />
+              <span className="w-12 text-center font-black text-primary text-xl">
+                {settings.minCount}
+              </span>
+            </div>
+          </div>
+
+          {/* Difficulty dropdown */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Difficulty level
+            </label>
+            <select
+              value={settings.difficulty}
+              onChange={(e) => handleSettingChange('difficulty', e.target.value)}
+              className="w-full px-3 py-2 border border-border rounded-md bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+              disabled={isLoading}
+            >
+              {DIFFICULTY_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Custom prompt input */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Custom Instructions (Optional)
+            </label>
+            <textarea
+              value={settings.customPrompt}
+              onChange={(e) => handleSettingChange('customPrompt', e.target.value)}
+              placeholder="e.g., Focus on key concepts, emphasize definitions, test practical applications, include examples..."
+              className="w-full px-3 py-2 border border-border rounded-md bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+              rows={3}
+              disabled={isLoading}
+            />
+            <p className="text-xs text-foreground-muted">
+              Add specific instructions to customize the focus of flashcards. Examples: "Focus on key concepts", "Emphasize definitions", "Test practical applications"
+            </p>
+          </div>
+
+          {/* Preview mode toggle */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="previewMode"
+              checked={settings.previewMode}
+              onChange={(e) => handleSettingChange('previewMode', e.target.checked)}
+              className="w-4 h-4 text-accent border-border rounded focus:ring-accent"
+              disabled={isLoading}
+            />
+            <label htmlFor="previewMode" className="text-sm font-medium">
+              Show preview before saving
+            </label>
+          </div>
+
+          {/* Error display */}
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+
+          {/* Success display */}
+          {success && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-sm text-green-600">{success}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="px-8 py-6 bg-surface border-t border-border/40 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0">
+          <button
+            onClick={onClose}
+            disabled={isLoading || saving}
+            className="px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase border-2 border-border/60 hover:bg-background-muted transition-all disabled:opacity-50 text-foreground flex items-center justify-center gap-2"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={generateFlashcards}
+            disabled={isLoading || saving}
+            className="px-8 py-4 rounded-[2rem] font-black tracking-widest text-[11px] uppercase bg-primary text-white hover:bg-primary-dark transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+          >
+            {isLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Generating...
+              </>
+            ) : saving ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <SparklesIcon className="w-4 h-4" />
+                {settings.action === 'regenerate' ? 'Regenerate All' : 'Add More'}
+              </>
+            )}
+          </button>
+        </div>
+      </div>
 
       {/* Preview Modal */}
       <Modal isOpen={showPreview} onClose={handleCancelPreview} nested>
-        <div className="w-full max-w-2xl max-h-[90vh] bg-surface overflow-hidden rounded-[2.5rem] flex flex-col shadow-2xl ring-1 ring-border/40">
-          <div className="px-8 py-6 bg-background-muted/5 border-b border-border/40 shrink-0">
+        <div className="w-full max-w-2xl max-h-[90vh] bg-surface border-[3px] border-foreground rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col relative paper-texture">
+          <div className="px-8 py-6 bg-background-muted/20 border-b-[3px] border-foreground/5 shrink-0">
             <h2 className="text-2xl font-black text-foreground tracking-tight">
               {settings.action === 'regenerate' ? 'Regenerated' : 'New'} Flashcards Preview
             </h2>

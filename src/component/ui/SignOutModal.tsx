@@ -34,12 +34,12 @@ export default function SignOutModal({ isOpen, onClose }: SignOutModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <div className="w-full max-w-md">
-        <ClayCard variant="elevated" padding="none" className="rounded-[2.5rem] overflow-hidden flex flex-col">
-          <div className="p-8 text-center bg-background-muted/5">
+        <div className="bg-surface border-[3px] border-foreground rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col relative paper-texture">
+          <div className="p-8 text-center bg-background-muted/20 border-b-[3px] border-foreground/5">
             <div className="mx-auto mb-6 w-16 h-16 bg-surface border-2 border-border/60 rounded-full flex items-center justify-center shadow-sm">
               <Logout01Icon className="w-7 h-7 text-foreground/80" />
             </div>
-            
+
             <h3 className="text-2xl font-black text-foreground mb-2 tracking-tight">Sign out</h3>
             <p className="text-sm text-foreground-muted font-medium">
               Are you sure you want to sign out?
@@ -70,7 +70,7 @@ export default function SignOutModal({ isOpen, onClose }: SignOutModalProps) {
               )}
             </button>
           </div>
-        </ClayCard>
+        </div>
       </div>
     </Modal>
   );

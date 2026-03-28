@@ -34,8 +34,8 @@ export default function SaveMaterialModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="w-full max-w-lg">
-        <ClayCard variant="elevated" padding="none" className="rounded-[2.5rem] overflow-hidden flex flex-col">
-          <div className="p-8 bg-background-muted/5 border-b border-border/40">
+        <div className="bg-surface border-[3px] border-foreground rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col relative paper-texture">
+          <div className="p-8 bg-background-muted/20 border-b-[3px] border-foreground/5">
             <h2 className="text-2xl font-black text-foreground mb-2 tracking-tight">Save {TYPE_LABELS[itemType]}</h2>
             <p className="text-sm font-medium text-foreground-muted">
               Choose how you want to keep <span className="font-black text-foreground">{title}</span>.
@@ -100,7 +100,7 @@ export default function SaveMaterialModal({
               Cancel
             </button>
           </div>
-        </ClayCard>
+        </div>
       </div>
     </Modal>
   );

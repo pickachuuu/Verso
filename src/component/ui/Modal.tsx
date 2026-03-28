@@ -1,57 +1,18 @@
 'use client';
 
-import { useEffect, ReactNode } from 'react';
-import { createPortal } from 'react-dom';
+import { ReactNode, useState, useEffect } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
-  /** Extra classes on the modal content wrapper */
+  /** Extra classes on the modal flex container */
   className?: string;
   /** Use higher z-index tier for nested/stacked modals */
   nested?: boolean;
 }
 
-/**
- * Counter-based body scroll lock.
- *
- * Each open modal increments the counter; each closing modal decrements it.
- * Overflow is only restored when the counter reaches 0, so nested modals
- * and race-condition unmounts can never leave the body locked.
- */
-let lockCount = 0;
-
-function lockBodyScroll() {
-  lockCount++;
-  if (lockCount === 1) {
-    document.body.style.overflow = 'hidden';
-    document.body.style.height = '100vh';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
-    document.body.style.touchAction = 'none';
-  }
-}
-
-function unlockBodyScroll() {
-  lockCount = Math.max(0, lockCount - 1);
-  if (lockCount === 0) {
-    document.body.style.overflow = '';
-    document.body.style.height = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
-    document.body.style.touchAction = '';
-  }
-}
-
-/**
- * Reusable modal component.
- *
- * - Single fixed-inset element guarantees full viewport coverage (no white gaps)
- * - Locks body scroll while open (counter-based, safe for nested modals)
- * - ESC key closes the modal
- * - Clicking the backdrop (outside modal content) closes the modal
- */
 export default function Modal({
   isOpen,
   onClose,
@@ -59,50 +20,27 @@ export default function Modal({
   className = '',
   nested = false,
 }: ModalProps) {
-  // Lock body scroll
+  // Prevent hydration mismatch
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    if (!isOpen) return;
-    lockBodyScroll();
-    return () => {
-      unlockBodyScroll();
-    };
-  }, [isOpen]);
+    setMounted(true);
+  }, []);
 
-  // ESC to close
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [isOpen, onClose]);
+  if (!mounted) return null;
 
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div
-      className={`fixed inset-0 ${nested ? 'z-[120]' : 'z-[100]'} bg-black/40 backdrop-blur-sm overflow-y-auto`}
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div
-        className="min-h-full flex items-center justify-center p-4"
-        onMouseDown={(e) => {
-          if (e.target === e.currentTarget) onClose();
-        }}
-      >
-        <div
-          className={`relative flex w-full justify-center ${className}`}
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) onClose();
-          }}
+  return (
+    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay
+          className={`fixed inset-0 ${nested ? 'z-[120]' : 'z-[100]'} flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 ${className}`}
         >
-          {children}
-        </div>
-      </div>
-    </div>,
-    document.body,
+          <Dialog.Content className="outline-none w-full flex justify-center max-h-full" aria-describedby={undefined}>
+            <Dialog.Title className="sr-only">Modal Dialog</Dialog.Title>
+            {children}
+          </Dialog.Content>
+        </Dialog.Overlay>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
+

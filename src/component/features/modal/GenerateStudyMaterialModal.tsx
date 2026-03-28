@@ -22,8 +22,8 @@ export default function GenerateStudyMaterialModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="w-full max-w-md">
-        <ClayCard variant="elevated" padding="none" className="rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl ring-1 ring-border/40">
-          <div className="px-8 py-6 bg-background-muted/5 border-b border-border/40 shrink-0">
+        <div className="bg-surface border-[3px] border-foreground rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col relative paper-texture">
+          <div className="px-8 py-6 bg-background-muted/20 border-b-[3px] border-foreground/5 shrink-0">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-[1rem] bg-background-muted flex items-center justify-center shadow-lg shadow-black/5 border border-border/40 shrink-0">
                 <NotebookIcon className="w-6 h-6 text-foreground-muted" />
@@ -79,7 +79,7 @@ export default function GenerateStudyMaterialModal({
               Cancel
             </button>
           </div>
-        </ClayCard>
+        </div>
       </div>
     </Modal>
   );
