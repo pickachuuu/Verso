@@ -3,20 +3,17 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { SparklesIcon, ArrowRight01Icon, PencilEdit01Icon, Tag01Icon, Book01Icon, LeftToRightListNumberIcon } from 'hugeicons-react';
+import { motion, Variants } from 'framer-motion';
+import { ArrowRight01Icon, PencilEdit01Icon, Tag01Icon, Book01Icon, LeftToRightListNumberIcon, SparklesIcon } from 'hugeicons-react';
 import { FlashcardIcon, ExamIcon, NotebookIcon } from '@/component/icons';
 import { createClient } from '@/utils/supabase/client';
 import LandingNavbar from '@/component/Layout/navbar/LandingNavbar';
 
-const staggerContainer = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
 
-const fadeUp = {
+
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 20 } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
 };
 
 export default function LandingPage() {
@@ -32,7 +29,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background selection:bg-foreground selection:text-surface overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-background selection:bg-foreground selection:text-surface">
       <LandingNavbar />
 
       <main className="flex-1 w-full relative">
@@ -40,67 +37,29 @@ export default function LandingPage() {
         {/* ===== STICKY HERO PARALLAX SECTION ===== */}
         <section className="sticky top-0 h-screen w-full flex flex-col justify-center items-center text-center overflow-hidden z-0">
 
-          {/* Epic Mascot Centerpiece inside hero */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 50 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: 'easeOut' }}
-            className="absolute top-[45%] md:top-[50%] left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 w-[90vw] md:w-[60vw] max-w-[800px]"
-          >
-            <div className="absolute inset-0 bg-primary/10 blur-[150px] rounded-full" />
+          <div className="relative z-20 flex flex-col items-center w-full max-w-[1700px] px-4">
+            <div className="w-full relative px-4 z-20 text-center flex flex-col items-center">
+              <h1 className="text-[13vw] sm:text-[7rem] md:text-[9rem] lg:text-[11rem] font-black tracking-tighter text-foreground uppercase leading-[0.85] drop-shadow-sm z-20 relative">
+                MASTER YOUR <br /> MATERIAL.
+              </h1>
+            </div>
+          </div>
+
+          <div className="relative z-10 w-[60vw] sm:w-[40vw] md:w-[30vw] max-w-[350px] flex justify-center mt-8">
             <Image
               src="/brand/verso-happy-clean.png"
               alt="Verso Mascot"
-              width={1000}
-              height={1000}
-              className="w-full h-auto drop-shadow-2xl mix-blend-multiply"
+              width={800}
+              height={800}
+              className="w-full h-auto drop-shadow-2xl"
               priority
             />
-          </motion.div>
-
-          <motion.div
-            className="relative z-20 flex flex-col items-center w-full max-w-[1700px] px-4 pt-10"
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-          >
-            <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 px-6 py-3 rounded-full border-[3px] border-foreground bg-surface shadow-md">
-              <SparklesIcon className="w-5 h-5 text-foreground" />
-              <span className="text-[12px] md:text-[14px] font-black uppercase tracking-[0.3em] text-foreground">
-                Verso 2.0 Is Live
-              </span>
-            </motion.div>
-
-            <motion.div variants={fadeUp} className="w-full relative px-4">
-              {/* Massive Text positioned to wrap around the mascot visually */}
-              <h1 className="text-[15vw] sm:text-[12rem] lg:text-[16rem] font-black tracking-tighter text-foreground uppercase leading-[0.8] mix-blend-multiply drop-shadow-sm">
-                LEARN <br />
-                FASTER.
-              </h1>
-            </motion.div>
-          </motion.div>
-
-          {/* Anchor to scroll */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 1 }}
-            className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
-          >
-            <span className="text-[10px] font-black uppercase tracking-widest text-foreground-muted">SCROLL TO DISCOVER</span>
-            <div className="w-1 h-12 bg-foreground/20 rounded-full overflow-hidden">
-              <motion.div
-                animate={{ y: [0, 48, 0] }}
-                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                className="w-full h-1/2 bg-foreground rounded-full"
-              />
-            </div>
-          </motion.div>
+          </div>
 
         </section>
 
         {/* ===== SCROLLING BENTO CONTENT ===== */}
-        <section className="relative z-10 bg-surface rounded-t-[3rem] md:rounded-t-[5rem] border-t-[8px] border-foreground shadow-[0_-30px_60px_rgba(0,0,0,0.15)] pb-20 pt-16 md:pt-24 px-4 sm:px-8 mt-[90vh]">
+        <section className="relative z-10 bg-surface rounded-t-[3rem] md:rounded-t-[5rem] border-t-[8px] border-foreground shadow-[0_-30px_60px_rgba(0,0,0,0.15)] pb-20 pt-16 md:pt-24 px-4 sm:px-8">
 
           <div className="max-w-[1700px] mx-auto w-full flex flex-col gap-10">
 
@@ -240,8 +199,8 @@ export default function LandingPage() {
                         <div
                           key={src}
                           className={`absolute w-[85%] rounded-[1.5rem] shadow-[0_20px_40px_rgba(0,0,0,0.2)] border-[4px] border-surface transition-all duration-1000 origin-center bg-surface overflow-hidden ${i === 0 ? '-rotate-6 -translate-x-6 group-hover:-rotate-[10deg] group-hover:-translate-x-12 group-hover:-translate-y-4' :
-                              i === 1 ? 'rotate-6 translate-x-6 group-hover:rotate-[8deg] group-hover:translate-x-12 group-hover:translate-y-4 z-10' :
-                                'z-20 group-hover:scale-105 group-hover:-translate-y-2'
+                            i === 1 ? 'rotate-6 translate-x-6 group-hover:rotate-[8deg] group-hover:translate-x-12 group-hover:translate-y-4 z-10' :
+                              'z-20 group-hover:scale-105 group-hover:-translate-y-2'
                             }`}
                         >
                           <Image src={src} alt="Exam UI" width={600} height={400} className="w-full h-auto object-cover opacity-90" />

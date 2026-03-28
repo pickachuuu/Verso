@@ -21,7 +21,7 @@ export default function LandingNavbar() {
     }, []);
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b-[4px] border-foreground text-foreground transition-colors duration-300 shadow-sm">
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b-[4px] border-foreground text-foreground shadow-sm">
             <div className="max-w-[1700px] mx-auto px-4 sm:px-8">
                 <div className="h-20 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-4 group text-foreground">
