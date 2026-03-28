@@ -192,7 +192,6 @@ export default function LandingPage() {
 
                   {/* Graphics / Cards Shuffle Side */}
                   <div className="xl:flex-1 relative min-h-[450px] p-8 bg-foreground/5 border-b-[4px] xl:border-b-0 xl:border-r-[4px] border-border/60 flex items-center justify-center overflow-hidden">
-                    <ExamIcon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[35rem] h-[35rem] text-foreground/[0.04] pointer-events-none group-hover:scale-110 group-hover:rotate-12 transition-all duration-1000" />
 
                     <div className="relative w-full max-w-[500px] aspect-[4/3] flex items-center justify-center">
                       {['/brand/exam-preview-1.png', '/brand/exam-preview-2.png', '/brand/exam-preview-3.png'].map((src, i) => (
@@ -206,14 +205,16 @@ export default function LandingPage() {
                           <Image src={src} alt="Exam UI" width={600} height={400} className="w-full h-auto object-cover opacity-90" />
                         </div>
                       ))}
-                      <Image
-                        src="/brand/verso-thinking-clean.svg"
-                        alt="Thinking Mascot"
-                        width={200}
-                        height={200}
-                        className="absolute z-30 top-1/2 right-[10%] -translate-y-1/2 w-[160px] md:w-[220px] drop-shadow-[0_30px_50px_rgba(0,0,0,0.3)] group-hover:scale-110 transition-transform duration-700"
-                      />
                     </div>
+
+                    {/* Mascot pinned to bottom-left corner */}
+                    <Image
+                      src="/brand/verso-thinking-clean.svg"
+                      alt="Thinking Mascot"
+                      width={160}
+                      height={160}
+                      className="absolute z-30 bottom-4 left-4 w-[100px] md:w-[140px] drop-shadow-xl group-hover:scale-110 transition-transform duration-500"
+                    />
                   </div>
 
                   {/* Content Side */}
@@ -231,18 +232,18 @@ export default function LandingPage() {
                       WALK INTO EXAM DAY FULLY PREPARED. AI CRAFTS REALISTIC PRACTICE EXAMS FROM YOUR NOTES WITH INSTANT FEEDBACK ON EVERYTHING.
                     </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8 md:gap-y-6">
+                    <div className="flex flex-col gap-6">
                       {[
                         { title: 'MULTIPLE CHOICE', desc: 'Instant feedback on options', icon: LeftToRightListNumberIcon },
                         { title: 'IDENTIFICATION', desc: 'Master key definitions', icon: Tag01Icon },
                         { title: 'ESSAYS', desc: 'Long-form preparation', icon: PencilEdit01Icon },
                       ].map(item => (
-                        <div key={item.title} className="flex gap-4 items-start">
-                          <div className="p-3 bg-foreground rounded-[1.2rem] text-surface shrink-0 shadow-xl mt-1">
+                        <div key={item.title} className="flex gap-4 items-center">
+                          <div className="p-3 bg-foreground rounded-[1.2rem] text-surface shrink-0 shadow-xl">
                             <item.icon className="w-6 h-6" />
                           </div>
                           <div>
-                            <p className="font-black text-[12px] md:text-[14px] uppercase tracking-widest text-foreground mb-1 mt-1">{item.title}</p>
+                            <p className="font-black text-[12px] md:text-[14px] uppercase tracking-widest text-foreground mb-0.5">{item.title}</p>
                             <p className="font-black text-[9px] uppercase tracking-[0.2em] text-foreground-muted">{item.desc}</p>
                           </div>
                         </div>
