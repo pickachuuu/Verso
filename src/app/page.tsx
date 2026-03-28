@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, Variants } from 'framer-motion';
-import { ArrowRight01Icon, PencilEdit01Icon, Tag01Icon, Book01Icon, LeftToRightListNumberIcon, SparklesIcon } from 'hugeicons-react';
+import { ArrowRight01Icon, PencilEdit01Icon, Tag01Icon, Book01Icon, LeftToRightListNumberIcon, SparklesIcon, FlashIcon, Note01Icon, BookOpen01Icon, Clock01Icon, CheckmarkCircle02Icon, AiChat02Icon, Target01Icon } from 'hugeicons-react';
 import { FlashcardIcon, ExamIcon, NotebookIcon } from '@/component/icons';
 import { createClient } from '@/utils/supabase/client';
 import LandingNavbar from '@/component/Layout/navbar/LandingNavbar';
@@ -15,6 +15,23 @@ const fadeUp: Variants = {
   hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
 };
+
+const heroDoodles = [
+  { icon: FlashIcon, top: '10%', left: '8%', rotate: -12, size: 'w-16 h-16 md:w-20 md:h-20', delay: 0 },
+  { icon: BookOpen01Icon, top: '18%', right: '10%', rotate: 8, size: 'w-20 h-20 md:w-24 md:h-24', delay: 1.5 },
+  { icon: PencilEdit01Icon, bottom: '30%', left: '12%', rotate: 15, size: 'w-14 h-14 md:w-16 md:h-16', delay: 3 },
+  { icon: CheckmarkCircle02Icon, top: '50%', left: '5%', rotate: -5, size: 'w-12 h-12 md:w-14 md:h-14', delay: 4.5 },
+  { icon: Note01Icon, bottom: '22%', right: '8%', rotate: -10, size: 'w-16 h-16 md:w-20 md:h-20', delay: 2 },
+  { icon: AiChat02Icon, top: '8%', left: '45%', rotate: 6, size: 'w-14 h-14 md:w-16 md:h-16', delay: 5 },
+  { icon: Clock01Icon, bottom: '12%', left: '25%', rotate: -8, size: 'w-16 h-16 md:w-20 md:h-20', delay: 3.5 },
+  { icon: Target01Icon, top: '35%', right: '6%', rotate: 12, size: 'w-14 h-14 md:w-16 md:h-16', delay: 1 },
+  { icon: FlashIcon, bottom: '40%', right: '12%', rotate: -15, size: 'w-12 h-12 md:w-14 md:h-14', delay: 6 },
+  { icon: BookOpen01Icon, bottom: '55%', left: '3%', rotate: -18, size: 'w-16 h-16 md:w-20 md:h-20', delay: 4 },
+  { icon: Note01Icon, top: '5%', right: '30%', rotate: 18, size: 'w-14 h-14 md:w-18 md:h-18', delay: 2.5 },
+  { icon: Target01Icon, bottom: '8%', right: '30%', rotate: -22, size: 'w-14 h-14 md:w-16 md:h-16', delay: 5.5 },
+  { icon: AiChat02Icon, top: '65%', left: '8%', rotate: 10, size: 'w-14 h-14 md:w-16 md:h-16', delay: 1.5 },
+  { icon: CheckmarkCircle02Icon, top: '75%', right: '5%', rotate: -8, size: 'w-16 h-16 md:w-20 md:h-20', delay: 3 },
+];
 
 export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -36,6 +53,22 @@ export default function LandingPage() {
 
         {/* ===== STICKY HERO PARALLAX SECTION ===== */}
         <section className="sticky top-0 h-screen w-full flex flex-col justify-center items-center text-center overflow-hidden z-0">
+
+          {/* Floating study doodles */}
+          {heroDoodles.map(({ icon: Icon, size, rotate, delay, ...pos }, i) => (
+            <div
+              key={i}
+              className="pointer-events-none absolute z-0"
+              style={{
+                ...pos,
+                animation: `doodle-float 8s ease-in-out ${delay}s infinite`,
+              }}
+            >
+              <div style={{ transform: `rotate(${rotate}deg)` }} className="text-foreground/[0.15]">
+                <Icon className={size} strokeWidth={1.5} />
+              </div>
+            </div>
+          ))}
 
           <div className="relative z-20 flex flex-col items-center w-full max-w-[1700px] px-4">
             <div className="w-full relative px-4 z-20 text-center flex flex-col items-center">
@@ -333,7 +366,7 @@ export default function LandingPage() {
               </span>
             </Link>
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-surface/50">
-              THE PAPER-FIRST STUDY PLATFORM.
+              THE AI POWERED STUDY PLATFORM.
             </p>
           </div>
 
