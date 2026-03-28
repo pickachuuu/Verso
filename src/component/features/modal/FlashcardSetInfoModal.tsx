@@ -105,141 +105,104 @@ export default function FlashcardSetInfoModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-full max-w-lg">
-        <ClayCard variant="elevated" padding="none" className="rounded-[2.5rem] overflow-hidden flex flex-col">
+      <div className="w-full max-w-lg px-2 sm:px-4">
+        <div className="bg-surface border-[3px] border-foreground rounded-[2rem] shadow-2xl overflow-hidden flex flex-col relative paper-texture max-h-[85vh]">
           {/* Header */}
-          <div className="relative px-8 pt-8 pb-6 bg-background-muted/5 border-b border-border/40">
-            {/* Background decoration */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute -top-16 -right-16 w-64 h-64 bg-gradient-to-bl from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl" />
-            </div>
+          <div className="relative px-5 sm:px-7 pt-7 sm:pt-9 pb-5 border-b-[3px] border-foreground/5 bg-background-muted/20">
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 p-2 rounded-full text-foreground/40 hover:text-foreground hover:bg-foreground/5 transition-all z-20"
+            >
+              <Cancel01Icon className="w-5 h-5" />
+            </button>
 
-            <div className="relative z-10">
-              {/* Close button */}
-              <button
-                onClick={onClose}
-                className="absolute -top-2 -right-2 p-3 rounded-2xl text-foreground-muted hover:text-foreground hover:bg-surface-elevated/80 transition-all font-black"
-              >
-                <Cancel01Icon className="w-5 h-5" />
-              </button>
-
-              <div className="flex items-start gap-5">
-                <div className="p-4 rounded-[1.5rem] bg-gradient-to-br from-primary-muted to-primary-muted/60 shadow-[0_4px_20px_rgba(43,93,139,0.2)] flex-shrink-0 border border-primary/20">
-                  <FlashcardIcon className="w-8 h-8 text-primary" />
-                </div>
-                <div className="min-w-0 flex-1 pr-10">
-                  <h2 className="text-2xl font-black text-foreground tracking-tight line-clamp-2 leading-tight">
-                    {set.title || 'Untitled Set'}
-                  </h2>
-                  {set.description && (
-                    <p className="text-sm font-medium text-foreground-muted mt-2 line-clamp-2 leading-snug">
-                      {set.description}
-                    </p>
-                  )}
-                </div>
-              </div>
+            <div className="relative z-10 flex flex-col text-left">
+              <h2 className="text-xl sm:text-2xl font-black text-foreground uppercase tracking-tighter leading-none mb-1">
+                {set.title || 'Untitled Set'}
+              </h2>
+              {set.description && (
+                <p className="text-[11px] font-bold text-foreground-muted truncate opacity-60">
+                  {set.description}
+                </p>
+              )}
             </div>
           </div>
 
           {/* Mastery progress bar */}
-          <div className="px-8 py-6 pb-2">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-[10px] font-black uppercase tracking-widest text-foreground-muted">MASTERY</span>
-              <span className="text-[10px] font-black uppercase tracking-widest text-primary-light">{masteryPercentage}%</span>
+          <div className="px-5 sm:px-7 py-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-foreground-muted leading-none">MASTERY</span>
+              <span className="text-[10px] sm:text-[11px] font-black text-primary uppercase tracking-widest bg-primary-muted px-2 py-0.5 rounded-full">{masteryPercentage}%</span>
             </div>
-            <div className="h-3 rounded-full bg-surface-elevated overflow-hidden border border-border/40">
+            <div className="h-2.5 rounded-full bg-background-muted overflow-hidden border-2 border-foreground/5 shadow-inner p-0.5">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-primary-light transition-all duration-700 shadow-[0_0_10px_rgba(43,93,139,0.5)]"
+                className="h-full rounded-full bg-foreground transition-all duration-1000 ease-out"
                 style={{ width: `${masteryPercentage}%` }}
               />
             </div>
           </div>
 
-          {/* Stats grid */}
-          <div className="px-8 py-4">
+          {/* Stats grid row */}
+          <div className="px-5 sm:px-7 py-1">
             {isLoading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="flex gap-1.5 text-[9px]">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-20 rounded-[1.5rem] bg-surface-elevated/60 animate-pulse border-2 border-border/40" />
+                  <div key={i} className="flex-1 h-12 rounded-lg bg-background-muted/40 animate-pulse" />
                 ))}
               </div>
             ) : stats ? (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <StatBox
-                  label="NEW"
-                  value={stats.newCount}
-                  color="text-blue-500"
-                  bgColor="bg-blue-500/5"
-                  borderColor="border-blue-500/20"
-                />
-                <StatBox
-                  label="LEARNING"
-                  value={stats.learningCount}
-                  color="text-orange-500"
-                  bgColor="bg-orange-500/5"
-                  borderColor="border-orange-500/20"
-                />
-                <StatBox
-                  label="REVIEW"
-                  value={stats.reviewCount}
-                  color="text-purple-500"
-                  bgColor="bg-purple-500/5"
-                  borderColor="border-purple-500/20"
-                />
-                <StatBox
-                  label="MASTERED"
-                  value={stats.masteredCount}
-                  color="text-emerald-500"
-                  bgColor="bg-emerald-500/5"
-                  borderColor="border-emerald-500/20"
-                />
+              <div className="flex gap-1.5">
+                <StatBox label="NEW" value={stats.newCount} color="text-foreground" />
+                <StatBox label="LEARN" value={stats.learningCount} color="text-foreground" />
+                <StatBox label="REV" value={stats.reviewCount} color="text-foreground" />
+                <StatBox label="MST" value={stats.masteredCount} color="text-foreground" />
               </div>
             ) : null}
           </div>
 
           {/* Difficulty breakdown */}
-          <div className="px-8 pb-6">
-            <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mb-3">DIFFICULTY</p>
-            <div className="flex flex-wrap items-center gap-3">
-              <DifficultyPill label="EASY" count={difficulty.easy} color="text-emerald-600 bg-emerald-500/10 border-emerald-500/20" />
-              <DifficultyPill label="MEDIUM" count={difficulty.medium} color="text-amber-600 bg-amber-500/10 border-amber-500/20" />
-              <DifficultyPill label="HARD" count={difficulty.hard} color="text-red-600 bg-red-500/10 border-red-500/20" />
+          <div className="px-5 sm:px-7 py-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <DifficultyPill label="EASY" count={difficulty.easy} variant="neutral" />
+              <DifficultyPill label="MED" count={difficulty.medium} variant="neutral" />
+              <DifficultyPill label="HARD" count={difficulty.hard} variant="neutral" />
             </div>
           </div>
 
-          {/* Due cards highlight */}
+          {/* Due cards highlight - Compressed */}
           {dueNow > 0 && (
-            <div className="mx-8 mb-6 p-4 rounded-[1.5rem] bg-primary/10 border-2 border-primary/20 flex items-center gap-4">
-              <div className="p-2 sm:p-3 rounded-xl bg-primary/20 shrink-0">
-                <AlertCircleIcon className="w-5 h-5 text-primary-light" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm sm:text-base font-black text-foreground tracking-tight leading-snug">
-                  {dueNow} CARD{dueNow !== 1 ? 'S' : ''} DUE FOR REVIEW
+            <div className="mx-6 sm:mx-8 mb-6 p-4 rounded-[1.25rem] bg-foreground text-surface flex items-center justify-between gap-4 shadow-lg hover:scale-[1.01] transition-transform">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg bg-surface/10 flex items-center justify-center shrink-0">
+                  <AlertCircleIcon className="w-5 h-5 text-surface" />
+                </div>
+                <p className="text-sm font-black uppercase tracking-widest leading-none">
+                  {dueNow} CARDS DUE NOW
                 </p>
-                <p className="text-[11px] font-bold text-foreground-muted truncate uppercase tracking-wider mt-0.5">Start a study session to keep up</p>
               </div>
+              <BookOpen01Icon className="w-5 h-5 opacity-40 shrink-0" />
             </div>
           )}
 
           {/* Action buttons */}
-          <div className="px-8 pb-8 flex flex-col sm:flex-row gap-4 border-t border-border/40 pt-6">
+          <div className="px-6 sm:px-8 pb-8 flex sm:flex-row gap-3 mt-auto border-t-[3px] border-foreground/5 pt-6 bg-surface">
             <button
               onClick={handleBrowse}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] sm:text-xs uppercase border-2 border-border/60 hover:bg-background-muted transition-all text-foreground order-2 sm:order-1 active:scale-[0.98]"
+              className="flex-1 flex items-center justify-center gap-2.5 px-4 py-4 rounded-xl font-black tracking-widest text-[10px] uppercase border-[3px] border-foreground hover:bg-foreground hover:text-surface transition-all text-foreground active:scale-95"
             >
               <ViewIcon className="w-4 h-4" />
-              Browse Cards
+              BROWSE
             </button>
             <button
               onClick={handleStudy}
-              className="flex-[2] flex items-center justify-center gap-2 px-6 py-4 rounded-[2rem] font-black tracking-widest text-[11px] sm:text-xs uppercase border-2 border-transparent bg-primary text-white hover:bg-primary-dark transition-all order-1 sm:order-2 active:scale-[0.98]"
+              className="flex-[1.5] flex items-center justify-center gap-2.5 px-4 py-4 rounded-xl font-black tracking-widest text-[10px] uppercase bg-foreground text-surface hover:bg-foreground/90 transition-all active:scale-95 shadow-lg"
             >
               <BookOpen01Icon className="w-4 h-4" />
-              {dueNow > 0 ? `STUDY (${dueNow} DUE)` : 'STUDY SESSION'}
+              {dueNow > 0 ? `STUDY (${dueNow} DUE)` : 'START SESSION'}
             </button>
           </div>
-        </ClayCard>
+        </div>
       </div>
     </Modal>
   );
@@ -249,19 +212,15 @@ function StatBox({
   label,
   value,
   color,
-  bgColor,
-  borderColor,
 }: {
   label: string;
   value: number;
   color: string;
-  bgColor: string;
-  borderColor: string;
 }) {
   return (
-    <div className={`p-4 rounded-[1.5rem] flex flex-col items-center justify-center border-2 ${bgColor} ${borderColor}`}>
-      <p className={`text-2xl font-black tracking-tight ${color}`}>{value}</p>
-      <p className="text-[9px] font-black tracking-widest uppercase text-foreground-muted mt-1 opacity-70">{label}</p>
+    <div className="flex-1 py-4 px-2 rounded-xl flex flex-col items-center justify-center border-2 border-foreground/5 bg-background-muted/20 hover:border-foreground/20 transition-colors group">
+      <p className={`text-xl font-black tracking-tighter mb-0.5 group-hover:scale-110 transition-transform ${color}`}>{value}</p>
+      <p className="text-[7px] font-black tracking-widest uppercase text-foreground-muted/60 text-center leading-none">{label}</p>
     </div>
   );
 }
@@ -269,17 +228,16 @@ function StatBox({
 function DifficultyPill({
   label,
   count,
-  color,
+  variant,
 }: {
   label: string;
   count: number;
-  color: string;
+  variant: 'neutral';
 }) {
   return (
-    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${color}`}>
-      <span className="text-[10px] font-black tracking-wider">
-        {label} <span className="opacity-60 ml-1 font-bold">{count}</span>
-      </span>
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 border-foreground/10 bg-background-muted/20 font-black text-[9px] tracking-[0.2em] text-foreground-muted hover:scale-105 transition-transform cursor-default whitespace-nowrap">
+      <span>{label}</span>
+      <span className="opacity-50 text-[8px] ml-1">{count}</span>
     </div>
   );
 }
