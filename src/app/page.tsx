@@ -35,6 +35,14 @@ const heroDoodles = [
 
 export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [activeExam, setActiveExam] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveExam((prev) => (prev + 1) % 3);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -224,29 +232,43 @@ export default function LandingPage() {
                 <div className="w-full rounded-[3rem] bg-background border-[4px] border-border/60 relative overflow-hidden flex flex-col xl:flex-row items-stretch shadow-sm group hover:border-foreground/30 transition-colors duration-500">
 
                   {/* Graphics / Cards Shuffle Side */}
-                  <div className="xl:flex-1 relative min-h-[450px] p-8 bg-foreground/5 border-b-[4px] xl:border-b-0 xl:border-r-[4px] border-border/60 flex items-center justify-center overflow-hidden">
+                  <div className="xl:flex-1 relative min-h-[450px] bg-foreground/5 border-b-[4px] xl:border-b-0 xl:border-r-[4px] border-border/60 overflow-hidden">
 
-                    <div className="relative w-full max-w-[500px] aspect-[4/3] flex items-center justify-center">
+                    <div className="absolute inset-0 w-full h-full">
                       {['/brand/exam-preview-1.png', '/brand/exam-preview-2.png', '/brand/exam-preview-3.png'].map((src, i) => (
-                        <div
+                        <motion.div
                           key={src}
-                          className={`absolute w-[85%] rounded-[1.5rem] shadow-[0_20px_40px_rgba(0,0,0,0.2)] border-[4px] border-surface transition-all duration-1000 origin-center bg-surface overflow-hidden ${i === 0 ? '-rotate-6 -translate-x-6 group-hover:-rotate-[10deg] group-hover:-translate-x-12 group-hover:-translate-y-4' :
-                            i === 1 ? 'rotate-6 translate-x-6 group-hover:rotate-[8deg] group-hover:translate-x-12 group-hover:translate-y-4 z-10' :
-                              'z-20 group-hover:scale-105 group-hover:-translate-y-2'
-                            }`}
+                          initial={{ rotate: 0, scale: 1.1, opacity: 0 }}
+                          animate={{
+                            scale: activeExam === i ? 1 : 1.1,
+                            opacity: activeExam === i ? 1 : 0,
+                            rotate: 0,
+                            zIndex: activeExam === i ? 30 : 10,
+                          }}
+                          transition={{
+                            duration: 0.8,
+                            ease: 'easeInOut',
+                          }}
+                          className="absolute inset-0 w-full h-full overflow-hidden"
                         >
-                          <Image src={src} alt="Exam UI" width={600} height={400} className="w-full h-auto object-cover opacity-90" />
-                        </div>
+                          <Image
+                            src={src}
+                            alt="Exam UI"
+                            fill
+                            className="object-cover"
+                            priority={i === 0}
+                          />
+                        </motion.div>
                       ))}
                     </div>
 
-                    {/* Mascot pinned to bottom-left corner */}
+                    {/* Mascot enlarged and positioned for better presence */}
                     <Image
                       src="/brand/verso-thinking-clean.svg"
                       alt="Thinking Mascot"
-                      width={160}
-                      height={160}
-                      className="absolute z-30 -top-8 -left-2 md:top-auto md:bottom-4 md:left-4 w-[90px] md:w-[140px] drop-shadow-xl group-hover:scale-110 transition-all duration-500"
+                      width={200}
+                      height={200}
+                      className="absolute z-40 top-4 left-4 md:top-auto md:bottom-8 md:left-8 w-[110px] md:w-[180px] drop-shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500"
                     />
                   </div>
 
