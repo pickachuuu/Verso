@@ -1,20 +1,22 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, useCallback, ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import SaveMaterialModal from '@/component/features/modal/SaveMaterialModal';
 import { useCopyPublicNote, useSaveReference } from '@/hooks/useSavedMaterials';
-import { ArrowLeft01Icon, Bookmark01Icon } from 'hugeicons-react';
-import Button from '@/component/ui/Button';
-import ClayNotebookCover, { NotebookColorKey } from '@/component/ui/ClayNotebookCover';
-import PageFlipContainer, { ViewType } from '@/component/ui/PageFlipContainer';
+import {
+  ArrowLeft01Icon,
+  Bookmark01Icon,
+  Menu01Icon,
+  ArrowRight01Icon,
+  BookOpen01Icon,
+  ArrowLeft02Icon
+} from 'hugeicons-react';
 import TableOfContents, { NotePage } from '@/component/ui/TableOfContents';
 import NotebookPage from '@/component/ui/NotebookPage';
-import { useNotebookScale, NOTEBOOK_WIDTH, NOTEBOOK_HEIGHT } from '@/hooks/useNotebookScale';
 import { extractH1Title } from '@/hooks/useNotes';
-import { ClayCard } from '@/component/ui/Clay';
 
 const supabase = createClient();
 
@@ -48,19 +50,18 @@ export default function PublicNotePage() {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [savingAction, setSavingAction] = useState<'reference' | 'copy' | null>(null);
 
-  const [currentView, setCurrentView] = useState<ViewType>('cover');
+  const [currentView, setCurrentView] = useState<'toc' | 'page'>('toc');
   const [currentPageIndex, setCurrentPageIndex] = useState<number | null>(null);
-  const previousContentRef = useRef<ReactNode>(null);
 
   const notebookContainerRef = useRef<HTMLDivElement>(null);
+  const mobileTocRef = useRef<HTMLDivElement>(null);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
-  const rawScale = useNotebookScale(notebookContainerRef, { widthOnly: isSmallScreen });
 
   const saveReferenceMutation = useSaveReference();
   const copyNoteMutation = useCopyPublicNote();
 
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 640px)');
+    const media = window.matchMedia('(max-width: 1024px)');
     const update = () => setIsSmallScreen(media.matches);
     update();
     media.addEventListener('change', update);
@@ -98,7 +99,15 @@ export default function PublicNotePage() {
           console.error('Error loading note pages:', pagesError);
         }
 
-        setPages((pagesData || []) as NotePage[]);
+        const resolvedPages = (pagesData || []) as NotePage[];
+        setPages(resolvedPages);
+
+        // Auto-select first page if it exists
+        if (resolvedPages.length > 0) {
+          setCurrentPageIndex(0);
+          setCurrentView('page');
+        }
+
         setLoading(false);
       } catch (err) {
         setError('An error occurred while loading this note');
@@ -125,68 +134,16 @@ export default function PublicNotePage() {
   }, [note, pages]);
 
   const theme = 'light' as const;
-  const coverColor = (note?.cover_color as NotebookColorKey) || 'royal';
   const currentPage = currentPageIndex !== null ? pagesToShow[currentPageIndex] : null;
   const currentPageContent = currentPage?.content || '';
 
-  const minScale = isSmallScreen ? 0 : 0.6;
-  const scale = Math.max(rawScale, minScale);
-
-  const captureCurrentState = useCallback(() => {
-    if (currentView === 'cover') {
-      previousContentRef.current = (
-        <ClayNotebookCover
-          mode="editor"
-          title={note?.title || 'Untitled Notebook'}
-          onTitleChange={() => { }}
-          onOpen={() => { }}
-          color={coverColor}
-          theme={theme}
-          readOnly
-        />
-      );
-      return;
-    }
-
-    if (currentView === 'toc') {
-      previousContentRef.current = (
-        <TableOfContents
-          notebookTitle={note?.title || 'Untitled Notebook'}
-          pages={pagesToShow}
-          onPageClick={() => { }}
-          onAddPage={() => { }}
-          theme={theme}
-          readOnly
-        />
-      );
-      return;
-    }
-
-    previousContentRef.current = (
-      <NotebookPage
-        content={currentPageContent}
-        onChange={() => { }}
-        theme={theme}
-        readOnly
-      />
-    );
-  }, [currentView, note?.title, coverColor, theme, pagesToShow, currentPageContent]);
-
-  const handleOpenContents = useCallback(() => {
-    captureCurrentState();
-    setCurrentView('toc');
-    setCurrentPageIndex(null);
-  }, [captureCurrentState]);
-
   const handlePageClick = useCallback((index: number) => {
-    captureCurrentState();
     setCurrentPageIndex(index);
     setCurrentView('page');
-  }, [captureCurrentState]);
+  }, []);
 
   const handlePrev = useCallback(() => {
     if (currentView === 'page' && currentPageIndex !== null) {
-      captureCurrentState();
       if (currentPageIndex === 0) {
         setCurrentView('toc');
         setCurrentPageIndex(null);
@@ -195,25 +152,11 @@ export default function PublicNotePage() {
       setCurrentPageIndex(currentPageIndex - 1);
       return;
     }
-
-    if (currentView === 'toc') {
-      captureCurrentState();
-      setCurrentView('cover');
-      setCurrentPageIndex(null);
-    }
-  }, [captureCurrentState, currentView, currentPageIndex]);
+  }, [currentView, currentPageIndex]);
 
   const handleNext = useCallback(() => {
-    if (currentView === 'cover') {
-      captureCurrentState();
-      setCurrentView('toc');
-      setCurrentPageIndex(null);
-      return;
-    }
-
     if (currentView === 'toc') {
       if (pagesToShow.length === 0) return;
-      captureCurrentState();
       setCurrentPageIndex(0);
       setCurrentView('page');
       return;
@@ -221,10 +164,9 @@ export default function PublicNotePage() {
 
     if (currentView === 'page' && currentPageIndex !== null) {
       if (currentPageIndex >= pagesToShow.length - 1) return;
-      captureCurrentState();
       setCurrentPageIndex(currentPageIndex + 1);
     }
-  }, [captureCurrentState, currentView, currentPageIndex, pagesToShow.length]);
+  }, [currentView, currentPageIndex, pagesToShow.length]);
 
   const handleSaveReference = async () => {
     if (!note) return;
@@ -256,7 +198,7 @@ export default function PublicNotePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-foreground-muted">Loading note...</p>
+        <p className="text-foreground-muted font-black uppercase tracking-[0.2em] text-[10px]">Loading note...</p>
       </div>
     );
   }
@@ -280,140 +222,246 @@ export default function PublicNotePage() {
     );
   }
 
-  const coverComponent = (
-    <ClayNotebookCover
-      mode="editor"
-      title={note.title || 'Untitled Notebook'}
-      onTitleChange={() => { }}
-      onOpen={handleOpenContents}
-      color={coverColor}
-      theme={theme}
-      readOnly
-    />
-  );
-
-  const tocComponent = (
-    <TableOfContents
-      notebookTitle={note.title || 'Untitled Notebook'}
-      pages={pagesToShow}
-      onPageClick={handlePageClick}
-      onAddPage={() => { }}
-      theme={theme}
-      readOnly
-    />
-  );
-
-  const pageComponent = (
-    <NotebookPage
-      content={currentPageContent}
-      onChange={() => { }}
-      theme={theme}
-      readOnly
-    />
-  );
-
   const pageIndicator = currentView === 'page' && currentPageIndex !== null
     ? `Page ${currentPageIndex + 1} of ${pagesToShow.length}`
-    : currentView === 'toc'
-      ? 'Table of Contents'
-      : 'Notebook Cover';
+    : 'Table of Contents';
 
-  const canGoPrev = currentView !== 'cover';
-  const canGoNext = currentView !== 'page'
-    ? !(currentView === 'toc' && pagesToShow.length === 0)
+  const canGoPrev = currentView !== 'toc';
+  const canGoNext = currentView === 'toc'
+    ? pagesToShow.length > 0
     : currentPageIndex !== null && currentPageIndex < pagesToShow.length - 1;
 
-  return (
-    <div className="w-full max-w-[90rem] mx-auto pt-8 md:pt-4 pb-20 px-4 lg:px-8">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
-        
-        {/* Left Sticky Pane */}
-        <div className="lg:col-span-4 xl:col-span-3 flex flex-col gap-8 lg:sticky lg:top-8 h-fit z-20">
-          {/* Hero Header */}
-          <div className="w-full flex flex-col gap-5">
-            <div className="flex items-center gap-3">
-              <Link href="/community" className="px-4 py-2 rounded-full border-2 border-border/60 hover:bg-background-muted transition-all hidden sm:flex items-center gap-2">
-                <ArrowLeft01Icon className="w-3.5 h-3.5" />
-              </Link>
-              <div className="w-3 h-3 rounded-full bg-primary flex-shrink-0" />
-              <h1 className="text-[11px] font-black uppercase tracking-[0.3em] text-foreground/50">COMMUNITY NOTE</h1>
-            </div>
-            <h2 className="text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase text-foreground leading-[0.85] break-words">
+  // Ported Mobile Layout Flow (Stack) from Editor
+  if (isSmallScreen) {
+    return (
+      <div className="min-h-[100dvh] flex flex-col bg-background">
+        <header className="h-16 shrink-0 border-b border-border/40 bg-surface/95 backdrop-blur-xl flex items-center justify-between px-4 z-50 sticky top-0">
+          <Link href="/community" className="w-10 h-10 flex items-center justify-center rounded-[1rem] bg-background-muted active:scale-90 transition-all text-foreground">
+            <ArrowLeft02Icon className="w-5 h-5" />
+          </Link>
+          <div className="flex-1 px-4 flex flex-col items-center text-center">
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-foreground/50">COMMUNITY NOTE</span>
+            <h2 className="text-sm font-black text-foreground tracking-tighter truncate uppercase w-full">
               {note.title || 'UNTITLED NOTEBOOK'}
             </h2>
-            <div className="mt-2 text-[10px] font-black uppercase tracking-widest text-foreground/40 break-words">
+          </div>
+          <button
+            onClick={() => setIsSaveModalOpen(true)}
+            className="w-10 h-10 flex items-center justify-center rounded-[1rem] bg-foreground text-surface active:scale-90 transition-all"
+          >
+            <Bookmark01Icon className="w-5 h-5" />
+          </button>
+        </header>
+
+        {/* Mobile Page Selector Horizontal Scroll */}
+        <div ref={mobileTocRef} className="w-full bg-surface border-b border-border/40 py-3 px-4 overflow-x-auto scrollbar-hide flex items-center gap-2">
+          <button
+            onClick={() => setCurrentView('toc')}
+            className={`shrink-0 h-10 px-4 rounded-[1rem] border-[2px] transition-all font-black text-[10px] uppercase tracking-widest
+              ${currentView === 'toc' ? 'border-primary bg-primary text-surface shadow-md' : 'border-border/40 bg-background-muted text-foreground/70'}
+            `}
+          >
+            CONTENTS
+          </button>
+
+          {pagesToShow.map((p, i) => (
+            <button
+              key={p.id}
+              onClick={() => handlePageClick(i)}
+              className={`shrink-0 w-10 h-10 flex items-center justify-center rounded-[1rem] border-[2px] transition-all font-black text-sm
+                ${currentView === 'page' && currentPageIndex === i ? 'border-primary bg-primary text-surface shadow-md' : 'border-border/40 bg-background-muted text-foreground/70'}
+              `}
+            >
+              {String(i + 1).padStart(2, '0')}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex-1 bg-surface p-4 pb-[20vh] overflow-y-auto">
+          {currentView === 'toc' && (
+            <div className="w-full max-w-md mx-auto min-h-[60vh] bg-surface rounded-[2rem] border border-border/20 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <TableOfContents
+                notebookTitle={note.title || 'Untitled Notebook'}
+                pages={pagesToShow}
+                onPageClick={handlePageClick}
+                onAddPage={() => { }}
+                theme={theme}
+                readOnly
+              />
+            </div>
+          )}
+
+          {currentView === 'page' && currentPageIndex !== null ? (
+            <div className="w-full bg-surface shadow-xl rounded-[2rem] border border-border/20 overflow-hidden min-h-[70vh] animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <NotebookPage
+                content={currentPageContent}
+                onChange={() => { }}
+                theme={theme}
+                readOnly={true}
+                simpleMode={true}
+                autoFocus={false}
+              />
+            </div>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop Dual Pane Reader Layout (Inspired by Editor Dashboard)
+  return (
+    <div className="h-[100dvh] bg-background-muted/30 overflow-hidden flex w-full relative selection:bg-primary/20 dashboard-grid-bg">
+      {/* LEFT PANE - Research/Context */}
+      <aside className="w-[340px] xl:w-[420px] shrink-0 h-full flex flex-col bg-surface/80 backdrop-blur-3xl border-r border-border/40 shadow-[0_0_60px_rgba(0,0,0,0.03)] z-[20] overflow-y-auto scrollbar-hide">
+        <div className="p-8 pb-6 border-b border-border/20 bg-surface">
+          <Link
+            href="/community"
+            className="w-12 h-12 flex items-center justify-center rounded-[1.5rem] bg-background-muted border border-border/40 text-foreground hover:bg-foreground hover:text-surface transition-all active:scale-95 group mb-8 shadow-sm"
+            title="Back to Community"
+          >
+            <ArrowLeft02Icon className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+          </Link>
+
+          <div className="flex flex-col mb-8 mt-4">
+            <span className="text-[11px] font-black uppercase tracking-[0.3em] text-foreground/50 block mb-2">COMMUNITY NOTE</span>
+            <h2 className="text-3xl xl:text-4xl font-black text-foreground tracking-tighter uppercase leading-[0.9] break-words">
+              {note.title || 'UNTITLED NOTEBOOK'}
+            </h2>
+            <div className="mt-4 text-[10px] font-black uppercase tracking-widest text-foreground/40">
               {formatDate(note.created_at)}
             </div>
-
-            <button onClick={() => setIsSaveModalOpen(true)} className="mt-2 w-full flex justify-center items-center gap-3 px-6 py-4 rounded-[2rem] bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[11px] hover:bg-foreground/90 active:scale-95 transition-all shadow-lg">
-              <Bookmark01Icon className="w-4 h-4" />
-              SAVE NOTE
-            </button>
           </div>
 
-          {/* Control Strip */}
-          <div className="w-full bg-background-muted rounded-[2rem] p-5 flex flex-col gap-4">
-            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground/50 text-center">{pageIndicator}</span>
-            <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setIsSaveModalOpen(true)}
+            className="w-full flex justify-center items-center gap-3 px-6 py-4 rounded-[1.5rem] bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[11px] hover:bg-foreground/90 active:scale-95 transition-all shadow-lg"
+          >
+            <Bookmark01Icon className="w-4 h-4" />
+            SAVE NOTE
+          </button>
+        </div>
+
+        <div className="p-8 flex-1 flex flex-col gap-6 relative pb-12">
+          <div className="flex items-center justify-between">
+            <h3 className="text-[12px] font-black text-foreground uppercase tracking-[0.3em] flex items-center gap-2">
+              <Menu01Icon className="w-4 h-4 text-primary" /> NOTE DIRECTORY
+            </h3>
+            <span className="text-[10px] font-black uppercase tracking-widest bg-foreground text-surface px-3 py-1 rounded-full">{pagesToShow.length} PAGES</span>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => setCurrentView('toc')}
+              className={`w-full flex items-center gap-4 p-4 rounded-[1.5rem] transition-all border-[3px]
+                    ${currentView === 'toc'
+                  ? 'bg-foreground border-foreground text-surface shadow-xl scale-[1.02]'
+                  : 'bg-surface border-transparent hover:border-border/40 hover:bg-background-muted text-foreground'
+                }
+                  `}
+            >
+              <div className={`w-10 h-10 flex items-center justify-center rounded-[1rem] text-[12px] font-black shrink-0 ${currentView === 'toc' ? 'bg-surface/20 text-surface' : 'bg-background-muted text-foreground'}`}>
+                TC
+              </div>
+              <span className="text-[13px] font-black uppercase tracking-widest">Contents</span>
+            </button>
+
+            <div className="h-4" />
+
+            {pagesToShow.map((p, i) => (
+              <button
+                key={p.id}
+                onClick={() => handlePageClick(i)}
+                className={`group w-full flex items-center justify-between p-4 rounded-[1.5rem] transition-all border-[3px]
+                      ${currentView === 'page' && currentPageIndex === i
+                    ? 'bg-foreground border-foreground text-surface shadow-xl scale-[1.02]'
+                    : 'bg-surface border-transparent hover:border-border/40 hover:bg-background-muted text-foreground'
+                  }
+                    `}
+              >
+                <div className="flex items-center gap-4 min-w-0">
+                  <span className={`w-10 h-10 flex items-center justify-center rounded-[1rem] text-[12px] font-black shrink-0 ${currentView === 'page' && currentPageIndex === i ? 'bg-surface/20 text-surface' : 'bg-background-muted text-foreground'}`}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-[13px] font-black uppercase tracking-widest truncate">{p.title || 'UNTITLED PAGE'}</span>
+                </div>
+                {currentView === 'page' && currentPageIndex === i && <ArrowRight01Icon className="w-5 h-5 text-surface/50" />}
+              </button>
+            ))}
+          </div>
+        </div>
+      </aside>
+
+      {/* RIGHT PANE - THE CANVAS (Reader) */}
+      <section className="flex-1 h-full flex flex-col z-[10] relative">
+        <header className="h-[100px] shrink-0 flex items-center justify-between px-8 lg:px-12">
+          <div>
+            <span className="text-[12px] font-black text-foreground/40 uppercase tracking-[0.3em]">Reader Mode</span>
+          </div>
+
+          <div className="flex items-center gap-4 bg-surface px-4 py-2 rounded-[1.5rem] border border-border/40 shadow-sm">
+            <span className="text-[10px] font-black uppercase tracking-widest text-foreground/50">{pageIndicator}</span>
+            <div className="w-[2px] h-4 bg-border/20" />
+            <div className="flex items-center gap-2">
               <button
                 onClick={handlePrev}
                 disabled={!canGoPrev}
-                className="px-2 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest bg-surface border border-border/40 hover:border-foreground/20 hover:shadow-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed text-foreground"
+                className="p-1.5 rounded-lg hover:bg-background-muted disabled:opacity-30 transition-colors"
               >
-                PREV
+                <ArrowLeft01Icon className="w-4 h-4" />
               </button>
               <button
                 onClick={handleNext}
                 disabled={!canGoNext}
-                className="px-2 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest bg-surface border border-border/40 hover:border-foreground/20 hover:shadow-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed text-foreground"
+                className="p-1.5 rounded-lg hover:bg-background-muted disabled:opacity-30 transition-colors"
               >
-                NEXT
+                <ArrowRight01Icon className="w-4 h-4" />
               </button>
             </div>
-            <button
-              onClick={handleOpenContents}
-              disabled={currentView === 'toc'}
-              className="w-full px-2 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest bg-surface border border-border/40 hover:border-foreground/20 hover:shadow-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed text-foreground"
-            >
-              CONTENTS
-            </button>
           </div>
-        </div>
+        </header>
 
-        {/* Right Scrolling Pane */}
-        <div className="lg:col-span-8 xl:col-span-9 flex justify-center items-start lg:pt-8 min-h-[70vh] z-10 w-full overflow-hidden">
-          <div ref={notebookContainerRef} className="relative w-full flex justify-center items-start overflow-visible pt-10">
-          <div
-            className="relative"
-            style={{
-              width: NOTEBOOK_WIDTH * scale,
-              height: NOTEBOOK_HEIGHT * scale,
-            }}
-          >
-            <div
-              className="relative"
-              style={{
-                width: NOTEBOOK_WIDTH,
-                height: NOTEBOOK_HEIGHT,
-                transform: `scale(${scale})`,
-                transformOrigin: 'top left',
-              }}
-            >
-              <PageFlipContainer
-                currentView={currentView}
-                currentPageIndex={currentView === 'page' ? currentPageIndex : null}
-                totalPages={pagesToShow.length}
-                cover={coverComponent}
-                toc={tocComponent}
-                pageContent={pageComponent}
-                previousContent={previousContentRef.current || undefined}
-                theme={theme}
-              />
-            </div>
+        <div className="flex-1 overflow-y-auto px-8 pb-32 scrollbar-hide">
+          <div className="w-full max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center pt-8">
+
+            {currentView === 'toc' && (
+              <div className="w-full bg-surface shadow-[0_30px_80px_rgba(0,0,0,0.08)] rounded-[3rem] border border-border/20 overflow-hidden min-h-[80vh] animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <TableOfContents
+                  notebookTitle={note.title || 'Untitled Notebook'}
+                  pages={pagesToShow}
+                  onPageClick={handlePageClick}
+                  onAddPage={() => { }}
+                  theme={theme}
+                  readOnly
+                />
+              </div>
+            )}
+
+            {currentView === 'page' && currentPageIndex !== null && (
+              <div className="w-full bg-surface shadow-[0_30px_80px_rgba(0,0,0,0.08)] rounded-[3rem] border border-border/20 overflow-hidden min-h-[110vh] animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="p-8 sm:p-12 xl:p-16 h-full flex flex-col">
+                  <NotebookPage
+                    content={currentPageContent}
+                    onChange={() => { }}
+                    theme={theme}
+                    readOnly={true}
+                    simpleMode={true}
+                    autoFocus={false}
+                  />
+                </div>
+              </div>
+            )}
+
+            {(!currentView || (currentView === 'page' && currentPageIndex === null)) && (
+              <div className="w-full aspect-video border-[4px] border-dashed border-border/40 rounded-[4rem] flex flex-col items-center justify-center bg-surface/30 backdrop-blur-md">
+                <BookOpen01Icon className="w-20 h-20 text-foreground/20 mb-6" />
+                <h2 className="text-3xl font-black uppercase tracking-tighter text-foreground/40">Canvas Empty</h2>
+                <p className="text-[13px] font-black text-foreground/30 uppercase tracking-[0.3em] mt-3">Select a section from the directory</p>
+              </div>
+            )}
+
           </div>
         </div>
-        </div>
-      </div>
+      </section>
 
       <SaveMaterialModal
         isOpen={isSaveModalOpen}
