@@ -279,7 +279,7 @@ export default function PublicNotePage() {
 
         <div className="flex-1 bg-surface p-4 pb-[20vh] overflow-y-auto">
           {currentView === 'toc' && (
-            <div className="w-full max-w-md mx-auto min-h-[60vh] bg-surface rounded-[2rem] border border-border/20 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="w-full min-h-[60vh] animate-in fade-in slide-in-from-bottom-4 duration-500">
               <TableOfContents
                 notebookTitle={note.title || 'Untitled Notebook'}
                 pages={pagesToShow}
@@ -424,7 +424,7 @@ export default function PublicNotePage() {
           <div className="w-full max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center pt-8">
 
             {currentView === 'toc' && (
-              <div className="w-full bg-surface shadow-[0_30px_80px_rgba(0,0,0,0.08)] rounded-[3rem] border border-border/20 overflow-hidden min-h-[80vh] animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <TableOfContents
                   notebookTitle={note.title || 'Untitled Notebook'}
                   pages={pagesToShow}

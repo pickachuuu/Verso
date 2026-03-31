@@ -48,7 +48,7 @@ import {
   useDeletePage,
   extractH1Title,
 } from '@/hooks/useNotes';
-import { NotePage } from '@/component/ui/TableOfContents';
+import TableOfContents, { NotePage } from '@/component/ui/TableOfContents';
 
 const ROMAN_NUMERALS = [
   { value: 10, symbol: 'X' },
@@ -179,7 +179,7 @@ export default function EditorPage() {
   const createPageMutation = useCreatePage();
   const savePageMutation = useSavePage();
   const deletePageMutation = useDeletePage();
-  
+
   const { mutateAsync: savePageAsync } = savePageMutation;
   const { mutateAsync: saveNoteAsync } = saveNoteMutation;
   const { mutateAsync: createPageAsync } = createPageMutation;
@@ -279,7 +279,7 @@ export default function EditorPage() {
     try {
       let result = '';
       const cleanAIResult = (raw: string) => raw.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
-      
+
       switch (action) {
         case 'continue_writing': {
           result = await callAI(`You are a writing assistant. ${TIPTAP_FORMATTING_GUIDE}`, textContent);
@@ -305,15 +305,15 @@ export default function EditorPage() {
   const handleAddPage = async () => {
     if (!noteId) {
       // Create Note first
-        try {
-          const { id: newId, slug: newSlug } = await createNoteMutation.mutateAsync({ title, coverColor });
-          setId(newId);
-          setSlug(newSlug);
-          const pageId = await createPageMutation.mutateAsync({ noteId: newId });
-          if(pageId) {
-            router.replace(`/editor/${newSlug}`, { scroll: false });
-          }
-        } catch {}
+      try {
+        const { id: newId, slug: newSlug } = await createNoteMutation.mutateAsync({ title, coverColor });
+        setId(newId);
+        setSlug(newSlug);
+        const pageId = await createPageMutation.mutateAsync({ noteId: newId });
+        if (pageId) {
+          router.replace(`/editor/${newSlug}`, { scroll: false });
+        }
+      } catch { }
       return;
     }
     // Optimistic UI updates
@@ -323,7 +323,7 @@ export default function EditorPage() {
       setCurrentPageContent('');
       setLastSavedContent('');
       setCurrentView('page');
-    } catch {}
+    } catch { }
   };
 
   const handlePageClick = async (pageIndex: number) => {
@@ -342,7 +342,7 @@ export default function EditorPage() {
 
   const handleDeletePage = async (pageId: string) => {
     if (pages.length <= 1) return;
-    try { await deletePageMutation.mutateAsync(pageId); } catch {}
+    try { await deletePageMutation.mutateAsync(pageId); } catch { }
   };
 
   const handleAutoPageBreak = useCallback(async (overflowHTML: string, trimmedHTML: string) => {
@@ -354,7 +354,7 @@ export default function EditorPage() {
       try {
         await savePageAsync({ pageId: page.id, title: currentTitle, content: trimmedHTML });
         setLastSavedContent(trimmedHTML);
-      } catch {}
+      } catch { }
     }
     try {
       const pageId = await createPageAsync({ noteId });
@@ -371,7 +371,7 @@ export default function EditorPage() {
         setCurrentPageContent(finalOverflowHTML);
         setLastSavedContent(finalOverflowHTML);
       }
-    } catch {}
+    } catch { }
   }, [noteId, currentPageIndex, pages, savePageMutation, createPageMutation, refetchPages, setCurrentPageContent, setLastSavedContent, setCurrentPageIndex]);
 
   useAutoPageBreak({ editor, enabled: currentView === 'page' && !isSmallScreen, onOverflow: handleAutoPageBreak });
@@ -379,11 +379,11 @@ export default function EditorPage() {
   useEffect(() => {
     if (currentView !== 'page' || currentPageIndex === null || !pages[currentPageIndex]) return;
     if (currentPageContent === lastSavedContent) return;
-    
+
     if (useUIStore.getState().saveStatus !== 'saving') {
       setSaveStatus('saving');
     }
-    
+
     const timeoutId = setTimeout(async () => {
       try {
         const page = pages[currentPageIndex];
@@ -407,7 +407,7 @@ export default function EditorPage() {
           setSlug(newSlug);
           router.replace(`/editor/${newSlug}`, { scroll: false });
         }
-      } catch {}
+      } catch { }
     }, 1500);
     return () => clearTimeout(timeoutId);
   }, [noteId, title, tags, coverColor, slug, router, setSlug, saveNoteAsync]);
@@ -463,26 +463,26 @@ export default function EditorPage() {
   );
 
   const saveStatusIndicator = (
-      <div className="flex items-center gap-2 select-none h-8 px-4 rounded-[1.25rem] bg-surface border border-border/40 shadow-sm ml-auto">
-        <AnimatePresence mode="wait">
-          {saveStatus === 'saving' ? (
-            <motion.div key="saving" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="flex items-center gap-2">
-               <Loading03Icon className="w-3.5 h-3.5 text-foreground animate-spin" />
-               <span className="text-[10px] font-black text-foreground uppercase tracking-widest hidden sm:block">Syncing</span>
-            </motion.div>
-          ) : saveStatus === 'saved' ? (
-            <motion.div key="saved" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-2">
-               <Tick01Icon className="w-3.5 h-3.5 text-foreground/40" />
-               <span className="text-[10px] font-black text-foreground/40 uppercase tracking-widest hidden sm:block">Cloud Synced</span>
-            </motion.div>
-          ) : saveStatus === 'error' ? (
-            <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
-               <AlertCircleIcon className="w-3.5 h-3.5 text-red-600" />
-               <span className="text-[10px] font-black text-red-600 uppercase tracking-widest hidden sm:block">Offline</span>
-            </motion.div>
-          ) : <div className="w-6" />}
-        </AnimatePresence>
-      </div>
+    <div className="flex items-center gap-2 select-none h-8 px-4 rounded-[1.25rem] bg-surface border border-border/40 shadow-sm ml-auto">
+      <AnimatePresence mode="wait">
+        {saveStatus === 'saving' ? (
+          <motion.div key="saving" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="flex items-center gap-2">
+            <Loading03Icon className="w-3.5 h-3.5 text-foreground animate-spin" />
+            <span className="text-[10px] font-black text-foreground uppercase tracking-widest hidden sm:block">Syncing</span>
+          </motion.div>
+        ) : saveStatus === 'saved' ? (
+          <motion.div key="saved" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-2">
+            <Tick01Icon className="w-3.5 h-3.5 text-foreground/40" />
+            <span className="text-[10px] font-black text-foreground/40 uppercase tracking-widest hidden sm:block">Cloud Synced</span>
+          </motion.div>
+        ) : saveStatus === 'error' ? (
+          <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
+            <AlertCircleIcon className="w-3.5 h-3.5 text-red-600" />
+            <span className="text-[10px] font-black text-red-600 uppercase tracking-widest hidden sm:block">Offline</span>
+          </motion.div>
+        ) : <div className="w-6" />}
+      </AnimatePresence>
+    </div>
   );
 
   if (!isNewNote && (isLoadingNote || (!!resolvedNoteId && isLoadingPages))) {
@@ -498,195 +498,208 @@ export default function EditorPage() {
 
   // Mobile Layout Flow (Stack)
   if (isSmallScreen) {
-     return (
-       <div className="min-h-[100dvh] flex flex-col bg-background">
-         <header className="h-16 shrink-0 border-b border-border/40 bg-surface/95 backdrop-blur-xl flex items-center justify-between px-4 z-50 sticky top-0">
-            <button onClick={handleBack} className="w-10 h-10 flex items-center justify-center rounded-[1rem] bg-background-muted active:scale-90 transition-all text-foreground">
-               <ArrowLeft02Icon className="w-5 h-5" />
-            </button>
-            <div className="flex-1 px-4 flex justify-between items-center text-center">
-              <div>
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-foreground/50">NOTEBOOK</span>
-                <input
-                   type="text"
-                   value={title}
-                   onChange={(e) => setTitle(e.target.value)}
-                   className="w-full text-center text-sm font-black bg-transparent border-none focus:outline-none placeholder:text-foreground/30 text-foreground tracking-tighter truncate uppercase"
-                   placeholder="UNTITLED NOTEBOOK"
-                />
-              </div>
+    return (
+      <div className="min-h-[100dvh] flex flex-col bg-background">
+        <header className="h-16 shrink-0 border-b border-border/40 bg-surface/95 backdrop-blur-xl flex items-center justify-between px-4 z-50 sticky top-0">
+          <button onClick={handleBack} className="w-10 h-10 flex items-center justify-center rounded-[1rem] bg-background-muted active:scale-90 transition-all text-foreground">
+            <ArrowLeft02Icon className="w-5 h-5" />
+          </button>
+          <div className="flex-1 px-4 flex justify-between items-center text-center">
+            <div>
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-foreground/50">NOTEBOOK</span>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full text-center text-sm font-black bg-transparent border-none focus:outline-none placeholder:text-foreground/30 text-foreground tracking-tighter truncate uppercase"
+                placeholder="UNTITLED NOTEBOOK"
+              />
             </div>
-            {saveStatusIndicator}
-         </header>
+          </div>
+          {saveStatusIndicator}
+        </header>
 
-         {/* Mobile TOC Horizontal Scroll */}
-         <div ref={mobileTocRef} className="w-full bg-surface border-b border-border/40 py-3 px-4 overflow-x-auto scrollbar-hide flex items-center gap-2">
-            {pages.map((p, i) => (
-                <button
-                   key={p.id}
-                   onClick={() => handlePageClick(i)}
-                   className={`shrink-0 w-10 h-10 flex items-center justify-center rounded-[1rem] border-[2px] transition-all font-black text-sm
+        {/* Mobile TOC Horizontal Scroll */}
+        <div ref={mobileTocRef} className="w-full bg-surface border-b border-border/40 py-3 px-4 overflow-x-auto scrollbar-hide flex items-center gap-2">
+          {pages.map((p, i) => (
+            <button
+              key={p.id}
+              onClick={() => handlePageClick(i)}
+              className={`shrink-0 w-10 h-10 flex items-center justify-center rounded-[1rem] border-[2px] transition-all font-black text-sm
                       ${currentPageIndex === i ? 'border-primary bg-primary text-surface shadow-md scale-105' : 'border-border/40 bg-background-muted text-foreground/70 hover:bg-background-muted/80'}
                    `}
-                >
-                   {String(i + 1).padStart(2, '0')}
-                </button>
-            ))}
-
-            <button onClick={handleAddPage} className="shrink-0 w-10 h-10 rounded-[1rem] border-2 border-dashed border-primary/40 text-primary flex items-center justify-center bg-primary/5 ml-1 hover:bg-primary/10 transition-colors">
-               <Add01Icon className="w-5 h-5" />
+            >
+              {String(i + 1).padStart(2, '0')}
             </button>
-         </div>
+          ))}
 
-         <div className="flex-1 bg-surface p-4 pb-[20vh]">
-            {editor && (
-              <div className="sticky top-0 z-[60] bg-surface/90 backdrop-blur-md pb-4 pt-2 -mx-4 px-4 border-b border-border/20 mb-4">
-                 <EditorToolbar editor={editor} fullscreen={false} />
-              </div>
-            )}
-            {currentPageIndex !== null && pages[currentPageIndex] ? (
-              <NotebookPage content={currentPageContent} onChange={setCurrentPageContent} theme={theme} onEditorReady={handleEditorReady} simpleMode={true} />
-            ) : (
-              <div className="flex flex-col items-center justify-center py-20 opacity-30">
-                 <BookOpen01Icon className="w-12 h-12 mb-4" />
-                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Select a page</span>
-              </div>
-            )}
-         </div>
-       </div>
-     )
+          <button onClick={handleAddPage} className="shrink-0 w-10 h-10 rounded-[1rem] border-2 border-dashed border-primary/40 text-primary flex items-center justify-center bg-primary/5 ml-1 hover:bg-primary/10 transition-colors">
+            <Add01Icon className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 bg-surface p-4 pb-[20vh]">
+          {editor && (
+            <div className="sticky top-0 z-[60] bg-surface/90 backdrop-blur-md pb-4 pt-2 -mx-4 px-4 border-b border-border/20 mb-4">
+              <EditorToolbar editor={editor} fullscreen={false} />
+            </div>
+          )}
+          {currentPageIndex !== null && pages[currentPageIndex] ? (
+            <NotebookPage content={currentPageContent} onChange={setCurrentPageContent} theme={theme} onEditorReady={handleEditorReady} simpleMode={true} />
+          ) : (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[60vh]">
+              <TableOfContents
+                notebookTitle={title || 'UNTITLED NOTEBOOK'}
+                pages={pages}
+                onPageClick={handlePageClick}
+                onAddPage={handleAddPage}
+                onDeletePage={handleDeletePage}
+                theme={theme}
+                readOnly={false}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    )
   }
 
   // Massive Desktop Dual Pane Dashboard Layout
   return (
     <div className="h-[100dvh] bg-background-muted/30 overflow-hidden flex w-full relative selection:bg-primary/20 dashboard-grid-bg">
-      {/* 
+      {/*
         ====================================================================
         LEFT PANE - NOTEBOOK CONTEXT (Cover, Title, Elements, TOC)
         ====================================================================
       */}
       <aside className="w-[340px] xl:w-[420px] shrink-0 h-full flex flex-col bg-surface/80 backdrop-blur-3xl border-r border-border/40 shadow-[0_0_60px_rgba(0,0,0,0.03)] z-[20] overflow-y-auto scrollbar-hide">
-         <div className="p-8 pb-6 border-b border-border/20 bg-surface">
-            <button
-               onClick={handleBack}
-               className="w-12 h-12 flex items-center justify-center rounded-[1.5rem] bg-background-muted border border-border/40 text-foreground hover:bg-foreground hover:text-surface transition-all active:scale-95 group mb-8 shadow-sm"
-               title="Back to Library"
-            >
-               <ArrowLeft02Icon className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
-            </button>
+        <div className="p-8 pb-6 border-b border-border/20 bg-surface">
+          <button
+            onClick={handleBack}
+            className="w-12 h-12 flex items-center justify-center rounded-[1.5rem] bg-background-muted border border-border/40 text-foreground hover:bg-foreground hover:text-surface transition-all active:scale-95 group mb-8 shadow-sm"
+            title="Back to Library"
+          >
+            <ArrowLeft02Icon className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+          </button>
 
-            <div className="flex flex-col mb-8 mt-4">
-                 <span className="text-[11px] font-black uppercase tracking-[0.3em] text-foreground/50 block mb-2">NOTEBOOK</span>
-                 <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full text-3xl xl:text-4xl font-black bg-transparent border-none focus:outline-none placeholder:text-foreground/30 text-foreground tracking-tighter truncate uppercase pb-1"
-                    placeholder="UNTITLED NOTEBOOK"
-                 />
-            </div>
-
-            <TagsDropdown
-              tags={tags}
-              onRemoveTag={removeTag}
-              onAddTag={handleAddTag}
-              showTagInput={showTagInput}
-              tagInput={tagInput}
-              onTagInputChange={setTagInput}
-              onTagInputKeyDown={handleTagKeyDown}
-              onTagInputBlur={() => { if (tagInput.trim()) handleAddTag(); setTimeout(() => setShowTagInput(false), 150); }}
-              onAddTagClick={() => setShowTagInput(true)}
+          <div className="flex flex-col mb-8 mt-4">
+            <span className="text-[11px] font-black uppercase tracking-[0.3em] text-foreground/50 block mb-2">NOTEBOOK</span>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full text-3xl xl:text-4xl font-black bg-transparent border-none focus:outline-none placeholder:text-foreground/30 text-foreground tracking-tighter truncate uppercase pb-1"
+              placeholder="UNTITLED NOTEBOOK"
             />
-         </div>
+          </div>
 
-         <div className="p-8 flex-1 flex flex-col gap-6 relative pb-12">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[12px] font-black text-foreground uppercase tracking-[0.3em] flex items-center gap-2">
-                <Menu01Icon className="w-4 h-4 text-primary" /> PAGES DIRECTORY
-              </h3>
-              <span className="text-[10px] font-black uppercase tracking-widest bg-foreground text-surface px-3 py-1 rounded-full">{pages.length} PAGES</span>
-            </div>
+          <TagsDropdown
+            tags={tags}
+            onRemoveTag={removeTag}
+            onAddTag={handleAddTag}
+            showTagInput={showTagInput}
+            tagInput={tagInput}
+            onTagInputChange={setTagInput}
+            onTagInputKeyDown={handleTagKeyDown}
+            onTagInputBlur={() => { if (tagInput.trim()) handleAddTag(); setTimeout(() => setShowTagInput(false), 150); }}
+            onAddTagClick={() => setShowTagInput(true)}
+          />
+        </div>
 
-            <div className="flex flex-col gap-3">
-               {pages.map((p, i) => (
-                  <button
-                    key={p.id}
-                    onClick={() => handlePageClick(i)}
-                    className={`group w-full flex items-center justify-between p-4 rounded-[1.5rem] transition-all border-[3px] 
-                      ${currentPageIndex === i 
-                         ? 'bg-foreground border-foreground text-surface shadow-xl scale-[1.02]' 
-                         : 'bg-surface border-transparent hover:border-border/40 hover:bg-background-muted text-foreground'
-                      }
+        <div className="p-8 flex-1 flex flex-col gap-6 relative pb-12">
+          <div className="flex items-center justify-between">
+            <h3 className="text-[12px] font-black text-foreground uppercase tracking-[0.3em] flex items-center gap-2">
+              <Menu01Icon className="w-4 h-4 text-primary" /> PAGES DIRECTORY
+            </h3>
+            <span className="text-[10px] font-black uppercase tracking-widest bg-foreground text-surface px-3 py-1 rounded-full">{pages.length} PAGES</span>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {pages.map((p, i) => (
+              <button
+                key={p.id}
+                onClick={() => handlePageClick(i)}
+                className={`group w-full flex items-center justify-between p-4 rounded-[1.5rem] transition-all border-[3px]
+                      ${currentPageIndex === i
+                    ? 'bg-foreground border-foreground text-surface shadow-xl scale-[1.02]'
+                    : 'bg-surface border-transparent hover:border-border/40 hover:bg-background-muted text-foreground'
+                  }
                     `}
+              >
+                <div className="flex items-center gap-4 min-w-0">
+                  <span className={`w-10 h-10 flex items-center justify-center rounded-[1rem] text-[12px] font-black shrink-0 ${currentPageIndex === i ? 'bg-surface/20 text-surface' : 'bg-background-muted text-foreground'}`}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-[13px] font-black uppercase tracking-widest truncate">{p.title || 'UNTITLED PAGE'}</span>
+                </div>
+                {currentPageIndex === i && <ArrowRight01Icon className="w-5 h-5 text-surface/50" />}
+                {currentPageIndex !== i && (
+                  <div
+                    onClick={(e) => { e.stopPropagation(); handleDeletePage(p.id); }}
+                    className="w-8 h-8 flex items-center justify-center rounded-full text-red-500/0 group-hover:text-red-500 hover:bg-red-500/10 transition-colors"
                   >
-                     <div className="flex items-center gap-4 min-w-0">
-                        <span className={`w-10 h-10 flex items-center justify-center rounded-[1rem] text-[12px] font-black shrink-0 ${currentPageIndex === i ? 'bg-surface/20 text-surface' : 'bg-background-muted text-foreground'}`}>
-                           {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <span className="text-[13px] font-black uppercase tracking-widest truncate">{p.title || 'UNTITLED PAGE'}</span>
-                     </div>
-                     {currentPageIndex === i && <ArrowRight01Icon className="w-5 h-5 text-surface/50" />}
-                     {currentPageIndex !== i && (
-                        <div
-                           onClick={(e) => { e.stopPropagation(); handleDeletePage(p.id); }}
-                           className="w-8 h-8 flex items-center justify-center rounded-full text-red-500/0 group-hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                        >
-                           <Delete02Icon className="w-4 h-4" />
-                        </div>
-                     )}
-                  </button>
-               ))}
+                    <Delete02Icon className="w-4 h-4" />
+                  </div>
+                )}
+              </button>
+            ))}
 
-               <button
-                  onClick={handleAddPage}
-                  className="w-full mt-2 py-5 border-[3px] border-dashed border-border/80 rounded-[1.5rem] flex items-center justify-center gap-3 text-foreground font-black text-[12px] uppercase tracking-[0.2em] hover:bg-background-muted hover:border-foreground/20 active:scale-[0.98] transition-all"
-               >
-                  <Add01Icon className="w-5 h-5" /> NEW PAGE
-               </button>
-            </div>
-         </div>
+            <button
+              onClick={handleAddPage}
+              className="w-full mt-2 py-5 border-[3px] border-dashed border-border/80 rounded-[1.5rem] flex items-center justify-center gap-3 text-foreground font-black text-[12px] uppercase tracking-[0.2em] hover:bg-background-muted hover:border-foreground/20 active:scale-[0.98] transition-all"
+            >
+              <Add01Icon className="w-5 h-5" /> NEW PAGE
+            </button>
+          </div>
+        </div>
       </aside>
 
-      {/* 
+      {/*
         ====================================================================
         RIGHT PANE - THE CANVAS (Editor)
         ====================================================================
       */}
       <section className="flex-1 h-full flex flex-col z-[10] relative">
-         <header className="h-[100px] shrink-0 flex items-center justify-between px-8 lg:px-12 pointer-events-none">
-            <div className="pointer-events-auto">
-               <span className="text-[12px] font-black text-foreground/40 uppercase tracking-[0.3em]">Editor Canvas</span>
-            </div>
-            <div className="pointer-events-auto">
-               {saveStatusIndicator}
-            </div>
-         </header>
+        <header className="h-[100px] shrink-0 flex items-center justify-between px-8 lg:px-12 pointer-events-none">
+          <div className="pointer-events-auto">
+            <span className="text-[12px] font-black text-foreground/40 uppercase tracking-[0.3em]">Editor Canvas</span>
+          </div>
+          <div className="pointer-events-auto">
+            {saveStatusIndicator}
+          </div>
+        </header>
 
-         <div className="flex-1 overflow-y-auto px-8 pb-12 scrollbar-hide">
-            <div className="w-full max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center">
-               
-               {currentPageIndex !== null && pages[currentPageIndex] ? (
-                 <div className="w-full bg-surface shadow-[0_30px_80px_rgba(0,0,0,0.08)] rounded-[3rem] border border-border/20 overflow-hidden relative min-h-[95vh] mb-24">
-                     {editor && (
-                        <div className="sticky top-0 z-[60] bg-surface/95 backdrop-blur-xl border-b-[3px] border-background-muted">
-                           <EditorToolbar editor={editor} fullscreen trailingSlot={aiToolbarSlot} />
-                        </div>
-                     )}
-                     <div className="p-8 sm:p-12 xl:p-16 h-full flex flex-col">
-                        <NotebookPage content={currentPageContent} onChange={setCurrentPageContent} theme={theme} onEditorReady={handleEditorReady} simpleMode={true} />
-                        <div className="flex-1 mt-32" />{/* Adds extra visual space at the bottom to scroll past content */}
-                     </div>
-                 </div>
-               ) : (
-                  <div className="w-full aspect-video border-[4px] border-dashed border-border/40 rounded-[4rem] flex flex-col items-center justify-center bg-surface/30 backdrop-blur-md">
-                     <BookOpen01Icon className="w-20 h-20 text-foreground/20 mb-6" />
-                     <h2 className="text-3xl font-black uppercase tracking-tighter text-foreground/40">Canvas Empty</h2>
-                     <p className="text-[13px] font-black text-foreground/30 uppercase tracking-[0.3em] mt-3">Select a page from the directory</p>
+        <div className="flex-1 overflow-y-auto px-8 pb-12 scrollbar-hide">
+          <div className="w-full max-w-5xl xl:max-w-6xl mx-auto flex flex-col items-center">
+
+            {currentPageIndex !== null && pages[currentPageIndex] ? (
+              <div className="w-full bg-surface shadow-[0_30px_80px_rgba(0,0,0,0.08)] rounded-[3rem] border border-border/20 overflow-hidden relative min-h-[95vh] mb-24">
+                {editor && (
+                  <div className="sticky top-0 z-[60] bg-surface/95 backdrop-blur-xl border-b-[3px] border-background-muted">
+                    <EditorToolbar editor={editor} fullscreen trailingSlot={aiToolbarSlot} />
                   </div>
-               )}
+                )}
+                <div className="p-8 sm:p-12 xl:p-16 h-full flex flex-col">
+                  <NotebookPage content={currentPageContent} onChange={setCurrentPageContent} theme={theme} onEditorReady={handleEditorReady} simpleMode={true} />
+                  <div className="flex-1 mt-32" />{/* Adds extra visual space at the bottom to scroll past content */}
+                </div>
+              </div>
+            ) : (
+              <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <TableOfContents
+                  notebookTitle={title || 'UNTITLED NOTEBOOK'}
+                  pages={pages}
+                  onPageClick={handlePageClick}
+                  onAddPage={handleAddPage}
+                  onDeletePage={handleDeletePage}
+                  theme={theme}
+                  readOnly={false}
+                />
+              </div>
+            )}
 
-            </div>
-         </div>
+          </div>
+        </div>
       </section>
     </div>
   );
