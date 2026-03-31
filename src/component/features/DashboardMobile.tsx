@@ -199,7 +199,7 @@ function MobileRecentActivity() {
   const items = activities.slice(0, 4);
 
   return (
-    <div className="mt-8 mb-6">
+    <div className="mt-8 mb-0">
       <div className="flex items-center justify-between px-2 mb-4">
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground">ACTIVITY LOG</h3>
         <Link href="/library" className="text-[8px] font-black uppercase tracking-widest text-foreground-muted hover:text-foreground">VIEW ALL &rarr;</Link>
@@ -257,7 +257,7 @@ function MobileRecentActivity() {
 
 export default function DashboardMobile({ user }: DashboardMobileProps) {
   return (
-    <div className="flex flex-col gap-2 px-4 pt-6 pb-24">
+    <div className="flex flex-col gap-2 px-4 pt-6 pb-8">
       <MobileHeader user={user} />
       <MobileQuickActions />
       <MobileContinueLearning />
