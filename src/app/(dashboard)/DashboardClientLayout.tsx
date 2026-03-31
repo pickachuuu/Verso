@@ -43,7 +43,7 @@ export default function DashboardClientLayout({ children, isAuthenticated }: Das
                     ? (sidebarCollapsed ? 'md:ml-[5rem]' : 'md:ml-[20rem]')
                     : 'md:ml-0'
                 }`}>
-                <div className={`relative z-10 px-2 sm:px-4 lg:px-6 max-w-7xl mx-auto w-full transition-all ${isStudyMode ? 'pt-0 pb-0' : 'pt-24 pb-20 md:py-6'
+                <div className={`relative z-10 px-2 sm:px-4 lg:px-6 max-w-7xl mx-auto w-full transition-all ${isStudyMode ? 'pt-0 pb-0' : 'pt-16 pb-20 md:py-6'
                     }`}>
                     {children}
                 </div>
