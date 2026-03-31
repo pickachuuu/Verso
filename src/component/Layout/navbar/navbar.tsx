@@ -361,12 +361,12 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
 
       {/* ═══════════════ Mobile Navigation (Premium Island Dock) ═══════════════ */}
       <div className="md:hidden">
-        {/* Top Floating Actions - Refined */}
-        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-5 pointer-events-none">
+        {/* Top Floating Actions - Compact Brutalist Island */}
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 pointer-events-none">
           <div className="pointer-events-auto">
             <Link
               href="/dashboard"
-              className="group p-2.5 rounded-[1.25rem] bg-surface/80 backdrop-blur-xl border border-border/50 shadow-[0_8px_20px_rgba(60,50,40,0.12)] flex items-center transition-all active:scale-95 hover:bg-surface"
+              className="group p-2 rounded-2xl bg-surface border-[2.5px] border-foreground shadow-md flex items-center transition-all active:scale-95 hover:bg-surface-elevated"
             >
               <Image
                 src="/brand/verso-mark.png"
@@ -383,18 +383,17 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
             <button
               type="button"
               onClick={() => setNotificationsOpen(!notificationsOpen)}
-              className={`p-2.5 rounded-[1.25rem] bg-surface/80 backdrop-blur-xl border transition-all duration-300 shadow-[0_8px_20px_rgba(60,50,40,0.12)] relative active:scale-95 ${notificationsOpen ? "border-primary/40 text-primary ring-4 ring-primary/5" : "border-border/50 text-foreground-muted hover:bg-surface"
-                }`}
+              className="p-2.5 rounded-2xl bg-surface border-[2.5px] border-foreground text-foreground transition-all duration-300 shadow-md relative active:scale-95 hover:bg-surface-elevated"
             >
-              <NotificationIcon className="w-6 h-6" />
+              <NotificationIcon className="w-6 h-6 pointer-events-none" />
               {hasNotifications && (
-                <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-secondary rounded-full border-2 border-surface shadow-[0_0_8px_rgba(199,123,75,0.4)] animate-pulse" />
+                <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-secondary rounded-full border-[1.5px] border-foreground shadow-[2px_2px_0_rgba(0,0,0,1)]" />
               )}
             </button>
 
             <button
               onClick={handleOpenSignOut}
-              className="h-11 w-11 rounded-[1.25rem] bg-surface/80 backdrop-blur-xl border border-border/50 shadow-[0_8px_20px_rgba(60,50,40,0.12)] overflow-hidden flex items-center justify-center p-0.5 active:scale-95 transition-all hover:bg-surface"
+              className="h-10.5 w-10.5 rounded-2xl bg-surface border-[2.5px] border-foreground shadow-md overflow-hidden flex items-center justify-center p-0.5 active:scale-95 transition-all hover:bg-surface-elevated"
             >
               {userProfile?.avatar_url ? (
                 <img
@@ -417,9 +416,9 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
               initial={{ opacity: 0, y: 15, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 15, scale: 0.96 }}
-              className="fixed top-24 right-4 left-4 z-[60]"
+              className="fixed top-20 right-4 left-4 z-[60]"
             >
-              <div className="rounded-[2.5rem] bg-surface/98 backdrop-blur-2xl border border-pencil/20 shadow-[0_30px_70px_rgba(60,50,40,0.3)] p-6 overflow-hidden">
+              <div className="rounded-[2rem] bg-surface border-[2.5px] border-foreground shadow-[10px_10px_0_rgba(0,0,0,1)] p-6 overflow-hidden paper-texture">
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="text-lg font-bold text-foreground">Notifications</h3>
                   <div className="flex items-center gap-3">

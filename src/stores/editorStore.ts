@@ -183,6 +183,8 @@ interface UIState {
   showTagInput: boolean;
   tagInput: string;
   sidebarCollapsed: boolean;
+  deferredPrompt: any;
+  isPWAInstalled: boolean;
 }
 
 interface UIActions {
@@ -191,6 +193,8 @@ interface UIActions {
   setShowTagInput: (show: boolean) => void;
   setTagInput: (input: string) => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  setDeferredPrompt: (prompt: any) => void;
+  setIsPWAInstalled: (installed: boolean) => void;
   toggleSidebar: () => void;
   reset: () => void;
 }
@@ -210,6 +214,8 @@ const initialUIState: UIState = {
   showTagInput: false,
   tagInput: '',
   sidebarCollapsed: getInitialSidebarState(),
+  deferredPrompt: null,
+  isPWAInstalled: false,
 };
 
 export const useUIStore = create<UIState & UIActions>((set) => ({
@@ -234,5 +240,7 @@ export const useUIStore = create<UIState & UIActions>((set) => ({
       return { sidebarCollapsed: next };
     });
   },
+  setDeferredPrompt: (prompt) => set({ deferredPrompt: prompt }),
+  setIsPWAInstalled: (installed) => set({ isPWAInstalled: installed }),
   reset: () => set(initialUIState),
 }));

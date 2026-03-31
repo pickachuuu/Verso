@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, Variants } from 'framer-motion';
-import { ArrowRight01Icon, PencilEdit01Icon, Tag01Icon, Book01Icon, LeftToRightListNumberIcon, SparklesIcon, FlashIcon, Note01Icon, BookOpen01Icon, Clock01Icon, CheckmarkCircle02Icon, AiChat02Icon, Target01Icon } from 'hugeicons-react';
+import { ArrowRight01Icon, PencilEdit01Icon, Tag01Icon, Book01Icon, LeftToRightListNumberIcon, SparklesIcon, FlashIcon, Note01Icon, BookOpen01Icon, Clock01Icon, CheckmarkCircle02Icon, AiChat02Icon, Target01Icon, Download01Icon } from 'hugeicons-react';
 import { FlashcardIcon, ExamIcon, NotebookIcon } from '@/component/icons';
 import { createClient } from '@/utils/supabase/client';
 import LandingNavbar from '@/component/Layout/navbar/LandingNavbar';
+import { useUIStore } from '@/stores';
+
 
 
 
@@ -35,7 +37,34 @@ const heroDoodles = [
 
 export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { deferredPrompt, setDeferredPrompt, isPWAInstalled, setIsPWAInstalled } = useUIStore();
   const [activeExam, setActiveExam] = useState(0);
+
+  useEffect(() => {
+    // Check if the app is already installed
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      || (window.navigator as any).standalone
+      || document.referrer.includes('android-app://');
+
+    setIsPWAInstalled(isStandalone);
+
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallPWA = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -309,6 +338,84 @@ export default function LandingPage() {
                     </div>
                   </div>
 
+                </div>
+              </motion.div>
+
+              {/* MOBILE READY - SPAN 12 */}
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={fadeUp}
+                className="col-span-12 h-full mt-4"
+              >
+                <div className="w-full rounded-[3rem] bg-foreground text-surface border-[4px] border-foreground relative overflow-hidden flex flex-col md:flex-row items-stretch shadow-2xl group transition-all duration-500">
+                  <div className="absolute inset-0 bg-primary/5 blur-[100px] pointer-events-none" />
+
+                  {/* Content Side */}
+                  <div className="flex-1 p-8 sm:p-12 md:p-16 flex flex-col justify-center relative z-10">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Target01Icon className="w-8 h-8 text-surface" />
+                      <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-surface/60">STUDY ANYWHERE</h3>
+                    </div>
+
+                    <h2 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tight text-surface leading-[0.95] mb-8">
+                      VERSO <br /> IN YOUR POCKET
+                    </h2>
+
+                    <p className="text-[12px] md:text-[14px] font-black uppercase tracking-[0.2em] text-surface/70 leading-relaxed mb-10 max-w-md">
+                      INSTALL VERSO AS A PWA. INSTANT SYNC. OFFLINE ACCESS. NO APP STORE BARRIERS. JUST PEAK PRODUCTIVITY IN THE PALM OF YOUR HAND.
+                    </p>
+
+                    {(deferredPrompt || isPWAInstalled) && (
+                      <div className="mt-auto">
+                        <button
+                          onClick={handleInstallPWA}
+                          disabled={isPWAInstalled}
+                          className="w-full sm:w-fit group flex items-center justify-center gap-4 px-10 py-5 rounded-2xl bg-surface text-foreground shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-default"
+                        >
+                          <Download01Icon className="w-6 h-6 shrink-0" />
+                          <span className="font-black text-[14px] uppercase tracking-[0.2em] leading-none mt-1">
+                            {isPWAInstalled ? 'APP INSTALLED' : 'INSTALL NOW'}
+                          </span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Mock Mobile Side */}
+                  <div className="flex-1 min-h-[450px] relative flex items-center justify-center p-8 overflow-hidden bg-background/5">
+                    <div className="relative">
+                      {/* CSS Phone Frame */}
+                      <div className="relative w-[280px] h-[560px] bg-foreground rounded-[3.5rem] border-[8px] border-foreground shadow-[0_40px_100px_rgba(0,0,0,0.5)] p-3 group-hover:-translate-y-4 transition-transform duration-700 ease-out">
+                        {/* Blank Screen */}
+                        <div className="w-full h-full bg-surface-elevated rounded-[2.5rem] overflow-hidden relative paper-texture">
+                          {/* Notch */}
+                          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-foreground rounded-b-2xl z-20" />
+
+                          {/* Content Placeholder (Blank for now) */}
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Image
+                              src="/brand/verso-mark.png"
+                              alt="Verso Icon"
+                              width={100}
+                              height={100}
+                              className="w-24 h-24 opacity-10 grayscale"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Floating Mascot - Anchored to Phone Edge */}
+                      <Image
+                        src="/brand/verso-mobile.svg"
+                        alt="Mobile Mascot"
+                        width={200}
+                        height={200}
+                        className="absolute -bottom-8 -right-16 w-[160px] md:w-[220px] drop-shadow-2xl z-30 group-hover:-rotate-12 transition-all duration-500"
+                      />
+                    </div>
+                  </div>
                 </div>
               </motion.div>
 
