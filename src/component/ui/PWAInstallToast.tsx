@@ -3,34 +3,22 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download01Icon } from 'hugeicons-react';
+import { useUIStore } from '@/stores';
 
 export default function PWAInstallToast() {
-    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const { deferredPrompt, setDeferredPrompt, isPWAInstalled } = useUIStore();
     const [showToast, setShowToast] = useState(false);
 
     useEffect(() => {
-        // Check if the app is already installed
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-            || (window.navigator as any).standalone
-            || document.referrer.includes('android-app://');
+        // If already installed, don't show the toast
+        if (isPWAInstalled) return;
 
-        if (isStandalone) return;
-
-        const handler = (e: any) => {
-            // Prevent the mini-infobar from appearing on mobile
-            e.preventDefault();
-            // Stash the event so it can be triggered later.
-            setDeferredPrompt(e);
-            // Show toast after a short delay to ensure user sees the page first
-            setTimeout(() => setShowToast(true), 4000);
-        };
-
-        window.addEventListener('beforeinstallprompt', handler);
-
-        return () => {
-            window.removeEventListener('beforeinstallprompt', handler);
-        };
-    }, []);
+        // If the prompt has been captured by the LandingPage, show the toast
+        if (deferredPrompt) {
+            const timer = setTimeout(() => setShowToast(true), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [deferredPrompt, isPWAInstalled]);
 
     const handleInstall = async () => {
         if (!deferredPrompt) return;
@@ -41,11 +29,8 @@ export default function PWAInstallToast() {
         const { outcome } = await deferredPrompt.userChoice;
 
         if (outcome === 'accepted') {
-            console.log('User accepted the PWA install prompt');
             setDeferredPrompt(null);
             setShowToast(false);
-        } else {
-            console.log('User dismissed the PWA install prompt');
         }
     };
 
