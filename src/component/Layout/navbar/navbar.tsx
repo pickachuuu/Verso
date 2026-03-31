@@ -467,7 +467,8 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
 
         {/* Mobile Dock (3+1 Structure - Paper Island Pro) */}
         <div className="fixed bottom-8 left-6 right-6 z-[100] flex justify-center pointer-events-none">
-          <div className="pointer-events-auto bg-surface/85 backdrop-blur-3xl border border-white/50 ring-1 ring-border/10 rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(60,50,40,0.3)] h-[4.25rem] w-full max-w-[400px] px-2 flex items-stretch justify-around gap-0.5 relative paper-texture">
+          <div className="pointer-events-auto bg-surface border-[3px] border-foreground rounded-[2.5rem] shadow-xl h-[4.25rem] w-full max-w-[400px] px-2 flex items-stretch justify-around gap-0.5 relative paper-texture">
+
 
             {/* "More" Popover Menu */}
             <AnimatePresence>
@@ -534,14 +535,14 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
                   {isActive && (
                     <motion.div
                       layoutId="nav-pill"
-                      className="absolute inset-y-2 inset-x-1 bg-foreground rounded-[1.75rem] shadow-lg -z-10"
+                      className="absolute inset-y-2 inset-x-1 bg-foreground rounded-[1.75rem] shadow-lg z-10"
                       transition={{ type: "spring", stiffness: 420, damping: 35 }}
                     />
                   )}
 
                   <motion.div
                     animate={{ scale: isActive ? 1.15 : 1 }}
-                    className={`transition-all duration-500 flex items-center justify-center ${
+                    className={`transition-all duration-500 flex items-center justify-center relative z-20 ${
                       isActive ? "text-surface" : "text-foreground-muted/40 group-hover:text-foreground-muted group-hover:scale-110"
                     }`}
                   >
@@ -556,7 +557,7 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
                         initial={{ opacity: 0, y: 10, scale: 0.8 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 5, scale: 0.8 }}
-                        className="text-[8.5px] font-black uppercase tracking-[0.1em] text-surface leading-none mt-1.5 whitespace-nowrap"
+                        className="text-[8.5px] font-black uppercase tracking-[0.1em] text-surface leading-none mt-1.5 whitespace-nowrap relative z-20"
                       >
                         {item.name}
                       </motion.span>
@@ -574,7 +575,7 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
               {[navItems[3], ...secondaryItems].some(item => pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) && (
                 <motion.div
                   layoutId="nav-pill"
-                  className="absolute inset-y-2 inset-x-1 bg-foreground rounded-[1.75rem] shadow-lg -z-10"
+                  className="absolute inset-y-2 inset-x-1 bg-foreground rounded-[1.75rem] shadow-lg z-10"
                   transition={{ type: "spring", stiffness: 420, damping: 35 }}
                 />
               )}
@@ -585,11 +586,11 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
                   color: ([navItems[3], ...secondaryItems].some(item => pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) || moreMenuOpen) 
                     ? "var(--surface)" : "rgba(var(--foreground-muted-rgb), 0.4)"
                 }}
-                className="transition-all duration-300"
+                className="transition-all duration-300 relative z-20"
               >
                 <MoreHorizontalIcon className="w-6 h-6" />
               </motion.div>
-              <span className={`text-[8.5px] font-black uppercase tracking-[0.1em] leading-none mt-1 transition-all duration-300 ${
+              <span className={`text-[8.5px] font-black uppercase tracking-[0.1em] leading-none mt-1 transition-all duration-300 relative z-20 ${
                 ([navItems[3], ...secondaryItems].some(item => pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) || moreMenuOpen)
                 ? "text-surface opacity-100" : "text-foreground-muted/40"
               }`}>
