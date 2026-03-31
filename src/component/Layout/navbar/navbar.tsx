@@ -4,7 +4,7 @@ import { navItems } from "./navConfig";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Logout01Icon, Menu01Icon, Cancel01Icon, ArrowLeft01Icon, ArrowRight01Icon } from "hugeicons-react";
+import { Logout01Icon, Menu01Icon, Cancel01Icon, ArrowLeft01Icon, ArrowRight01Icon, MoreHorizontalIcon } from "hugeicons-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useUserProfile } from '@/hooks/useAuth';
@@ -33,6 +33,7 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement | null>(null);
   const { data: userProfile } = useUserProfile();
   const [isSignOutOpen, setIsSignOutOpen] = useState(false);
@@ -156,7 +157,7 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
     <>
       {/* ═══════════════ Desktop Sidebar ═══════════════ */}
       <aside className={`hidden md:flex fixed left-0 top-0 bottom-0 z-50 flex-col bg-surface border-r-2 border-border/30 transition-[width] duration-300 ease-in-out ${sidebarWidth}`}>
-        
+
         {/* Logo */}
         <div className="flex items-center pt-8 pb-6 px-[1.375rem]">
           <Link href="/dashboard" className="group shrink-0">
@@ -181,11 +182,10 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
                 key={index}
                 href={item.href}
                 title={isCollapsed ? item.name : undefined}
-                className={`group relative flex items-center gap-3 px-[1.125rem] py-3 rounded-2xl text-sm transition-all duration-200 ${
-                  isActive
-                    ? 'bg-foreground text-surface shadow-md'
-                    : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
-                }`}
+                className={`group relative flex items-center gap-3 px-[1.125rem] py-3 rounded-2xl text-sm transition-all duration-200 ${isActive
+                  ? 'bg-foreground text-surface shadow-md'
+                  : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
+                  }`}
               >
                 <span className="shrink-0">{getNavIcon(item.href)}</span>
                 {showText && (
@@ -213,11 +213,10 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
                 key={item.href}
                 href={item.href}
                 title={isCollapsed ? item.name : undefined}
-                className={`group relative flex items-center gap-3 px-[1.125rem] py-3 rounded-2xl text-sm transition-all duration-200 ${
-                  isActive
-                    ? 'bg-foreground text-surface shadow-md'
-                    : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
-                }`}
+                className={`group relative flex items-center gap-3 px-[1.125rem] py-3 rounded-2xl text-sm transition-all duration-200 ${isActive
+                  ? 'bg-foreground text-surface shadow-md'
+                  : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
+                  }`}
               >
                 <span className="shrink-0">{item.icon}</span>
                 {showText && (
@@ -240,11 +239,10 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
               type="button"
               onClick={() => setNotificationsOpen((prev) => !prev)}
               title={isCollapsed ? 'Notifications' : undefined}
-              className={`group relative w-full flex items-center gap-3 px-[1.125rem] py-3 rounded-2xl text-sm transition-all duration-200 ${
-                notificationsOpen
-                  ? 'bg-background-muted text-foreground'
-                  : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
-              }`}
+              className={`group relative w-full flex items-center gap-3 px-[1.125rem] py-3 rounded-2xl text-sm transition-all duration-200 ${notificationsOpen
+                ? 'bg-background-muted text-foreground'
+                : 'text-foreground-muted hover:bg-background-muted hover:text-foreground'
+                }`}
             >
               <span className="relative shrink-0">
                 <NotificationIcon className="w-5 h-5" />
@@ -366,8 +364,8 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
         {/* Top Floating Actions - Refined */}
         <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-5 pointer-events-none">
           <div className="pointer-events-auto">
-            <Link 
-              href="/dashboard" 
+            <Link
+              href="/dashboard"
               className="group p-2.5 rounded-[1.25rem] bg-surface/80 backdrop-blur-xl border border-border/50 shadow-[0_8px_20px_rgba(60,50,40,0.12)] flex items-center transition-all active:scale-95 hover:bg-surface"
             >
               <Image
@@ -380,14 +378,13 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
               />
             </Link>
           </div>
-          
+
           <div className="flex items-center gap-3 pointer-events-auto" ref={notificationRef}>
             <button
               type="button"
               onClick={() => setNotificationsOpen(!notificationsOpen)}
-              className={`p-2.5 rounded-[1.25rem] bg-surface/80 backdrop-blur-xl border transition-all duration-300 shadow-[0_8px_20px_rgba(60,50,40,0.12)] relative active:scale-95 ${
-                notificationsOpen ? "border-primary/40 text-primary ring-4 ring-primary/5" : "border-border/50 text-foreground-muted hover:bg-surface"
-              }`}
+              className={`p-2.5 rounded-[1.25rem] bg-surface/80 backdrop-blur-xl border transition-all duration-300 shadow-[0_8px_20px_rgba(60,50,40,0.12)] relative active:scale-95 ${notificationsOpen ? "border-primary/40 text-primary ring-4 ring-primary/5" : "border-border/50 text-foreground-muted hover:bg-surface"
+                }`}
             >
               <NotificationIcon className="w-6 h-6" />
               {hasNotifications && (
@@ -468,47 +465,137 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
           )}
         </AnimatePresence>
 
-        {/* Mobile Dock (Bottom Centerpiece) - Planted to bottom */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-          <div className="pointer-events-auto bg-surface/95 backdrop-blur-2xl border-t border-border/50 flex items-stretch h-[4.75rem] w-full px-2 pb-safe">
-            {[...navItems, ...secondaryItems].map((item) => {
-              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
-              
-              const displayName = item.name === 'Saved Materials' ? 'Saved' : item.name;
+        {/* Mobile Dock (3+1 Structure - Paper Island Pro) */}
+        <div className="fixed bottom-8 left-6 right-6 z-[100] flex justify-center pointer-events-none">
+          <div className="pointer-events-auto bg-surface/85 backdrop-blur-3xl border border-white/50 ring-1 ring-border/10 rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(60,50,40,0.3)] h-[4.25rem] w-full max-w-[400px] px-2 flex items-stretch justify-around gap-0.5 relative paper-texture">
 
+            {/* "More" Popover Menu */}
+            <AnimatePresence>
+              {moreMenuOpen && (
+                <>
+                  {/* Backdrop for closing popover */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[-1]"
+                    onClick={() => setMoreMenuOpen(false)}
+                  />
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20, scale: 0.9, filter: "blur(10px)" }}
+                    animate={{ opacity: 1, y: -20, scale: 1, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: 15, scale: 0.9, filter: "blur(10px)" }}
+                    className="absolute bottom-full left-0 right-0 mb-4 px-2 z-[110]"
+                  >
+                    <div className="bg-surface/98 backdrop-blur-3xl border border-pencil/10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(60,50,40,0.25)] p-4 grid grid-cols-3 gap-3 paper-texture overflow-hidden">
+                      {/* Secondary Items + Extra Nav items */}
+                      {[navItems[3], ...secondaryItems].filter(Boolean).map((item) => {
+                        const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setMoreMenuOpen(false)}
+                            className={`flex flex-col items-center justify-center p-3 rounded-[1.5rem] transition-all duration-300 ${
+                              isActive ? "bg-foreground text-surface shadow-lg scale-105" : "text-foreground-muted hover:bg-background-muted"
+                            }`}
+                          >
+                            <div className={isActive ? "" : "opacity-60"}>
+                              {item.href === '/exams' ? <ExamIcon className="w-6 h-6" /> :
+                                item.href === '/saved' ? <SavedIcon className="w-6 h-6" /> :
+                                  item.href === '/community' ? <CommunityIcon className="w-6 h-6" /> : null}
+                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-[0.1em] mt-2 text-center leading-tight">
+                              {item.name === 'Saved Materials' ? 'Saved' : item.name}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                    {/* Subtle Pointer/Arrow */}
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-surface rotate-45 border-r border-b border-pencil/10" />
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+
+            {/* Primary Navigation (3 Items) */}
+            {navItems.slice(0, 3).map((item) => {
+              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 transition-all duration-300 active:scale-95 ${
-                    isActive ? "text-primary" : "text-foreground-muted hover:text-foreground"
-                  }`}
+                  onClick={() => setMoreMenuOpen(false)}
+                  className={`relative h-full flex flex-col items-center justify-center transition-all duration-500 group ${isActive ? "flex-[1.5]" : "flex-1"
+                    }`}
                 >
-                  <div className={`transition-all duration-400 ${isActive ? "scale-105 drop-shadow-[0_0_10px_rgba(43,93,139,0.25)]" : "opacity-70"}`}>
-                    {item.href === '/dashboard' ? <DashboardIcon className="w-6 h-6" /> :
-                     item.href === '/library' ? <NotebookIcon className="w-6 h-6" /> :
-                     item.href === '/flashcards' ? <FlashcardIcon className="w-6 h-6" /> :
-                     item.href === '/exams' ? <ExamIcon className="w-6 h-6" /> :
-                     item.href === '/saved' ? <SavedIcon className="w-6 h-6" /> :
-                     item.href === '/community' ? <CommunityIcon className="w-6 h-6" /> : null}
-                  </div>
-                  
-                  <span className={`text-[9px] font-black uppercase tracking-wider text-center leading-none transition-all duration-300 px-0.5 ${
-                    isActive ? "opacity-100 translate-y-0" : "opacity-40 translate-y-0.5"
-                  }`}>
-                    {displayName}
-                  </span>
-
                   {isActive && (
                     <motion.div
-                      layoutId="mobile-dock-dot"
-                      className="absolute bottom-1 w-1 h-1 rounded-full bg-primary"
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      layoutId="nav-pill"
+                      className="absolute inset-y-2 inset-x-1 bg-foreground rounded-[1.75rem] shadow-lg -z-10"
+                      transition={{ type: "spring", stiffness: 420, damping: 35 }}
                     />
                   )}
+
+                  <motion.div
+                    animate={{ scale: isActive ? 1.15 : 1 }}
+                    className={`transition-all duration-500 flex items-center justify-center ${
+                      isActive ? "text-surface" : "text-foreground-muted/40 group-hover:text-foreground-muted group-hover:scale-110"
+                    }`}
+                  >
+                    {item.href === '/dashboard' ? <DashboardIcon className="w-6 h-6" /> :
+                     item.href === '/library' ? <NotebookIcon className="w-6 h-6" /> :
+                     item.href === '/flashcards' ? <FlashcardIcon className="w-6 h-6" /> : null}
+                  </motion.div>
+
+                  <AnimatePresence mode="wait">
+                    {isActive && (
+                      <motion.span
+                        initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 5, scale: 0.8 }}
+                        className="text-[8.5px] font-black uppercase tracking-[0.1em] text-surface leading-none mt-1.5 whitespace-nowrap"
+                      >
+                        {item.name}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </Link>
               );
             })}
+
+            {/* "More" Trigger Button */}
+            <button
+              onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+              className="relative flex-1 h-full flex flex-col items-center justify-center transition-all duration-500 group"
+            >
+              {[navItems[3], ...secondaryItems].some(item => pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) && (
+                <motion.div
+                  layoutId="nav-pill"
+                  className="absolute inset-y-2 inset-x-1 bg-foreground rounded-[1.75rem] shadow-lg -z-10"
+                  transition={{ type: "spring", stiffness: 420, damping: 35 }}
+                />
+              )}
+              <motion.div
+                animate={{ 
+                  rotate: moreMenuOpen ? 90 : 0, 
+                  scale: moreMenuOpen ? 1.1 : 1,
+                  color: ([navItems[3], ...secondaryItems].some(item => pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) || moreMenuOpen) 
+                    ? "var(--surface)" : "rgba(var(--foreground-muted-rgb), 0.4)"
+                }}
+                className="transition-all duration-300"
+              >
+                <MoreHorizontalIcon className="w-6 h-6" />
+              </motion.div>
+              <span className={`text-[8.5px] font-black uppercase tracking-[0.1em] leading-none mt-1 transition-all duration-300 ${
+                ([navItems[3], ...secondaryItems].some(item => pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) || moreMenuOpen)
+                ? "text-surface opacity-100" : "text-foreground-muted/40"
+              }`}>
+                More
+              </span>
+            </button>
           </div>
         </div>
       </div>
