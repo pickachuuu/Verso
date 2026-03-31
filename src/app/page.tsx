@@ -235,18 +235,21 @@ export default function LandingPage() {
                   <div className="xl:flex-1 relative min-h-[450px] bg-foreground/5 border-b-[4px] xl:border-b-0 xl:border-r-[4px] border-border/60 overflow-hidden">
 
                     <div className="absolute inset-0 w-full h-full">
-                      {['/brand/exam-preview-1.png', '/brand/exam-preview-2.png', '/brand/exam-preview-3.png'].map((src, i) => (
+                      {[
+                        'https://pub-5d0fe94a3da5458ca88e4e79220a6798.r2.dev/Verso/Screenshot%202026-03-31%20120250.png',
+                        'https://pub-5d0fe94a3da5458ca88e4e79220a6798.r2.dev/Verso/Screenshot%202026-03-31%20120228.png',
+                        'https://pub-5d0fe94a3da5458ca88e4e79220a6798.r2.dev/Verso/Screenshot%202026-03-31%20120155.png'
+                      ].map((src, i) => (
                         <motion.div
                           key={src}
-                          initial={{ rotate: 0, scale: 1.1, opacity: 0 }}
+                          initial={{ x: '100%', opacity: 0 }}
                           animate={{
-                            scale: activeExam === i ? 1 : 1.1,
+                            x: activeExam === i ? '0%' : (activeExam > i ? '-100%' : '100%'),
                             opacity: activeExam === i ? 1 : 0,
-                            rotate: 0,
                             zIndex: activeExam === i ? 30 : 10,
                           }}
                           transition={{
-                            duration: 0.8,
+                            duration: 0.6,
                             ease: 'easeInOut',
                           }}
                           className="absolute inset-0 w-full h-full overflow-hidden"
@@ -255,7 +258,7 @@ export default function LandingPage() {
                             src={src}
                             alt="Exam UI"
                             fill
-                            className="object-cover"
+                            className="object-contain p-6"
                             priority={i === 0}
                           />
                         </motion.div>
