@@ -9,7 +9,7 @@ import { FlashcardIcon, ExamIcon, NotebookIcon } from '@/component/icons';
 import { createClient } from '@/utils/supabase/client';
 import LandingNavbar from '@/component/Layout/navbar/LandingNavbar';
 import { useUIStore } from '@/stores';
-import { MultipleChoiceInput, IdentificationInput, EssayInput, QuestionTypeBadge, StepperQuestion } from '@/component/ui/ExamQuestionStepper';
+import { MultipleChoiceInput, IdentificationInput, EssayInput, StepperQuestion } from '@/component/ui/ExamQuestionStepper';
 
 
 
@@ -76,7 +76,6 @@ function MockExamCard({ question }: { question: StepperQuestion }) {
             <div className="w-2 h-2 rounded-full bg-primary opacity-60 shadow-[0_0_8px_currentColor]" />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary opacity-50">QUESTION {question.position}</span>
           </div>
-          <QuestionTypeBadge type={question.question_type} />
         </div>
         <h3 className="text-xl md:text-2xl font-black text-foreground leading-tight tracking-tight">
           {question.question}

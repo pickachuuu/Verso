@@ -128,7 +128,7 @@ export default function ExamQuestionStepper({
   return (
     <div className={clsx('flex flex-col h-full overflow-hidden', className)}>
       {/* Progress bar */}
-      <div className="shrink-0 w-full bg-background-muted rounded-full h-1.5 mb-4 sm:mb-6 overflow-hidden">
+      <div className="shrink-0 w-full bg-background-muted rounded-full h-1.5 mb-2 sm:mb-6 overflow-hidden">
         <div
           className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
           style={{ width: `${progressPercent}%` }}
@@ -136,7 +136,7 @@ export default function ExamQuestionStepper({
       </div>
 
       {/* Question dots / mini nav (Optional depending on design) */}
-      <div className="shrink-0 flex items-center justify-center gap-1.5 mb-4 sm:mb-6 flex-wrap opacity-50 hover:opacity-100 transition-opacity">
+      <div className="shrink-0 flex items-center justify-center gap-1.5 mb-2 sm:mb-6 flex-wrap opacity-50 hover:opacity-100 transition-opacity">
         {questions.map((q, idx) => {
           const qAnswered = answers.has(q.id) && answers.get(q.id)?.trim();
           const isCurrent = idx === currentIndex;
@@ -168,11 +168,11 @@ export default function ExamQuestionStepper({
       <ClayCard variant="elevated" padding="none" className="w-full flex-1 min-h-0 rounded-[2.5rem] sm:rounded-[3rem] border border-border/20 shadow-2xl flex flex-col overflow-hidden bg-surface transition-all duration-500">
         
         {/* Top Content Area: Question */}
-        <div className={`transition-all duration-700 ease-[0.16,1,0.3,1] flex flex-col p-6 lg:p-10 shrink-0 max-h-[40%] bg-background-muted/5 border-b border-border/10`}>
-          <div className="flex items-center justify-between mb-4 lg:mb-6 shrink-0">
+        <div className={`transition-all duration-700 ease-[0.16,1,0.3,1] flex flex-col p-4 sm:p-6 lg:p-10 shrink-0 max-h-[30%] bg-background-muted/5 border-b border-border/10`}>
+          <div className="flex items-center justify-between mb-2 sm:mb-4 lg:mb-6 shrink-0">
              <div className="flex items-center gap-3">
                <div className="w-2 h-2 rounded-full bg-primary opacity-60 shadow-[0_0_8px_currentColor]" />
-               <span className="text-[11px] font-black uppercase tracking-[0.3em] text-primary opacity-50">QUESTION {currentIndex + 1}</span>
+               <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-primary opacity-50">QUESTION {currentIndex + 1}</span>
              </div>
              <div className="flex items-center gap-3">
                 <span className="text-[10px] uppercase font-black tracking-widest text-foreground-muted px-3 py-1 bg-surface border border-border/40 rounded-xl">
@@ -184,10 +184,10 @@ export default function ExamQuestionStepper({
           <div className="flex-1 flex text-left overflow-y-auto scrollbar-hide">
             <h2 className={clsx(
               "font-black text-foreground whitespace-pre-line leading-tight pb-2",
-              currentQuestion.question.length < 60 ? "text-2xl sm:text-3xl md:text-3xl" :
-              currentQuestion.question.length < 120 ? "text-xl sm:text-2xl md:text-3xl" :
-              currentQuestion.question.length < 200 ? "text-lg sm:text-xl md:text-2xl" :
-              "text-base sm:text-lg md:text-xl"
+              currentQuestion.question.length < 60 ? "text-sm sm:text-3xl" :
+              currentQuestion.question.length < 120 ? "text-xs sm:text-2xl" :
+              currentQuestion.question.length < 200 ? "text-[10px] sm:text-xl" :
+              "text-[9px] sm:text-lg"
             )}>
               {currentQuestion.question}
             </h2>
@@ -195,14 +195,11 @@ export default function ExamQuestionStepper({
         </div>
 
         {/* Answer area — takes remaining space, content scrolls inside */}
-        <div className="flex-1 flex flex-col min-h-0 bg-surface overflow-hidden p-6 lg:p-10 relative">
-          <div className="flex items-center justify-between mb-4 lg:mb-6 shrink-0">
+        <div className="flex-1 flex flex-col min-h-0 bg-surface overflow-hidden p-4 sm:p-6 lg:p-10 relative">
              <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-secondary opacity-60 shadow-[0_0_8px_currentColor]" />
-                <span className="text-[11px] font-black uppercase tracking-[0.3em] text-secondary opacity-50">YOUR ANSWER</span>
+                <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-secondary opacity-50">YOUR ANSWER</span>
              </div>
-             <QuestionTypeBadge type={currentQuestion.question_type} />
-          </div>
 
           <div className="flex-1 flex flex-col min-h-0 overflow-y-auto scrollbar-hide -mx-2 px-2 pb-4 pt-2">
             {currentQuestion.question_type === 'multiple_choice' && (
@@ -232,12 +229,12 @@ export default function ExamQuestionStepper({
       </ClayCard>
 
       {/* ⚡ ACTION BAR (Fixed at bottom of stage) */}
-      <footer className="shrink-0 mt-6 h-20 w-full flex items-center justify-between gap-4 max-w-sm mx-auto">
+      <footer className="shrink-0 mt-3 h-12 sm:h-20 w-full flex items-center justify-between gap-4 max-w-sm mx-auto">
         <button
           onClick={goToPrev}
           disabled={isFirst || isSubmitting}
           className={clsx(
-            'flex-1 h-full rounded-[2.5rem] font-black text-lg sm:text-xl transition-all flex items-center justify-center gap-2 border-2',
+            'flex-1 h-full rounded-[2.5rem] font-black text-sm sm:text-xl transition-all flex items-center justify-center gap-2 border-2',
             isFirst || isSubmitting
               ? 'border-border/40 text-foreground-muted/40 cursor-not-allowed bg-transparent'
               : 'border-border bg-surface text-foreground hover:bg-background-muted active:scale-95'
@@ -253,7 +250,7 @@ export default function ExamQuestionStepper({
               onSubmit();
             }}
             disabled={isSubmitting}
-            className="flex-[3] h-full rounded-[2.5rem] bg-foreground text-surface font-black text-lg sm:text-xl hover:bg-foreground/90 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+            className="flex-[3] h-full rounded-[2.5rem] bg-foreground text-surface font-black text-sm sm:text-xl hover:bg-foreground/90 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
           >
             <span>SUBMIT EXAM</span>
             <CheckmarkCircle01Icon className="w-6 h-6" />
@@ -262,7 +259,7 @@ export default function ExamQuestionStepper({
           <button
             onClick={goToNext}
             disabled={isSubmitting}
-            className="flex-[3] h-full rounded-[2.5rem] bg-foreground text-surface font-black text-lg sm:text-xl hover:bg-foreground/90 transition-all flex items-center justify-center gap-3 active:scale-95"
+            className="flex-[3] h-full rounded-[2.5rem] bg-foreground text-surface font-black text-sm sm:text-xl hover:bg-foreground/90 transition-all flex items-center justify-center gap-3 active:scale-95"
           >
             <span>NEXT QUESTION</span>
             <ArrowRight02Icon className="w-6 h-6" />
@@ -273,43 +270,7 @@ export default function ExamQuestionStepper({
   );
 }
 
-// ============================================
-// Question Type Badge
-// ============================================
 
-export function QuestionTypeBadge({ type }: { type: StepperQuestion['question_type'] }) {
-  const config = {
-    multiple_choice: {
-      label: 'Multiple Choice',
-      icon: Tick01Icon,
-      className: 'bg-blue-50 text-blue-700 border-blue-200',
-    },
-    identification: {
-      label: 'Identification',
-      icon: PencilEdit01Icon,
-      className: 'bg-amber-50 text-amber-700 border-amber-200',
-    },
-    essay: {
-      label: 'Essay',
-      icon: TextIcon,
-      className: 'bg-purple-50 text-purple-700 border-purple-200',
-    },
-  };
-
-  const { label, icon: Icon, className: badgeClass } = config[type];
-
-  return (
-    <span
-      className={clsx(
-        'inline-flex items-center gap-1.5 text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full border',
-        badgeClass
-      )}
-    >
-      <Icon className="w-3 h-3" />
-      {label}
-    </span>
-  );
-}
 
 // ============================================
 // Multiple Choice Input
@@ -329,7 +290,7 @@ export function MultipleChoiceInput({
   if (!question.options) return null;
 
   return (
-    <div className={clsx("flex-1 flex flex-col min-h-0 pb-1", compact ? 'gap-2' : 'gap-3')}>
+    <div className={clsx("flex-1 flex flex-col min-h-0 pb-1", compact ? 'gap-1.5' : 'gap-2 sm:gap-3')}>
       {question.options.map((opt, idx) => {
         const letter = String.fromCharCode(65 + idx);
         const isSelected = value.toUpperCase() === letter;
@@ -342,7 +303,7 @@ export function MultipleChoiceInput({
             onClick={() => onChange(letter)}
             className={clsx(
               'w-full flex-1 flex items-center transition-all duration-200 group focus:outline-none focus:ring-4 focus:ring-primary/20 border-2 text-left',
-              compact ? 'gap-3 p-2 sm:p-3 rounded-2xl min-h-[3rem]' : 'gap-4 p-4 sm:p-5 rounded-[1.5rem] min-h-[4.5rem]',
+              compact ? 'gap-3 p-2 sm:p-3 rounded-2xl min-h-[3rem]' : 'gap-2 sm:gap-4 p-2.5 sm:p-5 rounded-2xl sm:rounded-[1.5rem] min-h-0 sm:min-h-[4.5rem]',
               isSelected
                 ? 'border-primary bg-primary/5 shadow-md shadow-primary/10'
                 : 'border-border bg-surface hover:border-foreground-muted/40 hover:bg-background-muted/50'
@@ -352,7 +313,7 @@ export function MultipleChoiceInput({
             <span
               className={clsx(
                 'rounded-full flex items-center justify-center font-black shrink-0 transition-all duration-200',
-                compact ? 'w-8 h-8 text-[12px]' : 'w-10 h-10 text-sm',
+                compact ? 'w-8 h-8 text-[12px]' : 'w-6 h-6 sm:w-10 sm:h-10 text-[10px] sm:text-sm',
                 isSelected
                   ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/30'
                   : 'bg-background-muted text-foreground-muted border border-border group-hover:border-foreground-muted/30'
@@ -365,7 +326,7 @@ export function MultipleChoiceInput({
             <span
               className={clsx(
                 'font-bold transition-colors leading-snug',
-                compact ? 'text-sm md:text-base' : 'text-base md:text-lg',
+                compact ? 'text-sm md:text-base' : 'text-xs sm:text-base md:text-lg',
                 isSelected ? 'text-foreground' : 'text-foreground-muted group-hover:text-foreground'
               )}
             >
@@ -409,7 +370,7 @@ export const IdentificationInput = forwardRef<
           }
         }}
         placeholder="Type your answer..."
-        className="w-full px-6 py-5 rounded-[1.5rem] bg-surface border-2 border-border text-foreground placeholder:text-foreground-muted/40 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-xl font-bold font-sans shadow-sm hover:border-foreground-muted/30"
+        className="w-full px-4 py-3 sm:px-6 sm:py-5 rounded-2xl sm:rounded-[1.5rem] bg-surface border-2 border-border text-foreground placeholder:text-foreground-muted/40 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm sm:text-xl font-bold font-sans shadow-sm hover:border-foreground-muted/30"
       />
       <div className="flex justify-end">
         <p className="text-[10px] font-black tracking-widest uppercase text-foreground-muted/50">
@@ -431,7 +392,6 @@ export const EssayInput = forwardRef<
     onChange: (answer: string) => void;
   }
 >(function EssayInput({ value, onChange }, ref) {
-  const wordCount = value.trim() ? value.trim().split(/\s+/).length : 0;
 
   return (
     <div className="flex flex-col h-full flex-1 space-y-3 p-2">
@@ -440,15 +400,12 @@ export const EssayInput = forwardRef<
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Write your comprehensive answer here..."
-        className="flex-1 w-full px-6 py-5 rounded-[1.5rem] bg-surface border-2 border-border text-foreground placeholder:text-foreground-muted/40 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-lg font-medium shadow-sm hover:border-foreground-muted/30 resize-none"
+        className="flex-1 w-full px-4 py-3 sm:px-6 sm:py-5 rounded-2xl sm:rounded-[1.5rem] bg-surface border-2 border-border text-foreground placeholder:text-foreground-muted/40 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm sm:text-lg font-medium shadow-sm hover:border-foreground-muted/30 resize-none"
       />
       <div className="flex items-center justify-between shrink-0">
         <p className="text-[10px] font-black tracking-widest uppercase text-foreground-muted/50">
           BE AS DETAILED AS POSSIBLE
         </p>
-        <span className="text-[10px] font-black tracking-widest uppercase text-primary/70 bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10">
-          {wordCount} WORD{wordCount !== 1 ? 'S' : ''}
-        </span>
       </div>
     </div>
   );

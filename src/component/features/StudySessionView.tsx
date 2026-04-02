@@ -154,7 +154,7 @@ export default function StudySessionView({
                   <span className="text-[11px] font-black uppercase tracking-[0.3em] text-primary opacity-50">QUESTION</span>
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center text-center overflow-y-auto scrollbar-hide py-2 sm:py-4 min-h-0">
-                  <h2 className="font-black text-foreground leading-snug text-xl sm:text-2xl lg:text-3xl whitespace-pre-line px-2">
+                  <h2 className="font-black text-foreground leading-snug text-sm sm:text-2xl lg:text-3xl whitespace-pre-line px-2">
                     {currentCard.question}
                   </h2>
                 </div>
@@ -176,7 +176,7 @@ export default function StudySessionView({
                         <span className="text-[11px] font-black uppercase tracking-[0.3em] text-secondary opacity-50">ANSWER</span>
                       </div>
                       <div className="flex-1 flex flex-col items-center justify-center text-center overflow-y-auto scrollbar-hide py-2 mb-2 min-h-0">
-                        <p className="font-semibold text-foreground-muted leading-relaxed text-base sm:text-lg lg:text-xl whitespace-pre-line px-2">
+                        <p className="font-semibold text-foreground-muted leading-relaxed text-xs sm:text-lg lg:text-xl whitespace-pre-line px-2">
                           {currentCard.answer}
                         </p>
                       </div>
@@ -211,7 +211,7 @@ export default function StudySessionView({
           {!showAnswer ? (
             <motion.button
               whileTap={{ scale: 0.98 }} onClick={onShowAnswer}
-              className="w-full h-[64px] sm:h-[72px] rounded-3xl bg-foreground text-surface font-black text-lg sm:text-xl hover:bg-foreground/90 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl shadow-foreground/10"
+              className="w-full h-[56px] sm:h-[72px] rounded-3xl bg-foreground text-surface font-black text-base sm:text-xl hover:bg-foreground/90 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl shadow-foreground/10"
             >
               <ViewIcon className="w-7 h-7" />
               <span>REVEAL ANSWER</span>
@@ -259,7 +259,7 @@ function RatingAction({ onClick, disabled, icon, label, shortcut, color }: { onC
   return (
     <button
       onClick={onClick} disabled={disabled}
-      className={`flex flex-col items-center justify-center gap-1 p-2 h-20 sm:h-28 rounded-2xl sm:rounded-[2rem] border transition-all ${theme.bg} ${theme.border} ${theme.text} ${theme.active} shadow-lg active:scale-95 disabled:opacity-30 disabled:pointer-events-none group`}
+      className={`flex flex-col items-center justify-center gap-1 p-2 h-16 sm:h-28 rounded-2xl sm:rounded-[2rem] border transition-all ${theme.bg} ${theme.border} ${theme.text} ${theme.active} shadow-lg active:scale-95 disabled:opacity-30 disabled:pointer-events-none group`}
     >
       <div className="p-1 transition-transform group-hover:scale-110">{icon}</div>
       <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-widest block">{label}</span>
