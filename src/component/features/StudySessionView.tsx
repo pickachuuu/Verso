@@ -47,6 +47,10 @@ export default function StudySessionView({
   liveAccuracyLabel,
   remainingCount,
 }: StudySessionViewProps) {
+  const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
+  const surfaceColor = 'var(--surface)';
+  const mutedWashColor = 'rgba(239, 230, 216, 0.4)'; // matches bg-background-muted/40 wash color
+  const borderColor = 'rgba(217, 203, 185, 0.3)'; // matches border-border/30 shadow color
 
   // Handle escape key
   useEffect(() => {
@@ -128,10 +132,23 @@ export default function StudySessionView({
       {/* 💳 MAIN STAGE */}
       <main className="flex-1 px-4 py-4 md:py-8 flex flex-col min-h-0 bg-white relative overflow-hidden">
         <div className="flex-1 flex flex-col items-center justify-center min-h-0 py-2 max-w-[90vw] mx-auto w-full">
-          <div className="w-full max-w-[min(100%,500px)] lg:max-w-3xl h-full max-h-[min(560px,75vh)] lg:max-h-[85vh] flex flex-col">
-            <ClayCard variant="elevated" padding="none" className="w-full h-full rounded-[3rem] border border-border/20 shadow-2xl flex flex-col overflow-hidden bg-surface transition-all duration-500">
-              {/* QUESTION SECTION */}
-              <div className={`transition-all duration-700 ease-[0.16,1,0.3,1] flex flex-col p-10 lg:p-14 ${showAnswer ? 'bg-background-muted/5 border-b border-border/10 shrink-0' : 'flex-1 bg-surface'}`}>
+            <motion.div 
+              layout 
+              className="w-full max-w-[min(100%,500px)] lg:max-w-3xl h-full max-h-[min(560px,75vh)] lg:max-h-[85vh] flex flex-col"
+              transition={transition}
+            >
+              <ClayCard variant="elevated" padding="none" className="w-full h-full rounded-[3rem] border border-border/20 shadow-2xl flex flex-col overflow-hidden bg-surface will-change-transform">
+                {/* QUESTION SECTION */}
+                <motion.div 
+                  layout
+                  initial={false}
+                  animate={{ 
+                    backgroundColor: showAnswer ? mutedWashColor : surfaceColor,
+                    borderBottomColor: showAnswer ? borderColor : 'transparent'
+                  }}
+                  transition={transition}
+                  className={`flex flex-col p-10 lg:p-14 border-b ${showAnswer ? 'shrink-0' : 'flex-1'}`}
+                >
                 <div className="flex items-center gap-3 mb-6 shrink-0">
                   <div className="w-2 h-2 rounded-full bg-primary opacity-60 shadow-[0_0_8px_currentColor]" />
                   <span className="text-[11px] font-black uppercase tracking-[0.3em] text-primary opacity-50">QUESTION</span>
@@ -141,16 +158,17 @@ export default function StudySessionView({
                     {currentCard.question}
                   </h2>
                 </div>
-              </div>
+                </motion.div>
 
               {/* ANSWER SECTION */}
               <AnimatePresence>
                 {showAnswer && (
                   <motion.div
+                    layout
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="flex-1 flex flex-col min-h-0 bg-surface border-t border-border/5 overflow-hidden"
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className="flex-1 flex flex-col min-h-0 bg-surface border-t border-border/5 overflow-hidden will-change-[transform,opacity]"
+                    transition={transition}
                   >
                     <div className="flex-1 p-6 sm:p-10 lg:p-14 flex flex-col min-h-0">
                       <div className="flex items-center gap-3 mb-4 sm:mb-6 shrink-0">
@@ -177,10 +195,9 @@ export default function StudySessionView({
                   </motion.div>
                 )}
               </AnimatePresence>
-            </ClayCard>
+              </ClayCard>
+            </motion.div>
           </div>
-        </div>
-
         <div className="h-6 flex items-center justify-center shrink-0">
           <p className="text-[10px] font-black text-foreground-muted/20 uppercase tracking-[0.5em]">
             {remainingCount} CARDS LEFT
