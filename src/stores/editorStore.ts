@@ -202,9 +202,6 @@ interface UIActions {
 const STORAGE_KEY = 'verso-sidebar-collapsed';
 
 const getInitialSidebarState = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem(STORAGE_KEY) === 'true';
-  }
   return false;
 };
 

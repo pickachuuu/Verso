@@ -14,12 +14,21 @@ interface DashboardClientLayoutProps {
 export default function DashboardClientLayout({ children, isAuthenticated }: DashboardClientLayoutProps) {
     const pathname = usePathname();
     const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
+    const setSidebarCollapsed = useUIStore((state) => state.setSidebarCollapsed);
     const toggleSidebar = useUIStore((state) => state.toggleSidebar);
 
     // Safety: ensure body scroll is never stuck hidden after page navigation
     useEffect(() => {
         document.body.style.overflow = '';
     }, [pathname]);
+
+    // Rehydrate sidebar state from localStorage ONLY after mounting to avoid hydration mismatch
+    useEffect(() => {
+        const stored = localStorage.getItem('verso-sidebar-collapsed');
+        if (stored === 'true') {
+            setSidebarCollapsed(true);
+        }
+    }, [setSidebarCollapsed]);
 
     const isStudyMode = pathname?.includes('/study');
 
