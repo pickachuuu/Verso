@@ -9,6 +9,8 @@ import { FlashcardIcon, ExamIcon, NotebookIcon } from '@/component/icons';
 import { createClient } from '@/utils/supabase/client';
 import LandingNavbar from '@/component/Layout/navbar/LandingNavbar';
 import { useUIStore } from '@/stores';
+import { MultipleChoiceInput, IdentificationInput, EssayInput, QuestionTypeBadge, StepperQuestion } from '@/component/ui/ExamQuestionStepper';
+
 
 
 
@@ -34,6 +36,88 @@ const heroDoodles = [
   { icon: AiChat02Icon, top: '65%', left: '8%', rotate: 10, size: 'w-14 h-14 md:w-16 md:h-16', delay: 1.5 },
   { icon: CheckmarkCircle02Icon, top: '75%', right: '5%', rotate: -8, size: 'w-16 h-16 md:w-20 md:h-20', delay: 3 },
 ];
+
+const mockQuestions: StepperQuestion[] = [
+  {
+    id: 'q1',
+    question_type: 'multiple_choice',
+    question: 'What organelle is responsible for producing ATP in eukaryotic cells?',
+    options: ['Nucleus', 'Mitochondria', 'Ribosome', 'Golgi apparatus'],
+    points: 5,
+    position: 1,
+  },
+  {
+    id: 'q2',
+    question_type: 'identification',
+    question: 'The process by which plants convert light energy into chemical energy.',
+    options: null,
+    points: 10,
+    position: 2,
+  },
+  {
+    id: 'q3',
+    question_type: 'essay',
+    question: 'Explain the importance of the cell membrane in maintaining homeostasis.',
+    options: null,
+    points: 20,
+    position: 3,
+  }
+];
+
+function MockExamCard({ question }: { question: StepperQuestion }) {
+  const [answer, setAnswer] = useState('');
+  
+  return (
+    <div className="w-full h-full flex flex-col bg-surface overflow-hidden">
+      {/* Top Part: Question */}
+      <div className="p-6 md:p-8 bg-background-muted/5 border-b border-border/10 shrink-0">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-primary opacity-60 shadow-[0_0_8px_currentColor]" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary opacity-50">QUESTION {question.position}</span>
+          </div>
+          <QuestionTypeBadge type={question.question_type} />
+        </div>
+        <h3 className="text-xl md:text-2xl font-black text-foreground leading-tight tracking-tight">
+          {question.question}
+        </h3>
+      </div>
+      
+      {/* Bottom Part: Answer Input Area */}
+      <div className="flex-1 p-6 md:p-8 overflow-y-auto scrollbar-hide bg-surface">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-2 h-2 rounded-full bg-secondary opacity-60 shadow-[0_0_8px_currentColor]" />
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary opacity-50">YOUR ANSWER</span>
+        </div>
+        
+        <div className="flex-1 flex flex-col min-h-0">
+          {question.question_type === 'multiple_choice' && (
+            <MultipleChoiceInput 
+              question={question} 
+              value={answer} 
+              onChange={setAnswer} 
+              compact={true}
+            />
+          )}
+          {question.question_type === 'identification' && (
+            <IdentificationInput 
+              value={answer} 
+              onChange={setAnswer} 
+              onSubmit={() => {}} 
+            />
+          )}
+          {question.question_type === 'essay' && (
+            <EssayInput 
+              value={answer} 
+              onChange={setAnswer} 
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -69,7 +153,7 @@ export default function LandingPage() {
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveExam((prev) => (prev + 1) % 3);
-    }, 3000);
+    }, 6000);
     return () => clearInterval(timer);
   }, []);
 
@@ -261,16 +345,12 @@ export default function LandingPage() {
                 <div className="w-full rounded-[3rem] bg-background border-[4px] border-border/60 relative overflow-hidden flex flex-col xl:flex-row items-stretch shadow-sm group hover:border-foreground/30 transition-colors duration-500">
 
                   {/* Graphics / Cards Shuffle Side */}
-                  <div className="xl:flex-1 relative min-h-[450px] bg-foreground/5 border-b-[4px] xl:border-b-0 xl:border-r-[4px] border-border/60 overflow-hidden">
+                  <div className="xl:flex-1 relative min-h-[500px] bg-foreground/5 border-b-[4px] xl:border-b-0 xl:border-r-[4px] border-border/60 overflow-hidden">
 
                     <div className="absolute inset-0 w-full h-full">
-                      {[
-                        'https://pub-5d0fe94a3da5458ca88e4e79220a6798.r2.dev/Verso/Screenshot%202026-03-31%20120250.png',
-                        'https://pub-5d0fe94a3da5458ca88e4e79220a6798.r2.dev/Verso/Screenshot%202026-03-31%20120228.png',
-                        'https://pub-5d0fe94a3da5458ca88e4e79220a6798.r2.dev/Verso/Screenshot%202026-03-31%20120155.png'
-                      ].map((src, i) => (
+                      {mockQuestions.map((question, i) => (
                         <motion.div
-                          key={src}
+                          key={question.id}
                           initial={{ x: '100%', opacity: 0 }}
                           animate={{
                             x: activeExam === i ? '0%' : (activeExam > i ? '-100%' : '100%'),
@@ -283,13 +363,7 @@ export default function LandingPage() {
                           }}
                           className="absolute inset-0 w-full h-full overflow-hidden"
                         >
-                          <Image
-                            src={src}
-                            alt="Exam UI"
-                            fill
-                            className="object-contain p-6"
-                            priority={i === 0}
-                          />
+                          <MockExamCard question={question} />
                         </motion.div>
                       ))}
                     </div>

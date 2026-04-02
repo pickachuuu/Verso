@@ -277,7 +277,7 @@ export default function ExamQuestionStepper({
 // Question Type Badge
 // ============================================
 
-function QuestionTypeBadge({ type }: { type: StepperQuestion['question_type'] }) {
+export function QuestionTypeBadge({ type }: { type: StepperQuestion['question_type'] }) {
   const config = {
     multiple_choice: {
       label: 'Multiple Choice',
@@ -315,19 +315,21 @@ function QuestionTypeBadge({ type }: { type: StepperQuestion['question_type'] })
 // Multiple Choice Input
 // ============================================
 
-function MultipleChoiceInput({
+export function MultipleChoiceInput({
   question,
   value,
   onChange,
+  compact = false,
 }: {
   question: StepperQuestion;
   value: string;
   onChange: (answer: string) => void;
+  compact?: boolean;
 }) {
   if (!question.options) return null;
 
   return (
-    <div className="flex-1 flex flex-col gap-3 min-h-0 pb-1">
+    <div className={clsx("flex-1 flex flex-col min-h-0 pb-1", compact ? 'gap-2' : 'gap-3')}>
       {question.options.map((opt, idx) => {
         const letter = String.fromCharCode(65 + idx);
         const isSelected = value.toUpperCase() === letter;
@@ -339,7 +341,8 @@ function MultipleChoiceInput({
             key={idx}
             onClick={() => onChange(letter)}
             className={clsx(
-              'w-full flex-1 flex items-center gap-4 p-4 sm:p-5 rounded-[1.5rem] border-2 text-left transition-all duration-200 group focus:outline-none focus:ring-4 focus:ring-primary/20 min-h-[4.5rem]',
+              'w-full flex-1 flex items-center transition-all duration-200 group focus:outline-none focus:ring-4 focus:ring-primary/20 border-2 text-left',
+              compact ? 'gap-3 p-2 sm:p-3 rounded-2xl min-h-[3rem]' : 'gap-4 p-4 sm:p-5 rounded-[1.5rem] min-h-[4.5rem]',
               isSelected
                 ? 'border-primary bg-primary/5 shadow-md shadow-primary/10'
                 : 'border-border bg-surface hover:border-foreground-muted/40 hover:bg-background-muted/50'
@@ -348,7 +351,8 @@ function MultipleChoiceInput({
             {/* Letter circle */}
             <span
               className={clsx(
-                'w-10 h-10 rounded-full flex items-center justify-center text-sm font-black shrink-0 transition-all duration-200',
+                'rounded-full flex items-center justify-center font-black shrink-0 transition-all duration-200',
+                compact ? 'w-8 h-8 text-[12px]' : 'w-10 h-10 text-sm',
                 isSelected
                   ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/30'
                   : 'bg-background-muted text-foreground-muted border border-border group-hover:border-foreground-muted/30'
@@ -360,7 +364,8 @@ function MultipleChoiceInput({
             {/* Option text */}
             <span
               className={clsx(
-                'text-base md:text-lg font-bold transition-colors leading-snug',
+                'font-bold transition-colors leading-snug',
+                compact ? 'text-sm md:text-base' : 'text-base md:text-lg',
                 isSelected ? 'text-foreground' : 'text-foreground-muted group-hover:text-foreground'
               )}
             >
@@ -369,7 +374,7 @@ function MultipleChoiceInput({
 
             {/* Check indicator */}
             {isSelected && (
-              <CheckmarkCircle01Icon className="w-6 h-6 text-primary ml-auto shrink-0 animate-in zoom-in duration-300" />
+              <CheckmarkCircle01Icon className={clsx("text-primary ml-auto shrink-0 animate-in zoom-in duration-300", compact ? 'w-4 h-4' : 'w-6 h-6')} />
             )}
           </button>
         );
@@ -382,7 +387,7 @@ function MultipleChoiceInput({
 // Identification Input
 // ============================================
 
-const IdentificationInput = forwardRef<
+export const IdentificationInput = forwardRef<
   HTMLInputElement,
   {
     value: string;
@@ -419,7 +424,7 @@ const IdentificationInput = forwardRef<
 // Essay Input
 // ============================================
 
-const EssayInput = forwardRef<
+export const EssayInput = forwardRef<
   HTMLTextAreaElement,
   {
     value: string;
