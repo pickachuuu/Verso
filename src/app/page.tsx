@@ -524,7 +524,7 @@ export default function LandingPage() {
                   <div className="lg:flex-[0.8] relative w-full max-w-[450px] h-[220px] sm:h-[300px] lg:h-[360px] z-10 flex items-center justify-center pointer-events-none">
                     <div className="relative w-full h-full flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
                       <Image
-                        src="/brand/community-preview.png"
+                        src="https://pub-5d0fe94a3da5458ca88e4e79220a6798.r2.dev/Verso/Screenshot%202026-04-02%20163906.png"
                         alt="Library Preview"
                         width={600}
                         height={400}
