@@ -1,121 +1,96 @@
-import { ClayCard } from '@/component/ui/Clay';
-
 export default function ExamsLoading() {
   return (
-    <div className="space-y-6">
-      {/* Hero Header Skeleton — matches the elevated ClayCard hero */}
-      <ClayCard variant="elevated" padding="lg" className="rounded-3xl animate-pulse">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 bg-surface rounded-2xl" />
-            <div className="space-y-2">
-              <div className="h-6 w-28 bg-surface rounded" />
-              <div className="h-4 w-60 bg-surface/60 rounded" />
-            </div>
+    <div className="w-full max-w-7xl mx-auto pt-8 md:pt-4 pb-20 space-y-10 lg:space-y-14 px-2 md:px-0">
+      {/* Hero Header skeleton — matches ExamsPage header */}
+      <div className="w-full flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8 pb-4 animate-pulse">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-3 mb-2 md:mb-3">
+            <div className="w-3 h-3 rounded-full bg-background-muted flex-shrink-0" />
+            <div className="h-3 w-32 bg-background-muted rounded-full" />
           </div>
-          <div className="h-11 w-36 bg-surface rounded-2xl" />
+          <div className="h-12 md:h-16 w-44 bg-background-muted rounded-2xl" />
         </div>
-      </ClayCard>
+        <div className="flex shrink-0 w-full md:w-auto pb-1 mt-2 md:mt-0">
+          <div className="w-full sm:w-44 h-12 bg-background-muted rounded-[2rem]" />
+        </div>
+      </div>
 
-      <div className="grid gap-6 lg:grid-cols-12">
-        <div className="order-2 lg:order-1 lg:col-span-8 space-y-4">
-          {/* Mobile controls */}
-          <div className="lg:hidden space-y-2 animate-pulse">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-10 bg-surface rounded-2xl" />
-              <div className="h-10 w-24 bg-surface rounded-2xl" />
-            </div>
-            <div className="h-3 w-44 bg-surface/60 rounded" />
-          </div>
+      {/* Mobile Controls skeleton */}
+      <div className="lg:hidden flex flex-col gap-4 w-full animate-pulse">
+        <div className="flex w-full items-stretch gap-3 h-[3.5rem]">
+          <div className="flex-1 bg-background-muted rounded-[2rem]" />
+          <div className="w-[3.5rem] h-[3.5rem] shrink-0 bg-background-muted rounded-[2rem]" />
+        </div>
+        <div className="flex items-center justify-between px-2">
+          <div className="h-2.5 w-24 bg-background-muted rounded-full" />
+          <div className="h-2.5 w-20 bg-background-muted rounded-full" />
+        </div>
+      </div>
 
-          {/* List Skeleton */}
-          <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <ClayCard key={i} variant="default" padding="none" className="rounded-2xl overflow-hidden animate-pulse">
-                <div className="flex items-stretch">
-                  <div className="w-1 bg-surface" />
-                  <div className="flex items-center gap-4 p-3 pr-5 flex-1">
-                    <div className="w-12 h-14 bg-surface rounded-lg" />
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="h-4 w-2/3 bg-surface rounded" />
-                      <div className="h-3 w-1/2 bg-surface/70 rounded" />
-                      <div className="flex items-center gap-2 pt-1">
-                        <div className="h-2.5 w-16 bg-surface/70 rounded" />
-                        <div className="h-2.5 w-12 bg-surface/70 rounded" />
-                        <div className="h-2.5 w-10 bg-surface/70 rounded" />
-                      </div>
-                    </div>
-                    <div className="hidden sm:flex items-center gap-2">
-                      <div className="h-8 w-8 bg-surface rounded-lg" />
-                      <div className="h-8 w-16 bg-surface rounded-lg" />
-                    </div>
-                  </div>
-                </div>
-              </ClayCard>
-            ))}
+      {/* Desktop Inline Toolbar skeleton */}
+      <div className="hidden lg:flex flex-col gap-5 w-full animate-pulse">
+        {/* Search + Stats Row */}
+        <div className="flex items-center gap-4 w-full">
+          <div className="flex-1 bg-background-muted rounded-[1.5rem] h-[3.25rem]" />
+          <div className="shrink-0 flex items-center gap-3">
+            <div className="bg-background-muted px-5 h-[3.25rem] w-24 rounded-[1.5rem]" />
+            <div className="bg-background-muted px-5 h-[3.25rem] w-20 rounded-[1.5rem]" />
           </div>
         </div>
-
-        <div className="order-1 lg:order-2 lg:col-span-4 space-y-4 hidden lg:block">
-          <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse">
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 bg-surface rounded" />
-              <div className="h-10 flex-1 bg-surface rounded-xl" />
-            </div>
-          </ClayCard>
-
-          <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse">
-            <div className="space-y-4">
-              <div>
-                <div className="h-3 w-24 bg-surface/60 rounded mb-2" />
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="h-7 w-12 bg-surface rounded" />
-                  <div className="h-7 w-12 bg-surface rounded" />
-                  <div className="h-7 w-16 bg-surface rounded" />
-                  <div className="h-7 w-12 bg-surface rounded" />
-                </div>
-              </div>
-              <div>
-                <div className="h-3 w-28 bg-surface/60 rounded mb-2" />
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="h-7 w-12 bg-surface rounded" />
-                  <div className="h-7 w-10 bg-surface rounded" />
-                  <div className="h-7 w-10 bg-surface rounded" />
-                  <div className="h-7 w-12 bg-surface rounded" />
-                </div>
-              </div>
-              <div>
-                <div className="h-3 w-14 bg-surface/60 rounded mb-2" />
-                <div className="flex gap-2">
-                  <div className="h-8 w-8 bg-surface rounded-lg" />
-                  <div className="h-8 w-8 bg-surface rounded-lg" />
-                  <div className="h-8 w-8 bg-surface rounded-lg" />
-                </div>
-              </div>
-              <div>
-                <div className="h-3 w-12 bg-surface/60 rounded mb-2" />
-                <div className="flex gap-2">
-                  <div className="h-8 w-8 bg-surface rounded-lg" />
-                  <div className="h-8 w-8 bg-surface rounded-lg" />
-                </div>
-              </div>
-            </div>
-          </ClayCard>
-
-          <ClayCard variant="default" padding="md" className="rounded-2xl animate-pulse">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="h-3 w-12 bg-surface/60 rounded" />
-                <div className="h-6 w-16 bg-surface rounded" />
-              </div>
-              <div className="space-y-2">
-                <div className="h-3 w-20 bg-surface/60 rounded" />
-                <div className="h-6 w-16 bg-surface rounded" />
-              </div>
-            </div>
-            <div className="mt-3 h-3 w-40 bg-surface/60 rounded" />
-          </ClayCard>
+        {/* Filters Row */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-16 bg-background-muted rounded-full" />
+            <div className="h-8 w-10 bg-background-muted rounded-full" />
+            <div className="h-8 w-12 bg-background-muted rounded-full" />
+            <div className="h-8 w-16 bg-background-muted rounded-full" />
+            <div className="h-8 w-12 bg-background-muted rounded-full" />
+            <div className="h-8 w-14 bg-background-muted rounded-full" />
+          </div>
+          <div className="w-px h-6 bg-foreground/10 mx-1" />
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-8 bg-background-muted rounded-full" />
+            <div className="h-8 w-16 bg-background-muted rounded-full" />
+            <div className="h-8 w-10 bg-background-muted rounded-full" />
+            <div className="h-8 w-16 bg-background-muted rounded-full" />
+          </div>
         </div>
+      </div>
+
+      {/* Content Area — Exam cards grid skeleton */}
+      <div className="w-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="w-full bg-background-muted rounded-[2rem] p-5 lg:p-6 flex items-start gap-4 lg:gap-5 animate-pulse relative"
+          >
+            {/* Difficulty icon block */}
+            <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-[1rem] flex-shrink-0 bg-foreground/10" />
+
+            {/* Content */}
+            <div className="flex-1 min-w-0 flex flex-col justify-center pr-8 lg:pr-10 gap-2">
+              <div className="h-4 lg:h-5 w-3/4 bg-foreground/5 rounded-full" />
+              <div className="h-3 w-1/2 bg-foreground/5 rounded-full" />
+              <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                <div className="h-5 w-20 bg-foreground/5 rounded-[0.75rem]" />
+                <div className="h-5 w-10 bg-foreground/5 rounded-[0.75rem]" />
+                <div className="h-5 w-16 bg-foreground/5 rounded-[0.75rem]" />
+                <div className="h-5 w-16 bg-foreground/5 rounded-[0.75rem]" />
+              </div>
+              {/* Score bar */}
+              <div className="flex items-center gap-3 w-full mt-1">
+                <div className="flex-1 h-2 bg-foreground/5 rounded-full" />
+                <div className="h-3 w-8 bg-foreground/5 rounded-full" />
+              </div>
+              <div className="h-2.5 w-24 bg-foreground/5 rounded-full" />
+            </div>
+
+            {/* 3-dot menu placeholder */}
+            <div className="absolute top-4 right-4 lg:top-5 lg:right-5">
+              <div className="w-10 h-10 bg-foreground/5 rounded-full" />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

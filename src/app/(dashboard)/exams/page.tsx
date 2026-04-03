@@ -362,17 +362,30 @@ export default function ExamsPage() {
 
 function ExamsSkeleton() {
   return (
-    <div className="w-full flex flex-col gap-3">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="w-full bg-background-muted rounded-[2rem] p-5 lg:p-6 animate-pulse flex items-center gap-5">
-          <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-[1rem] bg-black/5 shrink-0" />
-          <div className="flex-1 flex flex-col gap-3">
-            <div className="h-5 w-3/4 bg-black/5 rounded-full" />
-            <div className="flex gap-2">
-              <div className="h-4 w-20 bg-black/5 rounded-full" />
-              <div className="h-4 w-16 bg-black/5 rounded-full" />
+    <div className="w-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="w-full bg-background-muted rounded-[2rem] p-5 lg:p-6 flex items-start gap-4 lg:gap-5 animate-pulse relative"
+        >
+          <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-[1rem] flex-shrink-0 bg-foreground/10" />
+          <div className="flex-1 min-w-0 flex flex-col justify-center pr-8 lg:pr-10 gap-2">
+            <div className="h-4 lg:h-5 w-3/4 bg-foreground/5 rounded-full" />
+            <div className="h-3 w-1/2 bg-foreground/5 rounded-full" />
+            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+              <div className="h-5 w-20 bg-foreground/5 rounded-[0.75rem]" />
+              <div className="h-5 w-10 bg-foreground/5 rounded-[0.75rem]" />
+              <div className="h-5 w-16 bg-foreground/5 rounded-[0.75rem]" />
+              <div className="h-5 w-16 bg-foreground/5 rounded-[0.75rem]" />
             </div>
-            <div className="h-2 w-full bg-black/5 rounded-full" />
+            <div className="flex items-center gap-3 w-full mt-1">
+              <div className="flex-1 h-2 bg-foreground/5 rounded-full" />
+              <div className="h-3 w-8 bg-foreground/5 rounded-full" />
+            </div>
+            <div className="h-2.5 w-24 bg-foreground/5 rounded-full" />
+          </div>
+          <div className="absolute top-4 right-4 lg:top-5 lg:right-5">
+            <div className="w-10 h-10 bg-foreground/5 rounded-full" />
           </div>
         </div>
       ))}

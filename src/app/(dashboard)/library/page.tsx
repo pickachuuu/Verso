@@ -463,17 +463,28 @@ function LibraryHeader({ totalNotes }: { totalNotes: number }) {
 
 function NotebooksSkeleton() {
   return (
-    <div className="w-full flex flex-col gap-4">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="w-full bg-background-muted rounded-[2.5rem] p-6 lg:p-8 animate-pulse flex flex-col sm:flex-row lg:items-center gap-6">
-          <div className="w-full sm:w-20 sm:h-24 h-40 rounded-[1.5rem] bg-black/5 flex-shrink-0" />
-          <div className="flex-1 flex flex-col gap-4">
-            <div className="h-6 w-3/4 bg-black/5 rounded-full" />
-            <div className="flex gap-2">
-              <div className="h-5 w-24 bg-black/5 rounded-full" />
-              <div className="h-5 w-20 bg-black/5 rounded-full" />
+    <div className="w-full grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="w-full bg-background-muted rounded-[2rem] lg:rounded-[2.5rem] p-5 lg:p-6 flex flex-col xl:flex-row xl:items-center gap-5 xl:gap-8 animate-pulse relative"
+        >
+          <div className="flex items-start gap-5 lg:gap-6 flex-1 min-w-0">
+            <div className="w-20 h-28 lg:w-24 lg:h-32 rounded-[1rem] lg:rounded-[1.25rem] flex-shrink-0 bg-foreground/10" />
+            <div className="flex-1 min-w-0 flex flex-col justify-center gap-2">
+              <div className="h-4 lg:h-5 w-3/4 bg-foreground/5 rounded-full" />
+              <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                <div className="h-5 w-20 bg-foreground/5 rounded-[0.75rem]" />
+                <div className="h-5 w-12 bg-foreground/5 rounded-[0.75rem]" />
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5 mt-2 pt-2 border-t-2 border-border/20">
+                <div className="h-5 w-16 bg-foreground/5 rounded-[0.5rem]" />
+                <div className="h-5 w-20 bg-foreground/5 rounded-[0.5rem]" />
+              </div>
             </div>
-            <div className="sm:hidden h-14 w-full bg-black/5 rounded-2xl mt-4" />
+          </div>
+          <div className="absolute top-4 right-4 lg:top-5 lg:right-5">
+            <div className="w-10 h-10 bg-foreground/5 rounded-full" />
           </div>
         </div>
       ))}
