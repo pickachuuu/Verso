@@ -66,7 +66,7 @@ const mockQuestions: StepperQuestion[] = [
 
 function MockExamCard({ question }: { question: StepperQuestion }) {
   const [answer, setAnswer] = useState('');
-  
+
   return (
     <div className="w-full h-full flex flex-col bg-surface overflow-hidden">
       {/* Top Part: Question */}
@@ -81,34 +81,34 @@ function MockExamCard({ question }: { question: StepperQuestion }) {
           {question.question}
         </h3>
       </div>
-      
+
       {/* Bottom Part: Answer Input Area */}
       <div className="flex-1 p-6 md:p-8 overflow-y-auto scrollbar-hide bg-surface">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-2 h-2 rounded-full bg-secondary opacity-60 shadow-[0_0_8px_currentColor]" />
           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary opacity-50">YOUR ANSWER</span>
         </div>
-        
+
         <div className="flex-1 flex flex-col min-h-0">
           {question.question_type === 'multiple_choice' && (
-            <MultipleChoiceInput 
-              question={question} 
-              value={answer} 
-              onChange={setAnswer} 
+            <MultipleChoiceInput
+              question={question}
+              value={answer}
+              onChange={setAnswer}
               compact={true}
             />
           )}
           {question.question_type === 'identification' && (
-            <IdentificationInput 
-              value={answer} 
-              onChange={setAnswer} 
-              onSubmit={() => {}} 
+            <IdentificationInput
+              value={answer}
+              onChange={setAnswer}
+              onSubmit={() => { }}
             />
           )}
           {question.question_type === 'essay' && (
-            <EssayInput 
-              value={answer} 
-              onChange={setAnswer} 
+            <EssayInput
+              value={answer}
+              onChange={setAnswer}
             />
           )}
         </div>
@@ -464,16 +464,16 @@ export default function LandingPage() {
                         {/* Blank Screen */}
                         <div className="w-full h-full bg-surface-elevated rounded-[2.5rem] overflow-hidden relative paper-texture">
                           {/* Notch */}
-                          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-foreground rounded-b-2xl z-20" />
+                          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-foreground rounded-b-2xl z-20" />
 
                           {/* Content Placeholder (Blank for now) */}
                           <div className="absolute inset-0 flex items-center justify-center">
                             <Image
-                              src="/brand/verso-mark.png"
+                              src="https://pub-5d0fe94a3da5458ca88e4e79220a6798.r2.dev/Verso/86d71427-d7cb-498e-9fec-4b68ac3fd18c.jpg"
                               alt="Verso Icon"
                               width={100}
                               height={100}
-                              className="w-24 h-24 opacity-10 grayscale"
+                              className="w-full h-full object-cover"
                             />
                           </div>
                         </div>
