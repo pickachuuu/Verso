@@ -163,10 +163,15 @@ export default function EditorPage() {
         resetEditor();
         resetNote();
         resetUI();
+      } else if (currentRoute !== slug && currentRoute !== noteId) {
+        // If the URL noteId/slug doesn't match the current state's id or slug, it's a completely different note
+        resetEditor();
+        resetNote();
+        resetUI();
       }
       initializedRef.current = currentRoute || null;
     }
-  }, [isNewNote, noteIdOrSlug, resetEditor, resetNote, resetUI]);
+  }, [isNewNote, noteIdOrSlug, slug, noteId, resetEditor, resetNote, resetUI]);
 
   const queryClient = useQueryClient();
   const { data: fetchedNote, isLoading: isLoadingNote } = useNote(noteIdOrSlug);
@@ -526,7 +531,7 @@ export default function EditorPage() {
         {/* Mobile TOC Horizontal Scroll */}
         <div ref={mobileTocRef} className="w-full bg-surface border-b border-border/40 py-3 px-4 overflow-x-auto scrollbar-hide flex items-center gap-2">
           <button
-            onClick={() => setCurrentPageIndex(null)}
+            onClick={() => navigateToTOC()}
             className="shrink-0 w-10 h-10 flex items-center justify-center rounded-[1rem] border-[2px] transition-all border-border/40 bg-foreground text-surface hover:bg-foreground/90 shadow-sm"
           >
             <Menu01Icon className="w-5 h-5" />
