@@ -81,7 +81,7 @@ export default function TableOfContents({
         <div className="h-8 w-48 bg-background-muted rounded-full animate-pulse mb-10" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="aspect-[4/3] rounded-[2rem] border-[3px] border-border/20 bg-background-muted/50 animate-pulse" />
+            <div key={i} className="h-28 sm:h-auto sm:aspect-[3/4] rounded-[2rem] border-[3px] sm:border-[4px] border-border/20 bg-background-muted/50 animate-pulse" />
           ))}
         </div>
       </div>
@@ -162,43 +162,74 @@ export default function TableOfContents({
                   >
                     <div
                       onClick={() => onPageClick(index)}
-                      className="relative h-full aspect-[4/3] sm:aspect-[3/4] p-8 sm:p-10 flex flex-col justify-between bg-surface border-[3px] sm:border-[4px] border-foreground rounded-[2.5rem] shadow-[8px_8px_0_rgba(0,0,0,1)] transition-all cursor-pointer hover:bg-primary/5 active:translate-x-1 active:translate-y-1 active:shadow-none"
+                      className="relative w-full sm:h-full sm:aspect-[3/4] p-5 sm:p-10 flex flex-col sm:justify-between bg-surface border-[3px] sm:border-[4px] border-foreground rounded-[2rem] sm:rounded-[2.5rem] shadow-[6px_6px_0_rgba(0,0,0,1)] sm:shadow-[8px_8px_0_rgba(0,0,0,1)] transition-all cursor-pointer hover:bg-primary/5 active:translate-x-1 active:translate-y-1 active:shadow-none"
                     >
                       {/* Paper Texture Overlay */}
                       {!simpleMode && (
                         <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[2rem] bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')]" />
                       )}
 
-                      <div className="relative z-10">
-                        <div className="flex items-center justify-between mb-8">
-                          <span className="w-12 h-12 flex items-center justify-center rounded-2xl bg-foreground text-surface font-black text-sm shadow-md">
-                            {String(index + 1).padStart(2, '0')}
-                          </span>
+                      <div className="relative z-10 flex flex-row items-center gap-4 sm:block sm:h-full sm:flex sm:flex-col sm:justify-between">
+
+                        {/* Mobile: Row Layout | Desktop: Column Layout */}
+                        <div className="flex flex-row items-center gap-3 sm:gap-4 sm:block flex-1 min-w-0">
+
+                          <div className="flex items-center justify-between sm:mb-8 flex-none">
+                            <span className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl sm:rounded-2xl bg-foreground text-surface font-black text-xs sm:text-sm shadow-md shrink-0">
+                              {String(index + 1).padStart(2, '0')}
+                            </span>
+
+                            {/* Desktop Delete Button */}
+                            {!readOnly && onDeletePage && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onDeletePage(page.id);
+                                }}
+                                className="hidden sm:flex w-10 h-10 items-center justify-center rounded-xl bg-background-muted border border-border/40 text-foreground hover:bg-red-500 hover:text-white hover:border-red-600 transition-all opacity-0 group-hover:opacity-100"
+                              >
+                                <Delete01Icon className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="flex-1 min-w-0 sm:w-full flex-col justify-center py-1">
+                            <h3 className="text-[15px] sm:text-2xl font-black text-foreground uppercase tracking-tight line-clamp-2 sm:line-clamp-3 leading-[1.15] sm:leading-tight">
+                              {page.title || 'Untitled Page'}
+                            </h3>
+                            <div className="sm:hidden mt-1 text-[9px] font-black text-foreground/40 uppercase tracking-widest truncate">
+                              UPDATED {formatDate(page.updated_at)}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Mobile Actions */}
+                        <div className="sm:hidden flex items-center gap-1.5 flex-none ml-1">
                           {!readOnly && onDeletePage && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onDeletePage(page.id);
                               }}
-                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-background-muted border border-border/40 text-foreground hover:bg-red-500 hover:text-white hover:border-red-600 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                              className="w-7 h-7 flex items-center justify-center rounded-[0.85rem] bg-background-muted border border-border/40 text-foreground active:bg-foreground active:text-surface"
                             >
-                              <Delete01Icon className="w-4 h-4" />
+                              <Delete01Icon className="w-[14px] h-[14px]" />
                             </button>
                           )}
+                          <div className="w-7 h-7 rounded-full bg-foreground text-surface flex items-center justify-center">
+                            <ArrowRight01Icon className="w-[14px] h-[14px]" />
+                          </div>
                         </div>
 
-                        <h3 className="text-xl sm:text-2xl font-black text-foreground uppercase tracking-tight line-clamp-3 leading-tight">
-                          {page.title || 'Untitled Page'}
-                        </h3>
-                      </div>
-
-                      <div className="relative z-10 flex items-center justify-between pt-6 border-t border-border/20">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-foreground uppercase tracking-widest opacity-40 mb-1">Last Edited</span>
-                          <span className="text-[11px] font-black text-foreground uppercase tracking-widest">{formatDate(page.updated_at)}</span>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-background-muted border border-border/40 flex items-center justify-center group-hover:bg-foreground group-hover:text-surface transition-all">
-                          <ArrowRight01Icon className="w-4 h-4" />
+                        {/* Desktop Footer */}
+                        <div className="hidden sm:flex items-center justify-between pt-6 border-t border-border/20 mt-6 sm:mt-0">
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-foreground uppercase tracking-widest opacity-40 mb-1">Last Edited</span>
+                            <span className="text-[11px] font-black text-foreground uppercase tracking-widest">{formatDate(page.updated_at)}</span>
+                          </div>
+                          <div className="w-10 h-10 rounded-full bg-background-muted border border-border/40 flex items-center justify-center group-hover:bg-foreground group-hover:text-surface transition-all">
+                            <ArrowRight01Icon className="w-4 h-4" />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -212,14 +243,14 @@ export default function TableOfContents({
                   >
                     <button
                       onClick={onAddPage}
-                      className="w-full h-full aspect-[4/3] sm:aspect-[3/4] flex flex-col items-center justify-center gap-6 bg-background-muted/40 border-[4px] border-dashed border-border/40 rounded-[2.5rem] hover:bg-background-muted hover:border-primary/40 transition-all group"
+                      className="w-full p-6 sm:h-full sm:aspect-[3/4] sm:p-10 flex flex-row sm:flex-col items-center justify-center gap-4 sm:gap-6 bg-background-muted/40 border-[3px] sm:border-[4px] border-dashed border-border/40 rounded-[2.25rem] sm:rounded-[2.5rem] hover:bg-background-muted hover:border-primary/40 transition-all group active:scale-[0.98]"
                     >
-                      <div className="w-16 h-16 rounded-full bg-surface border-[4px] border-foreground flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-90 transition-all">
-                        <PlusSignIcon className="w-8 h-8 text-foreground" />
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-surface border-[3px] sm:border-[4px] border-foreground flex items-center justify-center shadow-sm sm:shadow-lg group-hover:scale-110 group-hover:rotate-90 transition-all shrink-0">
+                        <PlusSignIcon className="w-6 h-6 sm:w-8 sm:h-8 text-foreground" />
                       </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-sm font-black text-foreground uppercase tracking-widest">New Page</span>
-                        <span className="text-[11px] font-bold text-foreground/40 uppercase tracking-widest mt-1">Insert after {pages.length} pages</span>
+                      <div className="flex flex-col items-start sm:items-center">
+                        <span className="text-sm sm:text-base font-black text-foreground uppercase tracking-widest">New Page</span>
+                        <span className="text-[10px] sm:text-[11px] font-bold text-foreground/40 uppercase tracking-widest mt-0.5 sm:mt-1">Insert after {pages.length} pages</span>
                       </div>
                     </button>
                   </motion.div>
@@ -231,26 +262,6 @@ export default function TableOfContents({
       </main>
 
       {/* Modern Footer Statistics */}
-      <footer className="px-6 sm:px-10 py-12 border-t-[4px] border-foreground/10 bg-background-muted/20">
-        <div className="max-w-6xl mx-auto flex flex-wrap gap-10 sm:gap-20">
-          <div className="flex flex-col gap-2">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/40">Knowledge Density</span>
-            <div className="flex items-center gap-4">
-              <div className="h-3 w-48 rounded-full bg-background-muted overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min((pages.length / 10) * 100, 100)}%` }}
-                  className="h-full bg-primary"
-                />
-              </div>
-              <span className="text-[12px] font-black uppercase tracking-widest text-foreground">
-                {Math.min((pages.length / 10) * 100, 100).toFixed(0)}%
-              </span>
-            </div>
-          </div>
-
-        </div>
-      </footer>
     </div>
   );
 }
