@@ -102,6 +102,7 @@ export default function EditorPage() {
   const noteIdOrSlug = params?.noteId as string | undefined;
   const isNewNote = !noteIdOrSlug || noteIdOrSlug === 'new';
   const initializedRef = useRef<string | null>(null);
+  const autoOpenedNoteIdRef = useRef<string | null>(null);
   const mobileTocRef = useRef<HTMLDivElement>(null);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
@@ -204,15 +205,18 @@ export default function EditorPage() {
     }
   }, [fetchedNote, noteIdOrSlug, router, setNoteData]);
 
-  // If we have pages, ensure we always default to page 0 if not set, abandoning 'toc' and 'cover' views unless literally forcing it
+  // If we have pages, ensure we always default to page 0 on initial load, but allow users to navigate back to TOC manually
   useEffect(() => {
-    if (pages.length > 0 && currentPageIndex === null) {
-      setCurrentPageIndex(0);
-      setCurrentPageContent(pages[0].content || '');
-      setLastSavedContent(pages[0].content || '');
-      setCurrentView('page');
+    if (pages.length > 0 && currentPageIndex === null && noteId) {
+      if (autoOpenedNoteIdRef.current !== noteId) {
+        setCurrentPageIndex(0);
+        setCurrentPageContent(pages[0].content || '');
+        setLastSavedContent(pages[0].content || '');
+        setCurrentView('page');
+        autoOpenedNoteIdRef.current = noteId;
+      }
     }
-  }, [pages, currentPageIndex, setCurrentPageIndex, setCurrentPageContent, setLastSavedContent, setCurrentView]);
+  }, [pages, currentPageIndex, noteId, setCurrentPageIndex, setCurrentPageContent, setLastSavedContent, setCurrentView]);
 
   // Keep Add Page button visible by scrolling right when pages are loaded or added
   useEffect(() => {
