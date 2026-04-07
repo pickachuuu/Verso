@@ -316,6 +316,10 @@ export default function EditorPage() {
       } catch { }
       return;
     }
+    
+    // Save current page synchronously to prevent data loss
+    await forceSaveCurrentPage();
+    
     // Optimistic UI updates
     try {
       createPageMutation.mutate({ noteId });
@@ -521,6 +525,13 @@ export default function EditorPage() {
 
         {/* Mobile TOC Horizontal Scroll */}
         <div ref={mobileTocRef} className="w-full bg-surface border-b border-border/40 py-3 px-4 overflow-x-auto scrollbar-hide flex items-center gap-2">
+          <button
+            onClick={() => setCurrentPageIndex(null)}
+            className="shrink-0 w-10 h-10 flex items-center justify-center rounded-[1rem] border-[2px] transition-all border-border/40 bg-foreground text-surface hover:bg-foreground/90 shadow-sm"
+          >
+            <Menu01Icon className="w-5 h-5" />
+          </button>
+          
           {pages.map((p, i) => (
             <button
               key={p.id}

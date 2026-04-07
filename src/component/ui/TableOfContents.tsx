@@ -180,7 +180,7 @@ export default function TableOfContents({
                                 e.stopPropagation();
                                 onDeletePage(page.id);
                               }}
-                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-background-muted border border-border/40 text-foreground hover:bg-red-500 hover:text-white hover:border-red-600 transition-all opacity-0 group-hover:opacity-100"
+                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-background-muted border border-border/40 text-foreground hover:bg-red-500 hover:text-white hover:border-red-600 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                             >
                               <Delete01Icon className="w-4 h-4" />
                             </button>

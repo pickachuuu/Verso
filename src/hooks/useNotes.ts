@@ -52,8 +52,25 @@ export const noteKeys = {
 // ============================================
 
 async function getSession() {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session;
+  const { data: { session }, error } = await supabase.auth.getSession();
+  
+  if (session) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('verso_last_active_user_id', session.user.id);
+    }
+    return session;
+  }
+  
+  // Offline fallback handling
+  if (typeof window !== 'undefined' && !navigator.onLine) {
+    const lastId = localStorage.getItem('verso_last_active_user_id');
+    if (lastId) {
+      console.log('Offline mode: Using cached user session strictly for local DB access');
+      return { user: { id: lastId } } as any;
+    }
+  }
+  
+  return null;
 }
 
 async function fetchUserNotes(): Promise<Note[]> {
@@ -383,21 +400,22 @@ async function savePage({ pageId, title, content }: SavePageParams): Promise<voi
     await db.notePages.update(pageId, updateData);
   }
 
-  try {
-    const payload = { ...updateData };
-    delete payload.sync_status;
+  // Fire-and-forget Supabase update for instantaneous optimistic UX
+  const payload = { ...updateData };
+  delete payload.sync_status;
 
-    const { error } = await supabase
-      .from('note_pages')
-      .update(payload)
-      .eq('id', pageId);
-
-    if (!error) {
-      await db.notePages.update(pageId, { sync_status: 'synced' });
-    }
-  } catch (error) {
-    console.log("Offline mode: Page save will sync later");
-  }
+  supabase
+    .from('note_pages')
+    .update(payload)
+    .eq('id', pageId)
+    .then(({ error }) => {
+      if (!error) {
+        db.notePages.update(pageId, { sync_status: 'synced' }).catch(() => {});
+      }
+    })
+    .catch((error) => {
+      console.log("Offline mode: Page save will sync later");
+    });
 }
 
 async function deletePage(pageId: string): Promise<void> {
