@@ -356,30 +356,30 @@ export default function LibraryPage() {
         title="REFINE SEARCH"
         description="FILTER YOUR KNOWLEDGE BASE"
         footer={(
-          <div className="flex gap-3 w-full p-2">
+          <div className="flex gap-2 w-full">
             <button
               onClick={() => { setSelectedColor('all'); setSortBy('recent'); }}
-              className="flex-1 py-5 rounded-[2rem] bg-background-muted text-foreground font-black uppercase tracking-[0.2em] text-[13px] hover:bg-border/40 active:scale-95 transition-all"
+              className="flex-1 py-3 rounded-xl bg-background-muted text-foreground font-black uppercase tracking-[0.2em] text-[11px] hover:bg-border/40 active:scale-95 transition-all"
             >
               RESET
             </button>
             <button
               onClick={() => setMobileFiltersOpen(false)}
-              className="flex-[2] py-5 rounded-[2rem] bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[13px] shadow-[0_8px_30px_rgba(0,0,0,0.2)] active:scale-95 transition-all"
+              className="flex-[2] py-3 rounded-xl bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[11px] shadow-sm active:scale-95 transition-all border border-foreground"
             >
               APPLY FILTERS
             </button>
           </div>
         )}
       >
-        <div className="space-y-10 pt-4 pb-6 px-1">
+        <div className="space-y-6 pt-2 pb-2 px-1">
           {/* Colors */}
           <div>
-            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-5">NOTEBOOK COLOR</div>
-            <div className="flex flex-wrap gap-3">
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-3">NOTEBOOK COLOR</div>
+            <div className="flex flex-wrap gap-2.5">
               <button
                 onClick={() => setSelectedColor('all')}
-                className={`px-6 py-4 rounded-[1.5rem] text-[12px] font-black uppercase tracking-widest transition-all shadow-sm ${
+                className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${
                   selectedColor === 'all' ? 'bg-foreground text-surface' : 'bg-background-muted text-foreground'
                 }`}
               >
@@ -389,8 +389,8 @@ export default function LibraryPage() {
                 <button
                   key={color}
                   onClick={() => setSelectedColor(color)}
-                  className={`w-14 h-14 rounded-[1.5rem] transition-all shadow-sm ${
-                    selectedColor === color ? 'ring-4 ring-foreground/20 scale-110 shadow-lg border-2 border-foreground' : 'border-2 border-transparent'
+                  className={`w-10 h-10 rounded-xl transition-all shadow-sm ${
+                    selectedColor === color ? 'ring-2 ring-foreground/20 scale-110 shadow-md border-2 border-foreground' : 'border border-border/40'
                   }`}
                   style={{ background: NOTEBOOK_COLORS[color].primary }}
                   title={NOTEBOOK_COLORS[color].name}
@@ -401,22 +401,22 @@ export default function LibraryPage() {
 
           {/* Sort Menu */}
           <div>
-            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-5">SORT ORDER</div>
-            <div className="flex flex-col gap-3">
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-3">SORT ORDER</div>
+            <div className="flex flex-col gap-2">
               {[
-                { id: 'recent', label: 'MOST RECENT', icon: <Clock01Icon className="w-6 h-6" /> },
-                { id: 'alphabetical', label: 'ALPHABETICAL (A-Z)', icon: <SortingAZ01Icon className="w-6 h-6" /> },
-                { id: 'oldest', label: 'OLDEST ARCHIVES', icon: <Calendar03Icon className="w-6 h-6" /> },
+                { id: 'recent', label: 'MOST RECENT', icon: <Clock01Icon className="w-5 h-5" /> },
+                { id: 'alphabetical', label: 'ALPHABETICAL (A-Z)', icon: <SortingAZ01Icon className="w-5 h-5" /> },
+                { id: 'oldest', label: 'OLDEST ARCHIVES', icon: <Calendar03Icon className="w-5 h-5" /> },
               ].map((opt) => (
                 <button
                   key={opt.id}
                   onClick={() => setSortBy(opt.id as SortOption)}
-                  className={`flex items-center gap-5 px-6 py-5 rounded-[2rem] transition-all shadow-sm ${
-                    sortBy === opt.id ? 'bg-foreground text-surface' : 'bg-background-muted text-foreground'
+                  className={`flex items-center gap-4 px-5 py-3.5 rounded-xl transition-all shadow-sm border ${
+                    sortBy === opt.id ? 'bg-foreground text-surface border-foreground' : 'bg-background-muted text-foreground border-transparent hover:border-border/60'
                   }`}
                 >
                   {opt.icon}
-                  <span className="text-[13px] font-black uppercase tracking-widest">{opt.label}</span>
+                  <span className="text-[11px] font-black uppercase tracking-widest">{opt.label}</span>
                 </button>
               ))}
             </div>

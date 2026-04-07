@@ -223,27 +223,27 @@ export default function SavedMaterialsPage() {
         title="REFINE SEARCH"
         description="FILTER SAVED MATERIALS"
         footer={(
-          <div className="flex gap-3 w-full p-2">
-            <button onClick={() => setSelectedType('all')} className="flex-1 py-4 rounded-[2rem] bg-background-muted text-foreground font-black uppercase tracking-[0.2em] text-[12px] active:scale-95 transition-all">RESET</button>
-            <button onClick={() => setMobileFiltersOpen(false)} className="flex-[2] py-4 rounded-[2rem] bg-foreground text-surface font-black uppercase tracking-[0.2em] text-[12px] shadow-[0_8px_30px_rgba(0,0,0,0.2)] active:scale-95 transition-all">APPLY</button>
+          <div className="flex gap-2 w-full">
+            <button onClick={() => setSelectedType('all')} className="flex-1 py-3 rounded-xl bg-background-muted text-foreground font-black uppercase tracking-[0.2em] text-[11px] active:scale-95 transition-all hover:bg-border/40">RESET</button>
+            <button onClick={() => setMobileFiltersOpen(false)} className="flex-[2] py-3 rounded-xl bg-foreground text-surface border border-foreground font-black uppercase tracking-[0.2em] text-[11px] shadow-sm active:scale-95 transition-all">APPLY</button>
           </div>
         )}
       >
-        <div className="space-y-6 pt-4 pb-6 px-1">
+        <div className="space-y-6 pt-2 pb-2 px-1">
           <div>
-            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-5">MATERIAL TYPE</div>
-            <div className="flex flex-col gap-3">
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/50 mb-3">MATERIAL TYPE</div>
+            <div className="flex flex-col gap-2">
               {FILTER_OPTIONS.map((opt) => (
                 <button
                   key={opt.id}
                   onClick={() => setSelectedType(opt.id)}
-                  className={`flex items-center justify-between px-5 py-4 rounded-[2rem] transition-all shadow-sm ${
-                    selectedType === opt.id ? 'bg-foreground text-surface' : 'bg-background-muted text-foreground'
+                  className={`flex items-center justify-between px-5 py-3.5 rounded-xl transition-all shadow-sm border ${
+                    selectedType === opt.id ? 'bg-foreground text-surface border-foreground' : 'bg-background-muted text-foreground border-transparent hover:border-border/60'
                   }`}
                 >
                   <div className="flex items-center gap-4">
                     {opt.icon}
-                    <span className="text-[12px] font-black uppercase tracking-widest">{opt.label}</span>
+                    <span className="text-[11px] font-black uppercase tracking-widest">{opt.label}</span>
                   </div>
                   <span className="text-[11px] font-black opacity-60">{typeCounts[opt.id]}</span>
                 </button>

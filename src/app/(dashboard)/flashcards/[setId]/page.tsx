@@ -171,7 +171,7 @@ export default function FlashcardBrowsePage() {
 
       <div className="grid gap-6 lg:grid-cols-12 items-start">
         <div className="lg:col-span-8 flex flex-col gap-6">
-          <div className="bg-surface border-[3px] border-border/40 rounded-[1.5rem] p-3 flex flex-col sm:flex-row items-center gap-3 w-full group focus-within:border-foreground focus-within:shadow-[4px_4px_0_rgba(0,0,0,1)] transition-all">
+          <div className="bg-surface border-[2px] border-border/50 rounded-[1.5rem] p-3 flex flex-col sm:flex-row items-center gap-3 w-full group focus-within:border-foreground focus-within:shadow-md transition-all">
             <div className="flex-1 relative w-full">
               <Search01Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40 group-focus-within:text-foreground transition-colors" />
               <input
@@ -213,7 +213,7 @@ export default function FlashcardBrowsePage() {
         </div>
 
         <div className="lg:col-span-4 flex flex-col gap-6 sticky top-24">
-          <div className="bg-surface border-[3px] border-foreground rounded-[1.5rem] p-6 shadow-[4px_4px_0_rgba(0,0,0,1)]">
+          <div className="bg-surface border-[2px] border-border/50 rounded-[1.5rem] p-6 shadow-sm">
             <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/40 mb-4">Mastery Progress</div>
             <div className="flex items-end justify-between mb-3">
               <span className="text-4xl font-black tracking-tighter leading-none">{progress.percentage}%</span>
@@ -229,7 +229,7 @@ export default function FlashcardBrowsePage() {
             </div>
           </div>
 
-          <div className="bg-surface border-[3px] border-foreground/10 rounded-[1.5rem] p-6">
+          <div className="bg-surface border-[2px] border-border/50 rounded-[1.5rem] p-6 shadow-sm">
             <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/40 mb-5">Filter Deck</div>
             <div className="flex flex-col gap-2">
               <StatusPill
@@ -294,8 +294,8 @@ function StatusPill({
       onClick={onClick}
       className={`w-full flex items-center justify-between px-5 py-3 rounded-xl border-[2px] transition-all font-black uppercase tracking-widest text-xs active:scale-[0.98]
         ${active
-          ? 'bg-foreground text-surface border-foreground shadow-md'
-          : 'bg-surface border-border/40 text-foreground/60 hover:border-foreground/50 hover:text-foreground'
+          ? 'bg-foreground text-surface border-foreground shadow-sm'
+          : 'bg-surface border-border/30 text-foreground/60 hover:border-border/60 hover:text-foreground'
         }`}
     >
       <span>{label}</span>
@@ -325,10 +325,10 @@ function BrowseCard({
   const statusStyle = STATUS_STYLES[card.status] || STATUS_STYLES.new;
 
   const difficultyLabel = card.difficulty_level === 1 ? 'Easy' : card.difficulty_level === 3 ? 'Hard' : 'Med';
-  const difficultyColorBorder = card.difficulty_level === 1 ? 'border-emerald-500/40 text-emerald-600' : card.difficulty_level === 3 ? 'border-red-500/40 text-red-600' : 'border-amber-500/40 text-amber-600';
+  const difficultyColorBorder = card.difficulty_level === 1 ? 'border-emerald-500/40 text-emerald-600 bg-emerald-500/5' : card.difficulty_level === 3 ? 'border-red-500/40 text-red-600 bg-red-500/5' : 'border-amber-500/40 text-amber-600 bg-amber-500/5';
 
   return (
-    <div className={`transition-all bg-surface border-[3px] border-foreground rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden ${isExpanded ? 'shadow-[6px_6px_0_rgba(0,0,0,1)] translate-y-[-2px]' : 'shadow-none hover:shadow-[4px_4px_0_rgba(0,0,0,1)] hover:-translate-y-1'}`}>
+    <div className={`transition-all bg-surface border-[2px] rounded-[1.5rem] overflow-hidden ${isExpanded ? 'border-foreground shadow-md translate-y-[-2px]' : 'border-border/50 shadow-sm hover:border-border/80 hover:-translate-y-1 hover:shadow-md'}`}>
       <button
         onClick={onToggle}
         className="w-full flex items-center gap-3 sm:gap-4 p-5 sm:p-6 text-left"
