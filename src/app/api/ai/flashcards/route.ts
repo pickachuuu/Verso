@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createGeminiService } from '@/lib/gemini';
 import { createClient } from '@/utils/supabase/server';
+import { aiRateLimiter } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,6 +9,14 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimitResult = aiRateLimiter(user.id);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429, headers: rateLimitResult.headers }
+      );
     }
 
     const body = await req.json();
