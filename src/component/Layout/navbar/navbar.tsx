@@ -465,7 +465,7 @@ export default function Navbar({ collapsed: propCollapsed, onToggle }: NavbarPro
         </AnimatePresence>
 
         {/* Mobile Dock (3+1 Structure - Paper Island Pro) */}
-        <div className="fixed bottom-8 left-6 right-6 z-[100] flex justify-center pointer-events-none">
+        <div className="fixed bottom-8 left-6 right-6 z-40 flex justify-center pointer-events-none">
           <div className="pointer-events-auto bg-surface border-[3px] border-foreground rounded-[2.5rem] shadow-xl h-[4.25rem] w-full max-w-[400px] px-2 flex items-stretch justify-around gap-0.5 relative paper-texture">
 
 
