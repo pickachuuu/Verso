@@ -20,6 +20,7 @@ import {
   MoreVerticalIcon
 } from 'hugeicons-react';
 import { NotebookIcon } from '@/component/icons';
+import { DropdownMenuContainer, DropdownMenuItem, ShareMenuItem, VisibilityMenuItem, DeleteMenuItem } from '@/component/ui/ItemContextMenu';
 import GenerateStudyMaterialModal from '@/component/features/modal/GenerateStudyMaterialModal';
 import ForgeFlashcardsModal from '@/component/features/modal/ForgeFlashcardsModal';
 import CreateExamModal from '@/component/features/modal/CreateExamModal';
@@ -321,7 +322,7 @@ export default function LibraryPage() {
         {/* ==============================================
             CONTENT AREA
         ============================================== */}
-        <div className="w-full relative z-10">
+        <div className="w-full relative z-30">
           {isLoading ? (
             <NotebooksSkeleton />
           ) : processedNotes.length === 0 ? (
@@ -574,56 +575,27 @@ function NotebookListItem({
 
       {/* 3-Dot Dropdown Menu for Actions */}
       <div className="absolute top-4 right-4 lg:top-5 lg:right-5 z-20 pointer-events-auto">
-        <button
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }}
-          className={`p-2.5 rounded-full transition-all shadow-sm ${
-            isMenuOpen ? 'bg-foreground text-surface' : 'bg-surface/80 backdrop-blur-md text-foreground hover:bg-foreground hover:text-surface'
-          }`}
-        >
-          <MoreVerticalIcon className="w-5 h-5" />
-        </button>
-
-        {isMenuOpen && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); }} />
-            <div className="absolute top-full right-0 mt-2 w-[11rem] lg:w-[12rem] bg-surface rounded-[1.25rem] shadow-2xl p-2 flex flex-col gap-1.5 border-2 border-border/20 z-50 origin-top-right animate-in zoom-in-95 duration-100">
-              
-              <button
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] transition-all w-full text-left ${
-                  shareLinkCopied ? 'bg-[#00c569] text-white cursor-default shadow-sm' : 'hover:bg-background-muted text-foreground'
-                }`}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); onShare(e); }}
-              >
-                <Share01Icon className="w-4 h-4 shrink-0" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">{shareLinkCopied ? 'COPIED!' : 'SHARE LINK'}</span>
-              </button>
-
-              <button
-                className="flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] hover:bg-background-muted text-foreground transition-all w-full text-left"
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); onToggleVisibility(); }}
-              >
-                {note.is_public ? <GlobeIcon className="w-4 h-4 shrink-0" /> : <LockIcon className="w-4 h-4 shrink-0" />}
-                <span className="text-[10px] font-bold uppercase tracking-widest">{note.is_public ? 'MAKE PRIVATE' : 'MAKE PUBLIC'}</span>
-              </button>
-
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); onGenerate(); }}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] bg-primary text-white hover:bg-[#1a4465] transition-all w-full text-left shadow-sm"
-              >
-                <SparklesIcon className="w-4 h-4 shrink-0" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">GENERATE</span>
-              </button>
-
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); onDelete(); }}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] hover:bg-[#ff3b30]/10 hover:text-[#ff3b30] text-[#ff3b30] transition-all w-full text-left"
-              >
-                <Delete01Icon className="w-4 h-4 shrink-0" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">DELETE</span>
-              </button>
-            </div>
-          </>
-        )}
+        <DropdownMenuContainer isOpen={isMenuOpen} onToggle={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }} onClose={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); }}>
+          <DropdownMenuItem
+            icon={SparklesIcon}
+            label="GENERATE"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); onGenerate(); }}
+            variant="primary"
+          />
+          {note.is_public && (
+            <ShareMenuItem
+              isCopied={shareLinkCopied}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); onShare(e); }}
+            />
+          )}
+          <VisibilityMenuItem
+            isPublic={note.is_public}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); onToggleVisibility(); }}
+          />
+          <DeleteMenuItem
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsMenuOpen(false); onDelete(); }}
+          />
+        </DropdownMenuContainer>
       </div>
 
     </div>

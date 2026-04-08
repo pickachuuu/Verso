@@ -26,7 +26,10 @@ import {
   SortingAZ01Icon,
   Calendar03Icon,
   MoreVerticalIcon,
+  GlobeIcon,
+  LockIcon,
 } from 'hugeicons-react';
+import { DropdownMenuContainer, DropdownMenuItem, ShareMenuItem, VisibilityMenuItem, DeleteMenuItem } from '@/component/ui/ItemContextMenu';
 import { ExamIcon, ExamAddIcon } from '@/component/icons';
 
 type SortOption = 'recent' | 'alphabetical' | 'oldest';
@@ -281,7 +284,7 @@ export default function ExamsPage() {
         </div>
 
         {/* Content Area */}
-        <div className="w-full relative z-10">
+        <div className="w-full relative z-30">
           {isLoading ? (
             <ExamsSkeleton />
           ) : processedExams.length === 0 ? (
@@ -300,6 +303,7 @@ export default function ExamsPage() {
                   onTakeExam={() => handleTakeExam(exam.id)}
                   onDelete={() => handleDeleteClick(exam)}
                   onShare={(e) => handleCopyShareLink(exam, e)}
+                  onToggleVisibility={() => togglePublicMutation.mutate({ examId: exam.id, isPublic: !exam.is_public })}
                   shareLinkCopied={shareLinkCopied === exam.id}
                 />
               ))}
@@ -425,7 +429,7 @@ function EmptyState({ hasFilters, onClearFilters, onCreateNew, totalExams }: { h
   );
 }
 
-function ExamListItemComponent({ exam, onTakeExam, onDelete, onShare, shareLinkCopied }: { exam: ExamListItem; onTakeExam: () => void; onDelete: () => void; onShare: (e: React.MouseEvent) => void; shareLinkCopied: boolean; }) {
+function ExamListItemComponent({ exam, onTakeExam, onDelete, onShare, onToggleVisibility, shareLinkCopied }: { exam: ExamListItem; onTakeExam: () => void; onDelete: () => void; onShare: (e: React.MouseEvent) => void; onToggleVisibility: () => void; shareLinkCopied: boolean; }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const scorePercent = exam.best_score ?? 0;
@@ -526,42 +530,27 @@ function ExamListItemComponent({ exam, onTakeExam, onDelete, onShare, shareLinkC
       </div>
 
       {/* 3-Dot Dropdown */}
-      <div className="absolute top-4 right-4 lg:top-5 lg:right-5 z-20">
-        <button
-          onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }}
-          className={`p-2.5 rounded-full transition-all shadow-sm ${isMenuOpen ? 'bg-foreground text-surface' : 'bg-surface/80 backdrop-blur-md text-foreground hover:bg-foreground hover:text-surface'}`}
-        >
-          <MoreVerticalIcon className="w-5 h-5" />
-        </button>
-        {isMenuOpen && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); }} />
-            <div className="absolute top-full right-0 mt-2 w-[11rem] lg:w-[12rem] bg-surface rounded-[1.25rem] shadow-2xl p-2 flex flex-col gap-1.5 border-2 border-border/20 z-50 origin-top-right animate-in zoom-in-95 duration-100">
-              <button
-                onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); onTakeExam(); }}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] bg-primary text-white hover:bg-[#1a4465] transition-all w-full text-left shadow-sm"
-              >
-                <ArrowRight01Icon className="w-4 h-4 shrink-0" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">{exam.attempt_count > 0 ? 'RETAKE' : 'TAKE EXAM'}</span>
-              </button>
-              <button
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] transition-all w-full text-left ${shareLinkCopied ? 'bg-[#00c569] text-white' : 'hover:bg-background-muted text-foreground'}`}
-                onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); onShare(e); }}
-              >
-                <Share01Icon className="w-4 h-4 shrink-0" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">{shareLinkCopied ? 'COPIED!' : 'SHARE LINK'}</span>
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); onDelete(); }}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-[0.75rem] hover:bg-[#ff3b30]/10 hover:text-[#ff3b30] text-[#ff3b30] transition-all w-full text-left"
-              >
-                <Delete01Icon className="w-4 h-4 shrink-0" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">DELETE</span>
-              </button>
-            </div>
-          </>
+      <DropdownMenuContainer isOpen={isMenuOpen} onToggle={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }} onClose={(e) => { e.stopPropagation(); setIsMenuOpen(false); }}>
+        <DropdownMenuItem
+          icon={ArrowRight01Icon}
+          label={exam.attempt_count > 0 ? 'RETAKE' : 'TAKE EXAM'}
+          onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); onTakeExam(); }}
+          variant="primary"
+        />
+        {exam.is_public && (
+          <ShareMenuItem
+            isCopied={shareLinkCopied}
+            onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); onShare(e); }}
+          />
         )}
-      </div>
+        <VisibilityMenuItem
+          isPublic={exam.is_public}
+          onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); onToggleVisibility(); }}
+        />
+        <DeleteMenuItem
+          onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); onDelete(); }}
+        />
+      </DropdownMenuContainer>
     </div>
   );
 }
