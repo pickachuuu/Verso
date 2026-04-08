@@ -388,7 +388,7 @@ export default function ForgeFlashcardsModal({
                 <SparklesIcon className="w-6 h-6 text-white" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-2xl font-black text-foreground tracking-tight truncate">Forge Flashcards</h2>
+                <h2 className="text-2xl font-black text-foreground tracking-tight truncate">Create Flashcards</h2>
                 <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1 truncate">Create flashcards from your notes</p>
               </div>
             </div>
@@ -413,7 +413,7 @@ export default function ForgeFlashcardsModal({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-foreground">
-                  Select notes to forge flashcards from
+                  Select notes to create flashcards from
                 </h3>
                 <ClayBadge variant="accent" className="text-xs">
                   {selectedNotes.length} selected

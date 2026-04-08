@@ -238,16 +238,15 @@ export default function FlashcardDashboardPage() {
   return (
     <>
       <div className="w-full max-w-7xl mx-auto pt-8 md:pt-4 pb-20 space-y-10 lg:space-y-14 px-2 md:px-0">
-        
+
         {/* Massive Hero Header */}
         <FlashcardsHeader totalSets={totalSets} totalCards={totalCards} onCreateNew={() => setIsForgeModalOpen(true)} />
 
         {/* Global Toast */}
         {saveSuccess && (
           <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] animate-in fade-in slide-in-from-bottom-4">
-            <div className={`px-8 py-4 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.15)] flex items-center gap-3 ${
-              saveSuccess.includes('Error') ? 'bg-[#ff3b30] text-white' : 'bg-foreground text-surface'
-            }`}>
+            <div className={`px-8 py-4 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.15)] flex items-center gap-3 ${saveSuccess.includes('Error') ? 'bg-[#ff3b30] text-white' : 'bg-foreground text-surface'
+              }`}>
               <SparklesIcon className="w-5 h-5 flex-shrink-0" />
               <p className="text-[12px] font-black uppercase tracking-widest">{saveSuccess}</p>
             </div>
@@ -317,9 +316,8 @@ export default function FlashcardDashboardPage() {
                 <button
                   key={opt.id}
                   onClick={() => setMasteryFilter(opt.id as MasteryFilter)}
-                  className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                    masteryFilter === opt.id ? 'bg-foreground text-surface shadow-md' : 'bg-background-muted text-foreground hover:bg-border/40'
-                  }`}
+                  className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${masteryFilter === opt.id ? 'bg-foreground text-surface shadow-md' : 'bg-background-muted text-foreground hover:bg-border/40'
+                    }`}
                 >{opt.label}</button>
               ))}
             </div>
@@ -336,9 +334,8 @@ export default function FlashcardDashboardPage() {
                 <button
                   key={opt.id}
                   onClick={() => setSortBy(opt.id as SortOption)}
-                  className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                    sortBy === opt.id ? 'bg-foreground text-surface shadow-md' : 'bg-background-muted text-foreground hover:bg-border/40'
-                  }`}
+                  className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${sortBy === opt.id ? 'bg-foreground text-surface shadow-md' : 'bg-background-muted text-foreground hover:bg-border/40'
+                    }`}
                 >{opt.label}</button>
               ))}
             </div>
@@ -413,9 +410,8 @@ export default function FlashcardDashboardPage() {
                 <button
                   key={opt.id}
                   onClick={() => setMasteryFilter(opt.id as MasteryFilter)}
-                  className={`flex items-center gap-4 px-5 py-3.5 rounded-xl transition-all shadow-sm border ${
-                    masteryFilter === opt.id ? 'bg-foreground text-surface border-foreground' : 'bg-background-muted text-foreground border-transparent hover:border-border/60'
-                  }`}
+                  className={`flex items-center gap-4 px-5 py-3.5 rounded-xl transition-all shadow-sm border ${masteryFilter === opt.id ? 'bg-foreground text-surface border-foreground' : 'bg-background-muted text-foreground border-transparent hover:border-border/60'
+                    }`}
                 >
                   {opt.icon}
                   <span className="text-[11px] font-black uppercase tracking-widest">{opt.label}</span>
@@ -436,9 +432,8 @@ export default function FlashcardDashboardPage() {
                 <button
                   key={opt.id}
                   onClick={() => setSortBy(opt.id as SortOption)}
-                  className={`flex items-center gap-4 px-5 py-3.5 rounded-xl transition-all shadow-sm border ${
-                    sortBy === opt.id ? 'bg-foreground text-surface border-foreground' : 'bg-background-muted text-foreground border-transparent hover:border-border/60'
-                  }`}
+                  className={`flex items-center gap-4 px-5 py-3.5 rounded-xl transition-all shadow-sm border ${sortBy === opt.id ? 'bg-foreground text-surface border-foreground' : 'bg-background-muted text-foreground border-transparent hover:border-border/60'
+                    }`}
                 >
                   {opt.icon}
                   <span className="text-[11px] font-black uppercase tracking-widest">{opt.label}</span>
@@ -491,7 +486,7 @@ function FlashcardsHeader({
           className="group flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 rounded-[2rem] bg-foreground text-surface hover:bg-foreground/90 transition-all font-black uppercase tracking-[0.2em] text-[12px] shadow-lg active:scale-95"
         >
           <FlashcardAddIcon className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-          FORGE FLASHCARDS
+          CREATE FLASHCARDS
         </button>
       </div>
     </div>
@@ -561,7 +556,7 @@ function EmptyState({
             className="group flex items-center justify-center gap-3 px-8 py-4 rounded-[2rem] bg-foreground text-surface hover:bg-foreground/90 transition-all font-black uppercase tracking-[0.2em] text-[12px] shadow-lg active:scale-95"
           >
             <FlashcardAddIcon className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-            FORGE FLASHCARDS
+            CREATE FLASHCARDS
           </button>
         </>
       ) : (

@@ -189,7 +189,7 @@ export default function ReforgeModal({
                 <SparklesIcon className="w-6 h-6 text-white" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-2xl font-black text-foreground tracking-tight truncate">Reforge Flashcards</h2>
+                <h2 className="text-2xl font-black text-foreground tracking-tight truncate">Recreate Flashcards</h2>
                 <p className="text-[10px] font-black uppercase tracking-widest text-foreground-muted mt-1 truncate">
                   {settings.action === 'regenerate'
                     ? 'Regenerate all flashcards from your note'
