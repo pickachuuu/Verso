@@ -32,7 +32,7 @@ export default function Modal({
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay
-          className={`fixed inset-0 ${nested ? 'z-[120]' : 'z-[100]'} flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 ${className}`}
+          className={`fixed inset-0 ${nested ? 'z-[10000]' : 'z-[9999]'} flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 ${className}`}
         >
           <Dialog.Content className="outline-none w-full flex justify-center max-h-full" aria-describedby={undefined}>
             <Dialog.Title className="sr-only">Modal Dialog</Dialog.Title>
