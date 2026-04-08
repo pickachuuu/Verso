@@ -12,6 +12,7 @@ import {
   ArrowDown01Icon,
   SparklesIcon,
 } from 'hugeicons-react';
+import VersoLoader from '@/component/ui/VersoLoader';
 import { useStudySetData } from '@/hooks/useFlashcards';
 import { Flashcard } from '@/lib/database.types';
 
@@ -87,17 +88,8 @@ export default function FlashcardBrowsePage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto py-8 space-y-6">
-        <div className="animate-pulse space-y-6">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-surface-elevated rounded-xl" />
-            <div className="h-6 w-48 bg-surface-elevated rounded-lg" />
-          </div>
-          <div className="h-2 bg-surface-elevated rounded-full" />
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-20 bg-surface-elevated rounded-2xl" />
-          ))}
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[50vh]">
+        <VersoLoader label="Loading deck..." size={80} />
       </div>
     );
   }

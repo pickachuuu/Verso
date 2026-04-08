@@ -23,6 +23,7 @@ import {
 import { motion } from "motion/react";
 import { ExamIcon } from '@/component/icons';
 import ExamQuestionStepper from '@/component/ui/ExamQuestionStepper';
+import VersoLoader from '@/component/ui/VersoLoader';
 
 export default function TakeExamPage() {
   const params = useParams();
@@ -208,10 +209,7 @@ export default function TakeExamPage() {
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-4">
-          <Loading03Icon className="w-10 h-10 text-foreground-muted animate-spin" />
-          <p className="text-foreground-muted">Loading exam...</p>
-        </div>
+        <VersoLoader label="Loading exam..." size={80} />
       </div>
     );
   }

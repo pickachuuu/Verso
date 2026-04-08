@@ -11,6 +11,7 @@ import ClayNotebookCover, { NotebookColorKey } from '@/component/ui/ClayNotebook
 import NotebookPage from '@/component/ui/NotebookPage';
 import TagsDropdown from '@/component/ui/TagsDropdown';
 import { motion, AnimatePresence } from 'motion/react';
+import VersoLoader from '@/component/ui/VersoLoader';
 
 // Hooks
 import { useAutoPageBreak } from '@/hooks/useAutoPageBreak';
@@ -501,10 +502,7 @@ export default function EditorPage() {
   if (!isNewNote && (isLoadingNote || (!!resolvedNoteId && isLoadingPages))) {
     return (
       <div className="h-[100dvh] flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <Loading03Icon className="w-10 h-10 text-primary animate-spin" />
-          <p className="text-foreground-muted font-black uppercase tracking-[0.2em] text-[10px]">PREPARING WORKSPACE</p>
-        </div>
+        <VersoLoader label="Preparing workspace" size={80} />
       </div>
     );
   }
