@@ -1,0 +1,56 @@
+.verso-loader-container {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.verso-loader {
+  width: var(--verso-size, 64px);
+  height: var(--verso-size, 64px);
+  background-image: url('/brand/verso-loader-sprite.webp');
+  background-size: calc(var(--verso-size, 64px) * var(--verso-frames, 25)) var(--verso-size, 64px);
+  background-repeat: no-repeat;
+  animation: verso-dance var(--verso-duration, 1.04s) steps(var(--verso-frames, 25)) infinite;
+  image-rendering: auto;
+}
+
+@keyframes verso-dance {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: calc(var(--verso-size, 64px) * var(--verso-frames, 25) * -1) 0;
+  }
+}
+
+.verso-loader-label {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--color-foreground-muted, #888);
+  animation: verso-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes verso-pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion: show static frame, no animation */
+@media (prefers-reduced-motion: reduce) {
+  .verso-loader {
+    animation: none;
+    background-position: 0 0;
+  }
+
+  .verso-loader-label {
+    animation: none;
+    opacity: 0.7;
+  }
+}
