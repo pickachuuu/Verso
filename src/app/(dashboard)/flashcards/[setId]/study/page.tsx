@@ -23,6 +23,7 @@ import {
   logCardReview,
 } from '@/hooks/useActivityTracking';
 import StudySessionView from '@/component/features/StudySessionView';
+import VersoLoader from '@/component/ui/VersoLoader';
 
 export default function StudyPage() {
   const params = useParams();
@@ -201,22 +202,8 @@ export default function StudyPage() {
   // ═══════════════════════════════════════════
   if (isLoading) {
     return (
-      <div className="max-w-5xl mx-auto py-8 space-y-6">
-        <div className="animate-pulse space-y-6">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-background-muted border border-border/40 rounded-xl" />
-            <div className="h-6 w-48 bg-background-muted border border-border/40 rounded-lg" />
-          </div>
-          <div className="h-2 bg-background-muted border border-border/40 rounded-full" />
-          <ClayCard variant="default" padding="lg" className="rounded-2xl">
-            <div className="space-y-4">
-              <div className="h-4 w-20 bg-background-muted border border-border/40 rounded" />
-              <div className="h-6 w-3/4 bg-background-muted border border-border/40 rounded" />
-              <div className="h-6 w-1/2 bg-background-muted border border-border/40 rounded" />
-            </div>
-          </ClayCard>
-          <div className="h-14 bg-background-muted border border-border/40 rounded-2xl" />
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] h-full w-full">
+        <VersoLoader label="Loading study session..." size={80} />
       </div>
     );
   }
