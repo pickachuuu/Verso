@@ -159,6 +159,7 @@ interface AISelectionBubbleProps {
 export default function AISelectionBubble({ editor, onGenerateFlashcards }: AISelectionBubbleProps) {
   const [loading, setLoading] = useState<AIAction | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showAIOptions, setShowAIOptions] = useState(false);
 
   const handleAction = useCallback(
     async (action: AIAction) => {
@@ -169,11 +170,13 @@ export default function AISelectionBubble({ editor, onGenerateFlashcards }: AISe
 
       // Handle flashcards separately
       if (action === 'flashcards') {
+        setShowAIOptions(false);
         onGenerateFlashcards?.(selectedText);
         return;
       }
 
       const config = AI_ACTIONS[action];
+      setShowAIOptions(false);
       setLoading(action);
       setError(null);
 
@@ -229,90 +232,98 @@ export default function AISelectionBubble({ editor, onGenerateFlashcards }: AISe
       shouldShow={({ editor: ed }: { editor: Editor }) => {
         // Only show when there's a text selection (not empty)
         const { from, to } = ed.state.selection;
-        if (from === to) return false;
+        if (from === to) {
+          return false;
+        }
         // Don't show if selection is inside a code block
         if (ed.isActive('codeBlock')) return false;
         return true;
       }}
     >
-      <div
-        className="flex items-center gap-0.5 px-1.5 py-1 rounded-xl overflow-x-auto [&::-webkit-scrollbar]:hidden max-w-[95vw] md:max-w-none"
-        style={{
-          background: 'linear-gradient(160deg, rgba(28, 28, 42, 0.95) 0%, rgba(20, 20, 32, 0.98) 100%)',
-          backdropFilter: 'blur(16px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          msOverflowStyle: 'none',
-          scrollbarWidth: 'none',
-        }}
-      >
-        {/* Basic Actions */}
-        <button
-          onClick={() => editor.chain().focus().selectAll().run()}
-          className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all text-gray-300 hover:bg-white/10 hover:text-white shrink-0"
-        >
-          <span>Select All</span>
-        </button>
-
-        <button
-          onClick={() => {
-            const { from, to } = editor.state.selection;
-            const text = editor.state.doc.textBetween(from, to, ' ');
-            navigator.clipboard.writeText(text);
+      <div className="relative flex flex-col items-center">
+        <div
+          className="flex items-center gap-0.5 px-1.5 py-1 rounded-xl"
+          style={{
+            background: 'linear-gradient(160deg, rgba(28, 28, 42, 0.95) 0%, rgba(20, 20, 32, 0.98) 100%)',
+            backdropFilter: 'blur(16px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
           }}
-          className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all text-gray-300 hover:bg-white/10 hover:text-white shrink-0"
         >
-          <Copy01Icon className="w-3.5 h-3.5" />
-          <span>Copy</span>
-        </button>
+          {/* Basic Actions */}
+          <button
+            onClick={() => editor.chain().focus().selectAll().run()}
+            className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all text-gray-300 hover:bg-white/10 hover:text-white shrink-0"
+          >
+            <span>Select All</span>
+          </button>
 
-        <div className="w-px h-5 mx-1 shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
+          <button
+            onClick={() => {
+              const { from, to } = editor.state.selection;
+              const text = editor.state.doc.textBetween(from, to, ' ');
+              navigator.clipboard.writeText(text);
+            }}
+            className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all text-gray-300 hover:bg-white/10 hover:text-white shrink-0"
+          >
+            <Copy01Icon className="w-3.5 h-3.5" />
+            <span>Copy</span>
+          </button>
 
-        {/* Gemini icon label */}
-        <div className="flex items-center gap-1 px-1.5 py-1 opacity-60 shrink-0">
-          <GoogleGeminiIcon className="w-3.5 h-3.5 text-blue-400" />
+          <div className="w-px h-5 mx-1 shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
+
+          {/* AI Assist Toggle */}
+          <button
+            onClick={() => !loading && setShowAIOptions(!showAIOptions)}
+            disabled={loading !== null}
+            className={`
+              flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0
+              ${showAIOptions || loading ? 'bg-white/10 text-white' : 'text-gray-300 hover:bg-white/10 hover:text-white'}
+              disabled:opacity-70 disabled:cursor-wait
+            `}
+          >
+            {loading ? (
+              <Loading03Icon className="w-3.5 h-3.5 text-blue-400 animate-spin" />
+            ) : (
+              <GoogleGeminiIcon className="w-3.5 h-3.5 text-blue-400" />
+            )}
+            <span>{loading ? 'AI Thinking...' : 'AI Assist'}</span>
+          </button>
+
+          {/* Error indicator inline if present */}
+          {error && (
+            <div className="ml-1 px-2 py-1 text-[10px] text-red-400 font-medium bg-red-500/10 rounded-lg">Error</div>
+          )}
         </div>
 
-        {/* Divider */}
-        <div className="w-px h-5 shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
+        {/* AI Actions Dropdown */}
+        {showAIOptions && (
+          <div
+            className="absolute top-full mt-2 w-48 flex flex-col gap-0.5 p-1.5 rounded-xl z-[999] origin-top animate-in zoom-in-95 duration-100"
+            style={{
+              background: 'linear-gradient(160deg, rgba(28, 28, 42, 0.95) 0%, rgba(20, 20, 32, 0.98) 100%)',
+              backdropFilter: 'blur(16px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+            }}
+          >
+            {(Object.keys(AI_ACTIONS) as AIAction[]).map((action) => {
+              const config = AI_ACTIONS[action];
 
-        {/* Action buttons */}
-        {(Object.keys(AI_ACTIONS) as AIAction[]).map((action) => {
-          const config = AI_ACTIONS[action];
-          const isLoading = loading === action;
-          const isDisabled = loading !== null;
+              if (action === 'flashcards' && !onGenerateFlashcards) return null;
 
-          // Don't show flashcards button if no handler
-          if (action === 'flashcards' && !onGenerateFlashcards) return null;
-
-          return (
-            <button
-              key={action}
-              onClick={() => handleAction(action)}
-              disabled={isDisabled}
-              title={config.label}
-              className={`
-                flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0
-                disabled:opacity-40 disabled:cursor-not-allowed
-                ${isLoading
-                  ? 'bg-blue-600/30 text-blue-300'
-                  : 'text-gray-300 hover:bg-white/10 hover:text-white'
-                }
-              `}
-            >
-              {isLoading ? (
-                <Loading03Icon className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                config.icon
-              )}
-              <span>{config.label}</span>
-            </button>
-          );
-        })}
-
-        {/* Error indicator */}
-        {error && (
-          <div className="px-2 py-1 text-[10px] text-red-400 font-medium">{error}</div>
+              return (
+                <button
+                  key={action}
+                  onClick={() => handleAction(action)}
+                  className="flex items-center gap-2.5 px-3 py-2 w-full rounded-lg text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white transition-all text-left"
+                >
+                  <span className="opacity-70 text-blue-400">{config.icon}</span>
+                  <span>{config.label}</span>
+                </button>
+              );
+            })}
+          </div>
         )}
       </div>
     </BubbleMenu>
