@@ -12,6 +12,7 @@ import {
   StarIcon,
   CheckmarkCircle03Icon,
   FlashIcon,
+  Copy01Icon,
 } from 'hugeicons-react';
 
 // ============================================
@@ -235,21 +236,45 @@ export default function AISelectionBubble({ editor, onGenerateFlashcards }: AISe
       }}
     >
       <div
-        className="flex items-center gap-0.5 px-1.5 py-1 rounded-xl"
+        className="flex items-center gap-0.5 px-1.5 py-1 rounded-xl overflow-x-auto [&::-webkit-scrollbar]:hidden max-w-[95vw] md:max-w-none"
         style={{
           background: 'linear-gradient(160deg, rgba(28, 28, 42, 0.95) 0%, rgba(20, 20, 32, 0.98) 100%)',
           backdropFilter: 'blur(16px)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
+          msOverflowStyle: 'none',
+          scrollbarWidth: 'none',
         }}
       >
+        {/* Basic Actions */}
+        <button
+          onClick={() => editor.chain().focus().selectAll().run()}
+          className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all text-gray-300 hover:bg-white/10 hover:text-white shrink-0"
+        >
+          <span>Select All</span>
+        </button>
+
+        <button
+          onClick={() => {
+            const { from, to } = editor.state.selection;
+            const text = editor.state.doc.textBetween(from, to, ' ');
+            navigator.clipboard.writeText(text);
+          }}
+          className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all text-gray-300 hover:bg-white/10 hover:text-white shrink-0"
+        >
+          <Copy01Icon className="w-3.5 h-3.5" />
+          <span>Copy</span>
+        </button>
+
+        <div className="w-px h-5 mx-1 shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
+
         {/* Gemini icon label */}
-        <div className="flex items-center gap-1 px-1.5 py-1 opacity-60">
+        <div className="flex items-center gap-1 px-1.5 py-1 opacity-60 shrink-0">
           <GoogleGeminiIcon className="w-3.5 h-3.5 text-blue-400" />
         </div>
 
         {/* Divider */}
-        <div className="w-px h-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
+        <div className="w-px h-5 shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
 
         {/* Action buttons */}
         {(Object.keys(AI_ACTIONS) as AIAction[]).map((action) => {
@@ -267,7 +292,7 @@ export default function AISelectionBubble({ editor, onGenerateFlashcards }: AISe
               disabled={isDisabled}
               title={config.label}
               className={`
-                flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all
+                flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0
                 disabled:opacity-40 disabled:cursor-not-allowed
                 ${isLoading
                   ? 'bg-blue-600/30 text-blue-300'
