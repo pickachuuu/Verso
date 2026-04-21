@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { createClient } from '@/utils/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { noteKeys } from './useNotes';
+import { flashcardKeys } from './useFlashcards';
 
 const supabase = createClient();
 
@@ -65,8 +66,33 @@ export function useSyncManager() {
                     }
                 }
 
+                // Sync Pending Flashcard Sets
+                const pendingSets = await db.flashcardSets.where('sync_status').equals('pending').toArray();
+                for (const set of pendingSets) {
+                    const payload: Partial<typeof set> = { ...set };
+                    delete payload.sync_status;
+                    const { error } = await supabase.from('flashcard_sets').upsert([payload]);
+                    if (!error) {
+                        await db.flashcardSets.update(set.id, { sync_status: 'synced' } as any);
+                        didSync = true;
+                    }
+                }
+
+                // Sync Pending Flashcards
+                const pendingCards = await db.flashcards.where('sync_status').equals('pending').toArray();
+                for (const card of pendingCards) {
+                    const payload: Partial<typeof card> = { ...card };
+                    delete payload.sync_status;
+                    const { error } = await supabase.from('flashcards').upsert([payload]);
+                    if (!error) {
+                        await db.flashcards.update(card.id, { sync_status: 'synced' } as any);
+                        didSync = true;
+                    }
+                }
+
                 if (didSync) {
                     queryClient.invalidateQueries({ queryKey: noteKeys.all });
+                    queryClient.invalidateQueries({ queryKey: flashcardKeys.all });
                 }
             } catch (error) {
                 console.error('Background sync failed:', error);

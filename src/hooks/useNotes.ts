@@ -73,109 +73,155 @@ async function getSession() {
   return null;
 }
 
-async function fetchUserNotes(): Promise<Note[]> {
+async function fetchUserNotes(queryClient?: any): Promise<Note[]> {
   const session = await getSession();
   if (!session?.user?.id) return [];
 
-  // 1. Fetch from Supabase (if online)
-  try {
-    const { data, error } = await supabase
-      .from('notes')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .order('updated_at', { ascending: false });
-
-    if (!error && data) {
-      await db.transaction('rw', db.notes, async () => {
-        for (const note of data) {
-          const existing = await db.notes.get(note.id);
-          // Only overwrite if it wasn't recently locally changed (pending sync)
-          if (!existing || existing.sync_status === 'synced' || existing.updated_at < note.updated_at) {
-            await db.notes.put({ ...note, sync_status: 'synced' });
-          }
-        }
-      });
-    }
-  } catch (error) {
-    console.log('Offline: Falling back to local notes');
-  }
-
-  // 2. Fetch from Dexie
+  // 1. Fetch from Dexie (Instant)
   const localNotes = await db.notes
     .where('user_id').equals(session.user.id)
     .reverse()
     .sortBy('updated_at');
 
-  return (localNotes || []).filter(
+  const validLocalNotes = (localNotes || []).filter(
     (note) =>
       (note.title && note.title.trim() !== '') ||
       (note.content && note.content.trim() !== '') ||
       (Array.isArray(note.tags) && note.tags.length > 0)
   ) as Note[];
-}
 
-async function fetchNoteBySlug(slug: string): Promise<Note | null> {
-  const session = await getSession();
-  if (!session?.user?.id) return null;
-
-  try {
-    const { data, error } = await supabase
-      .from('notes')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .eq('slug', slug)
-      .single();
-
-    if (!error && data) {
-      await db.notes.put({ ...data, sync_status: 'synced' });
-    } else {
-      const { data: dataById, error: errorById } = await supabase
+  // 2. Network Sync Logic
+  if (typeof window !== 'undefined' && navigator.onLine) {
+    const fetchFromSupabase = async () => {
+      const { data, error } = await supabase
         .from('notes')
         .select('*')
         .eq('user_id', session.user.id)
-        .eq('id', slug)
-        .single();
-      if (!errorById && dataById) {
-        await db.notes.put({ ...dataById, sync_status: 'synced' });
+        .order('updated_at', { ascending: false });
+
+      if (!error && data) {
+        let updated = false;
+        await db.transaction('rw', db.notes, async () => {
+          for (const note of data) {
+            const existing = await db.notes.get(note.id);
+            if (!existing || existing.sync_status === 'synced' || existing.updated_at < note.updated_at) {
+              await db.notes.put({ ...note, sync_status: 'synced' });
+              updated = true;
+            }
+          }
+        });
+        if (updated && queryClient) {
+          queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
+        }
+        return data as Note[];
       }
+      return null;
+    };
+
+    if (validLocalNotes.length === 0) {
+      // Blocking fallback to prevent empty state flash on fresh install
+      const networkData = await fetchFromSupabase();
+      if (networkData) return networkData;
+    } else {
+      // Fire-and-forget stale-while-revalidate
+      fetchFromSupabase();
     }
-  } catch (error) {
-    console.log('Offline: Falling back to local note by slug');
   }
+
+  return validLocalNotes;
+}
+
+async function fetchNoteBySlug(slug: string, queryClient?: any): Promise<Note | null> {
+  const session = await getSession();
+  if (!session?.user?.id) return null;
 
   let localNote = await db.notes.where('slug').equals(slug).first();
   if (!localNote) {
     localNote = await db.notes.get(slug);
   }
 
+  if (typeof window !== 'undefined' && navigator.onLine) {
+    const fetchFromSupabase = async () => {
+      const { data, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('slug', slug)
+        .single();
+        
+      let updatedData = data;
+      if (error || !data) {
+        const byIdRes = await supabase
+          .from('notes')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .eq('id', slug)
+          .single();
+        if (!byIdRes.error && byIdRes.data) {
+          updatedData = byIdRes.data;
+        }
+      }
+      
+      if (updatedData) {
+        await db.notes.put({ ...updatedData, sync_status: 'synced' });
+        if (queryClient) {
+          queryClient.invalidateQueries({ queryKey: noteKeys.detail(slug) });
+        }
+        return updatedData as Note;
+      }
+      return null;
+    };
+
+    if (!localNote) {
+      const networkData = await fetchFromSupabase();
+      if (networkData) return networkData;
+    } else {
+      fetchFromSupabase();
+    }
+  }
+
   return (localNote as Note) || null;
 }
 
-async function fetchNotePages(noteId: string): Promise<NotePage[]> {
-  try {
-    const { data, error } = await supabase
-      .from('note_pages')
-      .select('*')
-      .eq('note_id', noteId)
-      .order('page_order', { ascending: true });
-
-    if (!error && data) {
-      await db.transaction('rw', db.notePages, async () => {
-        for (const page of data) {
-          const existing = await db.notePages.get(page.id);
-          if (!existing || existing.sync_status === 'synced' || existing.updated_at < page.updated_at) {
-            await db.notePages.put({ ...page, sync_status: 'synced' });
-          }
-        }
-      });
-    }
-  } catch (error) {
-    console.log('Offline: Falling back to local pages');
-  }
-
+async function fetchNotePages(noteId: string, queryClient?: any): Promise<NotePage[]> {
   const localPages = await db.notePages
     .where('note_id').equals(noteId)
     .sortBy('page_order');
+
+  if (typeof window !== 'undefined' && navigator.onLine) {
+    const fetchFromSupabase = async () => {
+      const { data, error } = await supabase
+        .from('note_pages')
+        .select('*')
+        .eq('note_id', noteId)
+        .order('page_order', { ascending: true });
+
+      if (!error && data) {
+        let updated = false;
+        await db.transaction('rw', db.notePages, async () => {
+          for (const page of data) {
+            const existing = await db.notePages.get(page.id);
+            if (!existing || existing.sync_status === 'synced' || existing.updated_at < page.updated_at) {
+              await db.notePages.put({ ...page, sync_status: 'synced' });
+              updated = true;
+            }
+          }
+        });
+        if (updated && queryClient) {
+          queryClient.invalidateQueries({ queryKey: noteKeys.pages(noteId) });
+        }
+        return data as NotePage[];
+      }
+      return null;
+    };
+
+    if (localPages.length === 0) {
+      const networkData = await fetchFromSupabase();
+      if (networkData && networkData.length > 0) return networkData;
+    } else {
+      fetchFromSupabase();
+    }
+  }
 
   return localPages as NotePage[];
 }
@@ -436,24 +482,27 @@ async function deletePage(pageId: string): Promise<void> {
 // ============================================
 
 export function useUserNotes() {
+  const queryClient = useQueryClient();
   return useQuery({
     queryKey: noteKeys.lists(),
-    queryFn: fetchUserNotes,
+    queryFn: () => fetchUserNotes(queryClient),
   });
 }
 
 export function useNote(slugOrId: string | undefined) {
+  const queryClient = useQueryClient();
   return useQuery({
     queryKey: noteKeys.detail(slugOrId || ''),
-    queryFn: () => fetchNoteBySlug(slugOrId!),
+    queryFn: () => fetchNoteBySlug(slugOrId!, queryClient),
     enabled: !!slugOrId && slugOrId !== 'new',
   });
 }
 
 export function useNotePages(noteId: string | null | undefined) {
+  const queryClient = useQueryClient();
   return useQuery({
     queryKey: noteKeys.pages(noteId || ''),
-    queryFn: () => fetchNotePages(noteId!),
+    queryFn: () => fetchNotePages(noteId!, queryClient),
     enabled: !!noteId,
   });
 }
