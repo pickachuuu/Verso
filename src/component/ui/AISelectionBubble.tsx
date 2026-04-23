@@ -21,7 +21,11 @@ import {
 // This tells the AI exactly which HTML tags TipTap understands,
 // so the AI can "use the toolbar" by outputting the right HTML.
 export const TIPTAP_FORMATTING_GUIDE = `
-You MUST return your response as rich HTML. You have access to the following formatting tools — use them to make the output clear, scannable, and visually structured for a student's notebook:
+You act as an integrated document AI assistant. You will be provided with the full DOCUMENT CONTEXT and a specific snippet of SELECTED TEXT TO PROCESS.
+1. ALWAYS ensure your response directly relates to the broader DOCUMENT CONTEXT. If the user selects a sub-topic (e.g. "Servant Leadership"), explain it in the framing of the larger context (e.g. "Spiritual Quotient").
+2. Your response will be injected directly inline at the cursor position. Return ONLY the HTML content that structurally fits seamlessly next to the selected text. If expanding a bullet point, it's best to return a nested sub-list (<ul><li>...</li></ul>) or inline text, rather than disjointed paragraphs.
+
+You MUST return your response as rich HTML. You have access to the following formatting tools — use them to make the output clear, scannable, and visually structured:
 
 STRUCTURE:
 - <h2>...</h2> and <h3>...</h3> for section headings
@@ -115,7 +119,9 @@ const AI_ACTIONS: Record<AIAction, AIActionConfig> = {
     label: 'Fix Grammar',
     icon: <CheckmarkCircle03Icon className="w-3.5 h-3.5" />,
     systemPrompt:
-      `You are an expert editor. Fix all grammar, spelling, and punctuation errors in the following text. Maintain the original meaning, tone, and any existing HTML formatting. Return the corrected text as HTML.\n\n${TIPTAP_FORMATTING_GUIDE}`,
+      `You are an expert editor. Fix all grammar, spelling, and punctuation errors in the SELECTED TEXT TO PROCESS. 
+Maintain the exact original meaning and tone. Return ONLY the corrected version of the highlighted text. 
+CRITICAL: Do NOT wrap your response in any new HTML blocks (like <p> or <div>) unless they were originally there. Do NOT include the surrounding document context in your output. Your exact output will directly replace the user's selection.`,
     mode: 'replace',
   },
   flashcards: {
@@ -129,13 +135,13 @@ const AI_ACTIONS: Record<AIAction, AIActionConfig> = {
 // ============================================
 // Gemini API call (reuses existing pattern)
 // ============================================
-async function callGeminiAPI(systemPrompt: string, selectedText: string): Promise<string> {
+async function callGeminiAPI(systemPrompt: string, payloadContent: string): Promise<string> {
   const res = await fetch('/api/ai/editor', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       systemPrompt,
-      userContent: `Text:\n${selectedText}`,
+      userContent: payloadContent,
     }),
   });
 
@@ -181,7 +187,9 @@ export default function AISelectionBubble({ editor, onGenerateFlashcards }: AISe
       setError(null);
 
       try {
-        const result = await callGeminiAPI(config.systemPrompt, selectedText);
+        const fullText = editor.getText();
+        const payload = `DOCUMENT CONTEXT:\n${fullText}\n\n=== END CONTEXT ===\n\nSELECTED TEXT TO PROCESS:\n${selectedText}`;
+        const result = await callGeminiAPI(config.systemPrompt, payload);
 
         if (!result.trim()) {
           setError('Empty response from AI');
@@ -208,10 +216,11 @@ export default function AISelectionBubble({ editor, onGenerateFlashcards }: AISe
           // Replace selected text with AI-formatted HTML
           editor.chain().focus().deleteSelection().insertContent(cleanResult).run();
         } else {
-          // Insert below selection — add a divider and label heading
+          // Insert below selection directly inline/nested
           const endPos = to;
-          const htmlBlock = `<hr><h3><span style="color: #3b82f6">AI ${config.label}</span></h3>${cleanResult}`;
-          editor.chain().focus().setTextSelection(endPos).insertContent(htmlBlock).run();
+          
+          // If it's HTML blocks, tiptap will split the text and place it cleanly.
+          editor.chain().focus().setTextSelection(endPos).insertContent(cleanResult).run();
         }
       } catch (err) {
         console.error('AI action error:', err);
