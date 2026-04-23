@@ -2,7 +2,7 @@
 
 import { BubbleMenu } from '@tiptap/react/menus';
 import { Editor } from '@tiptap/react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   GoogleGeminiIcon,
   Loading03Icon,
@@ -14,6 +14,7 @@ import {
   FlashIcon,
   Copy01Icon,
 } from 'hugeicons-react';
+import MobileBottomSheet from './MobileBottomSheet';
 
 // ============================================
 // Shared Rich Formatting Guide for AI
@@ -166,6 +167,51 @@ export default function AISelectionBubble({ editor, onGenerateFlashcards }: AISe
   const [loading, setLoading] = useState<AIAction | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showAIOptions, setShowAIOptions] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [hasMobileSelection, setHasMobileSelection] = useState(false);
+
+  // Add listeners for mobile detection and selection updates
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) return;
+
+    let timeoutId: NodeJS.Timeout;
+
+    const updateSelection = () => {
+      clearTimeout(timeoutId);
+      
+      const { from, to } = editor.state.selection;
+      const isEmpty = from === to;
+      const isCodeBlock = editor.isActive('codeBlock');
+      
+      if (isEmpty || isCodeBlock) {
+        setHasMobileSelection(false);
+      } else {
+        // Wait 400ms before popping up the sheet so the user can easily finish dragging selection handles
+        timeoutId = setTimeout(() => {
+          setHasMobileSelection(true);
+        }, 400);
+      }
+    };
+
+    editor.on('selectionUpdate', updateSelection);
+    // Initial check without delay
+    const { from, to } = editor.state.selection;
+    if (from !== to && !editor.isActive('codeBlock')) {
+      setHasMobileSelection(true);
+    }
+
+    return () => {
+      clearTimeout(timeoutId);
+      editor.off('selectionUpdate', updateSelection);
+    };
+  }, [editor, isMobile]);
 
   const handleAction = useCallback(
     async (action: AIAction) => {
@@ -232,7 +278,7 @@ export default function AISelectionBubble({ editor, onGenerateFlashcards }: AISe
     [editor, onGenerateFlashcards]
   );
 
-  return (
+  const desktopMenu = (
     <BubbleMenu
       editor={editor}
       options={{
@@ -336,5 +382,54 @@ export default function AISelectionBubble({ editor, onGenerateFlashcards }: AISe
         )}
       </div>
     </BubbleMenu>
+  );
+
+  return (
+    <>
+      {!isMobile && desktopMenu}
+      {isMobile && (
+        <MobileBottomSheet
+          open={hasMobileSelection || loading !== null}
+          onClose={() => setHasMobileSelection(false)}
+          title="AI ASSISTANT"
+          description="WHAT WOULD YOU LIKE TO DO WITH THIS TEXT?"
+        >
+          <div className="flex flex-col gap-2 pt-2">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center p-8 text-center bg-background-muted rounded-2xl border border-border/40">
+                <Loading03Icon className="w-8 h-8 text-primary animate-spin mb-4" />
+                <p className="text-[12px] font-black uppercase tracking-widest text-foreground">AI is processing...</p>
+                <p className="text-[10px] font-bold text-foreground-muted mt-1 uppercase tracking-widest">Please don't close the sheet</p>
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center p-6 text-center bg-red-500/10 rounded-2xl border border-red-500/20">
+                <p className="text-[12px] font-black uppercase tracking-widest text-red-600 mb-2">{error}</p>
+                <button 
+                  onClick={() => setError(null)} 
+                  className="px-4 py-2 bg-surface border border-border rounded-xl text-[10px] font-bold uppercase tracking-widest"
+                >
+                  Dismiss
+                </button>
+              </div>
+            ) : (
+              (Object.keys(AI_ACTIONS) as AIAction[]).map((action) => {
+                const config = AI_ACTIONS[action];
+                if (action === 'flashcards' && !onGenerateFlashcards) return null;
+                return (
+                  <button
+                    key={action}
+                    onClick={() => handleAction(action)}
+                    className="flex items-center gap-4 px-5 py-4 rounded-xl border border-border/40 bg-background-muted active:scale-95 transition-all w-full text-left focus:outline-primary focus:ring-2"
+                  >
+                    <span className="text-primary w-6 flex justify-center">{config.icon}</span>
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em]">{config.label}</span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </MobileBottomSheet>
+      )}
+    </>
   );
 }
