@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/client';
 import { db } from '@/lib/db';
 import { GeminiFlashcard, GeminiResponse } from '@/lib/gemini';
 import { FlashcardSetInsert, FlashcardInsert, GeminiRequestInsert, Flashcard, FlashcardSet } from '@/lib/database.types';
+import { buildFlashcardProgressReset, buildFlashcardSetProgressReset } from '@/lib/flashcardReset';
 
 const supabase = createClient();
 
@@ -511,6 +512,46 @@ async function togglePublicStatus({ setId, isPublic }: { setId: string; isPublic
     .catch(() => console.log("Offline mode: Public status toggle will sync later"));
 }
 
+async function resetFlashcardSetProgress(setId: string): Promise<void> {
+  const now = new Date().toISOString();
+  const cardReset = buildFlashcardProgressReset(now);
+  const setReset = buildFlashcardSetProgressReset(now);
+  const localCards = await db.flashcards.where('set_id').equals(setId).toArray();
+
+  await db.transaction('rw', db.flashcardSets, db.flashcards, async () => {
+    for (const card of localCards) {
+      await db.flashcards.update(card.id, { ...cardReset, sync_status: 'pending' } as any);
+    }
+
+    await db.flashcardSets.update(setId, { ...setReset, sync_status: 'pending' } as any);
+  });
+
+  try {
+    const { error: cardsError } = await supabase
+      .from('flashcards')
+      .update(cardReset)
+      .eq('set_id', setId);
+
+    if (cardsError) throw cardsError;
+
+    const { error: setError } = await supabase
+      .from('flashcard_sets')
+      .update(setReset)
+      .eq('id', setId);
+
+    if (setError) throw setError;
+
+    await db.transaction('rw', db.flashcardSets, db.flashcards, async () => {
+      for (const card of localCards) {
+        await db.flashcards.update(card.id, { sync_status: 'synced' });
+      }
+      await db.flashcardSets.update(setId, { sync_status: 'synced' });
+    });
+  } catch (error) {
+    console.log('Offline mode: flashcard progress reset will sync later', error);
+  }
+}
+
 // ============================================
 // Query Hooks
 // ============================================
@@ -621,6 +662,19 @@ export function useTogglePublicStatus() {
     mutationFn: togglePublicStatus,
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: flashcardKeys.detail(variables.setId) });
+      queryClient.invalidateQueries({ queryKey: flashcardKeys.lists() });
+    },
+  });
+}
+
+export function useResetFlashcardProgress() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: resetFlashcardSetProgress,
+    onSuccess: (_, setId) => {
+      queryClient.invalidateQueries({ queryKey: flashcardKeys.detail(setId) });
+      queryClient.invalidateQueries({ queryKey: flashcardKeys.studyData(setId) });
       queryClient.invalidateQueries({ queryKey: flashcardKeys.lists() });
     },
   });
