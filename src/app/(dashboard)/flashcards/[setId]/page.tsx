@@ -13,7 +13,8 @@ import {
   SparklesIcon,
 } from 'hugeicons-react';
 import VersoLoader from '@/component/ui/VersoLoader';
-import { useStudySetData } from '@/hooks/useFlashcards';
+import ResetFlashcardProgressModal from '@/component/features/modal/ResetFlashcardProgressModal';
+import { useResetFlashcardProgress, useStudySetData } from '@/hooks/useFlashcards';
 import { Flashcard } from '@/lib/database.types';
 
 type StatusFilter = 'all' | 'new' | 'learning' | 'review' | 'mastered';
@@ -24,10 +25,12 @@ export default function FlashcardBrowsePage() {
   const setId = params.setId as string;
 
   const { data: studyData, isLoading } = useStudySetData(setId);
+  const resetProgress = useResetFlashcardProgress();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const [showResetModal, setShowResetModal] = useState(false);
 
   const filteredCards = useMemo(() => {
     if (!studyData?.cards) return [];
@@ -84,6 +87,12 @@ export default function FlashcardBrowsePage() {
   };
 
   const allExpanded = filteredCards.length > 0 && filteredCards.every((c) => expandedCards.has(c.id));
+
+  const handleResetProgress = async () => {
+    await resetProgress.mutateAsync(setId);
+    setStatusFilter('all');
+    setExpandedCards(new Set());
+  };
 
   // Loading state
   if (isLoading) {
@@ -219,6 +228,13 @@ export default function FlashcardBrowsePage() {
                 style={{ width: `${progress.percentage}%` }}
               />
             </div>
+            <button
+              onClick={() => setShowResetModal(true)}
+              disabled={studyData.cards.length === 0 || resetProgress.isPending}
+              className="mt-5 w-full px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest border-[2px] border-border/40 bg-background-muted hover:border-foreground hover:bg-foreground hover:text-surface transition-all shrink-0 active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+            >
+              Reset Progress
+            </button>
           </div>
 
           <div className="bg-surface border-[2px] border-border/50 rounded-[1.5rem] p-6 shadow-sm">
@@ -262,6 +278,15 @@ export default function FlashcardBrowsePage() {
       <p className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30 pt-12 pb-4">
         Showing {filteredCards.length} of {studyData.cards.length} cards
       </p>
+
+      <ResetFlashcardProgressModal
+        isOpen={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        onConfirm={handleResetProgress}
+        setTitle={studyData.set.title || 'Flashcards'}
+        totalCards={studyData.cards.length}
+        loading={resetProgress.isPending}
+      />
     </div>
   );
 }

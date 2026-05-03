@@ -24,6 +24,8 @@ import {
 } from '@/hooks/useActivityTracking';
 import StudySessionView from '@/component/features/StudySessionView';
 import VersoLoader from '@/component/ui/VersoLoader';
+import ResetFlashcardProgressModal from '@/component/features/modal/ResetFlashcardProgressModal';
+import { useResetFlashcardProgress } from '@/hooks/useFlashcards';
 
 export default function StudyPage() {
   const params = useParams();
@@ -39,7 +41,9 @@ export default function StudyPage() {
   const [reviewPreviews, setReviewPreviews] = useState<Record<SimplifiedRating, string> | null>(null);
   const [lastReviewResult, setLastReviewResult] = useState<{ interval: string; wasSuccessful: boolean } | null>(null);
   const [setTitle, setSetTitle] = useState('');
+  const [totalCards, setTotalCards] = useState(0);
   const [sessionComplete, setSessionComplete] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
   // Session tracking
   const sessionIdRef = useRef<string | null>(null);
@@ -47,6 +51,7 @@ export default function StudyPage() {
   const correctAnswersRef = useRef(0);
 
   const { getDueCardsForSet, reviewFlashcardWithSR, getReviewPreviews, getFlashcardSetById } = useFlashcardActions();
+  const resetProgress = useResetFlashcardProgress();
 
   const currentCard = useMemo(() => {
     if (dueCards.length === 0 || currentIndex >= dueCards.length) return null;
@@ -65,6 +70,7 @@ export default function StudyPage() {
 
       setDueCards(cards);
       setSetTitle(setData?.title || 'Flashcards');
+      setTotalCards(setData?.total_cards || cards.length);
 
       if (!sessionIdRef.current) {
         const sessionId = await getOrCreateFlashcardSession(setId);
@@ -103,6 +109,17 @@ export default function StudyPage() {
   }, []);
 
   const handleShowAnswer = useCallback(() => setShowAnswer(true), []);
+
+  const handleResetProgress = useCallback(async () => {
+    await resetProgress.mutateAsync(setId);
+    cardsStudiedRef.current = 0;
+    correctAnswersRef.current = 0;
+    setCurrentIndex(0);
+    setShowAnswer(false);
+    setLastReviewResult(null);
+    setSessionComplete(false);
+    await loadDueCards();
+  }, [loadDueCards, resetProgress, setId]);
 
   const handleReview = useCallback(
     async (rating: SimplifiedRating) => {
@@ -243,6 +260,13 @@ export default function StudyPage() {
                 Browse Cards
               </button>
               <button
+                onClick={() => setShowResetModal(true)}
+                disabled={resetProgress.isPending}
+                className="px-6 py-3 rounded-xl font-semibold border border-border/60 bg-surface hover:bg-background-muted text-foreground transition-all disabled:opacity-50"
+              >
+                Reset Progress
+              </button>
+              <button
                 onClick={() => router.push('/flashcards')}
                 className="px-6 py-3 rounded-xl font-semibold bg-primary text-white hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
               >
@@ -251,6 +275,15 @@ export default function StudyPage() {
             </div>
           </div>
         </ClayCard>
+
+        <ResetFlashcardProgressModal
+          isOpen={showResetModal}
+          onClose={() => setShowResetModal(false)}
+          onConfirm={handleResetProgress}
+          setTitle={setTitle}
+          totalCards={totalCards}
+          loading={resetProgress.isPending}
+        />
       </div>
     );
   }
@@ -317,9 +350,25 @@ export default function StudyPage() {
               >
                 Browse Cards
               </button>
+              <button
+                onClick={() => setShowResetModal(true)}
+                disabled={resetProgress.isPending}
+                className="px-6 py-3 rounded-xl font-semibold border border-border/60 bg-surface hover:bg-background-muted text-foreground transition-all disabled:opacity-50"
+              >
+                Reset Progress
+              </button>
             </div>
           </div>
         </ClayCard>
+
+        <ResetFlashcardProgressModal
+          isOpen={showResetModal}
+          onClose={() => setShowResetModal(false)}
+          onConfirm={handleResetProgress}
+          setTitle={setTitle}
+          totalCards={totalCards}
+          loading={resetProgress.isPending}
+        />
       </div>
     );
   }
