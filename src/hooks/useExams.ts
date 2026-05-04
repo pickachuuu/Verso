@@ -18,6 +18,10 @@ import { dashboardKeys } from './useDashboard';
 
 const supabase = createClient();
 
+function isOffline() {
+  return typeof window !== 'undefined' && !navigator.onLine;
+}
+
 // ============================================
 // Types
 // ============================================
@@ -88,6 +92,8 @@ async function getSession() {
 }
 
 async function fetchExams(): Promise<ExamListItem[]> {
+  if (isOffline()) return [];
+
   const session = await getSession();
   if (!session?.user?.id) return [];
 
@@ -143,6 +149,8 @@ async function fetchExams(): Promise<ExamListItem[]> {
 }
 
 async function fetchExam(examId: string): Promise<ExamWithQuestions | null> {
+  if (isOffline()) return null;
+
   const [examResult, questionsResult] = await Promise.all([
     supabase
       .from('exam_sets')
@@ -179,6 +187,8 @@ async function fetchExam(examId: string): Promise<ExamWithQuestions | null> {
 }
 
 async function fetchAttemptResults(attemptId: string): Promise<AttemptWithResponses | null> {
+  if (isOffline()) return null;
+
   const { data: attempt, error: attemptError } = await supabase
     .from('exam_attempts')
     .select(`
@@ -218,6 +228,8 @@ async function fetchAttemptResults(attemptId: string): Promise<AttemptWithRespon
 }
 
 async function fetchInProgressAttempt(examId: string): Promise<ExamAttempt | null> {
+  if (isOffline()) return null;
+
   const session = await getSession();
   if (!session?.user?.id) return null;
 
@@ -240,6 +252,8 @@ async function fetchInProgressAttempt(examId: string): Promise<ExamAttempt | nul
 }
 
 async function fetchExamAttempts(examId: string): Promise<ExamAttempt[]> {
+  if (isOffline()) return [];
+
   const session = await getSession();
   if (!session?.user?.id) return [];
 
