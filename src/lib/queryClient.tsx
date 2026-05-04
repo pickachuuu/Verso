@@ -2,6 +2,7 @@
 
 import { isServer, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
+import { useSyncManager } from '@/hooks/useSyncManager';
 
 function makeQueryClient() {
   return new QueryClient({
@@ -40,9 +41,15 @@ export function QueryProvider({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <OfflineSyncBridge />
       {children}
     </QueryClientProvider>
   );
+}
+
+function OfflineSyncBridge() {
+  useSyncManager();
+  return null;
 }
 
 export { getQueryClient };
