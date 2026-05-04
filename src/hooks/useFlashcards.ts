@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/utils/supabase/client';
-import { db } from '@/lib/db';
+import { db, queueSyncOperation } from '@/lib/db';
 import { GeminiFlashcard, GeminiResponse } from '@/lib/gemini';
 import { FlashcardSetInsert, FlashcardInsert, GeminiRequestInsert, Flashcard, FlashcardSet } from '@/lib/database.types';
 import { buildFlashcardProgressReset, buildFlashcardSetProgressReset } from '@/lib/flashcardReset';
@@ -72,6 +72,18 @@ function convertDifficultyToLevel(difficulty: 'easy' | 'medium' | 'hard'): numbe
 
 async function getSession() {
   const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('verso_last_active_user_id', session.user.id);
+    }
+    return session;
+  }
+
+  if (typeof window !== 'undefined' && !navigator.onLine) {
+    const lastId = localStorage.getItem('verso_last_active_user_id');
+    if (lastId) return { user: { id: lastId } } as any;
+  }
+
   return session;
 }
 
@@ -281,6 +293,7 @@ async function createFlashcardSet(noteId: string | null, noteTitle: string): Pro
   };
 
   await db.flashcardSets.put({ ...flashcardSet, sync_status: 'pending' } as any);
+  const outboxId = await queueSyncOperation('flashcard_sets', setId, 'create', { ...flashcardSet, sync_status: 'pending' } as any);
 
   supabase
     .from('flashcard_sets')
@@ -288,6 +301,9 @@ async function createFlashcardSet(noteId: string | null, noteTitle: string): Pro
     .then(({ error }: { error: any }) => {
       if (!error) {
         db.flashcardSets.update(setId, { sync_status: 'synced' }).catch(() => {});
+        db.syncOutbox.get(outboxId)
+          .then((item) => item?.operation === 'create' ? db.syncOutbox.delete(outboxId) : undefined)
+          .catch(() => {});
       }
     })
     .catch(() => console.log("Offline mode: Flashcard set creation will sync later"));
@@ -321,8 +337,10 @@ async function saveFlashcardsToSet(
     updated_at: now
   }));
 
+  const outboxIds: string[] = [];
   for (const fc of flashcardInserts) {
     await db.flashcards.put({ ...fc, sync_status: 'pending' } as any);
+    outboxIds.push(await queueSyncOperation('flashcards', fc.id!, 'create', { ...fc, sync_status: 'pending' } as any));
   }
 
   supabase
@@ -331,6 +349,10 @@ async function saveFlashcardsToSet(
     .then(({ error }: { error: any }) => {
       if (!error) {
         Promise.all(flashcardInserts.map(fc => db.flashcards.update(fc.id!, { sync_status: 'synced' }))).catch(() => {});
+        Promise.all(outboxIds.map(async (id) => {
+          const item = await db.syncOutbox.get(id);
+          if (item?.operation === 'create') await db.syncOutbox.delete(id);
+        })).catch(() => {});
       }
     })
     .catch(() => console.log("Offline mode: Flashcards save will sync later"));
@@ -392,6 +414,7 @@ async function reforgeFlashcards({ setId, action, flashcards }: ReforgeOptions):
   if (action === 'regenerate') {
     const relatedCards = await db.flashcards.where('set_id').equals(setId).toArray();
     for (const card of relatedCards) {
+      await queueSyncOperation('flashcards', card.id, 'delete', null);
       await db.flashcards.delete(card.id);
     }
     
@@ -421,7 +444,12 @@ async function reforgeFlashcards({ setId, action, flashcards }: ReforgeOptions):
 
   // Update set count optimistically
   const localCards = await db.flashcards.where('set_id').equals(setId).toArray();
-  await db.flashcardSets.update(setId, { total_cards: localCards.length, updated_at: new Date().toISOString() } as any);
+  const setUpdate = { total_cards: localCards.length, updated_at: new Date().toISOString(), sync_status: 'pending' } as any;
+  await db.flashcardSets.update(setId, setUpdate);
+  const localSet = await db.flashcardSets.get(setId);
+  if (localSet) {
+    await queueSyncOperation('flashcard_sets', setId, 'update', localSet as any);
+  }
 
   supabase
     .from('flashcard_sets')
@@ -430,6 +458,14 @@ async function reforgeFlashcards({ setId, action, flashcards }: ReforgeOptions):
       updated_at: new Date().toISOString()
     })
     .eq('id', setId)
+    .then(({ error }: { error: any }) => {
+      if (!error) {
+        db.flashcardSets.update(setId, { sync_status: 'synced' }).catch(() => {});
+        db.syncOutbox.where('[table_name+record_id]').equals(['flashcard_sets', setId] as any).first()
+          .then((outboxItem) => outboxItem ? db.syncOutbox.delete(outboxItem.id) : undefined)
+          .catch(() => {});
+      }
+    })
     .catch(() => console.log("Offline mode: reforge will sync later"));
 }
 
@@ -451,6 +487,7 @@ async function updateFlashcardStatus({ flashcardId, status, wasCorrect }: Update
   }
 
   await db.flashcards.update(flashcardId, { ...updateData, sync_status: 'pending' } as any);
+  await queueSyncOperation('flashcards', flashcardId, 'update', { ...localCard, ...updateData, sync_status: 'pending' } as any);
 
   supabase
     .from('flashcards')
@@ -459,6 +496,9 @@ async function updateFlashcardStatus({ flashcardId, status, wasCorrect }: Update
     .then(({ error }: { error: any }) => {
       if (!error) {
         db.flashcards.update(flashcardId, { sync_status: 'synced' }).catch(() => {});
+        db.syncOutbox.where('[table_name+record_id]').equals(['flashcards', flashcardId] as any).first()
+          .then((outboxItem) => outboxItem ? db.syncOutbox.delete(outboxItem.id) : undefined)
+          .catch(() => {});
       }
     })
     .catch(() => console.log("Offline mode: status sync deferred"));
@@ -472,7 +512,8 @@ async function deleteFlashcardSet(setId: string): Promise<void> {
     throw new Error('User not authenticated');
   }
 
-  await db.transaction('rw', db.flashcardSets, db.flashcards, async () => {
+  const outboxId = await queueSyncOperation('flashcard_sets', setId, 'delete', null);
+  await db.transaction('rw', db.flashcardSets, db.flashcards, db.syncOutbox, async () => {
     await db.flashcardSets.delete(setId);
     const relatedCards = await db.flashcards.where('set_id').equals(setId).toArray();
     for (const card of relatedCards) {
@@ -487,6 +528,7 @@ async function deleteFlashcardSet(setId: string): Promise<void> {
     .eq('user_id', session.user.id)
     .then(({ error }: { error: any }) => {
       if (error) console.error('Error deleting flashcard set from server:', error);
+      if (!error) db.syncOutbox.delete(outboxId).catch(() => {});
     })
     .catch(() => console.log("Offline mode: Flashcard set deleted locally. Will attempt delete on server later."));
 }
@@ -498,6 +540,10 @@ async function togglePublicStatus({ setId, isPublic }: { setId: string; isPublic
   }
 
   await db.flashcardSets.update(setId, { is_public: isPublic, sync_status: 'pending' } as any);
+  const localSet = await db.flashcardSets.get(setId);
+  if (localSet) {
+    await queueSyncOperation('flashcard_sets', setId, 'update', localSet as any);
+  }
 
   supabase
     .from('flashcard_sets')
@@ -507,6 +553,9 @@ async function togglePublicStatus({ setId, isPublic }: { setId: string; isPublic
     .then(({ error }: { error: any }) => {
       if (!error) {
         db.flashcardSets.update(setId, { sync_status: 'synced' }).catch(() => {});
+        db.syncOutbox.where('[table_name+record_id]').equals(['flashcard_sets', setId] as any).first()
+          .then((outboxItem) => outboxItem ? db.syncOutbox.delete(outboxItem.id) : undefined)
+          .catch(() => {});
       }
     })
     .catch(() => console.log("Offline mode: Public status toggle will sync later"));
@@ -518,12 +567,17 @@ async function resetFlashcardSetProgress(setId: string): Promise<void> {
   const setReset = buildFlashcardSetProgressReset(now);
   const localCards = await db.flashcards.where('set_id').equals(setId).toArray();
 
-  await db.transaction('rw', db.flashcardSets, db.flashcards, async () => {
+  await db.transaction('rw', db.flashcardSets, db.flashcards, db.syncOutbox, async () => {
     for (const card of localCards) {
       await db.flashcards.update(card.id, { ...cardReset, sync_status: 'pending' } as any);
+      await queueSyncOperation('flashcards', card.id, 'update', { ...card, ...cardReset, sync_status: 'pending' } as any);
     }
 
     await db.flashcardSets.update(setId, { ...setReset, sync_status: 'pending' } as any);
+    const localSet = await db.flashcardSets.get(setId);
+    if (localSet) {
+      await queueSyncOperation('flashcard_sets', setId, 'update', localSet as any);
+    }
   });
 
   try {
@@ -541,11 +595,15 @@ async function resetFlashcardSetProgress(setId: string): Promise<void> {
 
     if (setError) throw setError;
 
-    await db.transaction('rw', db.flashcardSets, db.flashcards, async () => {
+    await db.transaction('rw', db.flashcardSets, db.flashcards, db.syncOutbox, async () => {
       for (const card of localCards) {
         await db.flashcards.update(card.id, { sync_status: 'synced' });
+        const outboxItem = await db.syncOutbox.where('[table_name+record_id]').equals(['flashcards', card.id] as any).first();
+        if (outboxItem) await db.syncOutbox.delete(outboxItem.id);
       }
       await db.flashcardSets.update(setId, { sync_status: 'synced' });
+      const setOutboxItem = await db.syncOutbox.where('[table_name+record_id]').equals(['flashcard_sets', setId] as any).first();
+      if (setOutboxItem) await db.syncOutbox.delete(setOutboxItem.id);
     });
   } catch (error) {
     console.log('Offline mode: flashcard progress reset will sync later', error);
