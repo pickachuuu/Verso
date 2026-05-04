@@ -17,6 +17,10 @@ import { examKeys } from '@/hooks/useExams';
 
 const supabase = createClient();
 
+function isOffline() {
+  return typeof window !== 'undefined' && !navigator.onLine;
+}
+
 export type SavedMaterialType = 'note' | 'flashcard' | 'exam';
 
 export interface SavedMaterialItem {
@@ -133,6 +137,8 @@ async function getSession() {
 }
 
 async function fetchSavedMaterials(): Promise<SavedMaterialItem[]> {
+  if (isOffline()) return [];
+
   const session = await getSession();
   if (!session?.user?.id) return [];
 
