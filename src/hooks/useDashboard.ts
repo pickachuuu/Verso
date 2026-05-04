@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/utils/supabase/client';
 import { startOfDay, subDays, format, differenceInDays, parseISO, addDays } from 'date-fns';
 import { isCardDue, sortCardsByUrgency } from '@/lib/spacedRepetition';
+import { db } from '@/lib/db';
 
 const supabase = createClient();
 
@@ -139,7 +140,36 @@ function timeAgo(dateString: string): string {
 
 async function getSession() {
   const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('verso_last_active_user_id', session.user.id);
+    }
+    return session;
+  }
+
+  if (typeof window !== 'undefined' && !navigator.onLine) {
+    const lastId = localStorage.getItem('verso_last_active_user_id');
+    if (lastId) return { user: { id: lastId } } as any;
+  }
+
   return session;
+}
+
+function isOffline() {
+  return typeof window !== 'undefined' && !navigator.onLine;
+}
+
+async function fetchLocalFlashcardSets(userId: string) {
+  return db.flashcardSets.where('user_id').equals(userId).toArray();
+}
+
+async function fetchLocalUserFlashcards(userId: string) {
+  const sets = await fetchLocalFlashcardSets(userId);
+  const setIds = sets.map((set) => set.id);
+  if (setIds.length === 0) return { sets, cards: [] as any[] };
+
+  const cards = await db.flashcards.where('set_id').anyOf(setIds).toArray();
+  return { sets, cards };
 }
 
 async function fetchDashboardStats(): Promise<DashboardStats> {
@@ -155,6 +185,24 @@ async function fetchDashboardStats(): Promise<DashboardStats> {
   }
 
   const userId = session.user.id;
+
+  if (isOffline()) {
+    const notes = await db.notes.where('user_id').equals(userId).toArray();
+    const { sets, cards } = await fetchLocalUserFlashcards(userId);
+    const masteredCards = cards.filter((card) => card.status === 'mastered').length;
+    const fullyMasteredSets = sets.filter((set) => {
+      const setCards = cards.filter((card) => card.set_id === set.id);
+      return setCards.length > 0 && setCards.every((card) => card.status === 'mastered');
+    }).length;
+
+    return {
+      notesCount: notes.length,
+      totalFlashcards: cards.length,
+      totalSets: sets.length,
+      masteredCards,
+      fullyMasteredSets,
+    };
+  }
 
   // Fetch notes count
   const { count: notesCount } = await supabase
@@ -212,6 +260,37 @@ async function fetchRecentActivity(): Promise<ActivityItem[]> {
 
   const userId = session.user.id;
   const items: ActivityItem[] = [];
+
+  if (isOffline()) {
+    const notes = await db.notes.where('user_id').equals(userId).reverse().sortBy('updated_at');
+    const sets = await db.flashcardSets.where('user_id').equals(userId).reverse().sortBy('updated_at');
+
+    notes.slice(0, 3).forEach((note) => {
+      items.push({
+        id: note.id,
+        type: 'note',
+        title: note.title || 'Untitled Note',
+        description: 'Updated note',
+        time: note.updated_at ? timeAgo(note.updated_at) : '',
+        updatedAt: new Date(note.updated_at),
+        href: `/editor/${note.slug || note.id}`,
+      });
+    });
+
+    sets.slice(0, 2).forEach((set) => {
+      items.push({
+        id: set.id,
+        type: 'flashcard',
+        title: set.title || 'Flashcard Set',
+        description: `${set.total_cards || 0} cards`,
+        time: set.updated_at ? timeAgo(set.updated_at) : '',
+        updatedAt: new Date(set.updated_at),
+        href: `/flashcards/${set.id}`,
+      });
+    });
+
+    return items.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).slice(0, 5);
+  }
 
   // Fetch recent notes
   const { data: notes } = await supabase
@@ -311,6 +390,10 @@ async function fetchStudyStreak(): Promise<StudyStreakData> {
   const userId = session.user.id;
   const today = startOfDay(new Date());
 
+  if (isOffline()) {
+    return { currentStreak: 0, longestStreak: 0, studiedToday: false, lastStudyDate: null };
+  }
+
   // Fetch study sessions from the last 365 days
   // Include all activity types that count toward streak
   const { data: sessions } = await supabase
@@ -402,6 +485,64 @@ async function fetchCardsDue(): Promise<CardsDueData> {
   const todayEnd = new Date(now);
   todayEnd.setHours(23, 59, 59, 999);
   const tomorrowEnd = addDays(todayEnd, 1);
+
+  if (isOffline()) {
+    const { sets, cards: flashcards } = await fetchLocalUserFlashcards(userId);
+    const setTitleById = new Map(sets.map((set) => [set.id, set.title]));
+
+    if (flashcards.length === 0) {
+      return { dueToday: 0, dueTomorrow: 0, overdue: 0, newCards: 0, nextReviewSet: null };
+    }
+
+    let dueToday = 0;
+    let dueTomorrow = 0;
+    let overdue = 0;
+    let newCards = 0;
+    const setDueCounts: Record<string, { id: string; title: string; count: number }> = {};
+
+    flashcards.forEach((card) => {
+      if (card.status === 'new') {
+        newCards++;
+        dueToday++;
+        setDueCounts[card.set_id] ||= { id: card.set_id, title: setTitleById.get(card.set_id) || 'Flashcard Set', count: 0 };
+        setDueCounts[card.set_id].count++;
+        return;
+      }
+
+      if (card.status === 'mastered' && !isCardDue(card.next_review)) return;
+
+      if (card.next_review) {
+        const reviewDate = parseISO(card.next_review);
+        if (isCardDue(card.next_review)) {
+          overdue++;
+          dueToday++;
+          setDueCounts[card.set_id] ||= { id: card.set_id, title: setTitleById.get(card.set_id) || 'Flashcard Set', count: 0 };
+          setDueCounts[card.set_id].count++;
+        } else if (reviewDate <= todayEnd) {
+          dueToday++;
+          setDueCounts[card.set_id] ||= { id: card.set_id, title: setTitleById.get(card.set_id) || 'Flashcard Set', count: 0 };
+          setDueCounts[card.set_id].count++;
+        } else if (reviewDate <= tomorrowEnd) {
+          dueTomorrow++;
+        }
+      } else if (card.status === 'learning' || card.status === 'review') {
+        dueToday++;
+        setDueCounts[card.set_id] ||= { id: card.set_id, title: setTitleById.get(card.set_id) || 'Flashcard Set', count: 0 };
+        setDueCounts[card.set_id].count++;
+      }
+    });
+
+    let nextReviewSet: CardsDueData['nextReviewSet'] = null;
+    let maxDue = 0;
+    Object.values(setDueCounts).forEach((set) => {
+      if (set.count > maxDue) {
+        maxDue = set.count;
+        nextReviewSet = { id: set.id, title: set.title, dueCount: set.count };
+      }
+    });
+
+    return { dueToday, dueTomorrow, overdue, newCards, nextReviewSet };
+  }
 
   // Fetch all flashcards with their sets, including SM-2 fields
   const { data: flashcards } = await supabase
@@ -528,6 +669,28 @@ async function fetchMasteryData(): Promise<MasteryData> {
 
   const userId = session.user.id;
 
+  if (isOffline()) {
+    const { cards: flashcards } = await fetchLocalUserFlashcards(userId);
+    if (flashcards.length === 0) {
+      return { totalCards: 0, newCards: 0, learningCards: 0, reviewCards: 0, masteredCards: 0, masteryPercentage: 0 };
+    }
+
+    const newCards = flashcards.filter((card) => card.status === 'new').length;
+    const learningCards = flashcards.filter((card) => card.status === 'learning').length;
+    const reviewCards = flashcards.filter((card) => card.status === 'review').length;
+    const masteredCards = flashcards.filter((card) => card.status === 'mastered').length;
+    const totalCards = flashcards.length;
+
+    return {
+      totalCards,
+      newCards,
+      learningCards,
+      reviewCards,
+      masteredCards,
+      masteryPercentage: totalCards > 0 ? Math.round((masteredCards / totalCards) * 100) : 0,
+    };
+  }
+
   const { data: flashcards } = await supabase
     .from('flashcards')
     .select(`
@@ -570,6 +733,10 @@ async function fetchWeeklyActivity(): Promise<WeeklyActivityData[]> {
   const userId = session.user.id;
   const today = startOfDay(new Date());
   const weekAgo = subDays(today, 6);
+
+  if (isOffline()) {
+    return generateEmptyWeek();
+  }
 
   // Fetch all sessions including different activity types
   const { data: sessions } = await supabase
@@ -646,6 +813,10 @@ async function fetchExamStats(): Promise<ExamStatsData> {
 
   const userId = session.user.id;
 
+  if (isOffline()) {
+    return { totalExams: 0, totalAttempts: 0, averageScore: 0, bestScore: 0, recentAttempts: [] };
+  }
+
   // Fetch exam sets count
   const { count: totalExams } = await supabase
     .from('exam_sets')
@@ -711,6 +882,32 @@ async function fetchContinueLearning(): Promise<ContinueLearningData> {
   }
 
   const userId = session.user.id;
+
+  if (isOffline()) {
+    const { sets, cards } = await fetchLocalUserFlashcards(userId);
+    if (sets.length === 0) {
+      return { hasActivity: false, lastStudiedSet: null, suggestedAction: 'create_cards', dueCardsCount: 0 };
+    }
+
+    const cardsDue = await fetchCardsDue();
+    const dueCardsCount = cardsDue.dueToday;
+    const latestSet = [...sets].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0];
+    const setCards = cards.filter((card) => card.set_id === latestSet.id);
+    const masteredCards = setCards.filter((card) => card.status === 'mastered').length;
+
+    return {
+      hasActivity: true,
+      lastStudiedSet: {
+        id: latestSet.id,
+        title: latestSet.title,
+        progress: setCards.length > 0 ? Math.round((masteredCards / setCards.length) * 100) : 0,
+        totalCards: setCards.length,
+        masteredCards,
+      },
+      suggestedAction: dueCardsCount > 0 ? 'review_due' : masteredCards < setCards.length ? 'continue_set' : 'create_cards',
+      dueCardsCount,
+    };
+  }
 
   // Get most recent study session
   const { data: recentSession } = await supabase
