@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/utils/supabase/client';
 import { generateUniqueSlug } from '@/lib/slug';
 import { NotebookColorKey } from '@/component/ui/ClayNotebookCover';
-import { db, type LocalNote, type LocalNotePage } from '@/lib/db';
+import { db, queueSyncOperation, type LocalNote, type LocalNotePage } from '@/lib/db';
 
 const supabase = createClient();
 
@@ -260,6 +260,7 @@ async function createNote({ title, coverColor = 'royal' }: CreateNoteParams): Pr
   };
 
   await db.notes.put(localNote);
+  const outboxId = await queueSyncOperation('notes', newId, 'create', localNote as any);
 
   try {
     await supabase.from('notes').insert([{
@@ -272,6 +273,7 @@ async function createNote({ title, coverColor = 'royal' }: CreateNoteParams): Pr
       slug: slug,
     }]);
     await db.notes.update(newId, { sync_status: 'synced' });
+    await db.syncOutbox.delete(outboxId);
   } catch (error) {
     console.log("Offline mode: Note creation will sync later", error);
   }
@@ -312,8 +314,11 @@ async function saveNote({ id, title, content = '', tags, coverColor }: SaveNoteP
   const existingNote = await db.notes.get(id);
   if (existingNote) {
     await db.notes.update(id, { ...updateData, sync_status: 'pending' });
+    await queueSyncOperation('notes', id, 'update', { ...existingNote, ...updateData, sync_status: 'pending' } as any);
   } else {
-    await db.notes.put({ ...existingNote, ...updateData, id, sync_status: 'pending' } as LocalNote);
+    const localNote = { ...existingNote, ...updateData, id, sync_status: 'pending' } as LocalNote;
+    await db.notes.put(localNote);
+    await queueSyncOperation('notes', id, 'update', localNote as any);
   }
 
   try {
@@ -325,6 +330,8 @@ async function saveNote({ id, title, content = '', tags, coverColor }: SaveNoteP
 
     if (!error) {
       await db.notes.update(id, { sync_status: 'synced' });
+      const outboxItem = await db.syncOutbox.where('[table_name+record_id]').equals(['notes', id] as any).first();
+      if (outboxItem) await db.syncOutbox.delete(outboxItem.id);
     }
   } catch (error) {
     console.log("Offline mode: Note update will sync later");
@@ -337,7 +344,14 @@ async function deleteNote(id: string): Promise<void> {
   const session = await getSession();
   if (!session?.user?.id) throw new Error('Not authenticated');
 
-  await db.notes.delete(id);
+  const outboxId = await queueSyncOperation('notes', id, 'delete', null);
+  await db.transaction('rw', db.notes, db.notePages, async () => {
+    await db.notes.delete(id);
+    const pages = await db.notePages.where('note_id').equals(id).toArray();
+    for (const page of pages) {
+      await db.notePages.delete(page.id);
+    }
+  });
 
   try {
     await supabase
@@ -345,6 +359,7 @@ async function deleteNote(id: string): Promise<void> {
       .delete()
       .eq('id', id)
       .eq('user_id', session.user.id);
+    await db.syncOutbox.delete(outboxId);
   } catch (error) {
     console.log("Offline mode: Note delete will sync later");
   }
@@ -355,6 +370,10 @@ async function toggleNotePublicStatus({ noteId, isPublic }: { noteId: string; is
   if (!session?.user?.id) throw new Error('Not authenticated');
 
   await db.notes.update(noteId, { is_public: isPublic, sync_status: 'pending' });
+  const existingNote = await db.notes.get(noteId);
+  if (existingNote) {
+    await queueSyncOperation('notes', noteId, 'update', existingNote as any);
+  }
 
   try {
     await supabase
@@ -364,6 +383,8 @@ async function toggleNotePublicStatus({ noteId, isPublic }: { noteId: string; is
       .eq('user_id', session.user.id);
 
     await db.notes.update(noteId, { sync_status: 'synced' });
+    const outboxItem = await db.syncOutbox.where('[table_name+record_id]').equals(['notes', noteId] as any).first();
+    if (outboxItem) await db.syncOutbox.delete(outboxItem.id);
   } catch (error) {
     console.log("Offline mode: Access change will sync later");
   }
@@ -393,7 +414,7 @@ async function createPage({ noteId, pageOrder }: CreatePageParams): Promise<stri
   const pageId = crypto.randomUUID();
   const now = new Date().toISOString();
 
-  await db.notePages.put({
+  const localPage: LocalNotePage = {
     id: pageId,
     note_id: noteId,
     title: 'Untitled Page',
@@ -402,7 +423,10 @@ async function createPage({ noteId, pageOrder }: CreatePageParams): Promise<stri
     created_at: now,
     updated_at: now,
     sync_status: 'pending'
-  });
+  };
+
+  await db.notePages.put(localPage);
+  const outboxId = await queueSyncOperation('note_pages', pageId, 'create', localPage as any);
 
   // Fire-and-forget Supabase insert for optimistic offline-first behavior
   supabase
@@ -417,6 +441,9 @@ async function createPage({ noteId, pageOrder }: CreatePageParams): Promise<stri
     .then(({ error }) => {
       if (!error) {
         db.notePages.update(pageId, { sync_status: 'synced' }).catch(() => {});
+        db.syncOutbox.get(outboxId)
+          .then((item) => item?.operation === 'create' ? db.syncOutbox.delete(outboxId) : undefined)
+          .catch(() => {});
       }
     })
     .catch((error) => {
@@ -444,6 +471,7 @@ async function savePage({ pageId, title, content }: SavePageParams): Promise<voi
   const existingPage = await db.notePages.get(pageId);
   if (existingPage) {
     await db.notePages.update(pageId, updateData);
+    await queueSyncOperation('note_pages', pageId, 'update', { ...existingPage, ...updateData } as any);
   }
 
   // Fire-and-forget Supabase update for instantaneous optimistic UX
@@ -457,6 +485,9 @@ async function savePage({ pageId, title, content }: SavePageParams): Promise<voi
     .then(({ error }) => {
       if (!error) {
         db.notePages.update(pageId, { sync_status: 'synced' }).catch(() => {});
+        db.syncOutbox.where('[table_name+record_id]').equals(['note_pages', pageId] as any).first()
+          .then((outboxItem) => outboxItem ? db.syncOutbox.delete(outboxItem.id) : undefined)
+          .catch(() => {});
       }
     })
     .catch((error) => {
@@ -465,6 +496,7 @@ async function savePage({ pageId, title, content }: SavePageParams): Promise<voi
 }
 
 async function deletePage(pageId: string): Promise<void> {
+  const outboxId = await queueSyncOperation('note_pages', pageId, 'delete', null);
   await db.notePages.delete(pageId);
 
   try {
@@ -472,6 +504,7 @@ async function deletePage(pageId: string): Promise<void> {
       .from('note_pages')
       .delete()
       .eq('id', pageId);
+    await db.syncOutbox.delete(outboxId);
   } catch (error) {
     console.log("Offline mode: Page delete will sync later");
   }
